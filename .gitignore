@@ -1,0 +1,43 @@
+.DS_Store
+.venv
+.pytest_cache
+.ruff_cache
+.coverage
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Local data folder
+/Data/
+
+# Compiled outputs (PDFs are built artifacts, not sources)
+*.learning-sheet.pdf
+*.advanced-learning-sheet.pdf
+*.validation.pdf
+*.test.pdf
+*.test.B.pdf
+
+# Build directory
+_site/
+
+# Local notes / scratch
+local/
+*/learn-log.md
+
+# Brainstorming spec drafts (kept local; not part of the course harness)
+docs/superpowers/
+
+# Reference materials: keep converted .md, ignore the binary source files
+reference/*.pdf
+reference/*.pptx
+reference/*.ppt
+reference/*.docx
+reference/*.doc
+
+# Zulip grading bot — credentials and per-week submission/state files
+.zuliprc
+week*/submissions/
+week*/grades/
+week*/zulip-pull.json
+week*/zulip-feedback-sent.json

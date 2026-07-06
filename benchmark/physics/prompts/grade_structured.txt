@@ -1,0 +1,30 @@
+Grade the anonymized Physics Week 9 answer using evidence-first reasoning.
+
+Return valid JSON only. Include exactly these 12 question IDs:
+Q1a, Q1b, Q1c, Q1d, Q2a, Q2b, Q3a, Q3b, Q3c, Q3d, Q3e, Q3f.
+
+First extract the student's relevant evidence for each question from the answer.
+Then assign a quarter-point score within that question's maximum. Do not award
+points for inferred, unreadable, or absent work. Preserve numerical units in the
+evidence when they affect correctness.
+
+For every question include: question_id, extracted_evidence, score, evidence,
+confidence as high/medium/low, and flags as a list. Include total as the sum of
+the 12 scores. Use flags such as unclear_text, missing_work, arithmetic_error,
+unit_error, or rubric_ambiguous when needed.
+
+JSON shape:
+{
+  "student_id": "S001",
+  "scores": [
+    {
+      "question_id": "Q1a",
+      "extracted_evidence": "...",
+      "score": 0.0,
+      "evidence": "...",
+      "confidence": "medium",
+      "flags": []
+    }
+  ],
+  "total": 0.0
+}

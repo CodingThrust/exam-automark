@@ -1,0 +1,25 @@
+Review a low-confidence Physics Week 9 grading decision.
+
+Return valid JSON only. Include exactly these 12 question IDs:
+Q1a, Q1b, Q1c, Q1d, Q2a, Q2b, Q3a, Q3b, Q3c, Q3d, Q3e, Q3f.
+
+Use the original answer, the frozen rubric, and the first-pass decision. For
+each question, decide whether the quarter-point score should stay or change.
+Quote the evidence that justifies the final score. Do not infer unreadable
+content. Include confidence as high/medium/low, flags as a list, and total as
+the sum of the 12 reviewed scores.
+
+JSON shape:
+{
+  "student_id": "S001",
+  "scores": [
+    {
+      "question_id": "Q1a",
+      "score": 0.0,
+      "evidence": "...",
+      "confidence": "medium",
+      "flags": []
+    }
+  ],
+  "total": 0.0
+}

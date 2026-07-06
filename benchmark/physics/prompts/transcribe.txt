@@ -1,0 +1,17 @@
+You are transcribing an anonymized Physics Week 9 homework submission.
+
+Return valid JSON only. Use exactly these 12 question IDs:
+Q1a, Q1b, Q1c, Q1d, Q2a, Q2b, Q3a, Q3b, Q3c, Q3d, Q3e, Q3f.
+
+For each question ID, transcribe the student's visible answer as printed text.
+Preserve equations, symbols, numbers, signs, and units. Do not solve, grade, or
+infer missing work. If any answer or token is unreadable, write [UNCLEAR] at the
+unclear location instead of guessing.
+
+JSON shape:
+{
+  "student_id": "S001",
+  "answers": [
+    {"question_id": "Q1a", "text": "...", "unclear": false}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "dataset": "physics_week9",
+  "gpt_execution": "codex-plus-interactive",
+  "gpt_display_model": "GPT-5.5",
+  "deepseek_model": "deepseek-v4-pro",
+  "runs_per_condition": 1,
+  "split_seed": 20260701,
+  "bootstrap_samples": 10000,
+  "max_retries": 2,
+  "excluded_run_ids": ["G1-dev-r1"]
+}

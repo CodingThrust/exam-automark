@@ -1,0 +1,24 @@
+Grade the anonymized Physics Week 9 answer using the frozen rubric.
+
+Return valid JSON only. Include exactly these 12 question IDs:
+Q1a, Q1b, Q1c, Q1d, Q2a, Q2b, Q3a, Q3b, Q3c, Q3d, Q3e, Q3f.
+
+For every question, assign a quarter-point score within that question's maximum.
+Include concise evidence, confidence as high/medium/low, and flags as a list.
+Do not infer unreadable content. Use flags such as unclear_text, missing_work, or
+rubric_ambiguous when needed. Include total as the sum of the 12 scores.
+
+JSON shape:
+{
+  "student_id": "S001",
+  "scores": [
+    {
+      "question_id": "Q1a",
+      "score": 0.0,
+      "evidence": "...",
+      "confidence": "medium",
+      "flags": []
+    }
+  ],
+  "total": 0.0
+}

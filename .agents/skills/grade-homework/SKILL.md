@@ -107,6 +107,10 @@ continuing**. Freeze the page list, rubric, question IDs, point ranges, and
 quarter-point rules before grading. If no `[N pts]` markers are found, stop and
 ask for point allocations.
 
+Some conventions:
+1. If the solution is correct and the steps are roughly correct, the student gets full points. 
+
+
 ### Step 3 — Grade students one at a time
 
 For each student (in alphabetical order unless the user specifies otherwise):
@@ -173,10 +177,7 @@ This skill uses evidence-first grading plus targeted second-pass review. It is
 **not** a substitute for teacher review: spot-check at least 3 students against
 your own grading before publishing, and always review flagged items.
 
-The Physics Week 9 internal benchmark used one run per condition and a single
-primary-rater reference. Its transcript-based GPT condition did not outperform
-the historical direct baseline overall, so do not claim a general accuracy
-improvement. Treat page ordering, frozen rubrics, evidence, confidence, and
-second-pass review as auditability safeguards, with extra attention to the
-lowest-agreement Physics Week 9 questions; do not generalize those error
-patterns beyond this benchmark.
+
+
+
+

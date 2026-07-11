@@ -21,7 +21,20 @@ same transcription prompt.
 
 ## Fixed Inputs
 
-Use the existing physics plans as the source of record:
+Use the branch-specific physics plan copies as the source of record for model
+execution on this branch:
+
+- Branch baseline plan:
+  `experiments/records/physics-week9-baseline-candidate-v2-run/baseline-plan.json`
+- Branch candidate plan:
+  `experiments/records/physics-week9-baseline-candidate-v2-run/candidate-v2-plan.json`
+
+These plan copies preserve the same packet IDs, prompt hashes, skill hashes,
+data snapshot hash, packet paths, and packet hashes as the framework plans. They
+only update the run branch and run-branch anchor so the pre-run gate can verify
+the actual experiment branch.
+
+The framework plans remain:
 
 - Baseline plan:
   `experiments/records/physics-week9-standard-plan/plan.json`
@@ -69,16 +82,18 @@ regenerate the packet hash and the run-readiness report before running models.
 Before any model call on this branch:
 
 1. Confirm the worktree is clean.
-2. Update or create a branch-specific run-readiness record so the current branch
-   is `codex/physics-week9-baseline-candidate-v2-run`.
-3. Confirm baseline and candidate still use:
+2. Generate the branch-specific run-readiness record from:
+   - `experiments/records/physics-week9-baseline-candidate-v2-run/baseline-plan.json`
+   - `experiments/records/physics-week9-baseline-candidate-v2-run/candidate-v2-plan.json`
+3. Confirm the current branch is `codex/physics-week9-baseline-candidate-v2-run`.
+4. Confirm baseline and candidate still use:
    - same course and assessment
    - same data snapshot
    - same student IDs and input hashes per packet
    - same rubric hash for grade packets
    - same transcription prompt hash
    - different grading prompt and skill hashes
-4. Confirm `Data/` is ignored and no `Data/` files are tracked.
+5. Confirm `Data/` is ignored and no `Data/` files are tracked.
 
 No model call should happen unless the branch-specific readiness status is
 `ready`.

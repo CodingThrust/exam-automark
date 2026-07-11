@@ -40,11 +40,11 @@
     "course_id": "physics",
     "course_spec_path": "experiments/course_specs/physics_week9.json",
     "current_git_branch": "codex/repro-experiment-framework",
-    "current_git_commit": "9e1c7c01826827385f2cbb8bf8d3e4c432b68f1d",
+    "current_git_commit": "6033f539fe2bbc3be6c1f26a7f90c112de096fe0",
     "data_inventory_path": "experiments/data_inventory/physics.json",
     "data_snapshot_hash": "e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3",
     "git_branch": "codex/repro-experiment-framework",
-    "git_commit": "9e1c7c0"
+    "git_commit": "75039f8"
   },
   "baseline_plan_path": "experiments/records/physics-week9-standard-plan/plan.json",
   "candidate_plan_path": "experiments/records/physics-week9-candidate-v2-plan/plan.json",
@@ -70,7 +70,7 @@
       "status": "passed"
     },
     {
-      "detail": "codex/repro-experiment-framework@9e1c7c0 vs codex/repro-experiment-framework@9e1c7c0",
+      "detail": "codex/repro-experiment-framework@75039f8 vs codex/repro-experiment-framework@75039f8",
       "id": "same_git_anchor",
       "status": "passed"
     },
@@ -165,24 +165,24 @@
       "status": "passed"
     },
     {
-      "detail": "planned=9e1c7c0; resolved=9e1c7c01826827385f2cbb8bf8d3e4c432b68f1d",
+      "detail": "planned=75039f8; resolved=75039f8efaada1fe9add8d1c77283a70b3fce966",
       "id": "planned_git_commit_exists",
       "status": "passed"
     },
     {
-      "detail": "HEAD=9e1c7c01826827385f2cbb8bf8d3e4c432b68f1d; planned=9e1c7c01826827385f2cbb8bf8d3e4c432b68f1d",
+      "detail": "HEAD=6033f539fe2bbc3be6c1f26a7f90c112de096fe0; planned=75039f8efaada1fe9add8d1c77283a70b3fce966",
       "id": "current_git_head_contains_plan_commit",
       "status": "passed"
     },
     {
-      "detail": "HEAD is exactly the planned commit",
+      "detail": "post-anchor commits only touch experiment records",
       "id": "post_anchor_changes_are_record_only",
       "status": "passed"
     },
     {
-      "detail": "13 uncommitted/untracked entries; commit before model calls",
+      "detail": "working tree clean",
       "id": "git_worktree_clean",
-      "status": "failed"
+      "status": "passed"
     },
     {
       "detail": "Data/ is ignored and has no tracked files",
@@ -191,10 +191,8 @@
     }
   ],
   "model_run_status": "not_started",
-  "next_actions": [
-    "Commit or otherwise freeze the current repository state before model calls."
-  ],
+  "next_actions": [],
   "report_type": "run_readiness",
   "schema_version": 1,
-  "status": "not_ready"
+  "status": "ready"
 }

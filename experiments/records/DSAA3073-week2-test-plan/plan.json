@@ -6,7 +6,7 @@
   "data_snapshot_hash": "548fc08c46f257e6656b1b613c6de5b4aa1bbe53c0e02623b994648406999dbd",
   "experiment_id": "DSAA3073-week2-test-plan",
   "git_branch": "codex/repro-experiment-framework",
-  "git_commit": "9e1c7c0",
+  "git_commit": "75039f8",
   "notes": [
     "Draft data inventory only; extract real rubric and question scores before packet construction.",
     "Confirm DSAA3073 versus local DSAA3071 filename labels before freezing.",

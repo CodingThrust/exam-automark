@@ -6,7 +6,7 @@
   "data_snapshot_hash": "fc9a124431fb77a4a4d91eb132682148b679e7957835b248605cdcd8b34e371b",
   "experiment_id": "DSAA3701-week5-test-plan",
   "git_branch": "codex/repro-experiment-framework",
-  "git_commit": "9e1c7c0",
+  "git_commit": "75039f8",
   "notes": [
     "Draft data inventory only; extract real rubric and question scores before packet construction.",
     "Student submission source must be organized into anonymous packet inputs before any model run.",

@@ -6,7 +6,7 @@
   "data_snapshot_hash": "4338dbb2cb8cbe2ee129dc8a415d0ef964ca580e9e31f33ede3a761491d33518",
   "experiment_id": "linearalgebra-quiz1-plan",
   "git_branch": "codex/repro-experiment-framework",
-  "git_commit": "9e1c7c0",
+  "git_commit": "75039f8",
   "notes": [
     "Draft data inventory only; extract real rubric and question scores before packet construction.",
     "Raw local submission filenames may contain student identifiers; anonymize before packet construction.",

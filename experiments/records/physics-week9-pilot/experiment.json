@@ -1,0 +1,31 @@
+{
+  "assessment_id": "week9",
+  "conditions": [
+    "G2-dev-r1",
+    "G2-test-r1",
+    "G3-dev-r1",
+    "G3-test-r1",
+    "T1-dev-r1",
+    "T1-test-r1"
+  ],
+  "course_id": "physics",
+  "data_snapshot_hash": "d134f9127adc18ab7ac21be3c796d8fb3606d2679620de2a362b2414a0b7e426",
+  "experiment_id": "physics-week9-pilot",
+  "git_branch": "codex/repro-experiment-framework",
+  "git_commit": "9e1c7c018268",
+  "metrics_path": "Data/physics/benchmark/metrics-all.json",
+  "note_path": "experiments/records/physics-week9-pilot/note.typ",
+  "notes": [
+    "after-the-fact record for the legacy Physics Week 9 pilot",
+    "pilot only; not a final accuracy conclusion",
+    "private data is excluded from Git and must come from the private data snapshot"
+  ],
+  "prompt_packet_hashes": {
+    "G2-dev-r1": "752bf779d5fb03b73308107c5d1cce7bd37914289e04708c0a99d7b172ab8ae3",
+    "G2-test-r1": "02d067965bfb10f8e333acc780c6af3af77494582f20a9855a9a88caf644320d",
+    "G3-dev-r1": "6738cb00a40deb84299316ca7d51b53a7d55483f17a10b4232115161a0565441",
+    "G3-test-r1": "87103669cc7b6c46236bac3c813d27a03247a007a9bae3fd3bd3cd97185bf8ae",
+    "T1-dev-r1": "7763fc740353fb2655da84b28cc6a0235a8f9c7cf08f8c6a8734094a6d7f6b99",
+    "T1-test-r1": "b63aadd3cf338b0c9d7d8eec51e519379e85f20a69208f61efe957fc10e9abc7"
+  }
+}

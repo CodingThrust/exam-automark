@@ -1,0 +1,36 @@
+# Standard Transcription Prompt v1
+
+You are producing a faithful transcript for a blind grading experiment.
+
+Use only the files inside the current prompt packet:
+
+- `INSTRUCTIONS.md`
+- `manifest.json`
+- `course.json`
+- `output.schema.json`
+- files under `inputs/`
+
+For each anonymous student ID listed in `manifest.json`, read that student's
+input files. Inputs may be scanned PDF pages, photos, document exports, or
+plain text extracts. Produce exactly one JSON file per student under `outputs/`
+and name it `<student_id>.json`.
+
+Rules:
+
+1. Preserve the anonymous `student_id` exactly.
+2. Transcribe visible student work question by question according to
+   `course.json`.
+3. Do not solve the problem for the student.
+4. Do not infer missing steps. If a symbol, line, or page is unclear, write the
+   visible part and set `unclear` to `true`.
+5. If a student appears not to answer a question, use an empty string for that
+   question and set `unclear` to `false`.
+6. Do not inspect parent directories, reference scoring files, prior outputs,
+   summaries, or any files outside this packet.
+7. Your output must match `output.schema.json` exactly.
+
+The JSON for each student must contain:
+
+- `student_id`
+- `answers`, one item for every question in `course.json`
+- each answer item must contain `question_id`, `text`, and `unclear`

@@ -1,6 +1,6 @@
 ---
 name: grade-homework
-description: Use when the user wants to grade a folder of student homework submissions against a teacher-provided solutions document — handles mixed formats (PDF, JPG, DOCX), produces a grades CSV and per-student English feedback with explicit flagging of ambiguous items for teacher review. Triggers on phrases like "grade the homework", "mark HW9", "批作业".
+description: Use when the user wants to grade a folder of student homework, quiz, or exam submissions against a teacher-provided solutions or rubric document. Handles mixed PDF, image, and DOCX inputs, produces a grades CSV and per-student English feedback, and explicitly flags ambiguous, unreadable, missing, or high-impact grading items for teacher review. Triggers on phrases like "grade the homework", "mark HW9", "batch grade submissions", or "批作业".
 ---
 
 # grade-homework
@@ -64,6 +64,23 @@ Skill root: the directory containing this `SKILL.md`. Resolve scripts and
 references relative to that directory; do not assume a Claude- or Codex-specific
 home path.
 
+### Candidate v2 grading contract
+
+Grade from visible evidence, not from assumed intent. For every scored question,
+first record the visible equation, statement, diagram feature, answer text, or
+blank-answer marker. Assign points only after that evidence is written down.
+
+Freeze the grading protocol before student grading starts:
+
+- page ordering for solutions and each student submission
+- rubric question IDs, maximum points, and allowed score increments
+- partial-credit rules; do not introduce quarter-point or 0.25-point scores
+- treatment of missing pages, blank answers, unreadable work, and alternative correct methods
+
+Treat transcript or OCR text as an optional aid. The Physics Week 9 pilot does
+not prove that transcript workflows are generally better than direct-image
+grading, so never claim that a transcript route is automatically more accurate.
+
 ### Benchmark-informed safeguards
 
 The Physics Week 9 internal benchmark does not prove that transcript workflows
@@ -71,7 +88,7 @@ are generally better than the direct-image baseline. Treat transcript or OCR
 steps as optional evidence aids, not as an automatic accuracy improvement.
 
 Before grading, freeze the page ordering, rubric, question IDs, point ranges,
-and quarter-point rules. During grading, use an evidence-first pass: record the
+and allowed score increments. During grading, use an evidence-first pass: record the
 visible equation, statement, text, or blank-answer marker before assigning
 points. Run a second-pass review for low confidence, unreadable regions, blank
 or apparently missing answers, total mismatches, and high-impact deductions.
@@ -104,11 +121,22 @@ python <skill_root>/scripts/to_images.py <solutions_file> /tmp/grade-homework/so
 View the solutions images, verify deterministic **page ordering**, parse the
 `[N pts]` allocations into a rubric table, and **confirm with the user before
 continuing**. Freeze the page list, rubric, question IDs, point ranges, and
-quarter-point rules before grading. If no `[N pts]` markers are found, stop and
+allowed score increments before grading. If no `[N pts]` markers are found, stop and
 ask for point allocations.
 
-Some conventions:
-1. If the solution is correct and the steps are roughly correct, the student gets full points. 
+Partial-credit conventions:
+1. Do not use 0.25-point or quarter-point scores.
+2. Award full credit when the student's final answer is correct and the process
+   is roughly correct, including mathematically equivalent alternative methods.
+3. Deduct process points only when the final answer is correct but the process
+   seriously conflicts with the standard solution, required method, or visible
+   reasoning expectations.
+4. When the final answer is wrong, inspect the student's process carefully and
+   award the appropriate process credit from the frozen rubric.
+5. Preserve the frozen point increment; if the rubric is unclear, ask the
+   teacher before introducing a new increment.
+6. If handwriting, page order, or missing work affects the score, add an
+   explicit flag instead of hiding the uncertainty in the numeric score.
 
 
 ### Step 3 — Grade students one at a time
@@ -127,11 +155,12 @@ For each student (in alphabetical order unless the user specifies otherwise):
    Missing, duplicated, rotated, or unreadable pages require an explicit flag.
 
 3. Use an evidence-first pass. For every question, record the visible equation,
-   statement, or blank-answer marker before assigning points. **Do not guess**
-   missing work or silently repair a student's reasoning.
+   statement, diagram feature, answer text, or blank-answer marker before
+   assigning points. **Do not guess** missing work or silently repair a
+   student's reasoning.
 
 4. Score only against the frozen rubric. Validate each score against its range
-   and quarter-point increment, then recompute section and assignment totals.
+   and allowed increment, then recompute section and assignment totals.
    Attach `high`, `medium`, or `low` confidence plus explicit ambiguity flags.
 
 5. Run a **second-pass** review for every low-confidence item, unreadable region,
@@ -177,7 +206,10 @@ This skill uses evidence-first grading plus targeted second-pass review. It is
 **not** a substitute for teacher review: spot-check at least 3 students against
 your own grading before publishing, and always review flagged items.
 
-
-
-
-
+The Physics Week 9 internal benchmark used one run per condition and a single
+primary-rater reference. Its transcript-based GPT condition did not outperform
+the historical direct baseline overall, so do not claim a general accuracy
+improvement. Treat page ordering, frozen rubrics, evidence, confidence, and
+second-pass review as auditability safeguards, with extra attention to the
+lowest-agreement Physics Week 9 questions; do not generalize those error
+patterns beyond this benchmark.

@@ -1,0 +1,4 @@
+Grade the anonymized synthetic homework using evidence-first reasoning.
+
+Return JSON only. Extract evidence before assigning each score. Do not award
+points for inferred, unreadable, or absent work.

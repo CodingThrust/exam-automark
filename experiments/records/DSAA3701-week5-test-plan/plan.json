@@ -1,0 +1,60 @@
+{
+  "assessment_id": "week5_test",
+  "course_id": "DSAA3701",
+  "course_spec_path": "experiments/course_specs/DSAA3701_week5_test.json",
+  "data_inventory_path": "experiments/data_inventory/DSAA3701.json",
+  "data_snapshot_hash": "fc9a124431fb77a4a4d91eb132682148b679e7957835b248605cdcd8b34e371b",
+  "experiment_id": "DSAA3701-week5-test-plan",
+  "git_branch": "codex/repro-experiment-framework",
+  "git_commit": "9e1c7c0",
+  "notes": [
+    "Draft data inventory only; extract real rubric and question scores before packet construction.",
+    "Student submission source must be organized into anonymous packet inputs before any model run.",
+    "Uses frozen grade-homework skill baseline before any candidate skill changes."
+  ],
+  "planned_packets": [
+    {
+      "condition": "T1",
+      "packet_id": "T1-dev-r1",
+      "prompt_template_id": "transcribe_standard_v1",
+      "split": "development",
+      "task": "transcribe"
+    },
+    {
+      "condition": "T1",
+      "packet_id": "T1-test-r1",
+      "prompt_template_id": "transcribe_standard_v1",
+      "split": "heldout",
+      "task": "transcribe"
+    },
+    {
+      "condition": "G1",
+      "packet_id": "G1-dev-r1",
+      "prompt_template_id": "grade_standard_v1",
+      "split": "development",
+      "task": "grade"
+    },
+    {
+      "condition": "G1",
+      "packet_id": "G1-test-r1",
+      "prompt_template_id": "grade_standard_v1",
+      "split": "heldout",
+      "task": "grade"
+    }
+  ],
+  "prompt_template_hashes": {
+    "grade_standard_v1": "f8aeee5434c5db7b54f9d7b5dbb01b303bd84e48c5d4957731aeb038950953ea",
+    "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
+  },
+  "schema_version": 1,
+  "skill_hashes": {
+    "agents": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27",
+    "claude": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27"
+  },
+  "skill_source_paths": {
+    "agents": ".agents/skills/grade-homework/SKILL.md",
+    "claude": ".claude/skills/grade-homework/SKILL.md"
+  },
+  "skill_version_id": "skill_baseline_v1",
+  "status": "data_inventory"
+}

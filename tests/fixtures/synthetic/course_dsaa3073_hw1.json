@@ -1,0 +1,26 @@
+{
+  "course_id": "dsaa3073",
+  "assessment_id": "hw1",
+  "questions": [
+    {
+      "id": "Q1",
+      "max_score": 10,
+      "score_step": 0.5,
+      "title": "Asymptotic analysis"
+    },
+    {
+      "id": "Q2a",
+      "max_score": 3,
+      "score_step": 0.25,
+      "tags": ["proof"]
+    },
+    {
+      "id": "Q2b",
+      "max_score": 2,
+      "score_step": 0.25
+    }
+  ],
+  "input_modes": ["pdf", "image", "transcript"],
+  "anonymous_id_pattern": "^S[0-9]{3}$",
+  "score_unit": "points"
+}

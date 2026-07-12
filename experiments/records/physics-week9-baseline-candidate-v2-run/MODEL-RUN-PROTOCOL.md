@@ -147,6 +147,10 @@ Every DeepSeek call must record the exact command line before execution. The
 command record must not contain the API key value; it may contain the environment
 variable name `DEEPSEEK_API_KEY`.
 
+The first development-run command plan is recorded in:
+
+- `experiments/records/physics-week9-baseline-candidate-v2-run/DEEPSEEK-DEV-RUN-COMMANDS.md`
+
 Each run directory must include:
 
 - `command.txt`: exact shell command, with secret values redacted;
@@ -298,4 +302,3 @@ Stop before or during model execution if:
 - output JSON cannot be validated
 - API quota, network, or provider errors affect only one arm of the comparison
 - private student content would need to be committed to Git
-

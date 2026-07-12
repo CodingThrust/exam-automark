@@ -11,7 +11,7 @@ prompt packets, and model-facing prompts.
 
 - Public tool repository: `CodingThrust/exam-automark`
 - Experiment branch: `codex/physics-week9-baseline-candidate-v2-run`
-- Plan anchor commit recorded in both branch plans: `36e7201`
+- Plan anchor commit recorded in both branch plans: `af6a928`
 - Data snapshot hash:
   `e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3`
 - Branch readiness record:

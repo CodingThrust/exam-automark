@@ -75,6 +75,25 @@ This approval permits the two real development commands recorded in
 - `deepseek-baseline-text-G1-dev-r1`
 - `deepseek-candidate-text-G1-dev-r1`
 
+## Codex Execution Status
+
+After the approval was recorded, Codex attempted to start the real baseline
+development run. The execution environment blocked the command because it would
+transmit anonymous but real/pilot-derived course and student transcript data to
+the external DeepSeek API.
+
+Result:
+
+- real baseline DeepSeek run: not executed by Codex
+- real candidate DeepSeek run: not executed by Codex
+- real baseline output directory: not created
+- real candidate output directory: not created
+- API key value: not printed, not committed, not copied into records
+
+This is an execution-environment policy limit, not a readiness failure in the
+experiment framework. The reproducible command plan remains recorded, but Codex
+must not bypass the external-data restriction.
+
 ## Safer Alternatives
 
 If external API approval is not granted, use one of these alternatives:

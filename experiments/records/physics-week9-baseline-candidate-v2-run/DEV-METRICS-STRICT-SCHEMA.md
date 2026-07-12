@@ -110,5 +110,6 @@ This is not yet a final conclusion because:
 - gold reference status is single primary rater
 - held-out test split has not been run
 
-Next step: update the Typst/PDF note with these development results, then decide
-whether to freeze candidate v2 before any held-out test run.
+Typst/PDF note status: created at `note.typ` and `note.pdf`.
+
+Next step: decide whether to freeze candidate v2 before any held-out test run.

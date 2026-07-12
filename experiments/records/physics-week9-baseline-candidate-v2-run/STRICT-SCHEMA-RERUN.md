@@ -30,7 +30,7 @@ Both prompts explicitly require:
 
 ## Next Steps
 
-1. Record development metrics in the Typst/PDF note.
+1. Review the Typst/PDF note created at `note.typ` and `note.pdf`.
 2. Decide whether to freeze candidate v2 based on development results.
 3. Do not run held-out test packets until the workflow is frozen.
 

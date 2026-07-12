@@ -1,0 +1,106 @@
+{
+  "assessment_id": "week9",
+  "built_packets": [
+    {
+      "audit_status": "passed",
+      "condition": "T1",
+      "manifest_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/T1-dev-r1/manifest.json",
+      "packet_hash": "1ba6f32404a484e8255e71ab72470095ba7ba820c344b55b7e2592d216b89cc7",
+      "packet_id": "T1-dev-r1",
+      "packet_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/T1-dev-r1",
+      "prompt_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/T1-dev-r1/prompt.txt",
+      "split": "development",
+      "task": "transcribe"
+    },
+    {
+      "audit_status": "passed",
+      "condition": "T1",
+      "manifest_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/T1-test-r1/manifest.json",
+      "packet_hash": "434537a43b08efcb8019319e06e05431a7ffa1c5bba5e2a81d0e42ccacb3f2c4",
+      "packet_id": "T1-test-r1",
+      "packet_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/T1-test-r1",
+      "prompt_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/T1-test-r1/prompt.txt",
+      "split": "heldout",
+      "task": "transcribe"
+    },
+    {
+      "audit_status": "passed",
+      "condition": "G1",
+      "manifest_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/G1-dev-r1/manifest.json",
+      "packet_hash": "960b7a619846027d7d9b83368cb3199a8cb5cb249c91829dff88ae4ac00f114d",
+      "packet_id": "G1-dev-r1",
+      "packet_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/G1-dev-r1",
+      "prompt_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/G1-dev-r1/prompt.txt",
+      "split": "development",
+      "task": "grade"
+    },
+    {
+      "audit_status": "passed",
+      "condition": "G1",
+      "manifest_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/G1-test-r1/manifest.json",
+      "packet_hash": "50a7a3cab4648b2259ba5ace228e68ea5b71b3bfe49efb6f9c48e7f8a815583c",
+      "packet_id": "G1-test-r1",
+      "packet_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/G1-test-r1",
+      "prompt_path": "Data/physics/benchmark/dry_run_packets/physics-week9-standard-plan-lf/G1-test-r1/prompt.txt",
+      "split": "heldout",
+      "task": "grade"
+    }
+  ],
+  "course_id": "physics",
+  "course_spec_path": "experiments/course_specs/physics_week9.json",
+  "data_inventory_path": "experiments/data_inventory/physics.json",
+  "data_snapshot_hash": "e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3",
+  "experiment_id": "physics-week9-standard-plan",
+  "git_branch": "codex/repro-experiment-framework",
+  "git_commit": "7fe446a",
+  "notes": [
+    "Planned standard rerun; legacy pilot remains protocol evidence only.",
+    "Workspace is dirty; freeze with a commit before running final model calls.",
+    "Uses frozen grade-homework skill baseline before any candidate skill changes."
+  ],
+  "planned_packets": [
+    {
+      "condition": "T1",
+      "packet_id": "T1-dev-r1",
+      "prompt_template_id": "transcribe_standard_v1",
+      "split": "development",
+      "task": "transcribe"
+    },
+    {
+      "condition": "T1",
+      "packet_id": "T1-test-r1",
+      "prompt_template_id": "transcribe_standard_v1",
+      "split": "heldout",
+      "task": "transcribe"
+    },
+    {
+      "condition": "G1",
+      "packet_id": "G1-dev-r1",
+      "prompt_template_id": "grade_standard_v1",
+      "split": "development",
+      "task": "grade"
+    },
+    {
+      "condition": "G1",
+      "packet_id": "G1-test-r1",
+      "prompt_template_id": "grade_standard_v1",
+      "split": "heldout",
+      "task": "grade"
+    }
+  ],
+  "prompt_template_hashes": {
+    "grade_standard_v1": "f8aeee5434c5db7b54f9d7b5dbb01b303bd84e48c5d4957731aeb038950953ea",
+    "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
+  },
+  "schema_version": 1,
+  "skill_hashes": {
+    "agents": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27",
+    "claude": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27"
+  },
+  "skill_source_paths": {
+    "agents": ".agents/skills/grade-homework/SKILL.md",
+    "claude": ".claude/skills/grade-homework/SKILL.md"
+  },
+  "skill_version_id": "skill_baseline_v1",
+  "status": "packets_built"
+}

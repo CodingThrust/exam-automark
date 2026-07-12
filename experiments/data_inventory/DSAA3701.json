@@ -1,0 +1,32 @@
+{
+  "counts": {
+    "directories": 0,
+    "files": 2,
+    "submission_files": 0,
+    "top_level_files": 2
+  },
+  "course_id": "DSAA3701",
+  "extension_counts": {
+    ".pdf": 2
+  },
+  "layout": {
+    "has_benchmark_dir": false,
+    "has_grades_dir": false,
+    "has_report_dir": false,
+    "has_submissions_dir": false
+  },
+  "notes": [
+    "Inventory is local-only; private anonymous data snapshots should live in HKUST-GZ GitLab.",
+    "Raw filenames are intentionally omitted because they may contain student identifiers."
+  ],
+  "packet_exclusion_policy": [],
+  "privacy_policy": {
+    "git_tracking_allowed": false,
+    "raw_filenames_recorded": false,
+    "student_identity_maps_recorded": false
+  },
+  "schema_version": 1,
+  "snapshot_hash": "fc9a124431fb77a4a4d91eb132682148b679e7957835b248605cdcd8b34e371b",
+  "source_root": "Data/DSAA3701",
+  "submission_extension_counts": {}
+}

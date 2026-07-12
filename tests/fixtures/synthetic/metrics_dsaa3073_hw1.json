@@ -1,0 +1,43 @@
+{
+  "conditions": {
+    "G2": {
+      "exact_agreement": 0.75,
+      "macro_accuracy": 0.73,
+      "mean_signed_error": -0.1,
+      "n_students": 4,
+      "per_question_accuracy": {
+        "Q1": 0.5,
+        "Q2a": 0.75,
+        "Q2b": 1.0
+      },
+      "population": "development",
+      "run_id": "G2-dev-r1",
+      "severe_error_rate": 0.25,
+      "subquestion_mae": 0.2,
+      "total_score_mae": 1.25,
+      "within_1_point_rate": 0.5
+    },
+    "G3": {
+      "exact_agreement": 0.83,
+      "macro_accuracy": 0.8,
+      "mean_signed_error": 0.0,
+      "n_students": 2,
+      "per_question_accuracy": {
+        "Q1": 1.0,
+        "Q2a": 0.5,
+        "Q2b": 1.0
+      },
+      "population": "transcript_subset",
+      "run_id": "G3-dev-r1",
+      "severe_error_rate": 0.0,
+      "subquestion_mae": 0.1,
+      "total_score_mae": 0.5,
+      "within_1_point_rate": 1.0
+    }
+  },
+  "excluded_runs": [],
+  "paired_vs_g0": {},
+  "reference_status": "single_primary_rater",
+  "split": "dev",
+  "transcript_subset_comparisons": {}
+}

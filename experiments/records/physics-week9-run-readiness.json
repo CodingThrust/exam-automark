@@ -1,0 +1,198 @@
+{
+  "anchors": {
+    "assessment_id": "week9",
+    "baseline": {
+      "experiment_id": "physics-week9-standard-plan",
+      "packet_hashes": {
+        "G1-dev-r1": "960b7a619846027d7d9b83368cb3199a8cb5cb249c91829dff88ae4ac00f114d",
+        "G1-test-r1": "50a7a3cab4648b2259ba5ace228e68ea5b71b3bfe49efb6f9c48e7f8a815583c",
+        "T1-dev-r1": "1ba6f32404a484e8255e71ab72470095ba7ba820c344b55b7e2592d216b89cc7",
+        "T1-test-r1": "434537a43b08efcb8019319e06e05431a7ffa1c5bba5e2a81d0e42ccacb3f2c4"
+      },
+      "prompt_template_hashes": {
+        "grade_standard_v1": "f8aeee5434c5db7b54f9d7b5dbb01b303bd84e48c5d4957731aeb038950953ea",
+        "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
+      },
+      "skill_hashes": {
+        "agents": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27",
+        "claude": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27"
+      },
+      "skill_version_id": "skill_baseline_v1"
+    },
+    "candidate": {
+      "experiment_id": "physics-week9-candidate-v2-plan",
+      "packet_hashes": {
+        "G1-dev-r1": "72933ea81b6a28c884b46f8ddff95df46c833e5ad11edb2f005821f7eeb110cd",
+        "G1-test-r1": "083ee5fb30e348ea127e456cee2177d6f6f85be0ad3995328fcbf94b189d4f29",
+        "T1-dev-r1": "c81fcdfc61347798b8f8dd00a69f19106c2c87c960a569f23379d0d541fd84dd",
+        "T1-test-r1": "929495435b36b1a6b6bea184e42b67b17522f006f9cea4fa0ca7209419e28ece"
+      },
+      "prompt_template_hashes": {
+        "grade_candidate_v2": "32c5ea5c539e99ff8ea99f587a89bcdc0fa77a2a682b529a6a7c8f15b0fd21e7",
+        "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
+      },
+      "skill_hashes": {
+        "agents": "d8ba4c855e772e6562b521a12a80558297e8c310788c4bbbca3cdc663d56e9c0",
+        "claude": "d8ba4c855e772e6562b521a12a80558297e8c310788c4bbbca3cdc663d56e9c0"
+      },
+      "skill_version_id": "skill_candidate_v2"
+    },
+    "course_id": "physics",
+    "course_spec_path": "experiments/course_specs/physics_week9.json",
+    "current_git_branch": "codex/repro-experiment-framework",
+    "current_git_commit": "a6bc6a019dec811404a9dee1b1f803a81735891c",
+    "data_inventory_path": "experiments/data_inventory/physics.json",
+    "data_snapshot_hash": "e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3",
+    "git_branch": "codex/repro-experiment-framework",
+    "git_commit": "7fe446a"
+  },
+  "baseline_plan_path": "experiments/records/physics-week9-standard-plan/plan.json",
+  "candidate_plan_path": "experiments/records/physics-week9-candidate-v2-plan/plan.json",
+  "checks": [
+    {
+      "detail": "baseline=packets_built; candidate=packets_built",
+      "id": "plans_are_packetized",
+      "status": "passed"
+    },
+    {
+      "detail": "physics/week9 vs physics/week9",
+      "id": "same_course_and_assessment",
+      "status": "passed"
+    },
+    {
+      "detail": "e0b47a06a3ec... vs e0b47a06a3ec...",
+      "id": "same_data_snapshot",
+      "status": "passed"
+    },
+    {
+      "detail": "inventory=experiments/data_inventory/physics.json; course_spec=experiments/course_specs/physics_week9.json",
+      "id": "same_data_inventory_and_course_spec",
+      "status": "passed"
+    },
+    {
+      "detail": "codex/repro-experiment-framework@7fe446a vs codex/repro-experiment-framework@7fe446a",
+      "id": "same_git_anchor",
+      "status": "passed"
+    },
+    {
+      "detail": "skill_baseline_v1 vs skill_candidate_v2",
+      "id": "different_skill_versions",
+      "status": "passed"
+    },
+    {
+      "detail": "candidate skill hash must differ from baseline skill hash",
+      "id": "different_skill_hashes",
+      "status": "passed"
+    },
+    {
+      "detail": "G1-dev-r1, G1-test-r1, T1-dev-r1, T1-test-r1",
+      "id": "same_planned_packet_ids",
+      "status": "passed"
+    },
+    {
+      "detail": "G1-dev-r1, G1-test-r1, T1-dev-r1, T1-test-r1",
+      "id": "same_built_packet_ids",
+      "status": "passed"
+    },
+    {
+      "detail": "all built packet records must have audit_status=passed",
+      "id": "all_packets_audit_recorded_passed",
+      "status": "passed"
+    },
+    {
+      "detail": "['grade_standard_v1'] vs ['grade_candidate_v2']",
+      "id": "grade_prompt_differs",
+      "status": "passed"
+    },
+    {
+      "detail": "['transcribe_standard_v1'] vs ['transcribe_standard_v1']",
+      "id": "transcribe_prompt_held_constant",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet manifests are present",
+      "id": "packet_manifests_exist",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet paths should be under ignored Data/",
+      "id": "packet_paths_are_local_data",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet directories exist",
+      "id": "packet_directories_exist",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet hashes match",
+      "id": "packet_hashes_match_local_files",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet audits pass",
+      "id": "packet_audits_pass_now",
+      "status": "passed"
+    },
+    {
+      "detail": "all manifest prompt hashes match plan templates",
+      "id": "manifest_prompt_hashes_match_plan",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet metadata matches plan",
+      "id": "manifest_metadata_matches_plan",
+      "status": "passed"
+    },
+    {
+      "detail": "matching packet ids use the same student ids and input hashes",
+      "id": "same_students_and_inputs_per_packet",
+      "status": "passed"
+    },
+    {
+      "detail": "grade packets use the same rubric hash",
+      "id": "same_rubric_for_grade_packets",
+      "status": "passed"
+    },
+    {
+      "detail": "no experiment, metrics, or prediction artifacts found",
+      "id": "no_model_result_artifacts_in_plan_dirs",
+      "status": "passed"
+    },
+    {
+      "detail": "current=codex/repro-experiment-framework; planned=codex/repro-experiment-framework",
+      "id": "current_git_branch_matches_plan",
+      "status": "passed"
+    },
+    {
+      "detail": "planned=7fe446a; resolved=7fe446a228de1ee4c79c7dea6f16988f10489908",
+      "id": "planned_git_commit_exists",
+      "status": "passed"
+    },
+    {
+      "detail": "HEAD=a6bc6a019dec811404a9dee1b1f803a81735891c; planned=7fe446a228de1ee4c79c7dea6f16988f10489908",
+      "id": "current_git_head_contains_plan_commit",
+      "status": "passed"
+    },
+    {
+      "detail": "post-anchor commits only touch experiment records",
+      "id": "post_anchor_changes_are_record_only",
+      "status": "passed"
+    },
+    {
+      "detail": "working tree clean",
+      "id": "git_worktree_clean",
+      "status": "passed"
+    },
+    {
+      "detail": "Data/ is ignored and has no tracked files",
+      "id": "data_ignored_by_git",
+      "status": "passed"
+    }
+  ],
+  "model_run_status": "not_started",
+  "next_actions": [],
+  "report_type": "run_readiness",
+  "schema_version": 1,
+  "status": "ready"
+}

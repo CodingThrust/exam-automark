@@ -1,0 +1,87 @@
+{
+  "anonymous_id_pattern": "^S[0-9]{3}$",
+  "assessment_id": "week9",
+  "course_id": "physics",
+  "input_modes": [
+    "image",
+    "pdf",
+    "transcript",
+    "text"
+  ],
+  "questions": [
+    {
+      "id": "Q1a",
+      "max_score": 2.0,
+      "score_step": 0.25,
+      "title": "Electric-field amplitude"
+    },
+    {
+      "id": "Q1b",
+      "max_score": 2.0,
+      "score_step": 0.25,
+      "title": "Magnetic-field amplitude"
+    },
+    {
+      "id": "Q1c",
+      "max_score": 3.0,
+      "score_step": 0.25,
+      "title": "Radiated power"
+    },
+    {
+      "id": "Q1d",
+      "max_score": 3.0,
+      "score_step": 0.25,
+      "title": "Maximum magnetic-field derivative"
+    },
+    {
+      "id": "Q2a",
+      "max_score": 7.0,
+      "score_step": 0.25,
+      "title": "Radiation pressure critical radius"
+    },
+    {
+      "id": "Q2b",
+      "max_score": 3.0,
+      "score_step": 0.25,
+      "title": "Large-particle path reasoning"
+    },
+    {
+      "id": "Q3a",
+      "max_score": 1.5,
+      "score_step": 0.25,
+      "title": "Refraction at B"
+    },
+    {
+      "id": "Q3b",
+      "max_score": 1.5,
+      "score_step": 0.25,
+      "title": "Initial angle for critical condition"
+    },
+    {
+      "id": "Q3c",
+      "max_score": 1.5,
+      "score_step": 0.25,
+      "title": "Refraction at A"
+    },
+    {
+      "id": "Q3d",
+      "max_score": 1.5,
+      "score_step": 0.25,
+      "title": "Initial angle for alternate interface"
+    },
+    {
+      "id": "Q3e",
+      "max_score": 2.0,
+      "score_step": 0.25,
+      "title": "Brewster-angle refraction"
+    },
+    {
+      "id": "Q3f",
+      "max_score": 2.0,
+      "score_step": 0.25,
+      "title": "Initial angle for Brewster condition"
+    }
+  ],
+  "score_unit": "points",
+  "source_status": "pilot_rubric_available"
+}

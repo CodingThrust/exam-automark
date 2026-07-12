@@ -1,0 +1,43 @@
+{
+  "counts": {
+    "directories": 1,
+    "files": 136,
+    "submission_files": 135,
+    "top_level_files": 1
+  },
+  "course_id": "linearalgebra",
+  "extension_counts": {
+    ".docx": 1,
+    ".heic": 4,
+    ".jpeg": 16,
+    ".jpg": 98,
+    ".pdf": 17
+  },
+  "layout": {
+    "has_benchmark_dir": false,
+    "has_grades_dir": false,
+    "has_report_dir": false,
+    "has_submissions_dir": true
+  },
+  "notes": [
+    "Inventory is local-only; private anonymous data snapshots should live in HKUST-GZ GitLab.",
+    "Raw filenames are intentionally omitted because they may contain student identifiers.",
+    "Submissions directory exists; create an anonymous packet input tree before model runs."
+  ],
+  "packet_exclusion_policy": [],
+  "privacy_policy": {
+    "git_tracking_allowed": false,
+    "raw_filenames_recorded": false,
+    "student_identity_maps_recorded": false
+  },
+  "schema_version": 1,
+  "snapshot_hash": "4338dbb2cb8cbe2ee129dc8a415d0ef964ca580e9e31f33ede3a761491d33518",
+  "source_root": "Data/linearalgebra",
+  "submission_extension_counts": {
+    ".docx": 1,
+    ".heic": 4,
+    ".jpeg": 16,
+    ".jpg": 98,
+    ".pdf": 16
+  }
+}

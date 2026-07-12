@@ -1,0 +1,25 @@
+{
+  "anonymous_id_pattern": "^S[0-9]{3}$",
+  "assessment_id": "week2_test",
+  "course_id": "DSAA3073",
+  "input_modes": [
+    "pdf",
+    "transcript",
+    "text"
+  ],
+  "notes": [
+    "Draft only: extract real question IDs, max scores, and rubric before grading.",
+    "Local source folder appears to contain multiple weekly tests; week2 is selected because a solution PDF is present.",
+    "Local filenames appear to use DSAA3071 labels; confirm the official course identifier before freezing."
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "max_score": 1.0,
+      "score_step": 0.25,
+      "title": "Placeholder question - replace after rubric extraction"
+    }
+  ],
+  "score_unit": "points",
+  "source_status": "draft_needs_rubric_extraction"
+}

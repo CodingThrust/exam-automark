@@ -1,0 +1,4 @@
+Transcribe the anonymized synthetic homework.
+
+Return JSON only. Preserve every visible answer and use [UNCLEAR] for unreadable
+text. Do not solve, grade, or infer missing work.

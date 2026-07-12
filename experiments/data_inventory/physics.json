@@ -1,0 +1,55 @@
+{
+  "counts": {
+    "directories": 136,
+    "files": 491,
+    "submission_files": 30,
+    "top_level_files": 2
+  },
+  "course_id": "physics",
+  "extension_counts": {
+    ".csv": 25,
+    ".docx": 2,
+    ".jpg": 212,
+    ".json": 159,
+    ".jsonl": 26,
+    ".md": 33,
+    ".ndjson": 2,
+    ".pdf": 23,
+    ".txt": 6,
+    ".typ": 1,
+    ".xlsx": 2
+  },
+  "layout": {
+    "has_benchmark_dir": true,
+    "has_grades_dir": true,
+    "has_report_dir": true,
+    "has_submissions_dir": true
+  },
+  "notes": [
+    "Inventory is local-only; private anonymous data snapshots should live in HKUST-GZ GitLab.",
+    "Raw filenames are intentionally omitted because they may contain student identifiers.",
+    "Submissions directory exists; create an anonymous packet input tree before model runs.",
+    "Reference scores, feedback, reports, and identity maps must never be copied into prompt packets."
+  ],
+  "packet_exclusion_policy": [
+    "benchmark/manifest/student_map.csv",
+    "benchmark/reports/",
+    "benchmark/runs/",
+    "grades/",
+    "grades/grades.csv",
+    "report/"
+  ],
+  "privacy_policy": {
+    "git_tracking_allowed": false,
+    "raw_filenames_recorded": false,
+    "student_identity_maps_recorded": false
+  },
+  "schema_version": 1,
+  "snapshot_hash": "e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3",
+  "source_root": "Data/physics",
+  "submission_extension_counts": {
+    ".docx": 1,
+    ".jpg": 8,
+    ".pdf": 21
+  }
+}

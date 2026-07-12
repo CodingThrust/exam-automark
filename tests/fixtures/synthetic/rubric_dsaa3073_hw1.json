@@ -1,0 +1,17 @@
+{
+  "rubric_version": "synthetic_v1",
+  "questions": [
+    {
+      "id": "Q1",
+      "criteria": "Award up to 10 points for a correct asymptotic comparison."
+    },
+    {
+      "id": "Q2a",
+      "criteria": "Award up to 3 points for a valid proof outline."
+    },
+    {
+      "id": "Q2b",
+      "criteria": "Award up to 2 points for the correct conclusion."
+    }
+  ]
+}

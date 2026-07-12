@@ -1,7 +1,7 @@
 # Strict Confidence Rerun Plan
 
-Status: strict-confidence packets built and dry-run validated. Real rerun not
-executed by Codex.
+Status: strict-confidence baseline rerun failed validation. Superseded by the
+strict-schema rerun plan.
 
 Captured date: 2026-07-12, Asia/Shanghai.
 
@@ -87,3 +87,17 @@ python -m benchmark.core.cli run-model-packet \
 
 Do not delete or overwrite the first failed baseline run. Do not run held-out
 test packets at this stage.
+
+## Real Baseline Attempt 2 Status
+
+The strict-confidence baseline rerun produced
+`Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-strict-confidence`
+and failed validation. The retained local directory was renamed to
+`Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-strict-confidence-failed-validation`.
+
+- students expected: 8
+- students passed: 7
+- students failed: 1
+- failed reason: `total must equal the sum of question scores`
+
+See `BASELINE-DEV-ATTEMPT-2.md` and `STRICT-SCHEMA-RERUN.md`.

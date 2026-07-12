@@ -186,8 +186,8 @@ See `BASELINE-DEV-ATTEMPT-1.md`.
 
 ## Strict-Confidence Rerun
 
-Use the strict-confidence prompt sources and packet paths recorded in
-`STRICT-CONFIDENCE-RERUN.md`.
+Use the strict-schema prompt sources and packet paths recorded in
+`STRICT-SCHEMA-RERUN.md`.
 
-Run the strict-confidence baseline first. Do not run candidate v2 until that
+Run the strict-schema baseline first. Do not run candidate v2 until that
 baseline rerun validates 8/8.

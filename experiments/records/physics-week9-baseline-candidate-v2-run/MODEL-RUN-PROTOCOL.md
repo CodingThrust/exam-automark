@@ -151,10 +151,12 @@ The first development-run command plan is recorded in:
 
 - `experiments/records/physics-week9-baseline-candidate-v2-run/DEEPSEEK-DEV-RUN-COMMANDS.md`
 - `experiments/records/physics-week9-baseline-candidate-v2-run/STRICT-CONFIDENCE-RERUN.md`
+- `experiments/records/physics-week9-baseline-candidate-v2-run/STRICT-SCHEMA-RERUN.md`
 
 The first real baseline development attempt failed validation because DeepSeek
-returned numeric confidence values. Use the strict-confidence rerun packet
-before any candidate or held-out run.
+returned numeric confidence values. The strict-confidence rerun then failed
+because one output total did not equal the sum of itemized scores. Use the
+strict-schema rerun packet before any candidate or held-out run.
 
 Each run directory must include:
 

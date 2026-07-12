@@ -47,11 +47,13 @@ This file records the local software state before any model call on
 - Provider: `deepseek`
 - API client: OpenAI-compatible Python SDK
 - API key source: `DEEPSEEK_API_KEY` environment variable
-- API key status in current Codex/PowerShell process: `NOT_SET`
-- API key status in user environment: `NOT_SET`
+- API key status in current Codex/PowerShell process: `SET`
+- API key status in user environment: `SET`
 - API key status in machine environment: `NOT_SET`
 - Planned model for real dev run: `deepseek-v4-pro`
 - Real API calls recorded in this snapshot: `false`
+- External API data gate: real DeepSeek runs require explicit approval before
+  anonymous student transcripts are sent to `https://api.deepseek.com`
 
 The user reported that a DeepSeek API key is prepared. The key value must not be
 written into commands, files, Git commits, or reports.
@@ -60,7 +62,8 @@ written into commands, files, Git commits, or reports.
 
 Install or otherwise record:
 
-- `DEEPSEEK_API_KEY` visible in the process environment
+- explicit approval for external DeepSeek processing of anonymous development
+  transcript packets
 - `PyMuPDF` if this environment performs PDF/image conversion
 - exact provider/model/version metadata for every model run
 

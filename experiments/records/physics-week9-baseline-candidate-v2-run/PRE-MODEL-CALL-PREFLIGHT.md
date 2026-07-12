@@ -20,8 +20,8 @@ Git commit: `93f843f405df5cbf4d4d4cd1524c77a153121959`
 | Baseline dry-run validation | passed, 8/8 students |
 | Candidate v2 dry-run validation | passed, 8/8 students |
 | OpenAI-compatible SDK | installed, `openai==2.45.0` |
-| `DEEPSEEK_API_KEY` in current process | `NOT_SET` |
-| `DEEPSEEK_API_KEY` in user environment | `NOT_SET` |
+| `DEEPSEEK_API_KEY` in current process | `SET` |
+| `DEEPSEEK_API_KEY` in user environment | `SET` |
 | `DEEPSEEK_API_KEY` in machine environment | `NOT_SET` |
 | Real API calls | none |
 
@@ -49,12 +49,17 @@ These packet directories are under ignored `Data/` and are not committed.
 ## Provider Readiness
 
 The user reported that a DeepSeek API key is prepared. The current
-Codex/PowerShell process, user environment, and machine environment do not yet
-expose `DEEPSEEK_API_KEY`.
+Codex/PowerShell process and user environment expose `DEEPSEEK_API_KEY`; the
+machine environment does not.
+
+After the key was configured, a real DeepSeek command was still gated because it
+would send anonymous but real/pilot-derived student work transcripts to an
+external API endpoint. See `EXTERNAL-API-DATA-GATE.md`.
 
 The real model run must not start until:
 
-- `DEEPSEEK_API_KEY` is set in the process environment
+- explicit approval is recorded for external DeepSeek processing of the
+  anonymous development transcript packet
 - a fresh software environment snapshot is captured at the exact run commit
 
 The API key value must never be printed, committed, or copied into any record.

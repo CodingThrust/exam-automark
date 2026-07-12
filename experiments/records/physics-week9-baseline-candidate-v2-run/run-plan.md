@@ -58,6 +58,10 @@ The pre-model-call software environment snapshot is recorded in:
 - `experiments/records/physics-week9-baseline-candidate-v2-run/software-environment.json`
 - `experiments/records/physics-week9-baseline-candidate-v2-run/software-environment.md`
 
+The cross-platform reproduction protocol is recorded in:
+
+- `experiments/records/physics-week9-baseline-candidate-v2-run/REPRODUCIBILITY.md`
+
 Capture a fresh software environment snapshot at the exact model-run commit.
 
 ## Packets To Run
@@ -117,6 +121,8 @@ For this experiment:
 
 - model-facing rubrics must be English
 - model-facing prompt instructions must be English
+- experiment records should be English unless they quote source material or
+  document a local machine path
 - partial-credit rules must be English
 - grading evidence and feedback fields should be English
 - non-English source notes must be translated into an English rubric before
@@ -141,6 +147,10 @@ For every model-facing packet, record:
 - start time and end time
 - output directory
 - failure, retry, or manual intervention notes
+
+When running on macOS or Linux, use the relative packet paths in
+`REPRODUCIBILITY.md`; do not copy Windows absolute paths from
+`software-environment.*` into prompt text or model instructions.
 
 Expected output location:
 

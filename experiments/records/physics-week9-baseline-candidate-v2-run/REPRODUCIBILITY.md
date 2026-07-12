@@ -1,7 +1,7 @@
 # Physics Week 9 Reproducibility Note
 
-Status: pre-model-call protocol note. No model outputs are recorded by this
-file.
+Status: development model-run reproducibility note. Development outputs are
+recorded in local ignored `Data/` artifacts and summarized in Git records.
 
 This note defines how another reviewer can reproduce the planned Physics Week 9
 baseline vs candidate v2 experiment from the same code, private data snapshot,
@@ -172,13 +172,24 @@ Therefore the prompt packets are designed to be usable on macOS or Linux. The
 remaining limitation is that this has not yet been validated by an actual
 macOS/Linux model run.
 
-## Known Limits Before Model Runs
+## Development Run Status
 
-- No baseline or candidate v2 model calls have been made yet.
+The development split has been run with strict-schema text-only packets:
+
+- baseline:
+  `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-strict-schema`
+- candidate v2:
+  `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-dev-r1-strict-schema`
+- both runs validated 8/8 students
+- metrics record:
+  `experiments/records/physics-week9-baseline-candidate-v2-run/DEV-METRICS-STRICT-SCHEMA.md`
+
+## Known Limits After Development Runs
+
 - The private data snapshot must be available to the reviewer.
-- DeepSeek is selected as the first provider because a teacher-provided private
-  API key is available, but the exact model ID, SDK version, and generation
-  parameters must still be recorded at run time.
+- The held-out test split has not been run.
+- DeepSeek model ID, SDK version, generation parameters, prompt hashes, packet
+  hashes, and usage are recorded in the strict-schema run metadata.
 - The current software snapshot is Windows-specific. macOS/Linux reviewers
   should record their own software snapshots before running models.
 - Physics Week 9 remains a pilot-derived benchmark and should not be treated as

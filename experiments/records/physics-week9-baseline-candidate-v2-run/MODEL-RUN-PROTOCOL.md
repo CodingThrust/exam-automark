@@ -1,6 +1,7 @@
 # Physics Week 9 Model Run Protocol
 
-Status: planned. No model calls are recorded by this file.
+Status: development strict-schema runs completed; held-out protocol still
+planned.
 
 This protocol defines the first real model run for the Physics Week 9
 baseline-vs-candidate-v2 experiment. The first run should test whether the

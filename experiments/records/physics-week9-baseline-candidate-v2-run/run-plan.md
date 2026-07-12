@@ -1,6 +1,6 @@
 # Physics Week 9 Baseline vs Candidate v2 Run Plan
 
-Status: planned, no model calls yet.
+Status: development strict-schema model calls completed; held-out test not run.
 
 This branch is the active Physics Week 9 model-run planning branch. It is based
 on `main` after the reproducible experiment framework was merged, and it keeps
@@ -226,4 +226,5 @@ Stop before model calls if:
 
 ## Current Status
 
-No model calls have been made on this branch.
+Development model calls have been made and validated for strict-schema baseline
+and candidate v2 packets. Held-out test model calls have not been made.

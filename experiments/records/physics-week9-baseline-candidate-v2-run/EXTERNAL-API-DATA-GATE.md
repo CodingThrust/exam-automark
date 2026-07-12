@@ -31,8 +31,8 @@ disclosure and requires explicit approval before execution.
 | Run readiness | ready |
 | Baseline dry-run | passed, 8/8 |
 | Candidate v2 dry-run | passed, 8/8 |
-| Real baseline DeepSeek run | user-executed, failed validation twice |
-| Real candidate DeepSeek run | not executed |
+| Real baseline DeepSeek run | user-executed, strict-schema passed |
+| Real candidate DeepSeek run | user-executed, strict-schema passed |
 
 Current real-run output directory status:
 
@@ -40,9 +40,9 @@ Current real-run output directory status:
   `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-failed-validation`
 - strict-confidence failed baseline attempt retained at
   `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-strict-confidence-failed-validation`
-- strict-schema baseline rerun not yet created:
+- strict-schema baseline output created and passed validation:
   `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-strict-schema`
-- real candidate output not yet created:
+- strict-schema candidate output created and passed validation:
   `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-dev-r1-strict-schema`
 
 ## Approval Needed Before Real Runs

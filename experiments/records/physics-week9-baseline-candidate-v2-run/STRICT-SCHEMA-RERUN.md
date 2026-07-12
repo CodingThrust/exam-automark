@@ -1,7 +1,6 @@
 # Strict Schema Rerun Plan
 
-Status: strict-schema packets built and dry-run validated. Real rerun not
-executed by Codex.
+Status: strict-schema baseline and candidate development runs passed validation.
 
 Captured date: 2026-07-13, Asia/Shanghai.
 
@@ -31,9 +30,9 @@ Both prompts explicitly require:
 
 ## Next Steps
 
-1. Run the strict-schema baseline first.
-2. Run candidate v2 only if the strict-schema baseline validates 8/8.
-3. Do not run held-out test packets at this stage.
+1. Record development metrics in the Typst/PDF note.
+2. Decide whether to freeze candidate v2 based on development results.
+3. Do not run held-out test packets until the workflow is frozen.
 
 ## Strict Schema Packet Outputs
 
@@ -85,3 +84,15 @@ python -m benchmark.core.cli run-model-packet \
   --response-format json_object \
   --max-retries 1
 ```
+
+## Real Development Run Status
+
+Both strict-schema development runs were executed by the project user and passed
+validation:
+
+| Run | Output path | Status |
+| --- | --- | --- |
+| baseline strict-schema | `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-strict-schema` | passed, 8/8 |
+| candidate strict-schema | `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-dev-r1-strict-schema` | passed, 8/8 |
+
+The development metrics are recorded in `DEV-METRICS-STRICT-SCHEMA.md`.

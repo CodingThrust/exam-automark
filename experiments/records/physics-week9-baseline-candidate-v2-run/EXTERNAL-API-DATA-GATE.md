@@ -1,6 +1,6 @@
 # External API Data Gate
 
-Status: supervisor approval recorded for real DeepSeek development runs.
+Status: supervisor approval clarified; Codex external execution remains blocked.
 
 Captured date: 2026-07-12, Asia/Shanghai.
 
@@ -74,6 +74,31 @@ This approval permits the two real development commands recorded in
 
 - `deepseek-baseline-text-G1-dev-r1`
 - `deepseek-candidate-text-G1-dev-r1`
+
+## Supervisor Clarification
+
+The project user reported the supervisor's explicit follow-up response on
+2026-07-12:
+
+- For questions 1 and 2, anonymized data is acceptable.
+- Running the development split first is acceptable.
+- A public DeepSeek API is preferred over an internal endpoint because it has
+  stronger external credibility for the experiment.
+- Recording/accepting provider data-retention, logging, and privacy terms is
+  acceptable.
+- Recording the approval statement in the experiment record is acceptable.
+- The supervisor requested that a first version be produced quickly.
+
+Interpretation for this experiment record:
+
+- approved provider: `deepseek`
+- approved endpoint: `https://api.deepseek.com`
+- approved content: anonymous student transcript text, course question text,
+  grading prompt, and rubric/scoring rules
+- approved split for the next run: development split only
+- held-out test split: still not part of the next run step
+- API key handling: key value must remain outside Git, command records, and
+  reports
 
 ## Codex Execution Status
 

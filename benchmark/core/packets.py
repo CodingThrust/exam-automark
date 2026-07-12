@@ -84,6 +84,44 @@ class PromptPacketResult:
     manifest: dict[str, Any]
 
 
+@dataclass(frozen=True)
+class TextGradingPacketSpec:
+    course: CourseSpec
+    packet_id: str
+    condition: str
+    prompt_text: str
+    student_ids: tuple[str, ...]
+    transcript_source: Path
+    output_root: Path
+    rubric: dict[str, Any]
+    text_source_kind: str = "transcript"
+    source_run_id: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        for label, value in (
+            ("packet_id", self.packet_id),
+            ("condition", self.condition),
+            ("text_source_kind", self.text_source_kind),
+        ):
+            if not isinstance(value, str) or SAFE_TOKEN.fullmatch(value) is None:
+                raise ValueError(f"{label} must be a safe token")
+        if not self.prompt_text.strip():
+            raise ValueError("prompt_text must not be blank")
+        if not self.student_ids:
+            raise ValueError("student_ids must not be empty")
+        for student_id in self.student_ids:
+            self.course.validate_student_id(student_id)
+        if len(self.student_ids) != len(set(self.student_ids)):
+            raise ValueError("student_ids must be unique")
+        if self.source_run_id is not None and not self.source_run_id.strip():
+            raise ValueError("source_run_id must not be blank")
+        object.__setattr__(self, "student_ids", tuple(self.student_ids))
+        object.__setattr__(self, "transcript_source", Path(self.transcript_source))
+        object.__setattr__(self, "output_root", Path(self.output_root))
+        object.__setattr__(self, "metadata", dict(self.metadata))
+
+
 def build_prompt_packet(spec: PromptPacketSpec) -> PromptPacketResult:
     packet_path = spec.output_root / spec.packet_id
     if packet_path.exists():
@@ -138,6 +176,81 @@ def build_prompt_packet(spec: PromptPacketSpec) -> PromptPacketResult:
             for student_id in spec.student_ids
         },
         "metadata": spec.metadata,
+    }
+    _write_json(packet_path / "manifest.json", manifest)
+
+    findings = audit_prompt_packet(packet_path)
+    if findings:
+        raise ValueError("prompt packet audit failed: " + "; ".join(findings))
+    return PromptPacketResult(
+        packet_path=packet_path,
+        packet_hash=directory_digest(packet_path),
+        manifest=manifest,
+    )
+
+
+def build_text_grading_packet(spec: TextGradingPacketSpec) -> PromptPacketResult:
+    packet_path = spec.output_root / spec.packet_id
+    if packet_path.exists():
+        raise FileExistsError(f"packet already exists: {packet_path}")
+    if not spec.transcript_source.is_dir():
+        raise FileNotFoundError(f"transcript source missing: {spec.transcript_source}")
+
+    (packet_path / "inputs").mkdir(parents=True)
+    (packet_path / "outputs").mkdir()
+
+    source_hashes = {}
+    for student_id in spec.student_ids:
+        source = _find_transcript_source(spec.transcript_source, student_id)
+        payload = _read_transcript_payload(source, student_id, spec.course)
+        destination = packet_path / "inputs" / student_id / "transcript.json"
+        destination.parent.mkdir()
+        _write_json(destination, payload)
+        source_hashes[student_id] = _file_hash(source)
+
+    _write_json(packet_path / "course.json", spec.course.to_dict())
+    (packet_path / "prompt.txt").write_text(
+        _normalize_text(spec.prompt_text),
+        encoding="utf-8",
+        newline="\n",
+    )
+    (packet_path / "INSTRUCTIONS.md").write_text(
+        PACKET_INSTRUCTIONS,
+        encoding="utf-8",
+        newline="\n",
+    )
+    _write_json(packet_path / "output.schema.json", grading_output_schema(spec.course))
+    _write_json(packet_path / "rubric.json", spec.rubric)
+
+    metadata = dict(spec.metadata)
+    metadata.update(
+        {
+            "input_mode": "text-only",
+            "source_run_id": spec.source_run_id,
+            "text_source_hash": directory_digest(packet_path / "inputs"),
+            "text_source_input_hashes": source_hashes,
+            "text_source_kind": spec.text_source_kind,
+            "text_source_path": spec.transcript_source.as_posix(),
+        }
+    )
+
+    manifest = {
+        "schema_version": 1,
+        "packet_id": spec.packet_id,
+        "course_id": spec.course.course_id,
+        "assessment_id": spec.course.assessment_id,
+        "condition": spec.condition,
+        "task": "grade",
+        "student_ids": list(spec.student_ids),
+        "prompt_hash": _file_hash(packet_path / "prompt.txt"),
+        "course_hash": _file_hash(packet_path / "course.json"),
+        "output_schema_hash": _file_hash(packet_path / "output.schema.json"),
+        "rubric_hash": _file_hash(packet_path / "rubric.json"),
+        "input_hashes": {
+            student_id: directory_digest(packet_path / "inputs" / student_id)
+            for student_id in spec.student_ids
+        },
+        "metadata": metadata,
     }
     _write_json(packet_path / "manifest.json", manifest)
 
@@ -267,6 +380,60 @@ def directory_digest(path: Path) -> str:
 
 def _file_hash(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _find_transcript_source(root: Path, student_id: str) -> Path:
+    candidates = (
+        root / f"{student_id}.json",
+        root / student_id / "transcript.json",
+        root / student_id / f"{student_id}.json",
+    )
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(f"transcript missing for: {student_id}")
+
+
+def _read_transcript_payload(
+    path: Path,
+    student_id: str,
+    course: CourseSpec,
+) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"transcript must be a JSON object: {path}")
+    if payload.get("student_id") != student_id:
+        raise ValueError(f"transcript student_id mismatch for: {student_id}")
+    answers = payload.get("answers")
+    if not isinstance(answers, list):
+        raise ValueError(f"transcript answers must be a list: {path}")
+    question_ids = []
+    for answer in answers:
+        if not isinstance(answer, dict):
+            raise ValueError(f"transcript answer must be an object: {path}")
+        question_id = answer.get("question_id")
+        if not isinstance(question_id, str):
+            raise ValueError(f"transcript answer question_id missing: {path}")
+        if not isinstance(answer.get("text"), str):
+            raise ValueError(f"transcript answer text must be a string: {path}")
+        if not isinstance(answer.get("unclear"), bool):
+            raise ValueError(f"transcript answer unclear must be boolean: {path}")
+        question_ids.append(question_id)
+    if set(question_ids) != set(course.question_ids) or len(question_ids) != len(
+        set(question_ids)
+    ):
+        raise ValueError(f"transcript questions do not match course spec: {path}")
+    return {
+        "student_id": student_id,
+        "answers": [
+            {
+                "question_id": answer["question_id"],
+                "text": answer["text"],
+                "unclear": answer["unclear"],
+            }
+            for answer in answers
+        ],
+    }
 
 
 def _write_json(path: Path, payload: Any) -> None:

@@ -6,7 +6,14 @@ from pathlib import Path
 from typing import Any
 
 from .inventory import write_data_inventory
-from .packets import PromptPacketSpec, audit_prompt_packet, build_prompt_packet
+from .model_runner import ModelPacketRunConfig, run_model_packet
+from .packets import (
+    PromptPacketSpec,
+    TextGradingPacketSpec,
+    audit_prompt_packet,
+    build_prompt_packet,
+    build_text_grading_packet,
+)
 from .plans import (
     ExperimentPlan,
     build_standard_experiment_plan,
@@ -41,6 +48,29 @@ def _build_parser() -> argparse.ArgumentParser:
     packet.add_argument("--input-root", type=Path, required=True)
     packet.add_argument("--output-root", type=Path, required=True)
     packet.add_argument(
+        "--metadata",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="optional packet metadata; may be provided multiple times",
+    )
+
+    text_packet = subparsers.add_parser(
+        "build-text-grading-packet",
+        help="build a text-only grading packet from recorded transcripts",
+    )
+    text_packet.add_argument("--course", type=Path, required=True)
+    text_packet.add_argument("--packet-id", required=True)
+    text_packet.add_argument("--condition", required=True)
+    text_packet.add_argument("--prompt", type=Path, required=True)
+    text_packet.add_argument("--rubric", type=Path, required=True)
+    text_packet.add_argument("--student-id", action="append", dest="student_ids")
+    text_packet.add_argument("--students-file", type=Path)
+    text_packet.add_argument("--transcript-source", type=Path, required=True)
+    text_packet.add_argument("--output-root", type=Path, required=True)
+    text_packet.add_argument("--text-source-kind", default="transcript")
+    text_packet.add_argument("--source-run-id")
+    text_packet.add_argument(
         "--metadata",
         action="append",
         default=[],
@@ -120,14 +150,51 @@ def _build_parser() -> argparse.ArgumentParser:
     readiness.add_argument("--repo-root", type=Path)
     readiness.add_argument("--output", type=Path)
     readiness.add_argument("--markdown-output", type=Path)
+
+    run_model = subparsers.add_parser(
+        "run-model-packet",
+        help="run a text-only model provider against a prompt packet",
+    )
+    run_model.add_argument("--provider", choices=("deepseek",), required=True)
+    run_model.add_argument("--model", required=True)
+    run_model.add_argument("--input-mode", choices=("text-only",), required=True)
+    run_model.add_argument("--packet", type=Path, required=True)
+    run_model.add_argument("--output", type=Path, required=True)
+    run_model.add_argument("--temperature", type=float)
+    run_model.add_argument("--top-p", type=float)
+    run_model.add_argument("--max-tokens", type=int)
+    run_model.add_argument("--max-retries", type=int, default=0)
+    run_model.add_argument("--response-format", default="json_object")
+    run_model.add_argument("--endpoint", default="https://api.deepseek.com")
+    run_model.add_argument("--run-commit")
+    run_model.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="exercise packet IO and validation without calling the provider API",
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     try:
+        raw_argv = tuple(argv if argv is not None else sys.argv[1:])
         args = _build_parser().parse_args(argv)
         if args.command == "build-packet":
             result = _build_packet(args)
+            print(
+                json.dumps(
+                    {
+                        "packet_path": str(result.packet_path),
+                        "packet_id": result.manifest["packet_id"],
+                        "packet_hash": result.packet_hash,
+                        "manifest": result.manifest,
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.command == "build-text-grading-packet":
+            result = _build_text_grading_packet(args)
             print(
                 json.dumps(
                     {
@@ -269,6 +336,27 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             )
             return 0 if report["status"] == "ready" else 1
+        if args.command == "run-model-packet":
+            result = run_model_packet(
+                ModelPacketRunConfig(
+                    provider=args.provider,
+                    model=args.model,
+                    input_mode=args.input_mode,
+                    packet=args.packet,
+                    output=args.output,
+                    temperature=args.temperature,
+                    top_p=args.top_p,
+                    max_tokens=args.max_tokens,
+                    max_retries=args.max_retries,
+                    response_format=args.response_format,
+                    endpoint=args.endpoint,
+                    dry_run=args.dry_run,
+                    command_argv=raw_argv,
+                    run_commit=args.run_commit,
+                )
+            )
+            print(json.dumps(result, sort_keys=True))
+            return 0 if result["validation_status"] == "passed" else 1
         raise ValueError(f"unsupported command: {args.command}")
     except SystemExit as error:
         return int(error.code)
@@ -298,6 +386,26 @@ def _build_packet(args: argparse.Namespace) -> Any:
             input_root=args.input_root,
             output_root=args.output_root,
             rubric=rubric,
+            metadata=_parse_metadata(args.metadata),
+        )
+    )
+
+
+def _build_text_grading_packet(args: argparse.Namespace) -> Any:
+    course = CourseSpec.from_json_path(args.course)
+    student_ids = _load_student_ids(args.student_ids, args.students_file)
+    return build_text_grading_packet(
+        TextGradingPacketSpec(
+            course=course,
+            packet_id=args.packet_id,
+            condition=args.condition,
+            prompt_text=args.prompt.read_text(encoding="utf-8"),
+            student_ids=tuple(student_ids),
+            transcript_source=args.transcript_source,
+            output_root=args.output_root,
+            rubric=_read_json(args.rubric),
+            text_source_kind=args.text_source_kind,
+            source_run_id=args.source_run_id,
             metadata=_parse_metadata(args.metadata),
         )
     )

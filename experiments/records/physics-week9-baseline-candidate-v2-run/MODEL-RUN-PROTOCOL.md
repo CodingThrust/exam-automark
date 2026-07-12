@@ -46,6 +46,40 @@ baseline grading prompt/skill vs candidate v2 grading prompt/skill
 
 under one fixed DeepSeek model configuration.
 
+## DeepSeek Input Boundary
+
+DeepSeek must not be treated as a direct image-grading provider for this run.
+The official DeepSeek Chat Completion API documents text `content` fields for
+chat messages and lists text chat model IDs such as `deepseek-v4-flash` and
+`deepseek-v4-pro`. It does not define the image-content interface needed to
+grade the current `.jpg` packet inputs directly.
+
+Local packet inspection on 2026-07-12 found that the current `G1-dev-r1` and
+`T1-dev-r1` packet inputs are `.jpg` files. Therefore:
+
+- do not send existing `G1-*` image packets directly to DeepSeek;
+- run DeepSeek only on text-only grading packets;
+- record the text source before grading;
+- record the text-source hash before grading;
+- treat any unverified legacy transcript as pilot/provisional evidence only.
+
+The preferred final route is:
+
+```text
+image packet -> recorded transcription/OCR step -> text-only grading packet -> DeepSeek grading -> metrics
+```
+
+Text-source options:
+
+| Option | Use | Status | Required record |
+| --- | --- | --- | --- |
+| vision model transcription | final multimodal-to-text route | preferred | model/provider, command or UI protocol, prompt, output hash |
+| existing `Data/physics/benchmark/transcripts/automatic/T1-*` | provisional DeepSeek dry run | allowed only if labeled pilot-derived | source path, transcript hash, original run provenance |
+| local OCR tool | OCR baseline only | not enough for final math-handwriting claims by itself | tool name, version, command, output hash |
+| human-reviewed transcript | text upper-bound or adjudication route | valid if reviewer and review protocol are recorded | reviewer protocol, CSV/hash, review date |
+
+If no text source can be verified, stop before calling DeepSeek.
+
 ## Provider Plan
 
 The first provider should be DeepSeek because the project already has access to
@@ -65,6 +99,9 @@ Record these provider fields before any model call:
 | max_tokens | exact value used, or `not_set` |
 | response_format | JSON object or provider equivalent |
 | retry_policy | maximum retries and repair prompt policy |
+| input_mode | `text_only`; image input is blocked for DeepSeek |
+| text_source | transcript/OCR/human-review source path and hash |
+| command_line | exact command used, with secret values redacted |
 | run_commit | exact `git rev-parse HEAD` |
 | software_snapshot | path to the software environment record captured at run time |
 
@@ -100,18 +137,55 @@ Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/
 Each packet must be executed from its packet root using only files inside that
 root. The model-facing prompt is always `prompt.txt`.
 
+For DeepSeek, these image packets are source packets, not directly executable
+grading packets. A text-only grading packet must be built or selected before
+the DeepSeek call.
+
+## Command-Line Recording
+
+Every DeepSeek call must record the exact command line before execution. The
+command record must not contain the API key value; it may contain the environment
+variable name `DEEPSEEK_API_KEY`.
+
+Each run directory must include:
+
+- `command.txt`: exact shell command, with secret values redacted;
+- `command.argv.json`: parsed argv list if a CLI wrapper is used;
+- `run-metadata.json`: provider, model, parameters, packet hash, prompt hash,
+  text-source hash, git commit, and software snapshot path.
+
+Planned packet-based CLI shape:
+
+```bash
+python -m benchmark.core.cli run-model-packet \
+  --provider deepseek \
+  --model deepseek-v4-pro \
+  --input-mode text-only \
+  --packet Data/physics/benchmark/text_packets/physics-week9-baseline-text/G1-dev-r1 \
+  --output Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1 \
+  --temperature 0 \
+  --response-format json_object
+```
+
+This command shape is a required implementation target before real DeepSeek
+model calls. If the actual CLI differs, record the actual command and update
+this protocol before running the held-out split.
+
 ## Execution Order
 
 1. Confirm the worktree is clean.
 2. Run branch readiness and packet audits.
 3. Capture a fresh software environment snapshot at the exact run commit.
-4. Run baseline `G1-dev-r1`.
-5. Run candidate v2 `G1-dev-r1`.
-6. Validate output JSON for both development grading packets.
-7. If both development grading packets are valid, run baseline `G1-test-r1`.
-8. Run candidate v2 `G1-test-r1`.
-9. Compute metrics against human gold scores.
-10. Write the Typst/PDF report.
+4. Verify the text source for DeepSeek grading and record its hash.
+5. Build or select text-only baseline and candidate grading packets.
+6. Record the exact DeepSeek command line for the baseline development run.
+7. Run baseline text-only `G1-dev-r1` with DeepSeek.
+8. Record the exact DeepSeek command line for the candidate development run.
+9. Run candidate v2 text-only `G1-dev-r1` with DeepSeek.
+10. Validate output JSON for both development grading packets.
+11. If both development grading packets are valid, repeat the same command-recording and validation process for the held-out split.
+12. Compute metrics against human gold scores.
+13. Write the Typst/PDF report.
 
 Transcription packets are part of the full multimodal-vs-text benchmark, but
 the first grading-skill decision can start from grading packets if their inputs
@@ -218,6 +292,9 @@ Stop before or during model execution if:
 - the model-facing prompt or rubric is changed after readiness
 - the provider model ID is unknown
 - generation parameters are not recorded
+- DeepSeek is asked to grade image-only packet inputs directly
+- the DeepSeek command line is not recorded before execution
+- the text-source path and hash are not recorded
 - output JSON cannot be validated
 - API quota, network, or provider errors affect only one arm of the comparison
 - private student content would need to be committed to Git

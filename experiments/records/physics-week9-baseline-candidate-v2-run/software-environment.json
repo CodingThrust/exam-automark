@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "record_type": "software_environment",
-  "status": "pre_model_call_preflight_snapshot",
+  "status": "pre_model_call_preflight_snapshot_after_sdk_install",
   "captured_date": "2026-07-12",
   "timezone": "Asia/Shanghai",
   "git": {
@@ -33,19 +33,22 @@
     "api_client": "OpenAI-compatible Python SDK",
     "api_key_environment_variable": "DEEPSEEK_API_KEY",
     "api_key_status_in_current_process": "NOT_SET",
+    "api_key_status_in_user_environment": "NOT_SET",
+    "api_key_status_in_machine_environment": "NOT_SET",
     "planned_model": "deepseek-v4-pro",
     "real_api_calls_recorded": false
   },
   "python_packages_checked": {
-    "openai": "NOT_INSTALLED",
+    "openai": "2.45.0",
     "Pillow": "11.3.0",
     "PyMuPDF": "NOT_INSTALLED",
     "zulip": "NOT_INSTALLED",
     "pandas": "2.3.0",
-    "numpy": "2.1.3"
+    "numpy": "2.1.3",
+    "httpx": "0.28.1",
+    "typing-extensions": "4.16.0"
   },
   "missing_before_model_run": [
-    "openai package for the OpenAI-compatible DeepSeek API client",
     "DEEPSEEK_API_KEY must be set in the process environment before real model calls",
     "PyMuPDF package if PDF/image conversion is required in this environment",
     "provider/model/version metadata for the selected model"
@@ -57,8 +60,8 @@
   },
   "notes": [
     "This snapshot records the local software state before any model call on this branch.",
-    "The current environment is enough for offline record/readiness tests and existing dry-run validation. Real DeepSeek API model execution still needs the openai Python package and a process-visible DEEPSEEK_API_KEY.",
-    "The user reported that a DeepSeek API key is prepared, but the current Codex/PowerShell process does not yet expose DEEPSEEK_API_KEY.",
+    "The current environment is enough for offline record/readiness tests, existing dry-run validation, and DeepSeek runner import. Real DeepSeek API model execution still needs a process-visible DEEPSEEK_API_KEY.",
+    "The user reported that a DeepSeek API key is prepared, but the current Codex/PowerShell process, user environment, and machine environment do not yet expose DEEPSEEK_API_KEY.",
     "Capture a fresh software_environment record at the exact model-run commit before running models."
   ]
 }

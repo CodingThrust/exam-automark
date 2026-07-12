@@ -1,6 +1,7 @@
 # Pre-Model-Call Preflight
 
-Status: offline preflight complete. No real DeepSeek API call was made.
+Status: offline preflight complete after provider SDK install. No real DeepSeek
+API call was made.
 
 Captured date: 2026-07-12, Asia/Shanghai.
 
@@ -18,6 +19,10 @@ Git commit: `93f843f405df5cbf4d4d4cd1524c77a153121959`
 | Candidate v2 text packet | already present |
 | Baseline dry-run validation | passed, 8/8 students |
 | Candidate v2 dry-run validation | passed, 8/8 students |
+| OpenAI-compatible SDK | installed, `openai==2.45.0` |
+| `DEEPSEEK_API_KEY` in current process | `NOT_SET` |
+| `DEEPSEEK_API_KEY` in user environment | `NOT_SET` |
+| `DEEPSEEK_API_KEY` in machine environment | `NOT_SET` |
 | Real API calls | none |
 
 ## Text-Only Packet Inputs
@@ -44,11 +49,11 @@ These packet directories are under ignored `Data/` and are not committed.
 ## Provider Readiness
 
 The user reported that a DeepSeek API key is prepared. The current
-Codex/PowerShell process does not yet expose `DEEPSEEK_API_KEY`.
+Codex/PowerShell process, user environment, and machine environment do not yet
+expose `DEEPSEEK_API_KEY`.
 
 The real model run must not start until:
 
-- `openai` is installed for the OpenAI-compatible DeepSeek API client
 - `DEEPSEEK_API_KEY` is set in the process environment
 - a fresh software environment snapshot is captured at the exact run commit
 

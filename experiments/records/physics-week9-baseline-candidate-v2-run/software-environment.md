@@ -1,6 +1,6 @@
 # Software Environment Snapshot
 
-Status: pre-model-call preflight snapshot.
+Status: pre-model-call preflight snapshot after SDK install.
 
 Captured date: 2026-07-12, Asia/Shanghai.
 
@@ -33,12 +33,14 @@ This file records the local software state before any model call on
 
 | Package | Version |
 | --- | --- |
-| `openai` | `NOT_INSTALLED` |
+| `openai` | `2.45.0` |
 | `Pillow` | `11.3.0` |
 | `PyMuPDF` | `NOT_INSTALLED` |
 | `zulip` | `NOT_INSTALLED` |
 | `pandas` | `2.3.0` |
 | `numpy` | `2.1.3` |
+| `httpx` | `0.28.1` |
+| `typing-extensions` | `4.16.0` |
 
 ## Provider Configuration
 
@@ -46,6 +48,8 @@ This file records the local software state before any model call on
 - API client: OpenAI-compatible Python SDK
 - API key source: `DEEPSEEK_API_KEY` environment variable
 - API key status in current Codex/PowerShell process: `NOT_SET`
+- API key status in user environment: `NOT_SET`
+- API key status in machine environment: `NOT_SET`
 - Planned model for real dev run: `deepseek-v4-pro`
 - Real API calls recorded in this snapshot: `false`
 
@@ -56,7 +60,6 @@ written into commands, files, Git commits, or reports.
 
 Install or otherwise record:
 
-- `openai` for the OpenAI-compatible DeepSeek API client
 - `DEEPSEEK_API_KEY` visible in the process environment
 - `PyMuPDF` if this environment performs PDF/image conversion
 - exact provider/model/version metadata for every model run

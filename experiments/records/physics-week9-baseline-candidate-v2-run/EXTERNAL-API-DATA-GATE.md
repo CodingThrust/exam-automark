@@ -1,6 +1,6 @@
 # External API Data Gate
 
-Status: real DeepSeek dev run not executed.
+Status: supervisor approval recorded for real DeepSeek development runs.
 
 Captured date: 2026-07-12, Asia/Shanghai.
 
@@ -52,6 +52,28 @@ Before running either real DeepSeek command, record explicit approval that:
 If approval is granted, record the approver, date, allowed provider, allowed
 data split, and any restrictions in this experiment record before running the
 commands in `DEEPSEEK-DEV-RUN-COMMANDS.md`.
+
+## Approval Recorded
+
+Approval was reported by the project user on 2026-07-12:
+
+- approver: course supervisor/advisor, exact name not recorded in this file
+- provider allowed: `deepseek`
+- endpoint allowed: `https://api.deepseek.com`
+- allowed input mode: `text-only`
+- allowed data split: development split only, `G1-dev-r1`
+- allowed text source:
+  `Data/physics/benchmark/transcripts/automatic/T1-dev-r1`
+- data status: anonymous, pilot-derived automatic transcript
+- API key handling: key value must not be printed, committed, copied into
+  command records, or written into any report
+- held-out test split: not approved for execution at this stage
+
+This approval permits the two real development commands recorded in
+`DEEPSEEK-DEV-RUN-COMMANDS.md`:
+
+- `deepseek-baseline-text-G1-dev-r1`
+- `deepseek-candidate-text-G1-dev-r1`
 
 ## Safer Alternatives
 

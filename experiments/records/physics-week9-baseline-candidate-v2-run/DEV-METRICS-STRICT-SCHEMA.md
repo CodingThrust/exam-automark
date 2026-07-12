@@ -112,4 +112,6 @@ This is not yet a final conclusion because:
 
 Typst/PDF note status: created at `note.typ` and `note.pdf`.
 
-Next step: decide whether to freeze candidate v2 before any held-out test run.
+Freeze status: candidate v2 is frozen in `CANDIDATE-V2-FREEZE.md`.
+
+Next step: build and dry-run held-out test packets without changing prompts.

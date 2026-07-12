@@ -32,7 +32,7 @@
 ]
 
 #warning-box[
-  #strong[Reading guide.] This note records development evidence only. Candidate v2 improved over the baseline on the 8-student development split, but the held-out test split has not been run. Treat the result as a prompt-freezing decision aid, not as a final accuracy claim.
+  #strong[Reading guide.] This note records development evidence only. Candidate v2 improved over the baseline on the 8-student development split and is now frozen for held-out evaluation. The held-out test split has not been run, so this is not a final accuracy claim.
 ]
 
 == Experiment State
@@ -41,12 +41,12 @@
   metric-card("Validation", "8/8 + 8/8", "baseline and candidate passed"),
   metric-card("Exact agreement", "85.4%", "candidate v2 dev split", fill_color: rgb("#edf5ef")),
   metric-card("Total MAE", "0.75", "candidate v2, points", fill_color: rgb("#fff7e3")),
-  metric-card("Held-out test", "Not run", "freeze prompt first", fill_color: rgb("#f9eeee")),
+  metric-card("Held-out test", "Not run", "candidate frozen", fill_color: rgb("#f9eeee")),
 )
 
 #grid(columns: (1fr, 1fr), gutter: 8pt,
   note-box[
-    #strong[Protocol decision.] Candidate v2 is the current development winner. The next decision is whether to freeze its prompt packet before running any held-out test packet.
+    #strong[Protocol decision.] Candidate v2 is frozen in `CANDIDATE-V2-FREEZE.md`. The next step is held-out packet preparation without changing prompts.
   ],
   note-box[
     #strong[Data boundary.] Student data and model outputs remain under ignored `Data/`. This Git record stores paths, hashes, commands, and aggregate metrics only.
@@ -96,7 +96,7 @@
 
   rect((8.88, 2.72), (10.80, 3.42), fill: rgb("#edf5ef"), stroke: rgb("#c8dfce"))
   content((9.84, 3.18), text(size: 7.2pt, weight: "bold")[Dev metrics])
-  content((9.84, 2.92), text(size: 6.3pt, fill: rgb("#63707a"))[compare, then freeze])
+  content((9.84, 2.92), text(size: 6.3pt, fill: rgb("#63707a"))[compare, then test])
 
   line((2.45, 3.07), (3.10, 3.73), stroke: (paint: rgb("#63707a"), thickness: 0.8pt), mark: (end: ">"))
   line((2.45, 3.07), (3.10, 2.43), stroke: (paint: rgb("#63707a"), thickness: 0.8pt), mark: (end: ">"))
@@ -300,9 +300,10 @@ The exact multiline commands are stored in `STRICT-SCHEMA-RERUN.md`, and the use
   [#strong[Gate]], [#strong[Status]], [#strong[Evidence]],
   [Development validation], [passed], [both strict-schema runs validated 8/8],
   [Prompt packet record], [passed], [prompt, packet, text-source, and rubric hashes are recorded],
+  [Candidate v2 freeze], [passed], [`CANDIDATE-V2-FREEZE.md` records the frozen prompt],
   [English rubric rule], [passed], [model-facing prompts and rubrics are English],
   [External API data gate], [passed], [anonymous data approved for DeepSeek public API by supervisor],
-  [Held-out test], [blocked], [do not run until candidate v2 is frozen],
+  [Held-out test], [not run], [build and dry-run held-out packets first],
 )
 
 == Limitations
@@ -312,4 +313,4 @@ The exact multiline commands are stored in `STRICT-SCHEMA-RERUN.md`, and the use
 - Text source is a pilot-derived automatic transcript.
 - Gold reference status is single primary rater, not adjudicated.
 - The failed baseline attempts are retained under ignored `Data/` for audit, but are not used for metrics.
-- This note supports the decision to freeze or revise candidate v2; it is not a final cross-course conclusion.
+- This note supports held-out preparation for frozen candidate v2; it is not a final cross-course conclusion.

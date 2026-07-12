@@ -30,9 +30,10 @@ Both prompts explicitly require:
 
 ## Next Steps
 
-1. Review the Typst/PDF note created at `note.typ` and `note.pdf`.
-2. Decide whether to freeze candidate v2 based on development results.
-3. Do not run held-out test packets until the workflow is frozen.
+1. Use the freeze record in `CANDIDATE-V2-FREEZE.md`.
+2. Build and dry-run held-out test packets without changing prompts.
+3. Do not run real held-out model calls until held-out packets pass dry-run
+   validation.
 
 ## Strict Schema Packet Outputs
 

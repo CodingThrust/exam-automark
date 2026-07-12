@@ -41,12 +41,12 @@
   metric-card("Validation", "8/8 + 8/8", "baseline and candidate passed"),
   metric-card("Exact agreement", "85.4%", "candidate v2 dev split", fill_color: rgb("#edf5ef")),
   metric-card("Total MAE", "0.75", "candidate v2, points", fill_color: rgb("#fff7e3")),
-  metric-card("Held-out test", "Not run", "candidate frozen", fill_color: rgb("#f9eeee")),
+  metric-card("Held-out test", "Not run", "packets dry-run passed", fill_color: rgb("#f9eeee")),
 )
 
 #grid(columns: (1fr, 1fr), gutter: 8pt,
   note-box[
-    #strong[Protocol decision.] Candidate v2 is frozen in `CANDIDATE-V2-FREEZE.md`. The next step is held-out packet preparation without changing prompts.
+    #strong[Protocol decision.] Candidate v2 is frozen in `CANDIDATE-V2-FREEZE.md`. Held-out packets are built and dry-run validated in `HELD-OUT-PREFLIGHT.md`.
   ],
   note-box[
     #strong[Data boundary.] Student data and model outputs remain under ignored `Data/`. This Git record stores paths, hashes, commands, and aggregate metrics only.
@@ -303,7 +303,8 @@ The exact multiline commands are stored in `STRICT-SCHEMA-RERUN.md`, and the use
   [Candidate v2 freeze], [passed], [`CANDIDATE-V2-FREEZE.md` records the frozen prompt],
   [English rubric rule], [passed], [model-facing prompts and rubrics are English],
   [External API data gate], [passed], [anonymous data approved for DeepSeek public API by supervisor],
-  [Held-out test], [not run], [build and dry-run held-out packets first],
+  [Held-out packets], [passed], [`HELD-OUT-PREFLIGHT.md` records 18/18 dry-runs],
+  [Held-out real API run], [not run], [project user must run DeepSeek commands locally],
 )
 
 == Limitations

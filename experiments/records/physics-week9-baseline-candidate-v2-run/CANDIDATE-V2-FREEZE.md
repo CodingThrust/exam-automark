@@ -96,15 +96,19 @@ After this freeze record:
 
 The next work can prepare the held-out test run without changing prompts:
 
-1. Build strict-schema baseline held-out text packet.
-2. Build strict-schema candidate v2 held-out text packet.
-3. Dry-run both held-out packets with `deepseek-test`.
-4. Record packet hashes and dry-run validation.
+1. Build strict-schema baseline held-out text packet. Done in
+   `HELD-OUT-PREFLIGHT.md`.
+2. Build strict-schema candidate v2 held-out text packet. Done in
+   `HELD-OUT-PREFLIGHT.md`.
+3. Dry-run both held-out packets with `deepseek-test`. Passed, 18/18 for both
+   packets.
+4. Record packet hashes and dry-run validation. Done in
+   `HELD-OUT-PREFLIGHT.md`.
 5. Ask the project user to execute the real DeepSeek held-out runs from
    PowerShell with `DEEPSEEK_API_KEY` set locally.
 6. Evaluate held-out metrics and update the Typst/PDF note.
 
-Do not run the real held-out test before steps 1 to 4 are recorded.
+Do not evaluate held-out metrics unless both real held-out runs pass validation.
 
 ## Limitations
 

@@ -29,6 +29,8 @@ until a reviewer can answer:
    data inventory, course spec, and prompt template hashes?
 8. Which `grade-homework` skill version was used, and what are its skill
    hashes?
+9. Which operating system, software versions, model versions, and conversion
+   tools produced the run?
 
 ## Checklist
 
@@ -87,6 +89,14 @@ The packet manifest must record:
 - `output_schema_hash`
 - `input_hashes`
 
+Model-facing packet files must be English and cross-platform:
+
+- `prompt.txt`, `INSTRUCTIONS.md`, and grading `rubric.json` must be English.
+- Packet instructions should use relative file names such as `manifest.json`,
+  `inputs/`, and `outputs/`.
+- Reject Windows drive letters, UNC paths, or user-specific absolute paths in
+  model-facing packet files.
+
 Run packet audit before approving:
 
 ```bash
@@ -134,6 +144,10 @@ Every reported experiment with results must have an
 - `note_path`
 - `skill_version_id`, `skill_source_paths`, and `skill_hashes` when the result
   is intended to evaluate a grading-skill version
+- exact model provider, model name, API/model version when available, generation
+  parameters, and start/end timestamps
+- a software environment record with OS, shell, Python, package, Typst, and
+  conversion-tool versions relevant to the run
 
 If the experiment is a legacy pilot, the record must say `pilot` and must not
 claim final or general accuracy conclusions.

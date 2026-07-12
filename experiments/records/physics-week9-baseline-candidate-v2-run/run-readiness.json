@@ -40,11 +40,11 @@
     "course_id": "physics",
     "course_spec_path": "experiments/course_specs/physics_week9.json",
     "current_git_branch": "codex/physics-week9-baseline-candidate-v2-run",
-    "current_git_commit": "a3e8036a3990499fc7cd27f9ffd8156091ecd26c",
+    "current_git_commit": "565f2d4304b1d42b9238737807b8ad7c4fd23466",
     "data_inventory_path": "experiments/data_inventory/physics.json",
     "data_snapshot_hash": "e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3",
     "git_branch": "codex/physics-week9-baseline-candidate-v2-run",
-    "git_commit": "36e7201"
+    "git_commit": "af6a928"
   },
   "baseline_plan_path": "experiments/records/physics-week9-baseline-candidate-v2-run/baseline-plan.json",
   "candidate_plan_path": "experiments/records/physics-week9-baseline-candidate-v2-run/candidate-v2-plan.json",
@@ -70,7 +70,7 @@
       "status": "passed"
     },
     {
-      "detail": "codex/physics-week9-baseline-candidate-v2-run@36e7201 vs codex/physics-week9-baseline-candidate-v2-run@36e7201",
+      "detail": "codex/physics-week9-baseline-candidate-v2-run@af6a928 vs codex/physics-week9-baseline-candidate-v2-run@af6a928",
       "id": "same_git_anchor",
       "status": "passed"
     },
@@ -165,12 +165,12 @@
       "status": "passed"
     },
     {
-      "detail": "planned=36e7201; resolved=36e720107e7c8f02586cf53956fb8bd1319391de",
+      "detail": "planned=af6a928; resolved=af6a9285c60a0b4841b2dd15d66a2eba82f08150",
       "id": "planned_git_commit_exists",
       "status": "passed"
     },
     {
-      "detail": "HEAD=a3e8036a3990499fc7cd27f9ffd8156091ecd26c; planned=36e720107e7c8f02586cf53956fb8bd1319391de",
+      "detail": "HEAD=565f2d4304b1d42b9238737807b8ad7c4fd23466; planned=af6a9285c60a0b4841b2dd15d66a2eba82f08150",
       "id": "current_git_head_contains_plan_commit",
       "status": "passed"
     },

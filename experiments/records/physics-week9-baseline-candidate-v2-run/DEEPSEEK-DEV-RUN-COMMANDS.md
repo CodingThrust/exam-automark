@@ -1,6 +1,8 @@
 # Physics Week 9 DeepSeek Dev Run Commands
 
-Status: command plan only. No real DeepSeek model calls are recorded here.
+Status: updated command plan. The first real baseline attempt failed validation
+because the model returned numeric confidence values. Use the strict-confidence
+rerun plan before any candidate or held-out run.
 
 This file records the exact command-line plan for the first DeepSeek development
 split run after `build-text-grading-packet` and `run-model-packet` were merged
@@ -167,3 +169,23 @@ Each real run directory must contain:
 Stop before held-out runs if either development run has validation failures,
 missing outputs, unexpected retries, or provider/API errors.
 
+## Real Baseline Attempt 1 Status
+
+The original baseline command produced
+`Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1`
+and failed validation:
+
+- students expected: 8
+- students passed: 4
+- students failed: 4
+- failed reason: numeric `confidence` values such as `0.95` and `1.0`
+
+See `BASELINE-DEV-ATTEMPT-1.md`.
+
+## Strict-Confidence Rerun
+
+Use the strict-confidence prompt sources and packet paths recorded in
+`STRICT-CONFIDENCE-RERUN.md`.
+
+Run the strict-confidence baseline first. Do not run candidate v2 until that
+baseline rerun validates 8/8.

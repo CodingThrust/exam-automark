@@ -1,4 +1,4 @@
-#set document(title: "Physics Week 9 Development Run Note")
+#set document(title: "Physics Week 9 Text-Only Pilot Note")
 #set page(paper: "a4", margin: (x: 1.45cm, y: 1.2cm))
 #set text(font: "New Computer Modern", size: 9.2pt, fill: rgb("#17212b"))
 #import "@preview/cetz:0.5.2"
@@ -24,29 +24,29 @@
 ]
 
 #align(center)[
-  #text(size: 20pt, weight: "bold", fill: ink)[Physics Week 9 Development Run Note]
+  #text(size: 20pt, weight: "bold", fill: ink)[Physics Week 9 Text-Only Pilot Note]
 ]
 
 #align(center)[
-  #pill[Baseline vs candidate v2, text-only, DeepSeek dev split]
+  #pill[Baseline vs candidate v2, text-only, DeepSeek dev and held-out splits]
 ]
 
 #warning-box[
-  #strong[Reading guide.] This note records development evidence only. Candidate v2 improved over the baseline on the 8-student development split and is now frozen for held-out evaluation. The held-out test split has not been run, so this is not a final accuracy claim.
+  #strong[Reading guide.] Candidate v2 improved over the baseline on both the development and held-out text-only splits, but severe-error rate did not improve on held-out. Treat this as a Physics Week 9 pilot result, not a cross-course or multimodal conclusion.
 ]
 
 == Experiment State
 
 #grid(columns: (1fr, 1fr, 1fr, 1fr), gutter: 7pt,
-  metric-card("Validation", "8/8 + 8/8", "baseline and candidate passed"),
-  metric-card("Exact agreement", "85.4%", "candidate v2 dev split", fill_color: rgb("#edf5ef")),
-  metric-card("Total MAE", "0.75", "candidate v2, points", fill_color: rgb("#fff7e3")),
-  metric-card("Held-out test", "Not run", "packets dry-run passed", fill_color: rgb("#f9eeee")),
+  metric-card("Dev validation", "8/8 + 8/8", "baseline and candidate passed"),
+  metric-card("Held-out exact", "84.3%", "candidate v2 test split", fill_color: rgb("#edf5ef")),
+  metric-card("Held-out total MAE", "2.08", "candidate v2, points", fill_color: rgb("#fff7e3")),
+  metric-card("Severe error", "44.4%", "no held-out improvement", fill_color: rgb("#f9eeee")),
 )
 
 #grid(columns: (1fr, 1fr), gutter: 8pt,
   note-box[
-    #strong[Protocol decision.] Candidate v2 is frozen in `CANDIDATE-V2-FREEZE.md`. Held-out packets are built and dry-run validated in `HELD-OUT-PREFLIGHT.md`.
+    #strong[Protocol decision.] Candidate v2 was frozen before held-out evaluation. The real held-out runs passed 18/18 and metrics are recorded in `HELD-OUT-METRICS-STRICT-SCHEMA.md`.
   ],
   note-box[
     #strong[Data boundary.] Student data and model outputs remain under ignored `Data/`. This Git record stores paths, hashes, commands, and aggregate metrics only.
@@ -60,9 +60,9 @@
   [Record directory], [`experiments/records/physics-week9-baseline-candidate-v2-run`],
   [Branch], [`codex/physics-week9-baseline-candidate-v2-run`],
   [Model-run commit], [`95622f0aead87187c6410ec0a38ba94cb2866dee`],
-  [Report input record], [`DEV-METRICS-STRICT-SCHEMA.md`],
+  [Report input records], [`DEV-METRICS-STRICT-SCHEMA.md`; `HELD-OUT-METRICS-STRICT-SCHEMA.md`],
   [Course / assessment], [`physics` / `week9`],
-  [Split], [`development`, 8 anonymous students],
+  [Splits], [`development`, 8 students; `held-out`, 18 students],
   [Provider / model], [`deepseek` / `deepseek-v4-pro`],
   [Endpoint], [`https://api.deepseek.com`],
   [Input mode], [`text-only`, pilot-derived automatic transcript],
@@ -251,9 +251,106 @@
 
 #pagebreak()
 
+== Held-Out Test Results
+
+#warning-box[
+  #strong[Held-out interpretation.] Candidate v2 is better than the baseline on most aggregate held-out metrics, but severe-error rate is unchanged. The result supports candidate v2 as the current text-only pilot winner, while severe-error reduction remains the next improvement target.
+]
+
+#table(columns: (1.35fr, auto, auto, auto), stroke: line, inset: (x: 6pt, y: 4pt),
+  [#strong[Metric]], [#strong[Baseline]], [#strong[Candidate v2]], [#strong[Direction]],
+  [exact agreement], [0.8102], [0.8426], [candidate better],
+  [macro accuracy], [0.8102], [0.8426], [candidate better],
+  [subquestion MAE], [0.2002], [0.1852], [candidate better],
+  [total score MAE], [2.2639], [2.0833], [candidate better],
+  [within 1 point rate], [0.3333], [0.5000], [candidate better],
+  [severe error rate], [0.4444], [0.4444], [no improvement],
+  [mean signed error], [-0.1539], [-0.1389], [candidate slightly less biased],
+)
+
+#grid(columns: (1fr, 1fr), gutter: 8pt,
+  box(fill: white, stroke: line, inset: 8pt, radius: 4pt, width: 100%)[
+#strong[Held-out higher-is-better metrics]
+#v(4pt)
+#cetz.canvas({
+  import cetz.draw: *
+  line((1.25, 0.70), (7.25, 0.70), stroke: rgb("#63707a"))
+  content((1.25, 0.38), text(size: 6.3pt, fill: rgb("#63707a"))[0%])
+  content((4.25, 0.38), text(size: 6.3pt, fill: rgb("#63707a"))[50%])
+  content((7.25, 0.38), text(size: 6.3pt, fill: rgb("#63707a"))[100%])
+
+  content((0.34, 3.38), text(size: 7pt, weight: "bold")[Exact])
+  rect((1.25, 3.18), (7.25, 3.34), fill: rgb("#d8e4e8"), stroke: none)
+  rect((1.25, 3.18), (6.11, 3.34), fill: rgb("#256d85"), stroke: none)
+  content((7.55, 3.31), text(size: 6.5pt)[81.0%])
+  rect((1.25, 2.88), (7.25, 3.04), fill: rgb("#d8e4e8"), stroke: none)
+  rect((1.25, 2.88), (6.31, 3.04), fill: rgb("#b9822f"), stroke: none)
+  content((7.55, 3.01), text(size: 6.5pt)[84.3%])
+
+  content((0.34, 2.08), text(size: 7pt, weight: "bold")[Within 1])
+  rect((1.25, 1.88), (7.25, 2.04), fill: rgb("#d8e4e8"), stroke: none)
+  rect((1.25, 1.88), (3.25, 2.04), fill: rgb("#256d85"), stroke: none)
+  content((7.55, 2.01), text(size: 6.5pt)[33.3%])
+  rect((1.25, 1.58), (7.25, 1.74), fill: rgb("#d8e4e8"), stroke: none)
+  rect((1.25, 1.58), (4.25, 1.74), fill: rgb("#b9822f"), stroke: none)
+  content((7.55, 1.71), text(size: 6.5pt)[50.0%])
+
+  rect((1.25, 4.00), (1.45, 4.14), fill: rgb("#256d85"), stroke: none)
+  content((1.78, 4.08), text(size: 6.5pt, fill: rgb("#63707a"))[baseline])
+  rect((3.05, 4.00), (3.25, 4.14), fill: rgb("#b9822f"), stroke: none)
+  content((3.58, 4.08), text(size: 6.5pt, fill: rgb("#63707a"))[candidate v2])
+})
+#v(3pt)
+#text(size: 7.3pt, fill: muted)[Held-out exact agreement and within-1-point rate both favor candidate v2.]
+],
+  box(fill: white, stroke: line, inset: 8pt, radius: 4pt, width: 100%)[
+#strong[Held-out error metrics]
+#v(4pt)
+#cetz.canvas({
+  import cetz.draw: *
+  line((2.35, 0.70), (7.25, 0.70), stroke: rgb("#63707a"))
+  content((2.35, 0.38), text(size: 6.3pt, fill: rgb("#63707a"))[0])
+  content((4.80, 0.38), text(size: 6.3pt, fill: rgb("#63707a"))[1.5])
+  content((7.25, 0.38), text(size: 6.3pt, fill: rgb("#63707a"))[3.0])
+
+  content((0.30, 3.28), text(size: 6.6pt, weight: "bold")[Total MAE])
+  rect((2.35, 3.08), (7.25, 3.26), fill: rgb("#d8e4e8"), stroke: none)
+  rect((2.35, 3.08), (6.05, 3.26), fill: rgb("#256d85"), stroke: none)
+  content((7.48, 3.22), text(size: 6.5pt)[2.26])
+  rect((2.35, 2.78), (7.25, 2.96), fill: rgb("#d8e4e8"), stroke: none)
+  rect((2.35, 2.78), (5.75, 2.96), fill: rgb("#b9822f"), stroke: none)
+  content((7.48, 2.92), text(size: 6.5pt)[2.08])
+
+  content((0.30, 1.95), text(size: 6.6pt, weight: "bold")[Severe rate])
+  rect((2.35, 1.75), (7.25, 1.93), fill: rgb("#d8e4e8"), stroke: none)
+  rect((2.35, 1.75), (4.53, 1.93), fill: rgb("#a33b2f"), stroke: none)
+  content((7.48, 1.89), text(size: 6.5pt)[44.4%])
+  rect((2.35, 1.45), (7.25, 1.63), fill: rgb("#d8e4e8"), stroke: none)
+  rect((2.35, 1.45), (4.53, 1.63), fill: rgb("#a33b2f"), stroke: none)
+  content((7.48, 1.59), text(size: 6.5pt)[44.4%])
+})
+#v(3pt)
+#text(size: 7.3pt, fill: muted)[Total MAE improves modestly, but severe-error rate is unchanged.]
+],
+)
+
+#box(fill: white, stroke: line, inset: 8pt, radius: 4pt, width: 100%)[
+#strong[Held-out per-question changes]
+#v(4pt)
+#table(columns: (auto, auto, auto, auto, auto), stroke: line, inset: (x: 5pt, y: 3.3pt),
+  [#strong[Improved]], [Q1c +16.7 pp], [Q3e +11.1 pp], [Q3f +11.1 pp], [Q2a/Q2b +5.6 pp],
+  [#strong[Declined]], [Q1d -5.6 pp], [Q3b -5.6 pp], [ ], [ ],
+  [#strong[Unchanged]], [Q1a], [Q1b], [Q3a/Q3c/Q3d], [ ],
+)
+#v(3pt)
+#text(size: 7.3pt, fill: muted)[The largest held-out gain is Q1c. The severe-error caveat means total-error cases need manual review before operational claims.]
+]
+
+#pagebreak()
+
 == Prompt And Packet Registry
 
-#text(size: 7.5pt, fill: muted)[This PDF uses short hashes for layout. Full SHA-256 values are recorded in `DEV-METRICS-STRICT-SCHEMA.md`.]
+#text(size: 7.5pt, fill: muted)[This PDF uses short hashes for layout. Full SHA-256 values are recorded in `DEV-METRICS-STRICT-SCHEMA.md` and `HELD-OUT-METRICS-STRICT-SCHEMA.md`.]
 
 #table(columns: (auto, 1.75fr, auto), stroke: line, inset: (x: 5pt, y: 3.6pt),
   [#strong[Role]], [#strong[Prompt source]], [#strong[Prompt hash]],
@@ -267,7 +364,7 @@
   [candidate v2], [`Data/physics/benchmark/text_packets/physics-week9-candidate-v2-text-strict-schema/G1-dev-r1`], [`8987...ed6d`],
 )
 
-== Run Outputs Used For Metrics
+== Development Run Outputs Used For Metrics
 
 #table(columns: (auto, 1fr, auto), stroke: line, inset: (x: 5pt, y: 3.6pt),
   [#strong[Role]], [#strong[Run directory]], [#strong[Validation]],
@@ -281,18 +378,25 @@
   [`dev-student-total-errors-strict-schema.csv`], [`3e11...b176`],
 )
 
+== Held-Out Run Outputs Used For Metrics
+
+#table(columns: (auto, 1fr, auto), stroke: line, inset: (x: 5pt, y: 3.6pt),
+  [#strong[Role]], [#strong[Run directory]], [#strong[Validation]],
+  [baseline], [`Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-test-r1-strict-schema`], [passed, 18/18],
+  [candidate v2], [`Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-test-r1-strict-schema`], [passed, 18/18],
+)
+
+#table(columns: (1fr, auto), stroke: line, inset: (x: 5pt, y: 3.6pt),
+  [#strong[Local artifact]], [#strong[Hash]],
+  [`held-out-metrics-strict-schema.json`], [`a360...4de9`],
+  [`held-out-student-total-errors-strict-schema.csv`], [`3ff3...bbc7`],
+)
+
 == Reproduction Commands
 
 Run from the repository root. The API key must be supplied through `DEEPSEEK_API_KEY`; never write the key value into Git, reports, or shell history.
 
-#table(columns: (auto, 1fr), stroke: line, inset: (x: 5pt, y: 3.6pt),
-  [#strong[Step]], [#strong[Command record]],
-  [1], [`python -m benchmark.core.cli check-run-readiness ...` using `baseline-plan.json` and `candidate-v2-plan.json`],
-  [2], [`python -m benchmark.core.cli run-model-packet ...` with the baseline strict-schema packet],
-  [3], [`python -m benchmark.core.cli run-model-packet ...` with the candidate v2 strict-schema packet],
-)
-
-The exact multiline commands are stored in `STRICT-SCHEMA-RERUN.md`, and the user-facing DeepSeek key setup instructions are stored in `EXTERNAL-API-DATA-GATE.md`.
+The exact multiline commands are stored in `STRICT-SCHEMA-RERUN.md` and `HELD-OUT-PREFLIGHT.md`; the user-facing DeepSeek key setup instructions are stored in `EXTERNAL-API-DATA-GATE.md`.
 
 == Freeze Gate Before Held-Out Test
 
@@ -304,14 +408,10 @@ The exact multiline commands are stored in `STRICT-SCHEMA-RERUN.md`, and the use
   [English rubric rule], [passed], [model-facing prompts and rubrics are English],
   [External API data gate], [passed], [anonymous data approved for DeepSeek public API by supervisor],
   [Held-out packets], [passed], [`HELD-OUT-PREFLIGHT.md` records 18/18 dry-runs],
-  [Held-out real API run], [not run], [project user must run DeepSeek commands locally],
+  [Held-out real API run], [passed], [baseline and candidate both validated 18/18],
+  [Held-out metrics], [recorded], [`HELD-OUT-METRICS-STRICT-SCHEMA.md`],
 )
 
 == Limitations
 
-- Development split only; 8 anonymous students.
-- Text-only input; this run does not test multimodal image grading.
-- Text source is a pilot-derived automatic transcript.
-- Gold reference status is single primary rater, not adjudicated.
-- The failed baseline attempts are retained under ignored `Data/` for audit, but are not used for metrics.
-- This note supports held-out preparation for frozen candidate v2; it is not a final cross-course conclusion.
+#text(size: 8.2pt)[Development split has 8 anonymous students; held-out split has 18. This is text-only and does not test multimodal image grading. The text source is a pilot-derived automatic transcript, and the gold reference is single-primary-rater rather than adjudicated. Failed baseline attempts are retained under ignored `Data/` for audit but are not used for metrics. Held-out severe-error rate did not improve, so severe-error reduction remains unresolved. This note supports the Physics Week 9 text-only pilot result, not a final cross-course conclusion.]

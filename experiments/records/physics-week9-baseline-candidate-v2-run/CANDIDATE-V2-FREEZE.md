@@ -105,10 +105,12 @@ The next work can prepare the held-out test run without changing prompts:
 4. Record packet hashes and dry-run validation. Done in
    `HELD-OUT-PREFLIGHT.md`.
 5. Ask the project user to execute the real DeepSeek held-out runs from
-   PowerShell with `DEEPSEEK_API_KEY` set locally.
-6. Evaluate held-out metrics and update the Typst/PDF note.
+   PowerShell with `DEEPSEEK_API_KEY` set locally. Done; both runs passed 18/18.
+6. Evaluate held-out metrics and update the Typst/PDF note. Metrics are recorded
+   in `HELD-OUT-METRICS-STRICT-SCHEMA.md`.
 
-Do not evaluate held-out metrics unless both real held-out runs pass validation.
+Future prompt revisions must use a new candidate version and must not rewrite
+candidate v2.
 
 ## Limitations
 

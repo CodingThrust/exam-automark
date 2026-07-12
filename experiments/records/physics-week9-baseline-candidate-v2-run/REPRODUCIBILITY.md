@@ -184,13 +184,26 @@ The development split has been run with strict-schema text-only packets:
 - metrics record:
   `experiments/records/physics-week9-baseline-candidate-v2-run/DEV-METRICS-STRICT-SCHEMA.md`
 
-## Known Limits After Development Runs
+## Held-Out Run Status
+
+The held-out split has been run with frozen strict-schema text-only packets:
+
+- baseline:
+  `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-test-r1-strict-schema`
+- candidate v2:
+  `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-test-r1-strict-schema`
+- both runs validated 18/18 students
+- metrics record:
+  `experiments/records/physics-week9-baseline-candidate-v2-run/HELD-OUT-METRICS-STRICT-SCHEMA.md`
+
+## Known Limits After Held-Out Runs
 
 - The private data snapshot must be available to the reviewer.
-- The held-out test split has not been run.
 - DeepSeek model ID, SDK version, generation parameters, prompt hashes, packet
   hashes, and usage are recorded in the strict-schema run metadata.
 - The current software snapshot is Windows-specific. macOS/Linux reviewers
   should record their own software snapshots before running models.
+- Held-out severe-error rate did not improve, so severe-error reduction remains
+  unresolved.
 - Physics Week 9 remains a pilot-derived benchmark and should not be treated as
   a final multi-course conclusion.

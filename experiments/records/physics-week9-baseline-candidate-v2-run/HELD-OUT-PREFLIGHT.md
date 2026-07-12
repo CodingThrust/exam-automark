@@ -1,7 +1,7 @@
 # Held-Out Test Packet Preflight
 
-Status: held-out test packets built and dry-run validated. Real model calls have
-not been run.
+Status: held-out test packets built, dry-run validated, real model calls
+completed, and metrics recorded.
 
 Captured date: 2026-07-13, Asia/Shanghai.
 
@@ -165,3 +165,14 @@ Stop and record the failure before comparing metrics if either real held-out run
 - has provider/API errors
 - has output directories whose names differ from the commands above
 - is accidentally run with a prompt or packet hash that differs from this file
+
+## Real Held-Out Run Status
+
+Both real held-out runs were executed by the project user and passed validation:
+
+| Role | Output path | Validation |
+| --- | --- | --- |
+| baseline | `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-test-r1-strict-schema` | passed, 18/18 |
+| candidate v2 | `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-test-r1-strict-schema` | passed, 18/18 |
+
+Metrics are recorded in `HELD-OUT-METRICS-STRICT-SCHEMA.md`.

@@ -15,7 +15,7 @@ Captured date: 2026-07-13, Asia/Shanghai.
 - endpoint: `https://api.deepseek.com`
 - input mode: `text-only`
 - text source status: anonymous, pilot-derived automatic transcript
-- held-out test split: not run
+- held-out test split: later run and recorded in `HELD-OUT-METRICS-STRICT-SCHEMA.md`
 
 ## Valid Runs Used For Metrics
 
@@ -103,15 +103,16 @@ On the development split, candidate v2 outperformed the baseline on all headline
 aggregate metrics. The largest gains were lower total-score MAE and lower severe
 error rate.
 
-This is not yet a final conclusion because:
+This development record alone was not a final conclusion because:
 
 - the split has only 8 development students
 - the text source is pilot-derived automatic transcript
 - gold reference status is single primary rater
-- held-out test split has not been run
+- held-out evidence must be read from `HELD-OUT-METRICS-STRICT-SCHEMA.md`
 
 Typst/PDF note status: created at `note.typ` and `note.pdf`.
 
 Freeze status: candidate v2 is frozen in `CANDIDATE-V2-FREEZE.md`.
 
-Next step: build and dry-run held-out test packets without changing prompts.
+Held-out follow-up: completed and recorded in
+`HELD-OUT-METRICS-STRICT-SCHEMA.md`.

@@ -119,6 +119,26 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertEqual(report["status"], "not_ready" if failed_checks else "ready")
         self.assertIn("grade_prompt_differs", {check["id"] for check in report["checks"]})
 
+    def test_physics_run_branch_records_pre_model_environment(self):
+        record_root = Path(
+            "experiments/records/physics-week9-baseline-candidate-v2-run"
+        )
+        environment = json.loads(
+            (record_root / "software-environment.json").read_text(encoding="utf-8")
+        )
+        readiness = json.loads(
+            (record_root / "run-readiness.json").read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(environment["record_type"], "software_environment")
+        self.assertEqual(environment["status"], "pre_model_call_snapshot")
+        self.assertEqual(
+            environment["language_policy"]["model_facing_rubric"],
+            "English only",
+        )
+        self.assertEqual(readiness["status"], "ready")
+        self.assertTrue((record_root / "run-plan.md").is_file())
+
 
 if __name__ == "__main__":
     unittest.main()

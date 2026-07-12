@@ -53,6 +53,13 @@ The data snapshot hash is:
 
 Real student data remains under ignored `Data/` paths and must not be committed.
 
+The pre-model-call software environment snapshot is recorded in:
+
+- `experiments/records/physics-week9-baseline-candidate-v2-run/software-environment.json`
+- `experiments/records/physics-week9-baseline-candidate-v2-run/software-environment.md`
+
+Capture a fresh software environment snapshot at the exact model-run commit.
+
 ## Packets To Run
 
 Use the already built prompt packets under ignored `Data/`:
@@ -94,9 +101,30 @@ Before any model call on this branch:
    - same transcription prompt hash
    - different grading prompt and skill hashes
 5. Confirm `Data/` is ignored and no `Data/` files are tracked.
+6. Confirm all model-facing rubrics and prompts are English.
+7. Confirm required runtime software and provider SDKs are installed and
+   version-recorded.
 
 No model call should happen unless the branch-specific readiness status is
 `ready`.
+
+## Rubric Language Policy
+
+The teacher confirmed that rubric-based grading is acceptable, but the rubric
+must be in English.
+
+For this experiment:
+
+- model-facing rubrics must be English
+- model-facing prompt instructions must be English
+- partial-credit rules must be English
+- grading evidence and feedback fields should be English
+- non-English source notes must be translated into an English rubric before
+  packet construction
+
+If a rubric translation changes scoring meaning, stop and ask the teacher before
+running models. If an English rubric changes after packets are built, rebuild the
+affected packets and regenerate readiness.
 
 ## Model Run Recording
 
@@ -109,6 +137,7 @@ For every model-facing packet, record:
 - temperature and other generation parameters
 - packet path and packet hash
 - prompt path and prompt hash
+- software environment record path
 - start time and end time
 - output directory
 - failure, retry, or manual intervention notes
@@ -177,6 +206,8 @@ Stop before model calls if:
 - `Data/` appears in tracked files
 - prompt hashes differ from the recorded plan unexpectedly
 - rubric or student inputs changed without a new data snapshot record
+- model-facing rubric text is not English
+- required runtime software is missing or unversioned
 - teacher feedback changes the candidate v2 scoring policy
 
 ## Current Status

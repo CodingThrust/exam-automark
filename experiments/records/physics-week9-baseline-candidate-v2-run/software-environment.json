@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "record_type": "software_environment",
+  "status": "pre_model_call_snapshot",
+  "captured_date": "2026-07-12",
+  "timezone": "Asia/Shanghai",
+  "git": {
+    "branch": "codex/physics-week9-baseline-candidate-v2-run",
+    "commit": "ac8f6c7ff9d5a0dd0b2882bf57f4be2c367f4b00",
+    "remote_tracking": "origin/codex/physics-week9-baseline-candidate-v2-run"
+  },
+  "operating_system": {
+    "dotnet_version_string": "Microsoft Windows NT 10.0.26200.0",
+    "cmd_ver": "Microsoft Windows [Version 10.0.26200.7840]"
+  },
+  "shells": {
+    "powershell": "5.1.26100.7705"
+  },
+  "tools": {
+    "git": "2.54.0.windows.1",
+    "python": "3.12.10",
+    "pip": "25.1.1 from D:\\Miniforge\\Lib\\site-packages\\pip (python 3.12)",
+    "typst": "NOT_FOUND"
+  },
+  "python_packages_checked": {
+    "openai": "NOT_INSTALLED",
+    "Pillow": "11.3.0",
+    "PyMuPDF": "NOT_INSTALLED",
+    "zulip": "NOT_INSTALLED",
+    "pandas": "2.3.0",
+    "numpy": "2.1.3"
+  },
+  "missing_before_model_run": [
+    "openai package if OpenAI API execution is used",
+    "PyMuPDF package if PDF/image conversion is required in this environment",
+    "typst executable before compiling the final PDF report",
+    "provider/model/version metadata for the selected model"
+  ],
+  "language_policy": {
+    "model_facing_rubric": "English only",
+    "model_facing_prompts": "English",
+    "grading_evidence_and_feedback": "English unless a later report explicitly translates for human readers"
+  },
+  "notes": [
+    "This snapshot records the local software state before any model call on this branch.",
+    "The current environment is enough for offline record/readiness tests, but not yet enough for API model execution or final Typst PDF compilation.",
+    "Capture a fresh software_environment record at the exact model-run commit before running models."
+  ]
+}

@@ -6,7 +6,7 @@
   "timezone": "Asia/Shanghai",
   "git": {
     "branch": "codex/physics-week9-baseline-candidate-v2-run",
-    "commit": "b03b8d9e3667dc0f71f02485e5c423e2cc88e7ca",
+    "commit": "dc37556418fbe031a01ec649a7b730ebf9f89f39",
     "remote_tracking": "origin/codex/physics-week9-baseline-candidate-v2-run"
   },
   "operating_system": {
@@ -20,7 +20,9 @@
     "git": "2.54.0.windows.1",
     "python": "3.12.10",
     "pip": "25.1.1 from D:\\Miniforge\\Lib\\site-packages\\pip (python 3.12)",
-    "typst": "NOT_FOUND"
+    "typst": "0.15.0 (3ae52774)",
+    "typst_executable": "C:\\Users\\袁翊\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Typst.Typst_Microsoft.Winget.Source_8wekyb3d8bbwe\\typst-x86_64-pc-windows-msvc\\typst.exe",
+    "typst_path_status": "installed via WinGet but not discoverable as typst on the current PowerShell PATH"
   },
   "python_packages_checked": {
     "openai": "NOT_INSTALLED",
@@ -33,7 +35,7 @@
   "missing_before_model_run": [
     "openai package if OpenAI API execution is used",
     "PyMuPDF package if PDF/image conversion is required in this environment",
-    "typst executable before compiling the final PDF report",
+    "Typst PATH configuration or explicit executable path before compiling the final PDF report",
     "provider/model/version metadata for the selected model"
   ],
   "language_policy": {
@@ -43,7 +45,7 @@
   },
   "notes": [
     "This snapshot records the local software state before any model call on this branch.",
-    "The current environment is enough for offline record/readiness tests, but not yet enough for API model execution or final Typst PDF compilation.",
+    "The current environment is enough for offline record/readiness tests. API model execution still needs the selected provider package, and Typst PDF compilation should use the recorded executable path unless PATH is configured.",
     "Capture a fresh software_environment record at the exact model-run commit before running models."
   ]
 }

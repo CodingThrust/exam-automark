@@ -52,7 +52,7 @@
   "data_snapshot_hash": "e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3",
   "experiment_id": "physics-week9-candidate-v2-plan",
   "git_branch": "codex/physics-week9-baseline-candidate-v2-run",
-  "git_commit": "b03b8d9",
+  "git_commit": "36e7201",
   "notes": [
     "Candidate v2 dry-run plan; no model calls.",
     "Uses the same physics anonymous data snapshot, split, course spec, and rubric discipline as the baseline plan.",

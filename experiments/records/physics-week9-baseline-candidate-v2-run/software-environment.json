@@ -6,7 +6,7 @@
   "timezone": "Asia/Shanghai",
   "git": {
     "branch": "codex/physics-week9-baseline-candidate-v2-run",
-    "commit": "7fc3d4bded2839828093fe947cabe6c9a93ed415",
+    "commit": "3ee3d4ecbd150219966c8d656042beb31b14fc4c",
     "remote_tracking": "origin/codex/physics-week9-baseline-candidate-v2-run"
   },
   "operating_system": {

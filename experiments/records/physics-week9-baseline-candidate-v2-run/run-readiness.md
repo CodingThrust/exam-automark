@@ -12,7 +12,7 @@ No model calls are recorded by this checklist.
 - Course spec: `experiments/course_specs/physics_week9.json`
 - Data inventory: `experiments/data_inventory/physics.json`
 - Git: `codex/physics-week9-baseline-candidate-v2-run @ 36e7201`
-- Current Git: `codex/physics-week9-baseline-candidate-v2-run @ 51c22c644b1819c1aafb04549147f6c28fd4f7dc`
+- Current Git: `codex/physics-week9-baseline-candidate-v2-run @ d56d39897ab6beb06e610637eff780d98264c88a`
 - Baseline skill: `skill_baseline_v1`
 - Candidate skill: `skill_candidate_v2`
 
@@ -44,7 +44,7 @@ No model calls are recorded by this checklist.
 | `no_model_result_artifacts_in_plan_dirs` | passed | no experiment, metrics, or prediction artifacts found |
 | `current_git_branch_matches_plan` | passed | current=codex/physics-week9-baseline-candidate-v2-run; planned=codex/physics-week9-baseline-candidate-v2-run |
 | `planned_git_commit_exists` | passed | planned=36e7201; resolved=36e720107e7c8f02586cf53956fb8bd1319391de |
-| `current_git_head_contains_plan_commit` | passed | HEAD=51c22c644b1819c1aafb04549147f6c28fd4f7dc; planned=36e720107e7c8f02586cf53956fb8bd1319391de |
+| `current_git_head_contains_plan_commit` | passed | HEAD=d56d39897ab6beb06e610637eff780d98264c88a; planned=36e720107e7c8f02586cf53956fb8bd1319391de |
 | `post_anchor_changes_are_record_only` | passed | post-anchor commits only touch experiment records |
 | `git_worktree_clean` | passed | working tree clean |
 | `data_ignored_by_git` | passed | Data/ is ignored and has no tracked files |

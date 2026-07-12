@@ -11,7 +11,7 @@ prompt packets, and model-facing prompts.
 
 - Public tool repository: `CodingThrust/exam-automark`
 - Experiment branch: `codex/physics-week9-baseline-candidate-v2-run`
-- Plan anchor commit recorded in both branch plans: `b03b8d9`
+- Plan anchor commit recorded in both branch plans: `36e7201`
 - Data snapshot hash:
   `e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3`
 - Branch readiness record:
@@ -176,8 +176,9 @@ macOS/Linux model run.
 
 - No baseline or candidate v2 model calls have been made yet.
 - The private data snapshot must be available to the reviewer.
-- The selected model provider, model version, SDK version, and generation
-  parameters are not finalized yet.
+- DeepSeek is selected as the first provider because a teacher-provided private
+  API key is available, but the exact model ID, SDK version, and generation
+  parameters must still be recorded at run time.
 - The current software snapshot is Windows-specific. macOS/Linux reviewers
   should record their own software snapshots before running models.
 - Physics Week 9 remains a pilot-derived benchmark and should not be treated as

@@ -2,10 +2,9 @@
 
 Status: planned, no model calls yet.
 
-This branch is a dependent experiment branch. It starts from
-`codex/repro-experiment-framework @ c34427c` and depends on the framework draft
-PR. Do not merge this branch before the framework PR is reviewed or rebased
-onto `main`.
+This branch is the active Physics Week 9 model-run planning branch. It is based
+on `main` after the reproducible experiment framework was merged, and it keeps
+the actual model-run evidence separate from the framework-design PR.
 
 ## Purpose
 
@@ -61,6 +60,7 @@ The pre-model-call software environment snapshot is recorded in:
 The cross-platform reproduction protocol is recorded in:
 
 - `experiments/records/physics-week9-baseline-candidate-v2-run/REPRODUCIBILITY.md`
+- `experiments/records/physics-week9-baseline-candidate-v2-run/MODEL-RUN-PROTOCOL.md`
 
 Capture a fresh software environment snapshot at the exact model-run commit.
 
@@ -133,6 +133,10 @@ running models. If an English rubric changes after packets are built, rebuild th
 affected packets and regenerate readiness.
 
 ## Model Run Recording
+
+The detailed first-run execution protocol is recorded in:
+
+- `experiments/records/physics-week9-baseline-candidate-v2-run/MODEL-RUN-PROTOCOL.md`
 
 For every model-facing packet, record:
 

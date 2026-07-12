@@ -40,11 +40,11 @@
     "course_id": "physics",
     "course_spec_path": "experiments/course_specs/physics_week9.json",
     "current_git_branch": "codex/repro-experiment-framework",
-    "current_git_commit": "6033f539fe2bbc3be6c1f26a7f90c112de096fe0",
+    "current_git_commit": "a6bc6a019dec811404a9dee1b1f803a81735891c",
     "data_inventory_path": "experiments/data_inventory/physics.json",
     "data_snapshot_hash": "e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3",
     "git_branch": "codex/repro-experiment-framework",
-    "git_commit": "75039f8"
+    "git_commit": "7fe446a"
   },
   "baseline_plan_path": "experiments/records/physics-week9-standard-plan/plan.json",
   "candidate_plan_path": "experiments/records/physics-week9-candidate-v2-plan/plan.json",
@@ -70,7 +70,7 @@
       "status": "passed"
     },
     {
-      "detail": "codex/repro-experiment-framework@75039f8 vs codex/repro-experiment-framework@75039f8",
+      "detail": "codex/repro-experiment-framework@7fe446a vs codex/repro-experiment-framework@7fe446a",
       "id": "same_git_anchor",
       "status": "passed"
     },
@@ -165,12 +165,12 @@
       "status": "passed"
     },
     {
-      "detail": "planned=75039f8; resolved=75039f8efaada1fe9add8d1c77283a70b3fce966",
+      "detail": "planned=7fe446a; resolved=7fe446a228de1ee4c79c7dea6f16988f10489908",
       "id": "planned_git_commit_exists",
       "status": "passed"
     },
     {
-      "detail": "HEAD=6033f539fe2bbc3be6c1f26a7f90c112de096fe0; planned=75039f8efaada1fe9add8d1c77283a70b3fce966",
+      "detail": "HEAD=a6bc6a019dec811404a9dee1b1f803a81735891c; planned=7fe446a228de1ee4c79c7dea6f16988f10489908",
       "id": "current_git_head_contains_plan_commit",
       "status": "passed"
     },

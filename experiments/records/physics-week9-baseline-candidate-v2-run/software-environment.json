@@ -1,15 +1,19 @@
 {
   "schema_version": 1,
   "record_type": "software_environment",
-  "status": "pre_model_call_snapshot",
+  "status": "pre_model_call_preflight_snapshot",
   "captured_date": "2026-07-12",
   "timezone": "Asia/Shanghai",
   "git": {
     "branch": "codex/physics-week9-baseline-candidate-v2-run",
-    "commit": "3ee3d4ecbd150219966c8d656042beb31b14fc4c",
+    "commit": "93f843f405df5cbf4d4d4cd1524c77a153121959",
     "remote_tracking": "origin/codex/physics-week9-baseline-candidate-v2-run"
   },
   "operating_system": {
+    "caption": "Microsoft Windows 11 Professional",
+    "version": "10.0.26200",
+    "build_number": "26200",
+    "architecture": "64-bit",
     "dotnet_version_string": "Microsoft Windows NT 10.0.26200.0",
     "cmd_ver": "Microsoft Windows [Version 10.0.26200.7840]"
   },
@@ -24,6 +28,14 @@
     "typst_executable": "C:\\Tools\\typst\\typst.exe",
     "typst_path_status": "C:\\Tools\\typst added to the user PATH; reopen PowerShell/Codex sessions to refresh existing process environments"
   },
+  "provider_configuration": {
+    "provider": "deepseek",
+    "api_client": "OpenAI-compatible Python SDK",
+    "api_key_environment_variable": "DEEPSEEK_API_KEY",
+    "api_key_status_in_current_process": "NOT_SET",
+    "planned_model": "deepseek-v4-pro",
+    "real_api_calls_recorded": false
+  },
   "python_packages_checked": {
     "openai": "NOT_INSTALLED",
     "Pillow": "11.3.0",
@@ -33,7 +45,8 @@
     "numpy": "2.1.3"
   },
   "missing_before_model_run": [
-    "openai package if OpenAI API execution is used",
+    "openai package for the OpenAI-compatible DeepSeek API client",
+    "DEEPSEEK_API_KEY must be set in the process environment before real model calls",
     "PyMuPDF package if PDF/image conversion is required in this environment",
     "provider/model/version metadata for the selected model"
   ],
@@ -44,7 +57,8 @@
   },
   "notes": [
     "This snapshot records the local software state before any model call on this branch.",
-    "The current environment is enough for offline record/readiness tests. API model execution still needs the selected provider package. Typst is available at the recorded ASCII-only executable path.",
+    "The current environment is enough for offline record/readiness tests and existing dry-run validation. Real DeepSeek API model execution still needs the openai Python package and a process-visible DEEPSEEK_API_KEY.",
+    "The user reported that a DeepSeek API key is prepared, but the current Codex/PowerShell process does not yet expose DEEPSEEK_API_KEY.",
     "Capture a fresh software_environment record at the exact model-run commit before running models."
   ]
 }

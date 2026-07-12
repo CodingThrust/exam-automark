@@ -1,6 +1,6 @@
 # Software Environment Snapshot
 
-Status: pre-model-call snapshot.
+Status: pre-model-call preflight snapshot.
 
 Captured date: 2026-07-12, Asia/Shanghai.
 
@@ -10,12 +10,14 @@ This file records the local software state before any model call on
 ## Git
 
 - Branch: `codex/physics-week9-baseline-candidate-v2-run`
-- Commit: `3ee3d4ecbd150219966c8d656042beb31b14fc4c`
+- Commit: `93f843f405df5cbf4d4d4cd1524c77a153121959`
 - Remote tracking branch:
   `origin/codex/physics-week9-baseline-candidate-v2-run`
 
 ## System Software
 
+- OS: `Microsoft Windows 11 Professional`, version `10.0.26200`,
+  build `26200`, `64-bit`
 - OS via .NET: `Microsoft Windows NT 10.0.26200.0`
 - OS via `cmd /c ver`: `Microsoft Windows [Version 10.0.26200.7840]`
 - PowerShell: `5.1.26100.7705`
@@ -38,11 +40,24 @@ This file records the local software state before any model call on
 | `pandas` | `2.3.0` |
 | `numpy` | `2.1.3` |
 
+## Provider Configuration
+
+- Provider: `deepseek`
+- API client: OpenAI-compatible Python SDK
+- API key source: `DEEPSEEK_API_KEY` environment variable
+- API key status in current Codex/PowerShell process: `NOT_SET`
+- Planned model for real dev run: `deepseek-v4-pro`
+- Real API calls recorded in this snapshot: `false`
+
+The user reported that a DeepSeek API key is prepared. The key value must not be
+written into commands, files, Git commits, or reports.
+
 ## Before Model Runs
 
 Install or otherwise record:
 
-- the API client package needed for the selected model provider
+- `openai` for the OpenAI-compatible DeepSeek API client
+- `DEEPSEEK_API_KEY` visible in the process environment
 - `PyMuPDF` if this environment performs PDF/image conversion
 - exact provider/model/version metadata for every model run
 

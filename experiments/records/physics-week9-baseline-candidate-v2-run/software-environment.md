@@ -10,7 +10,7 @@ This file records the local software state before any model call on
 ## Git
 
 - Branch: `codex/physics-week9-baseline-candidate-v2-run`
-- Commit: `dc37556418fbe031a01ec649a7b730ebf9f89f39`
+- Commit: `7fc3d4bded2839828093fe947cabe6c9a93ed415`
 - Remote tracking branch:
   `origin/codex/physics-week9-baseline-candidate-v2-run`
 
@@ -23,10 +23,9 @@ This file records the local software state before any model call on
 - Python: `3.12.10`
 - pip: `25.1.1 from D:\Miniforge\Lib\site-packages\pip (python 3.12)`
 - Typst: `0.15.0 (3ae52774)`
-- Typst executable:
-  `C:\Users\袁翊\AppData\Local\Microsoft\WinGet\Packages\Typst.Typst_Microsoft.Winget.Source_8wekyb3d8bbwe\typst-x86_64-pc-windows-msvc\typst.exe`
-- Typst PATH status: installed via WinGet, but `typst` is not discoverable on
-  the current PowerShell `PATH`
+- Typst executable: `C:\Tools\typst\typst.exe`
+- Typst PATH status: `C:\Tools\typst` has been added to the user `PATH`;
+  reopen PowerShell/Codex sessions to refresh existing process environments
 
 ## Python Packages Checked
 
@@ -45,8 +44,6 @@ Install or otherwise record:
 
 - the API client package needed for the selected model provider
 - `PyMuPDF` if this environment performs PDF/image conversion
-- Typst `PATH` configuration, or the explicit executable path above, before
-  compiling the final PDF report
 - exact provider/model/version metadata for every model run
 
 The final model-run record should capture a fresh environment snapshot at the

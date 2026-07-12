@@ -52,7 +52,7 @@
   "data_snapshot_hash": "e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3",
   "experiment_id": "physics-week9-standard-plan",
   "git_branch": "codex/repro-experiment-framework",
-  "git_commit": "75039f8",
+  "git_commit": "7fe446a",
   "notes": [
     "Planned standard rerun; legacy pilot remains protocol evidence only.",
     "Workspace is dirty; freeze with a commit before running final model calls.",

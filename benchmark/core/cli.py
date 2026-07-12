@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from .inventory import write_data_inventory
+from .model_runner import ModelPacketRunConfig, run_model_packet
 from .packets import PromptPacketSpec, audit_prompt_packet, build_prompt_packet
 from .plans import (
     ExperimentPlan,
@@ -120,11 +121,34 @@ def _build_parser() -> argparse.ArgumentParser:
     readiness.add_argument("--repo-root", type=Path)
     readiness.add_argument("--output", type=Path)
     readiness.add_argument("--markdown-output", type=Path)
+
+    run_model = subparsers.add_parser(
+        "run-model-packet",
+        help="run a text-only model provider against a prompt packet",
+    )
+    run_model.add_argument("--provider", choices=("deepseek",), required=True)
+    run_model.add_argument("--model", required=True)
+    run_model.add_argument("--input-mode", choices=("text-only",), required=True)
+    run_model.add_argument("--packet", type=Path, required=True)
+    run_model.add_argument("--output", type=Path, required=True)
+    run_model.add_argument("--temperature", type=float)
+    run_model.add_argument("--top-p", type=float)
+    run_model.add_argument("--max-tokens", type=int)
+    run_model.add_argument("--max-retries", type=int, default=0)
+    run_model.add_argument("--response-format", default="json_object")
+    run_model.add_argument("--endpoint", default="https://api.deepseek.com")
+    run_model.add_argument("--run-commit")
+    run_model.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="exercise packet IO and validation without calling the provider API",
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     try:
+        raw_argv = tuple(argv if argv is not None else sys.argv[1:])
         args = _build_parser().parse_args(argv)
         if args.command == "build-packet":
             result = _build_packet(args)
@@ -269,6 +293,27 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             )
             return 0 if report["status"] == "ready" else 1
+        if args.command == "run-model-packet":
+            result = run_model_packet(
+                ModelPacketRunConfig(
+                    provider=args.provider,
+                    model=args.model,
+                    input_mode=args.input_mode,
+                    packet=args.packet,
+                    output=args.output,
+                    temperature=args.temperature,
+                    top_p=args.top_p,
+                    max_tokens=args.max_tokens,
+                    max_retries=args.max_retries,
+                    response_format=args.response_format,
+                    endpoint=args.endpoint,
+                    dry_run=args.dry_run,
+                    command_argv=raw_argv,
+                    run_commit=args.run_commit,
+                )
+            )
+            print(json.dumps(result, sort_keys=True))
+            return 0 if result["validation_status"] == "passed" else 1
         raise ValueError(f"unsupported command: {args.command}")
     except SystemExit as error:
         return int(error.code)

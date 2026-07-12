@@ -6,7 +6,9 @@ Captured date: 2026-07-12, Asia/Shanghai.
 
 ## Run Identity
 
-- run id: `deepseek-baseline-text-G1-dev-r1`
+- run id from original command: `deepseek-baseline-text-G1-dev-r1`
+- local retained directory:
+  `deepseek-baseline-text-G1-dev-r1-failed-validation`
 - provider: `deepseek`
 - endpoint: `https://api.deepseek.com`
 - model: `deepseek-v4-pro`
@@ -14,7 +16,7 @@ Captured date: 2026-07-12, Asia/Shanghai.
 - packet:
   `Data/physics/benchmark/text_packets/physics-week9-baseline-text/G1-dev-r1`
 - output:
-  `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1`
+  `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-failed-validation`
 - run commit: `730d9562ad97f34d69f96046db7c6162ae7c1fc9`
 - prompt hash:
   `f8aeee5434c5db7b54f9d7b5dbb01b303bd84e48c5d4957731aeb038950953ea`
@@ -66,3 +68,5 @@ New prompt source files:
 - `experiments/records/physics-week9-baseline-candidate-v2-run/prompts/grade_candidate_v2_strict_confidence.txt`
 
 The failed output directory must be retained as an attempted real run record.
+It has been renamed with the `failed-validation` suffix to prevent confusion
+with successful metric-bearing runs.

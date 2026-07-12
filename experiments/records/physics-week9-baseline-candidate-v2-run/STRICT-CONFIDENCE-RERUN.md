@@ -16,7 +16,8 @@ requires string confidence values only:
 - `"low"`
 
 The first attempt is recorded in `BASELINE-DEV-ATTEMPT-1.md` and must be
-retained as a failed real run attempt.
+retained as a failed real run attempt. Its retained local directory is
+`Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-failed-validation`.
 
 ## Strict Prompt Sources
 

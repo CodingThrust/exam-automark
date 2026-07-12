@@ -31,13 +31,17 @@ disclosure and requires explicit approval before execution.
 | Run readiness | ready |
 | Baseline dry-run | passed, 8/8 |
 | Candidate v2 dry-run | passed, 8/8 |
-| Real baseline DeepSeek run | not executed |
+| Real baseline DeepSeek run | user-executed, failed validation |
 | Real candidate DeepSeek run | not executed |
 
-No real model output directory was created for:
+Current real-run output directory status:
 
-- `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1`
-- `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-dev-r1`
+- failed baseline attempt retained at
+  `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-failed-validation`
+- strict-confidence baseline rerun not yet created:
+  `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-strict-confidence`
+- real candidate output not yet created:
+  `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-dev-r1-strict-confidence`
 
 ## Approval Needed Before Real Runs
 

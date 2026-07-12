@@ -173,7 +173,9 @@ missing outputs, unexpected retries, or provider/API errors.
 
 The original baseline command produced
 `Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1`
-and failed validation:
+and failed validation. The retained local directory was renamed to
+`Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-failed-validation`
+to prevent confusion:
 
 - students expected: 8
 - students passed: 4

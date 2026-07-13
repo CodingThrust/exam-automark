@@ -122,6 +122,25 @@ V3 local run result:
 V3 is the approved anonymized input candidate for the next DSAA3071 packet
 preparation step.
 
+## Rubric And Gold Template
+
+The draft English rubric was extracted from
+`Data/DSAA3071/week5-5.test-solution.pdf`:
+
+- `experiments/records/DSAA3071-week5-prep/rubric_v0.json`
+- source SHA-256:
+  `aeab881a2e23bcd29c6174419c0d0904ab706ec560314053cb1557958370d94f`
+
+The local gold score template was generated under ignored `Data/`:
+
+- `Data/DSAA3071/benchmark-redaction-v3/gold/primary_scores.csv`
+- rows: 220
+- students: 22
+- questions: 10
+- filled scores: 0
+
+The template must be manually filled before metrics can be computed.
+
 ## Privacy Gate
 
 The generated PDFs are not approved for model runs until

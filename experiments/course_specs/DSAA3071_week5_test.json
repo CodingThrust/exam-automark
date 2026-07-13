@@ -8,20 +8,74 @@
     "text"
   ],
   "notes": [
-    "Draft only: extract real question IDs, max scores, and rubric before grading.",
     "Local source folder contains one user-confirmed combined PDF with 22 students' answers and one question-plus-answer-key PDF.",
     "Course ID confirmed by user as DSAA3071 on 2026-07-13.",
-    "The combined student-answer PDF is not yet split or indexed into anonymous packet inputs.",
-    "The placeholder score step is not a grading rule; replace it with the rubric-defined increment before any model run."
+    "Anonymized v3 candidate inputs passed user privacy review on 2026-07-13.",
+    "Question IDs and max scores were extracted from week5-5.test-solution.pdf.",
+    "Use integer-point grading for this pilot unless the instructor supplies a finer official score increment."
   ],
   "questions": [
     {
       "id": "Q1",
-      "max_score": 1.0,
+      "max_score": 5.0,
       "score_step": 1.0,
-      "title": "Placeholder question - replace after rubric extraction"
+      "title": "Multiple choice - multitape TM simulation overhead"
+    },
+    {
+      "id": "Q2",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "title": "Multiple choice - NTM deterministic simulation overhead"
+    },
+    {
+      "id": "Q3",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "title": "Multiple choice - enumerator definition"
+    },
+    {
+      "id": "Q4",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "title": "Multiple choice - Church-Turing thesis"
+    },
+    {
+      "id": "Q5",
+      "max_score": 20.0,
+      "score_step": 1.0,
+      "title": "Multitape TM simulation"
+    },
+    {
+      "id": "Q6",
+      "max_score": 20.0,
+      "score_step": 1.0,
+      "title": "Deterministic simulation of an NTM"
+    },
+    {
+      "id": "Q7",
+      "max_score": 20.0,
+      "score_step": 1.0,
+      "title": "Turing-recognizable languages and enumerators"
+    },
+    {
+      "id": "Q8",
+      "max_score": 10.0,
+      "score_step": 1.0,
+      "title": "Enumerator for powers-of-two zero strings"
+    },
+    {
+      "id": "Q9",
+      "max_score": 25.0,
+      "score_step": 1.0,
+      "title": "Evidence for the Church-Turing thesis"
+    },
+    {
+      "id": "Q10",
+      "max_score": 15.0,
+      "score_step": 1.0,
+      "title": "TM robustness and restricted variants"
     }
   ],
   "score_unit": "points",
-  "source_status": "draft_needs_rubric_extraction"
+  "source_status": "rubric_draft_extracted_privacy_approved_gold_template_created_scores_pending"
 }

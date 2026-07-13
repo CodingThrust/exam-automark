@@ -1,7 +1,7 @@
 {
   "anonymous_id_pattern": "^S[0-9]{3}$",
   "assessment_id": "week5_test",
-  "course_id": "DSAA3701",
+  "course_id": "DSAA3071",
   "input_modes": [
     "pdf",
     "transcript",
@@ -10,7 +10,7 @@
   "notes": [
     "Draft only: extract real question IDs, max scores, and rubric before grading.",
     "Local source folder contains one user-confirmed combined PDF with 22 students' answers and one question-plus-answer-key PDF.",
-    "User review suggests this local folder may actually represent DSAA3071; confirm the official course ID before freezing.",
+    "Course ID confirmed by user as DSAA3071 on 2026-07-13.",
     "The combined student-answer PDF is not yet split or indexed into anonymous packet inputs.",
     "The placeholder score step is not a grading rule; replace it with the rubric-defined increment before any model run."
   ],

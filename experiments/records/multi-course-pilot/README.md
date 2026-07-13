@@ -2,7 +2,7 @@
 
 Status: inventory comparison only. No model calls were made.
 
-This record compares the current local data layout for DSAA3073, DSAA3701, and
+This record compares the current local data layout for DSAA3073, DSAA3071, and
 linear algebra so the next grading experiment can be chosen from first
 principles. It records only safe metadata: counts, extension distributions,
 layout flags, and blockers. Raw filenames, student answers, identity maps, and
@@ -15,11 +15,11 @@ student-visible work are intentionally omitted.
 - Scan date: `2026-07-13`
 - Existing inventories:
   - `experiments/data_inventory/DSAA3073.json`
-  - `experiments/data_inventory/DSAA3701.json`
+  - `experiments/data_inventory/DSAA3071.json`
   - `experiments/data_inventory/linearalgebra.json`
 - Existing draft course specs:
   - `experiments/course_specs/DSAA3073_week2_test.json`
-  - `experiments/course_specs/DSAA3701_week5_test.json`
+  - `experiments/course_specs/DSAA3071_week5_test.json`
   - `experiments/course_specs/linearalgebra_quiz1.json`
 
 ## Readiness Criteria
@@ -40,14 +40,13 @@ these are true:
 | Course | Current data shape | Useful assets observed | Main blockers | Pilot readiness |
 | --- | --- | --- | --- | --- |
 | DSAA3073 | 5 top-level PDFs | User confirmed 4 student answer PDFs and 1 question-plus-answer-key PDF | Needs anonymous packet input tree, rubric extraction, gold scores, and course ID confirmation because local labels appear inconsistent | Fastest small dry run after anonymization; not yet ready for accuracy claims |
-| DSAA3701 / possible DSAA3071 | 2 top-level PDFs | User confirmed 1 combined PDF containing 22 students' answers and 1 question-plus-answer-key PDF | Needs official course ID confirmation, combined-PDF splitting or indexing, anonymous packet input tree, rubric extraction, and gold scores | Recommended next small pilot after preparation |
+| DSAA3071 | 2 top-level PDFs | User confirmed 1 combined PDF containing 22 students' answers and 1 question-plus-answer-key PDF | Needs combined-PDF splitting or indexing, anonymous packet input tree, rubric extraction, and gold scores | Recommended next small pilot after preparation |
 | linearalgebra | 1 quiz PDF plus 135 submission files under `submissions/` | Actual student submissions exist across images, PDFs, HEIC, and one docx | Raw filenames contain identity-like prefixes; no rubric, solution, or gold score file is visible in the current tree | Best representative next pilot after anonymization and rubric/gold preparation |
 
 ## Recommendation
 
 If the goal is to enter multi-course packet construction as quickly as possible,
-start with the DSAA3701 folder, after confirming whether the official course ID
-should be DSAA3071. It has one combined PDF with 22 students' answers plus a
+start with DSAA3071. It has one combined PDF with 22 students' answers plus a
 question-and-answer key PDF. That is enough for a small but meaningful packet
 workflow once the combined PDF is split or indexed into anonymous `S###` inputs
 and a human gold table is created.
@@ -64,16 +63,14 @@ scores.
 
 ## Next Actions
 
-1. Confirm whether the DSAA3701 folder should be labeled DSAA3071 in experiment
-   records and packet metadata.
-2. For DSAA3701/DSAA3071, split or index the combined `week5.pdf` student-answer
+1. For DSAA3071, split or index the combined `week5.pdf` student-answer
    source into private anonymous `S###` packet inputs.
-3. Extract the question IDs, maximum scores, score increments, and grading rules
+2. Extract the question IDs, maximum scores, score increments, and grading rules
    from the question-plus-answer-key PDF into an English rubric.
-4. Create a gold score CSV for the same 22 anonymous IDs.
-5. Build prompt packets and run `exam-benchmark audit-packet` before any model
+3. Create a gold score CSV for the same 22 anonymous IDs.
+4. Build prompt packets and run `exam-benchmark audit-packet` before any model
    call.
-6. Only after packet audit passes, decide whether to run DeepSeek text-only,
+5. Only after packet audit passes, decide whether to run DeepSeek text-only,
    another text-only provider, or a multimodal provider.
 
 ## Privacy Notes

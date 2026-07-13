@@ -5,7 +5,7 @@
     "submission_files": 0,
     "top_level_files": 2
   },
-  "course_id": "DSAA3701",
+  "course_id": "DSAA3071",
   "extension_counts": {
     ".pdf": 2
   },
@@ -20,12 +20,12 @@
     "Raw filenames are intentionally omitted because they may contain student identifiers.",
     "User-confirmed asset roles: one top-level PDF contains 22 students' answers; one top-level PDF is the question plus answer key.",
     "The combined student-answer PDF needs to be split or indexed into anonymous S### packet inputs.",
-    "User review suggests this local folder may actually represent DSAA3071; confirm the official course ID before freezing."
+    "Course ID confirmed by user as DSAA3071 on 2026-07-13."
   ],
   "packet_exclusion_policy": [],
   "user_confirmed_assets": {
     "confirmation_date": "2026-07-13",
-    "course_id_needs_confirmation": true,
+    "course_id_confirmed": true,
     "question_plus_answer_key_pdfs": 1,
     "student_answer_pdfs": 1,
     "student_answers_in_combined_pdf": 22
@@ -37,6 +37,6 @@
   },
   "schema_version": 1,
   "snapshot_hash": "fc9a124431fb77a4a4d91eb132682148b679e7957835b248605cdcd8b34e371b",
-  "source_root": "Data/DSAA3701",
+  "source_root": "Data/DSAA3071",
   "submission_extension_counts": {}
 }

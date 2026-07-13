@@ -38,5 +38,5 @@ Known limitations:
 - G0 is a historical direct workflow, not a controlled rerun.
 - GPT/Codex interactive conditions are not pinned API snapshots.
 - The reference is primarily a single-rater grading standard.
-- Physics Week 9 error patterns must not be generalized to DSAA3073, DSAA3701,
+- Physics Week 9 error patterns must not be generalized to DSAA3073, DSAA3071,
   or linear algebra.

@@ -23,7 +23,7 @@ class ExperimentRecordFileTests(unittest.TestCase):
             Path("experiments/records/physics-week9-standard-plan/plan.json"),
             Path("experiments/records/physics-week9-candidate-v2-plan/plan.json"),
             Path("experiments/records/DSAA3073-week2-test-plan/plan.json"),
-            Path("experiments/records/DSAA3701-week5-test-plan/plan.json"),
+            Path("experiments/records/DSAA3071-week5-test-plan/plan.json"),
             Path("experiments/records/linearalgebra-quiz1-plan/plan.json"),
         ]
 
@@ -34,7 +34,7 @@ class ExperimentRecordFileTests(unittest.TestCase):
 
         self.assertEqual(
             {plan.course_id for plan in plans},
-            {"physics", "DSAA3073", "DSAA3701", "linearalgebra"},
+            {"physics", "DSAA3073", "DSAA3071", "linearalgebra"},
         )
         self.assertEqual(physics_baseline.status, "packets_built")
         self.assertEqual(
@@ -84,7 +84,7 @@ class ExperimentRecordFileTests(unittest.TestCase):
         spec_paths = [
             Path("experiments/course_specs/physics_week9.json"),
             Path("experiments/course_specs/DSAA3073_week2_test.json"),
-            Path("experiments/course_specs/DSAA3701_week5_test.json"),
+            Path("experiments/course_specs/DSAA3071_week5_test.json"),
             Path("experiments/course_specs/linearalgebra_quiz1.json"),
         ]
 
@@ -93,7 +93,7 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertEqual(specs[0].max_total, 30.0)
         self.assertEqual(
             {spec.course_id for spec in specs},
-            {"physics", "DSAA3073", "DSAA3701", "linearalgebra"},
+            {"physics", "DSAA3073", "DSAA3071", "linearalgebra"},
         )
 
     def test_physics_readiness_report_records_pre_run_gate(self):

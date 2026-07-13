@@ -70,7 +70,7 @@ Those paths are environment facts, not reproduction requirements. Reproduction
 commands should prefer repository-relative paths and `python -m ...` invocations.
 
 The private data repository may contain anonymized course data for physics,
-DSAA3073, DSAA3701, and linear algebra. This public tool repository should only
+DSAA3073, DSAA3071, and linear algebra. This public tool repository should only
 contain synthetic fixtures and experiment metadata that does not identify
 students.
 

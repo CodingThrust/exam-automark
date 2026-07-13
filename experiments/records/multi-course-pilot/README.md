@@ -57,9 +57,9 @@ band hid some question and answer content. The v2 candidate used smaller
 left/right header rectangles, but user review found that top-middle student IDs
 remained visible. The current v3 candidate is under
 `Data/DSAA3071/benchmark-redaction-v3/` and uses a full-width top 8% redaction
-band. It is not approved for model calls until
-`Data/DSAA3071/benchmark-redaction-v3/manifest/privacy_review.csv` is manually
-reviewed.
+band. User review approved the v3 anonymization on 2026-07-13. It is still not
+ready for model calls until rubric extraction, gold score creation, and prompt
+packet audit are complete.
 
 DSAA3073 remains useful as a smaller backup pilot. It has four student answer
 PDFs plus a question-and-answer key PDF, but the local course labels are also
@@ -73,15 +73,12 @@ scores.
 
 ## Next Actions
 
-1. Manually review `Data/DSAA3071/benchmark-redaction-v3/manifest/privacy_review.csv`
-   and the generated PDFs/previews to confirm no names or student IDs remain
-   visible and no essential question or answer content is hidden.
-2. Extract the question IDs, maximum scores, score increments, and grading rules
+1. Extract the question IDs, maximum scores, score increments, and grading rules
    from the question-plus-answer-key PDF into an English rubric.
-3. Create a gold score CSV for the same 22 anonymous IDs.
-4. Build prompt packets and run `exam-benchmark audit-packet` before any model
+2. Create a gold score CSV for the same 22 anonymous IDs.
+3. Build prompt packets and run `exam-benchmark audit-packet` before any model
    call.
-5. Only after packet audit passes, decide whether to run DeepSeek text-only,
+4. Only after packet audit passes, decide whether to run DeepSeek text-only,
    another text-only provider, or a multimodal provider.
 
 ## Privacy Notes

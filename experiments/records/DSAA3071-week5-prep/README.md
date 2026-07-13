@@ -114,10 +114,13 @@ V3 local run result:
 - generated page previews: 66
 - `student_index.csv` rows: 22
 - `privacy_review.csv` rows: 66
-- privacy review status: pending
-- model run allowed: false
+- privacy review status: approved by user
+- privacy reviewed at: `2026-07-13T10:26:50.903989Z`
+- model run allowed: false until rubric extraction, gold score creation, and
+  prompt packet audit are complete
 
-V3 is the current candidate for manual privacy review.
+V3 is the approved anonymized input candidate for the next DSAA3071 packet
+preparation step.
 
 ## Privacy Gate
 

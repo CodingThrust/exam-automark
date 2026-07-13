@@ -20,7 +20,6 @@
     },
     {
       "blocking_issues": [
-        "generated anonymous candidate PDFs still need manual privacy review before model use",
         "gold scores are not visible in the current local tree",
         "question IDs, maximum scores, and score increments still need extraction",
         "question-plus-answer-key PDF still needs conversion into an English model-facing rubric"
@@ -31,11 +30,12 @@
       "draft_course_spec": "experiments/course_specs/DSAA3071_week5_test.json",
       "observed_assets": [
         "1 user-confirmed combined PDF containing 22 students' answers",
-        "1 user-confirmed question-plus-answer-key PDF"
+        "1 user-confirmed question-plus-answer-key PDF",
+        "v3 anonymized candidate PDFs approved by user privacy review"
       ],
       "prep_result": "experiments/records/DSAA3071-week5-prep/prep-result-v3.json",
-      "recommended_next_action": "manually review generated anonymized PDFs, then extract rubric and create gold scores",
-      "status": "anonymous_candidate_generated_privacy_review_pending"
+      "recommended_next_action": "extract rubric and create gold scores for the 22 approved anonymous IDs",
+      "status": "privacy_approved_rubric_gold_pending"
     },
     {
       "blocking_issues": [

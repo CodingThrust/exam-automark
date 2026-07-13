@@ -9,13 +9,15 @@
   ],
   "notes": [
     "Draft only: extract real question IDs, max scores, and rubric before grading.",
-    "Local source folder contains a week5 test PDF and solution PDF; student submissions are not yet organized into anonymous packet inputs."
+    "Local source folder contains one user-confirmed student answer PDF and one question-plus-answer-key PDF.",
+    "The student answer PDF is not yet organized into anonymous packet inputs.",
+    "The placeholder score step is not a grading rule; replace it with the rubric-defined increment before any model run."
   ],
   "questions": [
     {
       "id": "Q1",
       "max_score": 1.0,
-      "score_step": 0.25,
+      "score_step": 1.0,
       "title": "Placeholder question - replace after rubric extraction"
     }
   ],

@@ -9,14 +9,16 @@
   ],
   "notes": [
     "Draft only: extract real question IDs, max scores, and rubric before grading.",
-    "Local source folder appears to contain multiple weekly tests; week2 is selected because a solution PDF is present.",
-    "Local filenames appear to use DSAA3071 labels; confirm the official course identifier before freezing."
+    "Local source folder contains four user-confirmed student answer PDFs and one question-plus-answer-key PDF.",
+    "Week2 is selected because the question-plus-answer-key PDF is available.",
+    "Local filenames appear to use DSAA3071 labels; confirm the official course identifier before freezing.",
+    "The placeholder score step is not a grading rule; replace it with the rubric-defined increment before any model run."
   ],
   "questions": [
     {
       "id": "Q1",
       "max_score": 1.0,
-      "score_step": 0.25,
+      "score_step": 1.0,
       "title": "Placeholder question - replace after rubric extraction"
     }
   ],

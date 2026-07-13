@@ -1,0 +1,59 @@
+{
+  "base_commit": "694618f",
+  "courses": [
+    {
+      "blocking_issues": [
+        "student answer PDFs are not yet copied into an anonymous packet input tree",
+        "gold scores are not visible in the current local tree",
+        "question IDs, maximum scores, and score increments still need extraction",
+        "official course ID needs confirmation because local source labels appear inconsistent"
+      ],
+      "course_id": "DSAA3073",
+      "data_inventory": "experiments/data_inventory/DSAA3073.json",
+      "draft_course_spec": "experiments/course_specs/DSAA3073_week2_test.json",
+      "observed_assets": [
+        "4 user-confirmed student answer PDFs",
+        "1 user-confirmed question-plus-answer-key PDF"
+      ],
+      "recommended_next_action": "use as the fastest small packet dry run after anonymization, rubric extraction, and gold-score creation",
+      "status": "fastest_small_dry_run_after_preparation"
+    },
+    {
+      "blocking_issues": [
+        "student answer PDF is not yet copied into an anonymous packet input tree",
+        "gold score is not visible in the current local tree",
+        "question IDs, maximum scores, and score increments still need extraction",
+        "sample size is too small for an accuracy conclusion"
+      ],
+      "course_id": "DSAA3701",
+      "data_inventory": "experiments/data_inventory/DSAA3701.json",
+      "draft_course_spec": "experiments/course_specs/DSAA3701_week5_test.json",
+      "observed_assets": [
+        "1 user-confirmed student answer PDF",
+        "1 user-confirmed question-plus-answer-key PDF"
+      ],
+      "recommended_next_action": "use only as a tiny smoke test unless more anonymous submissions and gold scores are added",
+      "status": "tiny_smoke_test_only"
+    },
+    {
+      "blocking_issues": [
+        "raw submission filenames contain identity-like prefixes",
+        "rubric or solution file is not visible in the current local tree",
+        "gold scores are not visible in the current local tree",
+        "HEIC and docx inputs need conversion policy before packet construction"
+      ],
+      "course_id": "linearalgebra",
+      "data_inventory": "experiments/data_inventory/linearalgebra.json",
+      "draft_course_spec": "experiments/course_specs/linearalgebra_quiz1.json",
+      "observed_assets": [
+        "quiz PDF",
+        "135 raw submission files",
+        "image, PDF, HEIC, and docx input formats"
+      ],
+      "recommended_next_action": "anonymize submissions, extract rubric and gold scores, then build the next prompt packet dry run",
+      "status": "best_representative_pilot_after_privacy_and_rubric_work"
+    }
+  ],
+  "record_type": "multi_course_pilot_inventory",
+  "scan_date": "2026-07-13"
+}

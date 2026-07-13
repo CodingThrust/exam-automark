@@ -17,9 +17,16 @@
   },
   "notes": [
     "Inventory is local-only; private anonymous data snapshots should live in HKUST-GZ GitLab.",
-    "Raw filenames are intentionally omitted because they may contain student identifiers."
+    "Raw filenames are intentionally omitted because they may contain student identifiers.",
+    "User-confirmed asset roles: one top-level PDF is a student answer; one top-level PDF is the question plus answer key.",
+    "The student answer PDF still needs to be copied or renamed into an anonymous packet input tree."
   ],
   "packet_exclusion_policy": [],
+  "user_confirmed_assets": {
+    "confirmation_date": "2026-07-13",
+    "question_plus_answer_key_pdfs": 1,
+    "student_answer_pdfs": 1
+  },
   "privacy_policy": {
     "git_tracking_allowed": false,
     "raw_filenames_recorded": false,

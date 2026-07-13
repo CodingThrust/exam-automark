@@ -109,6 +109,144 @@ The command must return:
 
 If it is not `ready`, do not run models.
 
+## macOS/Linux Reproduction Quickstart
+
+These commands are written with POSIX shell syntax and forward-slash relative
+paths. They are intended for macOS or Linux reviewers who already have access to
+the private `Data/` snapshot.
+
+1. Check out the experiment code.
+
+```bash
+git clone https://github.com/CodingThrust/exam-automark.git
+cd exam-automark
+git checkout codex/physics-week9-baseline-candidate-v2-run
+git rev-parse HEAD
+```
+
+The held-out metrics in this record were produced from run commit:
+
+```text
+9cce18378abb19d817040cb56599457108d7d575
+```
+
+The latest record commit after metrics documentation is:
+
+```text
+d6bbdf14cc392cae018e176bc66540d1937764ed
+```
+
+2. Create a Python environment.
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e .
+python -m pip install openai==2.45.0
+```
+
+3. Place the private data snapshot.
+
+The repository root should contain:
+
+```text
+Data/physics/benchmark/
+```
+
+At minimum, the reviewer needs the same anonymous transcripts, gold score CSVs,
+text packets, and run outputs referenced by the records in this directory.
+
+4. Run the readiness gate.
+
+```bash
+python -m benchmark.core.cli check-run-readiness \
+  --baseline-plan experiments/records/physics-week9-baseline-candidate-v2-run/baseline-plan.json \
+  --candidate-plan experiments/records/physics-week9-baseline-candidate-v2-run/candidate-v2-plan.json
+```
+
+Expected result:
+
+```json
+{"failed_checks": [], "markdown_output": null, "output": null, "status": "ready"}
+```
+
+5. Validate held-out packets without calling the provider.
+
+```bash
+python -m benchmark.core.cli run-model-packet \
+  --provider deepseek \
+  --model deepseek-test \
+  --input-mode text-only \
+  --packet Data/physics/benchmark/text_packets/physics-week9-baseline-text-strict-schema/G1-test-r1 \
+  --output Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-test-r1-strict-schema-dry-run-local \
+  --temperature 0 \
+  --response-format json_object \
+  --max-retries 1 \
+  --dry-run
+
+python -m benchmark.core.cli run-model-packet \
+  --provider deepseek \
+  --model deepseek-test \
+  --input-mode text-only \
+  --packet Data/physics/benchmark/text_packets/physics-week9-candidate-v2-text-strict-schema/G1-test-r1 \
+  --output Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-test-r1-strict-schema-dry-run-local \
+  --temperature 0 \
+  --response-format json_object \
+  --max-retries 1 \
+  --dry-run
+```
+
+Both dry-runs should report `students_expected: 18`,
+`students_passed: 18`, and `validation_status: passed`.
+
+6. Re-run the real held-out model calls only if authorized.
+
+Do not place the API key in a file or Git commit.
+
+```bash
+read -rsp "DeepSeek API key: " DEEPSEEK_API_KEY
+echo
+export DEEPSEEK_API_KEY
+
+python -m benchmark.core.cli run-model-packet \
+  --provider deepseek \
+  --model deepseek-v4-pro \
+  --input-mode text-only \
+  --packet Data/physics/benchmark/text_packets/physics-week9-baseline-text-strict-schema/G1-test-r1 \
+  --output Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-test-r1-strict-schema \
+  --temperature 0 \
+  --response-format json_object \
+  --max-retries 1
+
+python -m benchmark.core.cli run-model-packet \
+  --provider deepseek \
+  --model deepseek-v4-pro \
+  --input-mode text-only \
+  --packet Data/physics/benchmark/text_packets/physics-week9-candidate-v2-text-strict-schema/G1-test-r1 \
+  --output Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-test-r1-strict-schema \
+  --temperature 0 \
+  --response-format json_object \
+  --max-retries 1
+
+unset DEEPSEEK_API_KEY
+```
+
+7. Render the Typst note.
+
+Install Typst with the platform package manager or the official binary, then run:
+
+```bash
+typst compile \
+  experiments/records/physics-week9-baseline-candidate-v2-run/note.typ \
+  experiments/records/physics-week9-baseline-candidate-v2-run/note.pdf
+```
+
+The metrics JSON/CSV artifacts are stored under ignored `Data/`. The current
+metrics calculation used the project metric functions recorded in
+`benchmark.physics.metrics`; a first-class CLI wrapper for metrics regeneration
+is still future work.
+
 ## Packet Audit Commands
 
 Run these from the repository root after the private `Data/` snapshot is in

@@ -3,14 +3,14 @@
   "course_id": "DSAA3073",
   "course_spec_path": "experiments/course_specs/DSAA3073_week2_test.json",
   "data_inventory_path": "experiments/data_inventory/DSAA3073.json",
-  "data_snapshot_hash": "548fc08c46f257e6656b1b613c6de5b4aa1bbe53c0e02623b994648406999dbd",
+  "data_snapshot_hash": "9dcaa822cd478d474c498f6d9298ffa9fcceb3fce5355ea3236113ff8e7abcc3",
   "experiment_id": "DSAA3073-week2-test-plan",
   "git_branch": "codex/repro-experiment-framework",
   "git_commit": "75039f8",
   "notes": [
-    "Draft data inventory only; extract real rubric and question scores before packet construction.",
-    "Confirm DSAA3073 versus local DSAA3071 filename labels before freezing.",
-    "Uses frozen grade-homework skill baseline before any candidate skill changes."
+    "Retired draft plan. Do not build DSAA3073 packets from this local folder.",
+    "Supervisor/user correction on 2026-07-13: four student-answer PDFs previously in Data/DSAA3073 are actually DSAA3071 week 2, 3, 4, and 6 sources and were moved to Data/DSAA3071.",
+    "A clean DSAA3073 data snapshot is required before reopening DSAA3073."
   ],
   "planned_packets": [
     {
@@ -56,5 +56,5 @@
     "claude": ".claude/skills/grade-homework/SKILL.md"
   },
   "skill_version_id": "skill_baseline_v1",
-  "status": "data_inventory"
+  "status": "blocked"
 }

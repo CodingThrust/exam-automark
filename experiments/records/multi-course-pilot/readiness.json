@@ -3,25 +3,25 @@
   "courses": [
     {
       "blocking_issues": [
-        "student answer PDFs are not yet copied into an anonymous packet input tree",
-        "gold scores are not visible in the current local tree",
-        "question IDs, maximum scores, and score increments still need extraction",
-        "official course ID needs confirmation because local source labels appear inconsistent"
+        "local folder contents are inconsistent and no longer selected for the current pilot",
+        "four previously observed student-answer PDFs were corrected to DSAA3071 week 2, 3, 4, and 6 sources",
+        "a clean confirmed DSAA3073 submission set, rubric, and gold scores would be required to reopen DSAA3073"
       ],
       "course_id": "DSAA3073",
       "data_inventory": "experiments/data_inventory/DSAA3073.json",
       "draft_course_spec": "experiments/course_specs/DSAA3073_week2_test.json",
       "observed_assets": [
-        "4 user-confirmed student answer PDFs",
-        "1 user-confirmed question-plus-answer-key PDF"
+        "1 remaining top-level PDF after correcting misfiled assets",
+        "4 DSAA3071 week 2, 3, 4, and 6 student-answer PDFs moved to DSAA3071 on 2026-07-13"
       ],
-      "recommended_next_action": "use as the fastest small packet dry run after anonymization, rubric extraction, and gold-score creation",
-      "status": "fastest_small_dry_run_after_preparation"
+      "recommended_next_action": "do not use DSAA3073 until a clean confirmed DSAA3073 data snapshot is supplied",
+      "status": "retired_not_selected_misfiled_assets"
     },
     {
       "blocking_issues": [
         "gold score template exists but scores are not filled",
-        "prompt packets have not been built or audited"
+        "prompt packets have not been built or audited",
+        "week 2, 3, 4, and 6 source PDFs still need privacy review, anonymization, rubric/gold decisions, and packet planning before use"
       ],
       "course_id": "DSAA3071",
       "course_id_confirmed": true,
@@ -33,11 +33,12 @@
         "v3 anonymized candidate PDFs approved by user privacy review",
         "draft English rubric extracted from the question-plus-answer-key PDF",
         "Q8 confirmed as 0^(2^n)",
-        "blank gold score template created for 22 anonymous students and 10 questions"
+        "blank gold score template created for 22 anonymous students and 10 questions",
+        "additional student-answer source PDFs for weeks 2, 3, 4, and 6 moved from DSAA3073 into DSAA3071 on 2026-07-13"
       ],
       "prep_result": "experiments/records/DSAA3071-week5-prep/prep-result-v3.json",
-      "recommended_next_action": "fill gold scores for the 22 approved anonymous IDs, then build and audit prompt packets",
-      "status": "privacy_approved_rubric_draft_confirmed_gold_template_created_scores_pending"
+      "recommended_next_action": "finish the week 5 gold scores first, then build and audit week 5 prompt packets; treat weeks 2, 3, 4, and 6 as later DSAA3071 expansion data",
+      "status": "week5_privacy_approved_rubric_draft_confirmed_gold_template_created_scores_pending_additional_weeks_collected"
     },
     {
       "blocking_issues": [

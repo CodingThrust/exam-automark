@@ -39,9 +39,20 @@ these are true:
 
 | Course | Current data shape | Useful assets observed | Main blockers | Pilot readiness |
 | --- | --- | --- | --- | --- |
-| DSAA3073 | 5 top-level PDFs | User confirmed 4 student answer PDFs and 1 question-plus-answer-key PDF | Needs anonymous packet input tree, rubric extraction, gold scores, and course ID confirmation because local labels appear inconsistent | Fastest small dry run after anonymization; not yet ready for accuracy claims |
-| DSAA3071 | 2 top-level PDFs | User confirmed 1 combined PDF containing 22 students' answers and 1 question-plus-answer-key PDF | Anonymous candidate PDFs generated; needs manual privacy review, rubric extraction, and gold scores | Recommended next small pilot after privacy review |
+| DSAA3073 | 1 remaining top-level PDF after correction | Four previously observed student-answer PDFs were corrected to DSAA3071 week 2, 3, 4, and 6 sources | Local folder contents are inconsistent; clean DSAA3073 submissions, rubric, and gold scores are not available | Retired from current pilot selection |
+| DSAA3071 | 6 top-level source PDFs plus generated benchmark folders | Week 5 combined PDF with 22 students' answers, week 5 question-plus-answer key, and additional week 2, 3, 4, and 6 student-answer sources | Week 5 anonymous candidate PDFs are approved, but gold scores are not filled and prompt packets are not audited; week 2, 3, 4, and 6 still need separate preparation | Recommended current pilot remains week 5; other weeks are later expansion data |
 | linearalgebra | 1 quiz PDF plus 135 submission files under `submissions/` | Actual student submissions exist across images, PDFs, HEIC, and one docx | Raw filenames contain identity-like prefixes; no rubric, solution, or gold score file is visible in the current tree | Best representative next pilot after anonymization and rubric/gold preparation |
+
+## Data Correction On 2026-07-13
+
+The supervisor/user clarified that the four student-answer PDFs previously
+observed under `Data/DSAA3073` are actually DSAA3071 week 2, 3, 4, and 6
+student-answer sources. They were moved to `Data/DSAA3071` in the local private
+data tree. `Data/` remains ignored by Git.
+
+As a result, DSAA3073 is not a current pilot candidate. It should only be
+reopened if a clean DSAA3073 data snapshot with confirmed submissions, rubric,
+and gold scores is supplied.
 
 ## Recommendation
 
@@ -62,9 +73,10 @@ English rubric and a blank gold-score template have been created. Q8 has been
 confirmed as `0^(2^n)`. It is still not ready for model calls until gold scores
 are filled and prompt packets are audited.
 
-DSAA3073 remains useful as a smaller backup pilot. It has four student answer
-PDFs plus a question-and-answer key PDF, but the local course labels are also
-unclear and the sample is smaller.
+The newly corrected DSAA3071 week 2, 3, 4, and 6 sources expand the future
+DSAA3071 data pool, but they are not ready for model calls. Each week still
+needs privacy review/anonymization, rubric extraction, gold-score planning, and
+packet audit before it can enter a reproducible experiment.
 
 If the goal is a more representative second accuracy pilot, linear algebra is
 stronger because it has many more submissions. It should not be run yet. The
@@ -81,6 +93,8 @@ scores.
    call.
 4. Only after packet audit passes, decide whether to run DeepSeek text-only,
    another text-only provider, or a multimodal provider.
+5. Treat DSAA3071 week 2, 3, 4, and 6 as later expansion candidates after week
+   5 has a complete reproducible run.
 
 ## Privacy Notes
 

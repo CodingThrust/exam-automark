@@ -8,11 +8,9 @@
     "text"
   ],
   "notes": [
-    "Draft only: extract real question IDs, max scores, and rubric before grading.",
-    "Local source folder contains four user-confirmed student answer PDFs and one question-plus-answer-key PDF.",
-    "Week2 is selected because the question-plus-answer-key PDF is available.",
-    "Local filenames appear to use DSAA3071 labels; confirm the official course identifier before freezing.",
-    "The placeholder score step is not a grading rule; replace it with the rubric-defined increment before any model run."
+    "Retired draft: do not use for packet construction.",
+    "Supervisor/user correction on 2026-07-13: four PDFs previously treated as DSAA3073 student answers are actually DSAA3071 week 2, 3, 4, and 6 student-answer sources and were moved to Data/DSAA3071.",
+    "A clean DSAA3073 submission set, rubric, and gold score table are required before creating any DSAA3073 experiment."
   ],
   "questions": [
     {
@@ -23,5 +21,5 @@
     }
   ],
   "score_unit": "points",
-  "source_status": "draft_needs_rubric_extraction"
+  "source_status": "retired_not_selected_misfiled_assets_moved_to_DSAA3071"
 }

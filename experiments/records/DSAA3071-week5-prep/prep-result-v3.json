@@ -14,7 +14,6 @@
   },
   "model_run_allowed": false,
   "model_run_blockers": [
-    "Q8 rubric confirmation pending",
     "gold score filling pending",
     "prompt packet audit pending"
   ],
@@ -43,6 +42,7 @@
   "rubric": {
     "path": "experiments/records/DSAA3071-week5-prep/rubric_v0.json",
     "question_count": 10,
+    "q8_interpretation": "confirmed as 0^(2^n) on 2026-07-13",
     "source_pdf": "Data/DSAA3071/week5-5.test-solution.pdf",
     "source_sha256": "aeab881a2e23bcd29c6174419c0d0904ab706ec560314053cb1557958370d94f",
     "status": "draft_extracted_needs_human_review"

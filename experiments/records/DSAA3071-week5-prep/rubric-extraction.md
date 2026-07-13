@@ -23,11 +23,12 @@ Source SHA-256:
 
 Total: 130 points.
 
-## Known Issue
+## Clarification
 
-Q8 needs instructor confirmation before final scoring. The extracted source
-text appears inconsistent about whether epsilon is included in the target
-language or example output sequence.
+Q8 is confirmed by the user as `0^(2^n)`, not `0^(2n)`. Therefore the expected
+output lengths are powers of two: 1, 2, 4, 8, and so on. The rubric treats
+epsilon as not required for Q8 unless the instructor later supplies a different
+official correction.
 
 ## Outputs
 
@@ -40,6 +41,6 @@ language or example output sequence.
 
 ## Remaining Work
 
-1. Human review of `rubric_v0.json`, especially Q8.
+1. Human review of `rubric_v0.json`.
 2. Fill gold scores for the 22 anonymous students.
 3. Build and audit DSAA3071 prompt packets before any model call.

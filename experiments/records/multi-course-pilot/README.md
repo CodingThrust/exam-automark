@@ -58,9 +58,9 @@ left/right header rectangles, but user review found that top-middle student IDs
 remained visible. The current v3 candidate is under
 `Data/DSAA3071/benchmark-redaction-v3/` and uses a full-width top 8% redaction
 band. User review approved the v3 anonymization on 2026-07-13. The draft
-English rubric and a blank gold-score template have been created. It is still
-not ready for model calls until the Q8 rubric ambiguity is confirmed, gold
-scores are filled, and prompt packets are audited.
+English rubric and a blank gold-score template have been created. Q8 has been
+confirmed as `0^(2^n)`. It is still not ready for model calls until gold scores
+are filled and prompt packets are audited.
 
 DSAA3073 remains useful as a smaller backup pilot. It has four student answer
 PDFs plus a question-and-answer key PDF, but the local course labels are also
@@ -74,8 +74,7 @@ scores.
 
 ## Next Actions
 
-1. Human-review `experiments/records/DSAA3071-week5-prep/rubric_v0.json`,
-   especially the Q8 source inconsistency.
+1. Human-review `experiments/records/DSAA3071-week5-prep/rubric_v0.json`.
 2. Fill `Data/DSAA3071/benchmark-redaction-v3/gold/primary_scores.csv` for the
    22 anonymous IDs.
 3. Build prompt packets and run `exam-benchmark audit-packet` before any model

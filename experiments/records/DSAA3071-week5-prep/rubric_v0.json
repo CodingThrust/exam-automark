@@ -153,7 +153,7 @@
       "type": "proof"
     },
     {
-      "expected": "Design an enumerator that repeatedly outputs strings of zeros whose lengths follow the target sequence, using a counter n and doubling or otherwise computing the next length each iteration.",
+      "expected": "Design an enumerator for L = {0^(2^n) | n >= 0}. The enumerator should output strings of zeros whose lengths are powers of two: 1, 2, 4, 8, and so on.",
       "id": "Q8",
       "max_score": 10.0,
       "rubric": [
@@ -163,14 +163,14 @@
         },
         {
           "points": 4,
-          "criterion": "Correctly generates the intended sequence of zero-string lengths using powers of two or the instructor-confirmed target sequence."
+          "criterion": "Correctly generates zero strings with lengths 2^n for n >= 0, such as 0, 00, 0000, and 00000000."
         },
         {
           "points": 2,
           "criterion": "Mentions implementation details such as incrementing n and doubling the length."
         }
       ],
-      "source_note": "The source solution text appears internally inconsistent about whether epsilon is included. Human confirmation is required before final scoring.",
+      "source_note": "User confirmed on 2026-07-13 that the intended language is 0^(2^n), not 0^(2n).",
       "type": "short_answer"
     },
     {

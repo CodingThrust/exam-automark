@@ -20,7 +20,6 @@
     },
     {
       "blocking_issues": [
-        "Q8 rubric ambiguity needs instructor confirmation",
         "gold score template exists but scores are not filled",
         "prompt packets have not been built or audited"
       ],
@@ -33,11 +32,12 @@
         "1 user-confirmed question-plus-answer-key PDF",
         "v3 anonymized candidate PDFs approved by user privacy review",
         "draft English rubric extracted from the question-plus-answer-key PDF",
+        "Q8 confirmed as 0^(2^n)",
         "blank gold score template created for 22 anonymous students and 10 questions"
       ],
       "prep_result": "experiments/records/DSAA3071-week5-prep/prep-result-v3.json",
-      "recommended_next_action": "confirm the Q8 rubric ambiguity and fill gold scores for the 22 approved anonymous IDs",
-      "status": "privacy_approved_rubric_draft_gold_template_created_scores_pending"
+      "recommended_next_action": "fill gold scores for the 22 approved anonymous IDs, then build and audit prompt packets",
+      "status": "privacy_approved_rubric_draft_confirmed_gold_template_created_scores_pending"
     },
     {
       "blocking_issues": [

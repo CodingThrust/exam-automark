@@ -1,0 +1,22 @@
+{
+  "anonymous_id_pattern": "S###",
+  "anonymized_root": "Data/DSAA3071/benchmark/anonymized",
+  "first_page_preview_count": 22,
+  "generated_at": "2026-07-13T09:32:15.470818Z",
+  "generated_student_pdf_count": 22,
+  "model_run_allowed": false,
+  "output_root": "Data/DSAA3071/benchmark",
+  "page_count": 66,
+  "pages_per_student": 3,
+  "prep_script": "experiments/records/DSAA3071-week5-prep/prepare_anonymized_week5.py",
+  "privacy_review_csv_rows": 66,
+  "privacy_review_status": "pending",
+  "record_type": "dsaa3071_week5_anonymization_prep_result",
+  "redaction_method": "render each page to raster image, whiten top identity band, write new PDF",
+  "redaction_top_fraction": 0.18,
+  "scale": 2.0,
+  "source_pdf": "Data/DSAA3071/week5.pdf",
+  "source_sha256": "ab691a2614ce854e53f7830c6ae3c4d35c98b1961db34cbaac99ee7563258cb9",
+  "student_count": 22,
+  "student_index_csv_rows": 22
+}

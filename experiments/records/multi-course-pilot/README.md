@@ -40,7 +40,7 @@ these are true:
 | Course | Current data shape | Useful assets observed | Main blockers | Pilot readiness |
 | --- | --- | --- | --- | --- |
 | DSAA3073 | 5 top-level PDFs | User confirmed 4 student answer PDFs and 1 question-plus-answer-key PDF | Needs anonymous packet input tree, rubric extraction, gold scores, and course ID confirmation because local labels appear inconsistent | Fastest small dry run after anonymization; not yet ready for accuracy claims |
-| DSAA3071 | 2 top-level PDFs | User confirmed 1 combined PDF containing 22 students' answers and 1 question-plus-answer-key PDF | Needs combined-PDF splitting or indexing, anonymous packet input tree, rubric extraction, and gold scores | Recommended next small pilot after preparation |
+| DSAA3071 | 2 top-level PDFs | User confirmed 1 combined PDF containing 22 students' answers and 1 question-plus-answer-key PDF | Anonymous candidate PDFs generated; needs manual privacy review, rubric extraction, and gold scores | Recommended next small pilot after privacy review |
 | linearalgebra | 1 quiz PDF plus 135 submission files under `submissions/` | Actual student submissions exist across images, PDFs, HEIC, and one docx | Raw filenames contain identity-like prefixes; no rubric, solution, or gold score file is visible in the current tree | Best representative next pilot after anonymization and rubric/gold preparation |
 
 ## Recommendation
@@ -50,6 +50,10 @@ start with DSAA3071. It has one combined PDF with 22 students' answers plus a
 question-and-answer key PDF. That is enough for a small but meaningful packet
 workflow once the combined PDF is split or indexed into anonymous `S###` inputs
 and a human gold table is created.
+
+The first anonymized candidate input tree has now been generated under ignored
+`Data/DSAA3071/benchmark/`. It is not approved for model calls until
+`Data/DSAA3071/benchmark/manifest/privacy_review.csv` is manually reviewed.
 
 DSAA3073 remains useful as a smaller backup pilot. It has four student answer
 PDFs plus a question-and-answer key PDF, but the local course labels are also
@@ -63,8 +67,8 @@ scores.
 
 ## Next Actions
 
-1. For DSAA3071, split or index the combined `week5.pdf` student-answer
-   source into private anonymous `S###` packet inputs.
+1. Manually review `Data/DSAA3071/benchmark/manifest/privacy_review.csv` and the
+   generated PDFs/previews to confirm no names or student IDs remain visible.
 2. Extract the question IDs, maximum scores, score increments, and grading rules
    from the question-plus-answer-key PDF into an English rubric.
 3. Create a gold score CSV for the same 22 anonymous IDs.

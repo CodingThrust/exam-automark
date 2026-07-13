@@ -20,7 +20,7 @@
     },
     {
       "blocking_issues": [
-        "combined student-answer PDF is not yet split or indexed into an anonymous packet input tree",
+        "generated anonymous candidate PDFs still need manual privacy review before model use",
         "gold scores are not visible in the current local tree",
         "question IDs, maximum scores, and score increments still need extraction",
         "question-plus-answer-key PDF still needs conversion into an English model-facing rubric"
@@ -33,8 +33,9 @@
         "1 user-confirmed combined PDF containing 22 students' answers",
         "1 user-confirmed question-plus-answer-key PDF"
       ],
-      "recommended_next_action": "use as the next small multi-course pilot after PDF splitting or indexing, rubric extraction, and gold-score creation",
-      "status": "recommended_next_small_pilot_after_preparation"
+      "prep_result": "experiments/records/DSAA3071-week5-prep/prep-result.json",
+      "recommended_next_action": "manually review generated anonymized PDFs, then extract rubric and create gold scores",
+      "status": "anonymous_candidate_generated_privacy_review_pending"
     },
     {
       "blocking_issues": [

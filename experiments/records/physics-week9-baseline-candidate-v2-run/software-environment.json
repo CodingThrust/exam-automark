@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "record_type": "software_environment",
+  "status": "pre_model_call_preflight_snapshot_after_sdk_install",
+  "captured_date": "2026-07-12",
+  "timezone": "Asia/Shanghai",
+  "git": {
+    "branch": "codex/physics-week9-baseline-candidate-v2-run",
+    "commit": "93f843f405df5cbf4d4d4cd1524c77a153121959",
+    "remote_tracking": "origin/codex/physics-week9-baseline-candidate-v2-run"
+  },
+  "operating_system": {
+    "caption": "Microsoft Windows 11 Professional",
+    "version": "10.0.26200",
+    "build_number": "26200",
+    "architecture": "64-bit",
+    "dotnet_version_string": "Microsoft Windows NT 10.0.26200.0",
+    "cmd_ver": "Microsoft Windows [Version 10.0.26200.7840]"
+  },
+  "shells": {
+    "powershell": "5.1.26100.7705"
+  },
+  "tools": {
+    "git": "2.54.0.windows.1",
+    "python": "3.12.10",
+    "pip": "25.1.1 from D:\\Miniforge\\Lib\\site-packages\\pip (python 3.12)",
+    "typst": "0.15.0 (3ae52774)",
+    "typst_executable": "C:\\Tools\\typst\\typst.exe",
+    "typst_path_status": "C:\\Tools\\typst added to the user PATH; reopen PowerShell/Codex sessions to refresh existing process environments"
+  },
+  "provider_configuration": {
+    "provider": "deepseek",
+    "api_client": "OpenAI-compatible Python SDK",
+    "api_key_environment_variable": "DEEPSEEK_API_KEY",
+    "api_key_status_in_current_process": "SET",
+    "api_key_status_in_user_environment": "SET",
+    "api_key_status_in_machine_environment": "NOT_SET",
+    "planned_model": "deepseek-v4-pro",
+    "real_api_calls_recorded": false,
+    "external_api_data_gate": "real DeepSeek runs require explicit approval before anonymous student transcripts are sent to https://api.deepseek.com"
+  },
+  "python_packages_checked": {
+    "openai": "2.45.0",
+    "Pillow": "11.3.0",
+    "PyMuPDF": "NOT_INSTALLED",
+    "zulip": "NOT_INSTALLED",
+    "pandas": "2.3.0",
+    "numpy": "2.1.3",
+    "httpx": "0.28.1",
+    "typing-extensions": "4.16.0"
+  },
+  "missing_before_model_run": [
+    "explicit approval for external DeepSeek processing of anonymous development transcript packets",
+    "PyMuPDF package if PDF/image conversion is required in this environment",
+    "provider/model/version metadata for the selected model"
+  ],
+  "language_policy": {
+    "model_facing_rubric": "English only",
+    "model_facing_prompts": "English",
+    "grading_evidence_and_feedback": "English unless a later report explicitly translates for human readers"
+  },
+  "notes": [
+    "This snapshot records the local software state before any model call on this branch.",
+    "The current environment is enough for offline record/readiness tests, existing dry-run validation, DeepSeek runner import, and authenticated DeepSeek command construction.",
+    "DEEPSEEK_API_KEY is visible in the current Codex/PowerShell process and user environment, but the real API run is gated until explicit approval is recorded for sending anonymous student transcript packets to the external DeepSeek API.",
+    "Capture a fresh software_environment record at the exact model-run commit before running models."
+  ]
+}

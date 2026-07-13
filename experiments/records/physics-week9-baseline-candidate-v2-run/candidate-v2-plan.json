@@ -1,0 +1,106 @@
+{
+  "assessment_id": "week9",
+  "built_packets": [
+    {
+      "audit_status": "passed",
+      "condition": "T1",
+      "manifest_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/T1-dev-r1/manifest.json",
+      "packet_hash": "c81fcdfc61347798b8f8dd00a69f19106c2c87c960a569f23379d0d541fd84dd",
+      "packet_id": "T1-dev-r1",
+      "packet_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/T1-dev-r1",
+      "prompt_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/T1-dev-r1/prompt.txt",
+      "split": "development",
+      "task": "transcribe"
+    },
+    {
+      "audit_status": "passed",
+      "condition": "T1",
+      "manifest_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/T1-test-r1/manifest.json",
+      "packet_hash": "929495435b36b1a6b6bea184e42b67b17522f006f9cea4fa0ca7209419e28ece",
+      "packet_id": "T1-test-r1",
+      "packet_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/T1-test-r1",
+      "prompt_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/T1-test-r1/prompt.txt",
+      "split": "heldout",
+      "task": "transcribe"
+    },
+    {
+      "audit_status": "passed",
+      "condition": "G1",
+      "manifest_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/G1-dev-r1/manifest.json",
+      "packet_hash": "72933ea81b6a28c884b46f8ddff95df46c833e5ad11edb2f005821f7eeb110cd",
+      "packet_id": "G1-dev-r1",
+      "packet_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/G1-dev-r1",
+      "prompt_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/G1-dev-r1/prompt.txt",
+      "split": "development",
+      "task": "grade"
+    },
+    {
+      "audit_status": "passed",
+      "condition": "G1",
+      "manifest_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/G1-test-r1/manifest.json",
+      "packet_hash": "083ee5fb30e348ea127e456cee2177d6f6f85be0ad3995328fcbf94b189d4f29",
+      "packet_id": "G1-test-r1",
+      "packet_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/G1-test-r1",
+      "prompt_path": "Data/physics/benchmark/dry_run_packets/physics-week9-candidate-v2-lf/G1-test-r1/prompt.txt",
+      "split": "heldout",
+      "task": "grade"
+    }
+  ],
+  "course_id": "physics",
+  "course_spec_path": "experiments/course_specs/physics_week9.json",
+  "data_inventory_path": "experiments/data_inventory/physics.json",
+  "data_snapshot_hash": "e0b47a06a3ec12417a70a773ac8d5728ebbbd40c8991ac7ec7a11c2a92d2a6f3",
+  "experiment_id": "physics-week9-candidate-v2-plan",
+  "git_branch": "codex/physics-week9-baseline-candidate-v2-run",
+  "git_commit": "af6a928",
+  "notes": [
+    "Candidate v2 dry-run plan; no model calls.",
+    "Uses the same physics anonymous data snapshot, split, course spec, and rubric discipline as the baseline plan.",
+    "Candidate v2 keeps evidence-first grading, confidence/flags, second-pass review, total checks, and the teacher-confirmed partial-credit policy."
+  ],
+  "planned_packets": [
+    {
+      "condition": "T1",
+      "packet_id": "T1-dev-r1",
+      "prompt_template_id": "transcribe_standard_v1",
+      "split": "development",
+      "task": "transcribe"
+    },
+    {
+      "condition": "T1",
+      "packet_id": "T1-test-r1",
+      "prompt_template_id": "transcribe_standard_v1",
+      "split": "heldout",
+      "task": "transcribe"
+    },
+    {
+      "condition": "G1",
+      "packet_id": "G1-dev-r1",
+      "prompt_template_id": "grade_candidate_v2",
+      "split": "development",
+      "task": "grade"
+    },
+    {
+      "condition": "G1",
+      "packet_id": "G1-test-r1",
+      "prompt_template_id": "grade_candidate_v2",
+      "split": "heldout",
+      "task": "grade"
+    }
+  ],
+  "prompt_template_hashes": {
+    "grade_candidate_v2": "32c5ea5c539e99ff8ea99f587a89bcdc0fa77a2a682b529a6a7c8f15b0fd21e7",
+    "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
+  },
+  "schema_version": 1,
+  "skill_hashes": {
+    "agents": "d8ba4c855e772e6562b521a12a80558297e8c310788c4bbbca3cdc663d56e9c0",
+    "claude": "d8ba4c855e772e6562b521a12a80558297e8c310788c4bbbca3cdc663d56e9c0"
+  },
+  "skill_source_paths": {
+    "agents": ".agents/skills/grade-homework",
+    "claude": ".claude/skills/grade-homework"
+  },
+  "skill_version_id": "skill_candidate_v2",
+  "status": "packets_built"
+}

@@ -1,0 +1,42 @@
+# Standard Grading Prompt v1 Strict Confidence
+
+You are grading anonymous student work for a reproducible blind experiment.
+
+Use only the files inside the current prompt packet:
+
+- `INSTRUCTIONS.md`
+- `manifest.json`
+- `course.json`
+- `rubric.json`
+- `output.schema.json`
+- files under `inputs/`
+
+For each anonymous student ID listed in `manifest.json`, read that student's
+input files and grade strictly against `rubric.json`. Produce exactly one JSON
+file per student under `outputs/` and name it `<student_id>.json`.
+
+Rules:
+
+1. Preserve the anonymous `student_id` exactly.
+2. Award only points justified by visible evidence in the student's work.
+3. Use the score bounds, question IDs, and score increment described by
+   `course.json` and `rubric.json`.
+4. Give equivalent correct reasoning credit when the rubric policy allows it.
+5. Do not infer unreadable work. If unreadable or missing evidence could change
+   the score, lower `confidence` and add a short flag.
+6. Do not curve scores, compare students, or use information from outside this
+   packet.
+7. Do not inspect parent directories, reference scoring files, prior outputs,
+   summaries, or any files outside this packet.
+8. Your output must match `output.schema.json` exactly.
+9. The `confidence` field must be exactly one of the strings `"high"`,
+   `"medium"`, or `"low"`. Do not use numeric confidence values such as `0.95`,
+   `0.9`, or `1.0`.
+
+The JSON for each student must contain:
+
+- `student_id`
+- `scores`, one item for every question in `course.json`
+- each score item must contain `question_id`, `extracted_evidence`, `score`,
+  `evidence`, `confidence`, and `flags`
+- `total`, equal to the sum of all question scores

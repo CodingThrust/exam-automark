@@ -7,6 +7,7 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import NamedTuple
 
 from PIL import ImageDraw
 from reportlab.lib.utils import ImageReader
@@ -24,6 +25,7 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     source_pdf = args.source_pdf
     output_root = args.output_root
+    redaction_rects = _redaction_rects(args.redaction_rect, args.redaction_top_fraction)
     anonymized_root = output_root / "anonymized"
     manifest_root = output_root / "manifest"
     preview_root = output_root / "privacy_review" / "previews"
@@ -36,7 +38,7 @@ def main(argv: list[str] | None = None) -> int:
     output_root.mkdir(parents=True, exist_ok=True)
     anonymized_root.mkdir(parents=True, exist_ok=True)
     manifest_root.mkdir(parents=True, exist_ok=True)
-    if args.preview_first_pages:
+    if args.preview_first_pages or args.preview_all_pages:
         preview_root.mkdir(parents=True, exist_ok=True)
 
     doc = pdfium.PdfDocument(str(source_pdf))
@@ -67,13 +69,16 @@ def main(argv: list[str] | None = None) -> int:
                 source_start=start + 1,
                 source_end=end,
                 scale=args.scale,
-                redaction_top_fraction=args.redaction_top_fraction,
+                redaction_rects=redaction_rects,
             )
             for page_index in range(start, end)
         ]
         _write_pdf_from_images(output_pdf, pages)
 
-        if args.preview_first_pages:
+        if args.preview_all_pages:
+            for page_number, page in enumerate(pages, start=1):
+                page.save(preview_root / f"{student_id}-p{page_number:02d}.png")
+        elif args.preview_first_pages:
             pages[0].save(preview_root / f"{student_id}-p01.png")
 
         relative_output = output_pdf.relative_to(output_root).as_posix()
@@ -95,8 +100,8 @@ def main(argv: list[str] | None = None) -> int:
                     "source_page": source_page,
                     "output_pdf": relative_output,
                     "output_page": page_number,
-                    "redaction_method": "rasterize_and_top_band_whiten",
-                    "redaction_top_fraction": args.redaction_top_fraction,
+                    "redaction_method": "rasterize_and_whiten_rectangles",
+                    "redaction_rects": ";".join(rect.to_csv() for rect in redaction_rects),
                     "privacy_review_status": "pending",
                     "reviewer": "",
                     "reviewed_at": "",
@@ -117,15 +122,15 @@ def main(argv: list[str] | None = None) -> int:
         "anonymous_id_pattern": "S###",
         "output_root": str(output_root),
         "anonymized_root": str(anonymized_root),
-        "redaction_method": "render each page to raster image, whiten top identity band, write new PDF",
-        "redaction_top_fraction": args.redaction_top_fraction,
+        "redaction_method": "render each page to raster image, whiten identity rectangles, write new PDF",
+        "redaction_rects": [rect.to_dict() for rect in redaction_rects],
         "scale": args.scale,
         "privacy_review_status": "pending",
         "model_run_allowed": False,
         "notes": [
             "The generated PDFs are not approved for model runs until privacy_review.csv is reviewed.",
             "The source PDF is a combined 22-student answer file confirmed by the user.",
-            "The top-band redaction assumes direct identifiers are in the page header; human review is required.",
+            "The redaction rectangles assume direct identifiers are in page header regions; human review is required.",
         ],
     }
     (manifest_root / "prep-metadata.json").write_text(
@@ -146,10 +151,36 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--student-count", type=int, default=22)
     parser.add_argument("--pages-per-student", type=int, default=3)
     parser.add_argument("--redaction-top-fraction", type=float, default=0.18)
+    parser.add_argument(
+        "--redaction-rect",
+        action="append",
+        default=[],
+        metavar="LEFT,TOP,RIGHT,BOTTOM",
+        help="normalized rectangle to whiten; may be provided multiple times",
+    )
     parser.add_argument("--scale", type=float, default=2.0)
     parser.add_argument("--preview-first-pages", action="store_true")
+    parser.add_argument("--preview-all-pages", action="store_true")
     parser.add_argument("--force", action="store_true")
     return parser
+
+
+class RedactionRect(NamedTuple):
+    left: float
+    top: float
+    right: float
+    bottom: float
+
+    def to_dict(self) -> dict[str, float]:
+        return {
+            "left": self.left,
+            "top": self.top,
+            "right": self.right,
+            "bottom": self.bottom,
+        }
+
+    def to_csv(self) -> str:
+        return f"{self.left:g},{self.top:g},{self.right:g},{self.bottom:g}"
 
 
 def _render_redacted_page(
@@ -160,19 +191,51 @@ def _render_redacted_page(
     source_start: int,
     source_end: int,
     scale: float,
-    redaction_top_fraction: float,
+    redaction_rects: list[RedactionRect],
 ):
     page = doc[page_index]
     image = page.render(scale=scale).to_pil().convert("RGB")
     draw = ImageDraw.Draw(image)
-    band_height = int(image.height * redaction_top_fraction)
-    draw.rectangle((0, 0, image.width, band_height), fill="white")
+    for rect in redaction_rects:
+        draw.rectangle(
+            (
+                int(image.width * rect.left),
+                int(image.height * rect.top),
+                int(image.width * rect.right),
+                int(image.height * rect.bottom),
+            ),
+            fill="white",
+        )
     label = (
         f"Anonymous ID: {student_id} | source pages {source_start}-{source_end} "
-        "| identity header redacted"
+        "| identity fields redacted"
     )
     draw.text((24, 24), label, fill="black")
     return image
+
+
+def _redaction_rects(
+    raw_rects: list[str],
+    redaction_top_fraction: float,
+) -> list[RedactionRect]:
+    if raw_rects:
+        return [_parse_rect(value) for value in raw_rects]
+    if not 0 < redaction_top_fraction < 1:
+        raise ValueError("redaction_top_fraction must be between 0 and 1")
+    return [RedactionRect(0.0, 0.0, 1.0, redaction_top_fraction)]
+
+
+def _parse_rect(value: str) -> RedactionRect:
+    try:
+        left, top, right, bottom = [float(part) for part in value.split(",")]
+    except ValueError as error:
+        raise ValueError(
+            f"redaction rectangle must be LEFT,TOP,RIGHT,BOTTOM: {value}"
+        ) from error
+    rect = RedactionRect(left, top, right, bottom)
+    if not (0 <= left < right <= 1 and 0 <= top < bottom <= 1):
+        raise ValueError(f"redaction rectangle is out of bounds: {value}")
+    return rect
 
 
 def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:

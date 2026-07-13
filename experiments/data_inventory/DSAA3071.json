@@ -21,7 +21,7 @@
     "User-confirmed asset roles: one top-level PDF contains 22 students' answers; one top-level PDF is the question plus answer key.",
     "The combined student-answer PDF needs to be split or indexed into anonymous S### packet inputs.",
     "Course ID confirmed by user as DSAA3071 on 2026-07-13.",
-    "This inventory describes the source data snapshot before generated benchmark/anonymized outputs; see experiments/records/DSAA3071-week5-prep for generated-output records."
+    "This inventory describes the source data snapshot before generated benchmark/anonymized outputs; see experiments/records/DSAA3071-week5-prep for v1/v2 generated-output records."
   ],
   "packet_exclusion_policy": [],
   "user_confirmed_assets": {

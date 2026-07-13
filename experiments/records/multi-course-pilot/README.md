@@ -51,9 +51,13 @@ question-and-answer key PDF. That is enough for a small but meaningful packet
 workflow once the combined PDF is split or indexed into anonymous `S###` inputs
 and a human gold table is created.
 
-The first anonymized candidate input tree has now been generated under ignored
-`Data/DSAA3071/benchmark/`. It is not approved for model calls until
-`Data/DSAA3071/benchmark/manifest/privacy_review.csv` is manually reviewed.
+The first anonymized candidate input tree was generated under ignored
+`Data/DSAA3071/benchmark/`, but user review found that the full-width redaction
+band hid some question and answer content. The current v2 candidate is under
+`Data/DSAA3071/benchmark-redaction-v2/` and uses smaller left/right header
+rectangles. It is not approved for model calls until
+`Data/DSAA3071/benchmark-redaction-v2/manifest/privacy_review.csv` is manually
+reviewed.
 
 DSAA3073 remains useful as a smaller backup pilot. It has four student answer
 PDFs plus a question-and-answer key PDF, but the local course labels are also
@@ -67,8 +71,9 @@ scores.
 
 ## Next Actions
 
-1. Manually review `Data/DSAA3071/benchmark/manifest/privacy_review.csv` and the
-   generated PDFs/previews to confirm no names or student IDs remain visible.
+1. Manually review `Data/DSAA3071/benchmark-redaction-v2/manifest/privacy_review.csv`
+   and the generated PDFs/previews to confirm no names or student IDs remain
+   visible and no essential question or answer content is hidden.
 2. Extract the question IDs, maximum scores, score increments, and grading rules
    from the question-plus-answer-key PDF into an English rubric.
 3. Create a gold score CSV for the same 22 anonymous IDs.

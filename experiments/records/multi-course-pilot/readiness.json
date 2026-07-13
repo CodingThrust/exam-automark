@@ -33,7 +33,7 @@
         "1 user-confirmed combined PDF containing 22 students' answers",
         "1 user-confirmed question-plus-answer-key PDF"
       ],
-      "prep_result": "experiments/records/DSAA3071-week5-prep/prep-result-v2.json",
+      "prep_result": "experiments/records/DSAA3071-week5-prep/prep-result-v3.json",
       "recommended_next_action": "manually review generated anonymized PDFs, then extract rubric and create gold scores",
       "status": "anonymous_candidate_generated_privacy_review_pending"
     },

@@ -98,7 +98,26 @@ V2 local run result:
 - privacy review status: pending
 - model run allowed: false
 
-V2 is the current candidate for manual privacy review.
+Known issue:
+
+- v2 left the top-middle student ID visible on each PDF.
+
+V3 local run result:
+
+- v3 output root: `Data/DSAA3071/benchmark-redaction-v3`
+- redaction rectangle:
+  - `0,0,1,0.08`
+- source PDF page count: 66
+- anonymous students generated: 22
+- pages per student: 3
+- generated student PDFs: 22
+- generated page previews: 66
+- `student_index.csv` rows: 22
+- `privacy_review.csv` rows: 66
+- privacy review status: pending
+- model run allowed: false
+
+V3 is the current candidate for manual privacy review.
 
 ## Privacy Gate
 

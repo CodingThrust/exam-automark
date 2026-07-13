@@ -1,0 +1,115 @@
+{
+  "baseline": {
+    "confidence_accuracy": {
+      "high": 0.9230769230769231,
+      "low": 0.0,
+      "medium": 0.21875
+    },
+    "exact_agreement": 0.8101851851851852,
+    "macro_accuracy": 0.8101851851851851,
+    "mean_signed_error": -0.15393518518518517,
+    "per_question_accuracy": {
+      "Q1a": 0.8888888888888888,
+      "Q1b": 0.9444444444444444,
+      "Q1c": 0.7777777777777778,
+      "Q1d": 0.8333333333333334,
+      "Q2a": 0.6666666666666666,
+      "Q2b": 0.8333333333333334,
+      "Q3a": 0.8888888888888888,
+      "Q3b": 0.8333333333333334,
+      "Q3c": 0.9444444444444444,
+      "Q3d": 0.6666666666666666,
+      "Q3e": 0.7222222222222222,
+      "Q3f": 0.7222222222222222
+    },
+    "severe_error_rate": 0.4444444444444444,
+    "subquestion_mae": 0.20023148148148148,
+    "total_score_mae": 2.263888888888889,
+    "within_1_point_rate": 0.3333333333333333
+  },
+  "baseline_run": {
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "packet_hash": "53be0b2ae80adb39b7fbb08405d7a076e036dcd547f5469254b630ad11960c18",
+    "path": "Data\\physics\\benchmark\\runs\\physics-week9-baseline-candidate-v2\\deepseek-baseline-text-G1-test-r1-strict-schema",
+    "prompt_hash": "8fe0b9bb69d56109b2bbecfcdd6ca05ebe2ae9dff76efe610ecfde0d831cfa5e",
+    "provider": "deepseek",
+    "rubric_hash": "a02e0531b3d78590c66d32e76eba170d2e0400e3e4a1c60436f4f5c2c8e93b21",
+    "run_commit": "9cce18378abb19d817040cb56599457108d7d575",
+    "validation": {
+      "status": "passed",
+      "students_expected": 18,
+      "students_failed": 0,
+      "students_passed": 18
+    },
+    "validation_status": "passed"
+  },
+  "benchmark_root": "Data\\physics\\benchmark",
+  "bootstrap": {
+    "exact_agreement_candidate_minus_baseline": {
+      "lower": 0.004629629629629632,
+      "mean_difference": 0.0324074074074074,
+      "upper": 0.06018518518518517
+    },
+    "samples": 10000,
+    "seed": 20260701
+  },
+  "candidate": {
+    "confidence_accuracy": {
+      "high": 0.917098445595855,
+      "low": 0.5,
+      "medium": 0.11764705882352941
+    },
+    "exact_agreement": 0.8425925925925926,
+    "macro_accuracy": 0.8425925925925926,
+    "mean_signed_error": -0.1388888888888889,
+    "per_question_accuracy": {
+      "Q1a": 0.8888888888888888,
+      "Q1b": 0.9444444444444444,
+      "Q1c": 0.9444444444444444,
+      "Q1d": 0.7777777777777778,
+      "Q2a": 0.7222222222222222,
+      "Q2b": 0.8888888888888888,
+      "Q3a": 0.8888888888888888,
+      "Q3b": 0.7777777777777778,
+      "Q3c": 0.9444444444444444,
+      "Q3d": 0.6666666666666666,
+      "Q3e": 0.8333333333333334,
+      "Q3f": 0.8333333333333334
+    },
+    "severe_error_rate": 0.4444444444444444,
+    "subquestion_mae": 0.18518518518518517,
+    "total_score_mae": 2.0833333333333335,
+    "within_1_point_rate": 0.5
+  },
+  "candidate_minus_baseline": {
+    "exact_agreement": 0.03240740740740733,
+    "macro_accuracy": 0.03240740740740744,
+    "mean_signed_error": 0.01504629629629628,
+    "severe_error_rate": 0.0,
+    "subquestion_mae": -0.015046296296296308,
+    "total_score_mae": -0.18055555555555536,
+    "within_1_point_rate": 0.16666666666666669
+  },
+  "candidate_run": {
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "packet_hash": "bd369e450a9b2cf534cba2fa3c9862f6c81125d7d9709a9af1c3f3641a2a6dd7",
+    "path": "Data\\physics\\benchmark\\runs\\physics-week9-baseline-candidate-v2\\deepseek-candidate-text-G1-test-r1-strict-schema",
+    "prompt_hash": "1eb905236e6f4e4623399e4dc5cd77b80c69fa7a5ea3a2d6a2777f2dcc902c3f",
+    "provider": "deepseek",
+    "rubric_hash": "a02e0531b3d78590c66d32e76eba170d2e0400e3e4a1c60436f4f5c2c8e93b21",
+    "run_commit": "9cce18378abb19d817040cb56599457108d7d575",
+    "validation": {
+      "status": "passed",
+      "students_expected": 18,
+      "students_failed": 0,
+      "students_passed": 18
+    },
+    "validation_status": "passed"
+  },
+  "generated_at": "2026-07-13T08:10:39.173606Z",
+  "record_type": "physics_run_metrics_comparison",
+  "score_count": 216,
+  "student_count": 18
+}

@@ -232,7 +232,28 @@ python -m benchmark.core.cli run-model-packet \
 unset DEEPSEEK_API_KEY
 ```
 
-7. Render the Typst note.
+7. Recompute the metrics artifacts.
+
+```bash
+python -m benchmark.physics.cli metrics \
+  --root Data/physics/benchmark \
+  --baseline-run Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-strict-schema \
+  --candidate-run Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-dev-r1-strict-schema \
+  --output-json experiments/records/physics-week9-baseline-candidate-v2-run/dev-metrics-cli.json \
+  --output-md experiments/records/physics-week9-baseline-candidate-v2-run/dev-metrics-cli.md
+
+python -m benchmark.physics.cli metrics \
+  --root Data/physics/benchmark \
+  --baseline-run Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-test-r1-strict-schema \
+  --candidate-run Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-test-r1-strict-schema \
+  --output-json experiments/records/physics-week9-baseline-candidate-v2-run/heldout-metrics-cli.json \
+  --output-md experiments/records/physics-week9-baseline-candidate-v2-run/heldout-metrics-cli.md
+```
+
+The command reads `gold/primary_scores.csv` and either each run's
+`predictions.csv` or `outputs/*.json`. It does not call any model provider.
+
+8. Render the Typst note.
 
 Install Typst with the platform package manager or the official binary, then run:
 
@@ -242,10 +263,9 @@ typst compile \
   experiments/records/physics-week9-baseline-candidate-v2-run/note.pdf
 ```
 
-The metrics JSON/CSV artifacts are stored under ignored `Data/`. The current
-metrics calculation used the project metric functions recorded in
-`benchmark.physics.metrics`; a first-class CLI wrapper for metrics regeneration
-is still future work.
+The metrics CLI writes reproducible JSON and Markdown summaries. Raw model
+outputs remain under ignored `Data/`; the committed summaries contain only
+anonymous IDs, run metadata hashes, and aggregate metrics.
 
 ## Packet Audit Commands
 

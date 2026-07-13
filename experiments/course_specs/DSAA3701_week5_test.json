@@ -9,8 +9,9 @@
   ],
   "notes": [
     "Draft only: extract real question IDs, max scores, and rubric before grading.",
-    "Local source folder contains one user-confirmed student answer PDF and one question-plus-answer-key PDF.",
-    "The student answer PDF is not yet organized into anonymous packet inputs.",
+    "Local source folder contains one user-confirmed combined PDF with 22 students' answers and one question-plus-answer-key PDF.",
+    "User review suggests this local folder may actually represent DSAA3071; confirm the official course ID before freezing.",
+    "The combined student-answer PDF is not yet split or indexed into anonymous packet inputs.",
     "The placeholder score step is not a grading rule; replace it with the rubric-defined increment before any model run."
   ],
   "questions": [

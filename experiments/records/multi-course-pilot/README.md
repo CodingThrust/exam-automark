@@ -40,15 +40,21 @@ these are true:
 | Course | Current data shape | Useful assets observed | Main blockers | Pilot readiness |
 | --- | --- | --- | --- | --- |
 | DSAA3073 | 5 top-level PDFs | User confirmed 4 student answer PDFs and 1 question-plus-answer-key PDF | Needs anonymous packet input tree, rubric extraction, gold scores, and course ID confirmation because local labels appear inconsistent | Fastest small dry run after anonymization; not yet ready for accuracy claims |
-| DSAA3701 | 2 top-level PDFs | User confirmed 1 student answer PDF and 1 question-plus-answer-key PDF | Needs anonymous packet input tree, rubric extraction, and gold score; sample size is only one student | Smallest packet dry run; not meaningful as an accuracy experiment |
+| DSAA3701 / possible DSAA3071 | 2 top-level PDFs | User confirmed 1 combined PDF containing 22 students' answers and 1 question-plus-answer-key PDF | Needs official course ID confirmation, combined-PDF splitting or indexing, anonymous packet input tree, rubric extraction, and gold scores | Recommended next small pilot after preparation |
 | linearalgebra | 1 quiz PDF plus 135 submission files under `submissions/` | Actual student submissions exist across images, PDFs, HEIC, and one docx | Raw filenames contain identity-like prefixes; no rubric, solution, or gold score file is visible in the current tree | Best representative next pilot after anonymization and rubric/gold preparation |
 
 ## Recommendation
 
 If the goal is to enter multi-course packet construction as quickly as possible,
-start with DSAA3073. It has four student answer PDFs plus a question-and-answer
-key PDF, which is enough to test the packet workflow once the files are copied
-into anonymous `S###` inputs and a small human gold table is created.
+start with the DSAA3701 folder, after confirming whether the official course ID
+should be DSAA3071. It has one combined PDF with 22 students' answers plus a
+question-and-answer key PDF. That is enough for a small but meaningful packet
+workflow once the combined PDF is split or indexed into anonymous `S###` inputs
+and a human gold table is created.
+
+DSAA3073 remains useful as a smaller backup pilot. It has four student answer
+PDFs plus a question-and-answer key PDF, but the local course labels are also
+unclear and the sample is smaller.
 
 If the goal is a more representative second accuracy pilot, linear algebra is
 stronger because it has many more submissions. It should not be run yet. The
@@ -56,19 +62,15 @@ next required step is to create a private anonymous snapshot with `S###` IDs,
 preserve an identity map outside Git, and obtain or extract the rubric plus gold
 scores.
 
-DSAA3701 is useful as a tiny smoke test only. With one student answer, it can
-validate packet format and commands, but it cannot support a reliable accuracy
-conclusion.
-
 ## Next Actions
 
-1. Choose whether the next branch is a DSAA3073 packet dry run or a
-   linear-algebra anonymization branch.
-2. For DSAA3073 or DSAA3701, copy top-level student answer PDFs into a private
-   anonymous packet input tree such as `Data/<course>/benchmark/anonymized/S###/`.
+1. Confirm whether the DSAA3701 folder should be labeled DSAA3071 in experiment
+   records and packet metadata.
+2. For DSAA3701/DSAA3071, split or index the combined `week5.pdf` student-answer
+   source into private anonymous `S###` packet inputs.
 3. Extract the question IDs, maximum scores, score increments, and grading rules
    from the question-plus-answer-key PDF into an English rubric.
-4. Create a small gold score CSV for the same anonymous IDs.
+4. Create a gold score CSV for the same 22 anonymous IDs.
 5. Build prompt packets and run `exam-benchmark audit-packet` before any model
    call.
 6. Only after packet audit passes, decide whether to run DeepSeek text-only,

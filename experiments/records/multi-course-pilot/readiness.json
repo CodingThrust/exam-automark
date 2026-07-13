@@ -20,20 +20,22 @@
     },
     {
       "blocking_issues": [
-        "student answer PDF is not yet copied into an anonymous packet input tree",
-        "gold score is not visible in the current local tree",
+        "official course ID needs confirmation because user review suggests the folder may represent DSAA3071",
+        "combined student-answer PDF is not yet split or indexed into an anonymous packet input tree",
+        "gold scores are not visible in the current local tree",
         "question IDs, maximum scores, and score increments still need extraction",
-        "sample size is too small for an accuracy conclusion"
+        "question-plus-answer-key PDF still needs conversion into an English model-facing rubric"
       ],
       "course_id": "DSAA3701",
+      "course_id_note": "user review suggests this local folder may actually represent DSAA3071",
       "data_inventory": "experiments/data_inventory/DSAA3701.json",
       "draft_course_spec": "experiments/course_specs/DSAA3701_week5_test.json",
       "observed_assets": [
-        "1 user-confirmed student answer PDF",
+        "1 user-confirmed combined PDF containing 22 students' answers",
         "1 user-confirmed question-plus-answer-key PDF"
       ],
-      "recommended_next_action": "use only as a tiny smoke test unless more anonymous submissions and gold scores are added",
-      "status": "tiny_smoke_test_only"
+      "recommended_next_action": "use as the next small multi-course pilot after course ID confirmation, PDF splitting or indexing, rubric extraction, and gold-score creation",
+      "status": "recommended_next_small_pilot_after_preparation"
     },
     {
       "blocking_issues": [

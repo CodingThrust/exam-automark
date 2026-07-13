@@ -28,7 +28,9 @@
     }
   ],
   "scale": 2.0,
-  "source_pdf": "Data/DSAA3071/week5.pdf",
+  "source_pdf": "Data/DSAA3071/DSAA3071-W5Test.pdf",
+  "source_pdf_previous_name": "Data/DSAA3071/week5.pdf",
+  "source_pdf_renamed_at": "2026-07-13",
   "source_sha256": "ab691a2614ce854e53f7830c6ae3c4d35c98b1961db34cbaac99ee7563258cb9",
   "student_count": 22
 }

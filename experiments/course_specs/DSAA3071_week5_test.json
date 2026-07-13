@@ -8,7 +8,9 @@
     "text"
   ],
   "notes": [
-    "Local source folder contains one user-confirmed combined PDF with 22 students' answers and one question-plus-answer-key PDF.",
+    "Local source folder contains one user-confirmed week 5 combined PDF with 22 students' answers and one week 5 question-plus-answer-key PDF.",
+    "The week 5 student-answer source was renamed from Data/DSAA3071/week5.pdf to Data/DSAA3071/DSAA3071-W5Test.pdf on 2026-07-13; the content hash is unchanged.",
+    "DSAA3071 week 2, 3, 4, and 6 student-answer and question-plus-answer-key PDFs are present as later expansion data, not part of this week 5 course spec.",
     "Course ID confirmed by user as DSAA3071 on 2026-07-13.",
     "Anonymized v3 candidate inputs passed user privacy review on 2026-07-13.",
     "Question IDs and max scores were extracted from week5-5.test-solution.pdf.",

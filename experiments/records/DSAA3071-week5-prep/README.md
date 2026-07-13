@@ -2,9 +2,12 @@
 
 Status: local data preparation. No model calls were made.
 
-The source `Data/DSAA3071/week5.pdf` is a combined student-answer PDF confirmed
-by the user to contain 22 students. The pages also contain names and student
-IDs, so the raw PDF must not be copied directly into prompt packets.
+The source `Data/DSAA3071/DSAA3071-W5Test.pdf` is a combined student-answer PDF
+confirmed by the user to contain 22 students. It was previously named
+`Data/DSAA3071/week5.pdf`; the rename was made on 2026-07-13 to match the
+DSAA3071 week naming convention, and the SHA-256 hash is unchanged. The pages
+also contain names and student IDs, so the raw PDF must not be copied directly
+into prompt packets.
 
 ## Method
 
@@ -15,7 +18,7 @@ pixels under a PDF overlay.
 
 Assumption:
 
-- `week5.pdf` has 66 pages.
+- `DSAA3071-W5Test.pdf` has 66 pages.
 - There are 22 students.
 - Each student occupies 3 consecutive pages.
 
@@ -26,7 +29,7 @@ root:
 
 ```powershell
 python experiments\records\DSAA3071-week5-prep\prepare_anonymized_week5.py `
-  --source-pdf Data\DSAA3071\week5.pdf `
+  --source-pdf Data\DSAA3071\DSAA3071-W5Test.pdf `
   --output-root Data\DSAA3071\benchmark `
   --student-count 22 `
   --pages-per-student 3 `
@@ -40,7 +43,7 @@ Cross-platform equivalent:
 
 ```bash
 python experiments/records/DSAA3071-week5-prep/prepare_anonymized_week5.py \
-  --source-pdf Data/DSAA3071/week5.pdf \
+  --source-pdf Data/DSAA3071/DSAA3071-W5Test.pdf \
   --output-root Data/DSAA3071/benchmark \
   --student-count 22 \
   --pages-per-student 3 \
@@ -121,6 +124,15 @@ V3 local run result:
 
 V3 is the approved anonymized input candidate for the next DSAA3071 packet
 preparation step.
+
+## Additional DSAA3071 Source Files
+
+On 2026-07-13, the user added question-plus-answer-key PDFs for DSAA3071 weeks
+2, 3, 4, and 6. Together with the previously corrected student-answer PDFs,
+DSAA3071 now has week 2, 3, 4, 5, and 6 source coverage. Only week 5 has been
+anonymized and privacy-approved so far. Weeks 2, 3, 4, and 6 still require
+separate privacy review, anonymization, rubric extraction, gold-score planning,
+and packet audit before any model call.
 
 ## Rubric And Gold Template
 

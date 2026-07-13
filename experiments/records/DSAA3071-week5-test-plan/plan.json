@@ -3,14 +3,15 @@
   "course_id": "DSAA3071",
   "course_spec_path": "experiments/course_specs/DSAA3071_week5_test.json",
   "data_inventory_path": "experiments/data_inventory/DSAA3071.json",
-  "data_snapshot_hash": "fc9a124431fb77a4a4d91eb132682148b679e7957835b248605cdcd8b34e371b",
+  "data_snapshot_hash": "cf87b373395e381d9d07bbd370c1faa772372b760557b0581dcf9e8a93c04c28",
   "experiment_id": "DSAA3071-week5-test-plan",
   "git_branch": "codex/repro-experiment-framework",
   "git_commit": "75039f8",
   "notes": [
-    "Draft data inventory only; extract real rubric and question scores before packet construction.",
-    "User confirmed one combined PDF contains 22 students' answers and one PDF contains the question plus answer key.",
-    "The combined student-answer PDF must be split or indexed into anonymous packet inputs before any model run.",
+    "Draft plan retained for week 5 packet construction; do not use week 2, 3, 4, or 6 in this plan.",
+    "User confirmed one week 5 combined PDF contains 22 students' answers and one week 5 PDF contains the question plus answer key.",
+    "The week 5 student-answer source was renamed from Data/DSAA3071/week5.pdf to Data/DSAA3071/DSAA3071-W5Test.pdf on 2026-07-13; the source hash is unchanged.",
+    "The combined week 5 student-answer PDF has been split into anonymous packet candidate inputs, but gold scores and prompt packet audit are still pending.",
     "Uses frozen grade-homework skill baseline before any candidate skill changes."
   ],
   "planned_packets": [

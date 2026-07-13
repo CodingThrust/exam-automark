@@ -21,7 +21,7 @@
       "blocking_issues": [
         "gold score template exists but scores are not filled",
         "prompt packets have not been built or audited",
-        "week 2, 3, 4, and 6 source PDFs still need privacy review, anonymization, rubric/gold decisions, and packet planning before use"
+        "week 2, 3, 4, and 6 student-answer and answer-key PDFs still need privacy review, anonymization, rubric extraction, gold-score decisions, and packet planning before use"
       ],
       "course_id": "DSAA3071",
       "course_id_confirmed": true,
@@ -34,7 +34,9 @@
         "draft English rubric extracted from the question-plus-answer-key PDF",
         "Q8 confirmed as 0^(2^n)",
         "blank gold score template created for 22 anonymous students and 10 questions",
-        "additional student-answer source PDFs for weeks 2, 3, 4, and 6 moved from DSAA3073 into DSAA3071 on 2026-07-13"
+        "additional student-answer source PDFs for weeks 2, 3, 4, and 6 moved from DSAA3073 into DSAA3071 on 2026-07-13",
+        "question-plus-answer-key PDFs for weeks 2, 3, 4, and 6 added on 2026-07-13",
+        "week 5 student-answer source renamed to DSAA3071-W5Test.pdf with unchanged source hash"
       ],
       "prep_result": "experiments/records/DSAA3071-week5-prep/prep-result-v3.json",
       "recommended_next_action": "finish the week 5 gold scores first, then build and audit week 5 prompt packets; treat weeks 2, 3, 4, and 6 as later DSAA3071 expansion data",

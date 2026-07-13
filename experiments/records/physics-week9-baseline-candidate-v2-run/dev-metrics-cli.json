@@ -1,0 +1,115 @@
+{
+  "baseline": {
+    "confidence_accuracy": {
+      "high": 0.8674698795180723,
+      "low": 0.0,
+      "medium": 0.4444444444444444
+    },
+    "exact_agreement": 0.7916666666666666,
+    "macro_accuracy": 0.7916666666666666,
+    "mean_signed_error": -0.1796875,
+    "per_question_accuracy": {
+      "Q1a": 0.875,
+      "Q1b": 1.0,
+      "Q1c": 0.875,
+      "Q1d": 0.75,
+      "Q2a": 0.5,
+      "Q2b": 0.875,
+      "Q3a": 0.875,
+      "Q3b": 1.0,
+      "Q3c": 0.75,
+      "Q3d": 0.875,
+      "Q3e": 0.625,
+      "Q3f": 0.5
+    },
+    "severe_error_rate": 0.375,
+    "subquestion_mae": 0.22135416666666666,
+    "total_score_mae": 2.15625,
+    "within_1_point_rate": 0.375
+  },
+  "baseline_run": {
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "packet_hash": "e556b8f12cc32e975c6a27545efeddb2891cb85fa6d3060f57dec3d6abf92601",
+    "path": "Data\\physics\\benchmark\\runs\\physics-week9-baseline-candidate-v2\\deepseek-baseline-text-G1-dev-r1-strict-schema",
+    "prompt_hash": "8fe0b9bb69d56109b2bbecfcdd6ca05ebe2ae9dff76efe610ecfde0d831cfa5e",
+    "provider": "deepseek",
+    "rubric_hash": "a02e0531b3d78590c66d32e76eba170d2e0400e3e4a1c60436f4f5c2c8e93b21",
+    "run_commit": "95622f0aead87187c6410ec0a38ba94cb2866dee",
+    "validation": {
+      "status": "passed",
+      "students_expected": 8,
+      "students_failed": 0,
+      "students_passed": 8
+    },
+    "validation_status": "passed"
+  },
+  "benchmark_root": "Data\\physics\\benchmark",
+  "bootstrap": {
+    "exact_agreement_candidate_minus_baseline": {
+      "lower": 0.010416666666666657,
+      "mean_difference": 0.062499999999999986,
+      "upper": 0.14583333333333331
+    },
+    "samples": 10000,
+    "seed": 20260701
+  },
+  "candidate": {
+    "confidence_accuracy": {
+      "high": 0.9156626506024096,
+      "low": 0.3333333333333333,
+      "medium": 0.5
+    },
+    "exact_agreement": 0.8541666666666666,
+    "macro_accuracy": 0.8541666666666666,
+    "mean_signed_error": -0.0625,
+    "per_question_accuracy": {
+      "Q1a": 0.875,
+      "Q1b": 1.0,
+      "Q1c": 0.875,
+      "Q1d": 0.75,
+      "Q2a": 0.625,
+      "Q2b": 0.875,
+      "Q3a": 0.875,
+      "Q3b": 1.0,
+      "Q3c": 0.75,
+      "Q3d": 1.0,
+      "Q3e": 0.75,
+      "Q3f": 0.875
+    },
+    "severe_error_rate": 0.125,
+    "subquestion_mae": 0.10416666666666667,
+    "total_score_mae": 0.75,
+    "within_1_point_rate": 0.75
+  },
+  "candidate_minus_baseline": {
+    "exact_agreement": 0.0625,
+    "macro_accuracy": 0.0625,
+    "mean_signed_error": 0.1171875,
+    "severe_error_rate": -0.25,
+    "subquestion_mae": -0.11718749999999999,
+    "total_score_mae": -1.40625,
+    "within_1_point_rate": 0.375
+  },
+  "candidate_run": {
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "packet_hash": "8987ce06f54a46ba242703df0d028ffb8de56143a00a312b289e1f39fc7aed6d",
+    "path": "Data\\physics\\benchmark\\runs\\physics-week9-baseline-candidate-v2\\deepseek-candidate-text-G1-dev-r1-strict-schema",
+    "prompt_hash": "1eb905236e6f4e4623399e4dc5cd77b80c69fa7a5ea3a2d6a2777f2dcc902c3f",
+    "provider": "deepseek",
+    "rubric_hash": "a02e0531b3d78590c66d32e76eba170d2e0400e3e4a1c60436f4f5c2c8e93b21",
+    "run_commit": "95622f0aead87187c6410ec0a38ba94cb2866dee",
+    "validation": {
+      "status": "passed",
+      "students_expected": 8,
+      "students_failed": 0,
+      "students_passed": 8
+    },
+    "validation_status": "passed"
+  },
+  "generated_at": "2026-07-13T08:10:54.437014Z",
+  "record_type": "physics_run_metrics_comparison",
+  "score_count": 96,
+  "student_count": 8
+}

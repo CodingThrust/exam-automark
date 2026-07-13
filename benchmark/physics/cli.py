@@ -18,6 +18,11 @@ from .codex_import import (
 from .deepseek_runs import run_deepseek_condition
 from .evaluation import evaluate_conditions, freeze_revised_workflow
 from .gold import create_score_template
+from .metrics import (
+    compare_run_directories,
+    write_metrics_json,
+    write_metrics_markdown,
+)
 from .packets import build_blind_packet
 from .privacy import assert_anonymous_name, assert_privacy_approved
 from .providers import DeepSeekProvider
@@ -139,6 +144,17 @@ def _build_parser() -> argparse.ArgumentParser:
         "report", help="render the anonymous benchmark report"
     )
     report_parser.add_argument("--root", type=Path, required=True)
+
+    metrics_parser = subparsers.add_parser(
+        "metrics", help="compare a baseline run directory against a candidate run directory"
+    )
+    metrics_parser.add_argument("--root", type=Path, required=True)
+    metrics_parser.add_argument("--baseline-run", type=Path, required=True)
+    metrics_parser.add_argument("--candidate-run", type=Path, required=True)
+    metrics_parser.add_argument("--output-json", type=Path)
+    metrics_parser.add_argument("--output-md", type=Path)
+    metrics_parser.add_argument("--bootstrap-seed", type=int, default=20260701)
+    metrics_parser.add_argument("--bootstrap-samples", type=int, default=10_000)
     return parser
 
 
@@ -202,6 +218,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(freeze_revised_workflow(args.root, args.candidate))
         elif args.command == "report":
             print(write_benchmark_report(args.root))
+        elif args.command == "metrics":
+            result = compare_run_directories(
+                args.root,
+                args.baseline_run,
+                args.candidate_run,
+                bootstrap_seed=args.bootstrap_seed,
+                bootstrap_samples=args.bootstrap_samples,
+            )
+            if args.output_json:
+                write_metrics_json(args.output_json, result)
+            if args.output_md:
+                write_metrics_markdown(args.output_md, result)
+            print(json.dumps(result, sort_keys=True))
         return 0
     except SystemExit as error:
         return int(error.code)

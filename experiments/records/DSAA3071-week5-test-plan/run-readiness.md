@@ -1,6 +1,6 @@
 # DSAA3071 week5_test Run Readiness
 
-Status: **not_ready**
+Status: **ready**
 
 No model calls are recorded by this checklist.
 
@@ -12,7 +12,7 @@ No model calls are recorded by this checklist.
 - Course spec: `experiments/course_specs/DSAA3071_week5_test.json`
 - Data inventory: `experiments/data_inventory/DSAA3071.json`
 - Git: `codex/multi-course-pilot-inventory @ ca8954b`
-- Current Git: `codex/multi-course-pilot-inventory @ 5371f25e6d9a3725e7cb433c09b47a8115256715`
+- Current Git: `codex/multi-course-pilot-inventory @ c5fd48a8875d48747da4d2c3360b07da5d25915f`
 - Baseline skill: `skill_baseline_v1`
 - Candidate skill: `skill_candidate_v2`
 
@@ -44,11 +44,11 @@ No model calls are recorded by this checklist.
 | `no_model_result_artifacts_in_plan_dirs` | passed | no experiment, metrics, or prediction artifacts found |
 | `current_git_branch_matches_plan` | passed | current=codex/multi-course-pilot-inventory; planned=codex/multi-course-pilot-inventory |
 | `planned_git_commit_exists` | passed | planned=ca8954b; resolved=ca8954b4be01233aa4abfec306605bd4bc2b8b3a |
-| `current_git_head_contains_plan_commit` | passed | HEAD=5371f25e6d9a3725e7cb433c09b47a8115256715; planned=ca8954b4be01233aa4abfec306605bd4bc2b8b3a |
+| `current_git_head_contains_plan_commit` | passed | HEAD=c5fd48a8875d48747da4d2c3360b07da5d25915f; planned=ca8954b4be01233aa4abfec306605bd4bc2b8b3a |
 | `post_anchor_changes_are_record_only` | passed | post-anchor commits only touch experiment records |
-| `git_worktree_clean` | failed | 9 uncommitted/untracked entries; commit before model calls |
+| `git_worktree_clean` | passed | working tree clean |
 | `data_ignored_by_git` | passed | Data/ is ignored and has no tracked files |
 
 ## Next Actions
 
-- Commit or otherwise freeze the current repository state before model calls.
+- Ready to run only after the researcher explicitly starts model calls.

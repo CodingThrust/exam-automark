@@ -30,7 +30,7 @@ root:
 ```powershell
 python experiments\records\DSAA3071-week5-prep\prepare_anonymized_week5.py `
   --source-pdf Data\DSAA3071\DSAA3071-W5Test.pdf `
-  --output-root Data\DSAA3071\benchmark `
+  --output-root Data\DSAA3071\week5-benchmark-redaction-v1 `
   --student-count 22 `
   --pages-per-student 3 `
   --redaction-rect 0,0,0.48,0.08 `
@@ -44,7 +44,7 @@ Cross-platform equivalent:
 ```bash
 python experiments/records/DSAA3071-week5-prep/prepare_anonymized_week5.py \
   --source-pdf Data/DSAA3071/DSAA3071-W5Test.pdf \
-  --output-root Data/DSAA3071/benchmark \
+  --output-root Data/DSAA3071/week5-benchmark-redaction-v1 \
   --student-count 22 \
   --pages-per-student 3 \
   --redaction-rect 0,0,0.48,0.08 \
@@ -55,7 +55,7 @@ python experiments/records/DSAA3071-week5-prep/prepare_anonymized_week5.py \
 
 ## Outputs
 
-Generated local outputs are under ignored `Data/DSAA3071/benchmark/`:
+Generated local outputs are under ignored `Data/DSAA3071/week5-benchmark-redaction-v1/`:
 
 - `anonymized/S###/week5.pdf`
 - `manifest/student_index.csv`
@@ -65,7 +65,7 @@ Generated local outputs are under ignored `Data/DSAA3071/benchmark/`:
 
 Local run result:
 
-- v1 output root: `Data/DSAA3071/benchmark`
+- v1 output root: `Data/DSAA3071/week5-benchmark-redaction-v1`
 - source PDF page count: 66
 - anonymous students generated: 22
 - pages per student: 3
@@ -87,7 +87,7 @@ Known issue:
 
 V2 local run result:
 
-- v2 output root: `Data/DSAA3071/benchmark-redaction-v2`
+- v2 output root: `Data/DSAA3071/week5-benchmark-redaction-v2`
 - redaction rectangles:
   - `0,0,0.48,0.08`
   - `0.62,0,1,0.08`
@@ -107,7 +107,7 @@ Known issue:
 
 V3 local run result:
 
-- v3 output root: `Data/DSAA3071/benchmark-redaction-v3`
+- v3 output root: `Data/DSAA3071/week5-benchmark-redaction-v3`
 - redaction rectangle:
   - `0,0,1,0.08`
 - source PDF page count: 66
@@ -145,7 +145,7 @@ The draft English rubric was extracted from
 
 The local gold score template was generated under ignored `Data/`:
 
-- `Data/DSAA3071/benchmark-redaction-v3/gold/primary_scores.csv`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv`
 - rows: 220
 - students: 22
 - questions: 10
@@ -172,8 +172,8 @@ The tracked records include:
 
 The generated packets live under ignored `Data/` and must not be committed:
 
-- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/`
-- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/`
 
 This is still not an accuracy experiment. Gold scores, transcript outputs, and
 the multimodal/headless run protocol remain pending.

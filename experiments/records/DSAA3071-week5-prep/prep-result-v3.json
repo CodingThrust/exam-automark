@@ -1,12 +1,12 @@
 {
   "anonymous_id_pattern": "S###",
-  "anonymized_root": "Data/DSAA3071/benchmark-redaction-v3/anonymized",
+  "anonymized_root": "Data/DSAA3071/week5-benchmark-redaction-v3/anonymized",
   "generated_at": "2026-07-13T10:07:44.489867Z",
   "generated_page_preview_count": 66,
   "generated_student_pdf_count": 22,
   "gold_score_template": {
     "filled_scores": 0,
-    "path": "Data/DSAA3071/benchmark-redaction-v3/gold/primary_scores.csv",
+    "path": "Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv",
     "question_count": 10,
     "row_count": 220,
     "status": "created_scores_pending",
@@ -17,7 +17,7 @@
     "gold score filling pending",
     "prompt packet audit pending"
   ],
-  "output_root": "Data/DSAA3071/benchmark-redaction-v3",
+  "output_root": "Data/DSAA3071/week5-benchmark-redaction-v3",
   "page_count": 66,
   "pages_per_student": 3,
   "prep_script": "experiments/records/DSAA3071-week5-prep/prepare_anonymized_week5.py",

@@ -22,7 +22,7 @@ model run. It records:
 
 The dry-run packets use the privacy-approved anonymized v3 PDFs:
 
-`Data/DSAA3071/benchmark-redaction-v3/anonymized/S###/week5.pdf`
+`Data/DSAA3071/week5-benchmark-redaction-v3/anonymized/S###/week5.pdf`
 
 ## Split
 
@@ -49,14 +49,14 @@ Tracked prompt snapshots:
 
 Generated packet prompt paths:
 
-- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1/prompt.txt`
-- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-test-r1/prompt.txt`
-- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1/prompt.txt`
-- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-test-r1/prompt.txt`
-- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-dev-r1/prompt.txt`
-- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-test-r1/prompt.txt`
-- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-dev-r1/prompt.txt`
-- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-test-r1/prompt.txt`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1/prompt.txt`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-test-r1/prompt.txt`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1/prompt.txt`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-test-r1/prompt.txt`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-dev-r1/prompt.txt`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-test-r1/prompt.txt`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-dev-r1/prompt.txt`
+- `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-test-r1/prompt.txt`
 
 ## Plans
 
@@ -106,8 +106,8 @@ python -m benchmark.core.cli build-packet `
   --task transcribe `
   --prompt experiments/records/DSAA3071-week5-test-plan/prompts/transcribe_standard_v1.txt `
   --students-file experiments/records/DSAA3071-week5-test-plan/students-development.txt `
-  --input-root Data/DSAA3071/benchmark-redaction-v3/anonymized `
-  --output-root Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf `
+  --input-root Data/DSAA3071/week5-benchmark-redaction-v3/anonymized `
+  --output-root Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf `
   --metadata experiment_id=DSAA3071-week5-test-plan `
   --metadata split=development `
   --metadata input_mode=pdf
@@ -126,7 +126,7 @@ Then record each built packet:
 ```powershell
 python -m benchmark.core.cli record-built-packet `
   --plan experiments/records/DSAA3071-week5-test-plan/plan.json `
-  --packet Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1
+  --packet Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1
 ```
 
 ## Reproduce On macOS Or Linux
@@ -141,8 +141,8 @@ python -m benchmark.core.cli build-packet \
   --task transcribe \
   --prompt experiments/records/DSAA3071-week5-test-plan/prompts/transcribe_standard_v1.txt \
   --students-file experiments/records/DSAA3071-week5-test-plan/students-development.txt \
-  --input-root Data/DSAA3071/benchmark-redaction-v3/anonymized \
-  --output-root Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf \
+  --input-root Data/DSAA3071/week5-benchmark-redaction-v3/anonymized \
+  --output-root Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf \
   --metadata experiment_id=DSAA3071-week5-test-plan \
   --metadata split=development \
   --metadata input_mode=pdf
@@ -153,7 +153,7 @@ Then record:
 ```bash
 python -m benchmark.core.cli record-built-packet \
   --plan experiments/records/DSAA3071-week5-test-plan/plan.json \
-  --packet Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1
+  --packet Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1
 ```
 
 ## Current Blocks
@@ -162,7 +162,7 @@ This dry run is not an accuracy experiment yet.
 
 Blocked items:
 
-- `Data/DSAA3071/benchmark-redaction-v3/gold/primary_scores.csv` is still empty.
+- `Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv` is still empty.
 - No transcript outputs have been produced yet.
 - DeepSeek's public text API cannot directly grade PDF/image inputs.
 - The multimodal/headless runner is not implemented yet.

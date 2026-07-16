@@ -37,7 +37,7 @@ official correction.
 - Course spec updated:
   `experiments/course_specs/DSAA3071_week5_test.json`
 - Local gold score template:
-  `Data/DSAA3071/benchmark-redaction-v3/gold/primary_scores.csv`
+  `Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv`
 
 ## Remaining Work
 

@@ -68,11 +68,11 @@ workflow once the combined PDF is split or indexed into anonymous `S###` inputs
 and a human gold table is created.
 
 The first anonymized candidate input tree was generated under ignored
-`Data/DSAA3071/benchmark/`, but user review found that the full-width redaction
+`Data/DSAA3071/week5-benchmark-redaction-v1/`, but user review found that the full-width redaction
 band hid some question and answer content. The v2 candidate used smaller
 left/right header rectangles, but user review found that top-middle student IDs
 remained visible. The current v3 candidate is under
-`Data/DSAA3071/benchmark-redaction-v3/` and uses a full-width top 8% redaction
+`Data/DSAA3071/week5-benchmark-redaction-v3/` and uses a full-width top 8% redaction
 band. User review approved the v3 anonymization on 2026-07-13. The draft
 English rubric and a blank gold-score template have been created. Q8 has been
 confirmed as `0^(2^n)`. It is still not ready for model calls until gold scores
@@ -93,7 +93,7 @@ scores.
 ## Next Actions
 
 1. Human-review `experiments/records/DSAA3071-week5-prep/rubric_v0.json`.
-2. Fill `Data/DSAA3071/benchmark-redaction-v3/gold/primary_scores.csv` for the
+2. Fill `Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv` for the
    22 anonymous IDs.
 3. Build prompt packets and run `exam-benchmark audit-packet` before any model
    call.

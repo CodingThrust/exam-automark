@@ -1,11 +1,11 @@
 {
   "anonymous_id_pattern": "S###",
-  "anonymized_root": "Data/DSAA3071/benchmark-redaction-v2/anonymized",
+  "anonymized_root": "Data/DSAA3071/week5-benchmark-redaction-v2/anonymized",
   "generated_at": "2026-07-13T09:58:23.277297Z",
   "generated_page_preview_count": 66,
   "generated_student_pdf_count": 22,
   "model_run_allowed": false,
-  "output_root": "Data/DSAA3071/benchmark-redaction-v2",
+  "output_root": "Data/DSAA3071/week5-benchmark-redaction-v2",
   "page_count": 66,
   "pages_per_student": 3,
   "prep_script": "experiments/records/DSAA3071-week5-prep/prepare_anonymized_week5.py",

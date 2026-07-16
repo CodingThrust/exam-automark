@@ -4,44 +4,44 @@
     {
       "audit_status": "passed",
       "condition": "T1",
-      "manifest_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1/manifest.json",
+      "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1/manifest.json",
       "packet_hash": "710b4d97de4310a51549d53d8cb2df6d6ba25e9891076302872ff26c8f260f34",
       "packet_id": "T1-dev-r1",
-      "packet_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1",
-      "prompt_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1/prompt.txt",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1",
+      "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1/prompt.txt",
       "split": "development",
       "task": "transcribe"
     },
     {
       "audit_status": "passed",
       "condition": "T1",
-      "manifest_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-test-r1/manifest.json",
+      "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-test-r1/manifest.json",
       "packet_hash": "8dc513924b99cb2e34019b1aafd6c314be80e526594ee0d53dd75eacb1c65d0a",
       "packet_id": "T1-test-r1",
-      "packet_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-test-r1",
-      "prompt_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-test-r1/prompt.txt",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-test-r1",
+      "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-test-r1/prompt.txt",
       "split": "heldout",
       "task": "transcribe"
     },
     {
       "audit_status": "passed",
       "condition": "G1",
-      "manifest_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1/manifest.json",
+      "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1/manifest.json",
       "packet_hash": "fabee03c35acb9826a28df90989c4bcc2b5d8243d983d535f9bf26911d95b6f1",
       "packet_id": "G1-dev-r1",
-      "packet_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1",
-      "prompt_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1/prompt.txt",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1",
+      "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1/prompt.txt",
       "split": "development",
       "task": "grade"
     },
     {
       "audit_status": "passed",
       "condition": "G1",
-      "manifest_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-test-r1/manifest.json",
+      "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-test-r1/manifest.json",
       "packet_hash": "19a6f140e5b197973ff64c4e0b80becfc2221ff1d97b4b411c8d39052308dd6b",
       "packet_id": "G1-test-r1",
-      "packet_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-test-r1",
-      "prompt_path": "Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-test-r1/prompt.txt",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-test-r1",
+      "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-test-r1/prompt.txt",
       "split": "heldout",
       "task": "grade"
     }
@@ -55,7 +55,7 @@
   "git_commit": "ca8954b",
   "notes": [
     "Baseline DSAA3071 week 5 packet dry-run plan; no model calls.",
-    "Uses privacy-approved anonymized v3 PDFs under ignored Data/DSAA3071/benchmark-redaction-v3.",
+    "Uses privacy-approved anonymized v3 PDFs under ignored Data/DSAA3071/week5-benchmark-redaction-v3.",
     "DeepSeek text API cannot consume PDF inputs directly; PDF packets are for multimodal/headless runners, and text-only runs require a completed transcript packet first.",
     "Gold scores remain pending, so model accuracy metrics are still blocked."
   ],

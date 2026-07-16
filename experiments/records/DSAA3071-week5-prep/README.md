@@ -153,6 +153,31 @@ The local gold score template was generated under ignored `Data/`:
 
 The template must be manually filled before metrics can be computed.
 
+## Packet Dry Run
+
+On 2026-07-16, baseline and candidate-v2 DSAA3071 week 5 prompt packets were
+built from the approved v3 anonymized PDFs without making any model calls.
+The dry-run record is tracked at:
+
+- `experiments/records/DSAA3071-week5-test-plan/PACKET-DRY-RUN.md`
+
+The tracked records include:
+
+- deterministic anonymous dev/held-out split files
+- baseline and candidate-v2 strict-schema prompt snapshots
+- baseline plan: `experiments/records/DSAA3071-week5-test-plan/plan.json`
+- candidate-v2 plan:
+  `experiments/records/DSAA3071-week5-test-plan/candidate-v2-plan.json`
+- audit-passed packet hashes for all T1/G1 dev/test packets
+
+The generated packets live under ignored `Data/` and must not be committed:
+
+- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/`
+- `Data/DSAA3071/benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/`
+
+This is still not an accuracy experiment. Gold scores, transcript outputs, and
+the multimodal/headless run protocol remain pending.
+
 ## Privacy Gate
 
 The generated PDFs are not approved for model runs until

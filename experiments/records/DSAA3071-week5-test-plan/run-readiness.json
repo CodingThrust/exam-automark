@@ -1,0 +1,200 @@
+{
+  "anchors": {
+    "assessment_id": "week5_test",
+    "baseline": {
+      "experiment_id": "DSAA3071-week5-test-plan",
+      "packet_hashes": {
+        "G1-dev-r1": "fabee03c35acb9826a28df90989c4bcc2b5d8243d983d535f9bf26911d95b6f1",
+        "G1-test-r1": "19a6f140e5b197973ff64c4e0b80becfc2221ff1d97b4b411c8d39052308dd6b",
+        "T1-dev-r1": "710b4d97de4310a51549d53d8cb2df6d6ba25e9891076302872ff26c8f260f34",
+        "T1-test-r1": "8dc513924b99cb2e34019b1aafd6c314be80e526594ee0d53dd75eacb1c65d0a"
+      },
+      "prompt_template_hashes": {
+        "grade_standard_v1_strict_schema": "8fe0b9bb69d56109b2bbecfcdd6ca05ebe2ae9dff76efe610ecfde0d831cfa5e",
+        "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
+      },
+      "skill_hashes": {
+        "agents": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27",
+        "claude": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27"
+      },
+      "skill_version_id": "skill_baseline_v1"
+    },
+    "candidate": {
+      "experiment_id": "DSAA3071-week5-candidate-v2-plan",
+      "packet_hashes": {
+        "G1-dev-r1": "5ef409aaa9344c54c7f4bef59417897e455c0eac62ed2e2a0e12df19081257f9",
+        "G1-test-r1": "6b6c00faa16c5b6b88329000161f800fc96803541424fdcb5e2453e539ba0de6",
+        "T1-dev-r1": "0f361a1691af59c80a6c723e5599eabe5314189a6c8f7471bfc7f331c9334c06",
+        "T1-test-r1": "13a6299c61868a32177a800d776597a28697b9a90fe397a42eebc40e52b6d573"
+      },
+      "prompt_template_hashes": {
+        "grade_candidate_v2_strict_schema": "1eb905236e6f4e4623399e4dc5cd77b80c69fa7a5ea3a2d6a2777f2dcc902c3f",
+        "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
+      },
+      "skill_hashes": {
+        "agents": "d8ba4c855e772e6562b521a12a80558297e8c310788c4bbbca3cdc663d56e9c0",
+        "claude": "d8ba4c855e772e6562b521a12a80558297e8c310788c4bbbca3cdc663d56e9c0"
+      },
+      "skill_version_id": "skill_candidate_v2"
+    },
+    "course_id": "DSAA3071",
+    "course_spec_path": "experiments/course_specs/DSAA3071_week5_test.json",
+    "current_git_branch": "codex/multi-course-pilot-inventory",
+    "current_git_commit": "ca8954b4be01233aa4abfec306605bd4bc2b8b3a",
+    "data_inventory_path": "experiments/data_inventory/DSAA3071.json",
+    "data_snapshot_hash": "cf87b373395e381d9d07bbd370c1faa772372b760557b0581dcf9e8a93c04c28",
+    "git_branch": "codex/multi-course-pilot-inventory",
+    "git_commit": "ca8954b"
+  },
+  "baseline_plan_path": "experiments/records/DSAA3071-week5-test-plan/plan.json",
+  "candidate_plan_path": "experiments/records/DSAA3071-week5-test-plan/candidate-v2-plan.json",
+  "checks": [
+    {
+      "detail": "baseline=packets_built; candidate=packets_built",
+      "id": "plans_are_packetized",
+      "status": "passed"
+    },
+    {
+      "detail": "DSAA3071/week5_test vs DSAA3071/week5_test",
+      "id": "same_course_and_assessment",
+      "status": "passed"
+    },
+    {
+      "detail": "cf87b373395e... vs cf87b373395e...",
+      "id": "same_data_snapshot",
+      "status": "passed"
+    },
+    {
+      "detail": "inventory=experiments/data_inventory/DSAA3071.json; course_spec=experiments/course_specs/DSAA3071_week5_test.json",
+      "id": "same_data_inventory_and_course_spec",
+      "status": "passed"
+    },
+    {
+      "detail": "codex/multi-course-pilot-inventory@ca8954b vs codex/multi-course-pilot-inventory@ca8954b",
+      "id": "same_git_anchor",
+      "status": "passed"
+    },
+    {
+      "detail": "skill_baseline_v1 vs skill_candidate_v2",
+      "id": "different_skill_versions",
+      "status": "passed"
+    },
+    {
+      "detail": "candidate skill hash must differ from baseline skill hash",
+      "id": "different_skill_hashes",
+      "status": "passed"
+    },
+    {
+      "detail": "G1-dev-r1, G1-test-r1, T1-dev-r1, T1-test-r1",
+      "id": "same_planned_packet_ids",
+      "status": "passed"
+    },
+    {
+      "detail": "G1-dev-r1, G1-test-r1, T1-dev-r1, T1-test-r1",
+      "id": "same_built_packet_ids",
+      "status": "passed"
+    },
+    {
+      "detail": "all built packet records must have audit_status=passed",
+      "id": "all_packets_audit_recorded_passed",
+      "status": "passed"
+    },
+    {
+      "detail": "['grade_standard_v1_strict_schema'] vs ['grade_candidate_v2_strict_schema']",
+      "id": "grade_prompt_differs",
+      "status": "passed"
+    },
+    {
+      "detail": "['transcribe_standard_v1'] vs ['transcribe_standard_v1']",
+      "id": "transcribe_prompt_held_constant",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet manifests are present",
+      "id": "packet_manifests_exist",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet paths should be under ignored Data/",
+      "id": "packet_paths_are_local_data",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet directories exist",
+      "id": "packet_directories_exist",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet hashes match",
+      "id": "packet_hashes_match_local_files",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet audits pass",
+      "id": "packet_audits_pass_now",
+      "status": "passed"
+    },
+    {
+      "detail": "all manifest prompt hashes match plan templates",
+      "id": "manifest_prompt_hashes_match_plan",
+      "status": "passed"
+    },
+    {
+      "detail": "all packet metadata matches plan",
+      "id": "manifest_metadata_matches_plan",
+      "status": "passed"
+    },
+    {
+      "detail": "matching packet ids use the same student ids and input hashes",
+      "id": "same_students_and_inputs_per_packet",
+      "status": "passed"
+    },
+    {
+      "detail": "grade packets use the same rubric hash",
+      "id": "same_rubric_for_grade_packets",
+      "status": "passed"
+    },
+    {
+      "detail": "no experiment, metrics, or prediction artifacts found",
+      "id": "no_model_result_artifacts_in_plan_dirs",
+      "status": "passed"
+    },
+    {
+      "detail": "current=codex/multi-course-pilot-inventory; planned=codex/multi-course-pilot-inventory",
+      "id": "current_git_branch_matches_plan",
+      "status": "passed"
+    },
+    {
+      "detail": "planned=ca8954b; resolved=ca8954b4be01233aa4abfec306605bd4bc2b8b3a",
+      "id": "planned_git_commit_exists",
+      "status": "passed"
+    },
+    {
+      "detail": "HEAD=ca8954b4be01233aa4abfec306605bd4bc2b8b3a; planned=ca8954b4be01233aa4abfec306605bd4bc2b8b3a",
+      "id": "current_git_head_contains_plan_commit",
+      "status": "passed"
+    },
+    {
+      "detail": "HEAD is exactly the planned commit",
+      "id": "post_anchor_changes_are_record_only",
+      "status": "passed"
+    },
+    {
+      "detail": "10 uncommitted/untracked entries; commit before model calls",
+      "id": "git_worktree_clean",
+      "status": "failed"
+    },
+    {
+      "detail": "Data/ is ignored and has no tracked files",
+      "id": "data_ignored_by_git",
+      "status": "passed"
+    }
+  ],
+  "model_run_status": "not_started",
+  "next_actions": [
+    "Commit or otherwise freeze the current repository state before model calls."
+  ],
+  "report_type": "run_readiness",
+  "schema_version": 1,
+  "status": "not_ready"
+}

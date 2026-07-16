@@ -1,0 +1,149 @@
+{
+  "assessment_id": "week5_test",
+  "course_id": "DSAA3071",
+  "development_count": 7,
+  "heldout_count": 15,
+  "method": "Sort anonymous student IDs by SHA-256(seed + '|' + student_id). The first 7 sorted IDs are the development split and the remaining 15 IDs are the held-out split.",
+  "notes": [
+    "The split uses anonymous IDs only and does not record any identity mapping.",
+    "The source anonymized input set contains 22 students, S001 through S022.",
+    "The development split is for prompt/rubric iteration only; held-out students should not be used to tune the grading prompt or skill."
+  ],
+  "schema_version": 1,
+  "seed": "DSAA3071-week5-test-v1-20260716",
+  "split_assignments": [
+    {
+      "rank": 1,
+      "split": "development",
+      "split_key": "02842db91c27569deee25895bb8eb4f08b21936689b9b9f53efe1386f6d2b3fd",
+      "student_id": "S017"
+    },
+    {
+      "rank": 2,
+      "split": "development",
+      "split_key": "243ff436b7d852a75406eeae5813ab4462356420135816028f3f32548b78aa41",
+      "student_id": "S021"
+    },
+    {
+      "rank": 3,
+      "split": "development",
+      "split_key": "267d2fcf9ab467bf32564bf4720c41ece6ca7a7802bb0b6fcdf6f5dfc74da972",
+      "student_id": "S002"
+    },
+    {
+      "rank": 4,
+      "split": "development",
+      "split_key": "26acab3cfb1a68a662b93212e5073f89d61895df6413339a801a092e1300e320",
+      "student_id": "S015"
+    },
+    {
+      "rank": 5,
+      "split": "development",
+      "split_key": "359b77aa767f79f699e2a2ff2af393dcd2131613007482d1a55ed51c2414b81d",
+      "student_id": "S020"
+    },
+    {
+      "rank": 6,
+      "split": "development",
+      "split_key": "41ad535ba6bc79c97555e8682562b7b676b98267f6183a04d3746aeb7344d38b",
+      "student_id": "S016"
+    },
+    {
+      "rank": 7,
+      "split": "development",
+      "split_key": "55bd2d950fda5d0c8e52cc22f433e15f41e128e28ae9711bbe606946e6e53978",
+      "student_id": "S022"
+    },
+    {
+      "rank": 8,
+      "split": "heldout",
+      "split_key": "57eb479ecb72b2683245f7e71e56bb43dc4ad67aaf6053422e2a4ddd300dee62",
+      "student_id": "S018"
+    },
+    {
+      "rank": 9,
+      "split": "heldout",
+      "split_key": "7187c8663406a095f116b493d915b7484e9678dfd85fb9f886640d440891474a",
+      "student_id": "S005"
+    },
+    {
+      "rank": 10,
+      "split": "heldout",
+      "split_key": "8659720b9b7c8050d396c5ff2fd24769fe2f4acffa276c7be0e7655a5483b15f",
+      "student_id": "S003"
+    },
+    {
+      "rank": 11,
+      "split": "heldout",
+      "split_key": "896576fb605441e88b40bdece5333eb3ce40d6baf093bc83a078a3a89220fa31",
+      "student_id": "S008"
+    },
+    {
+      "rank": 12,
+      "split": "heldout",
+      "split_key": "8c550bfc9a21b9d2803913404a35044dfe03ebaff814f8f1bd985a1a25b714d4",
+      "student_id": "S011"
+    },
+    {
+      "rank": 13,
+      "split": "heldout",
+      "split_key": "9c8b93684376aba6453382bd3052a1cf3800f4decdac48c52682758bf195853a",
+      "student_id": "S019"
+    },
+    {
+      "rank": 14,
+      "split": "heldout",
+      "split_key": "9de93004814eac3e19ac7fc91cfcbccb8a5471b2e1cd2d95caee7d5564cc71fd",
+      "student_id": "S012"
+    },
+    {
+      "rank": 15,
+      "split": "heldout",
+      "split_key": "b7e8e390e75e3778882537ba07e4de73803565af92d44749dc058231871ab764",
+      "student_id": "S009"
+    },
+    {
+      "rank": 16,
+      "split": "heldout",
+      "split_key": "bab283b81200b8c424a17c3730a021e6e85f492fe783c856016e3192edd7efbe",
+      "student_id": "S007"
+    },
+    {
+      "rank": 17,
+      "split": "heldout",
+      "split_key": "c1e595c5a9e3f053cf8f8b8b9695da52873cee578303cf75f2d4d4b9baf1ae7a",
+      "student_id": "S004"
+    },
+    {
+      "rank": 18,
+      "split": "heldout",
+      "split_key": "c93109b2efceca11664dcb546543fa22d9572ab7fb1b58f05eed52b48695f62d",
+      "student_id": "S013"
+    },
+    {
+      "rank": 19,
+      "split": "heldout",
+      "split_key": "d00bff6d5c1329faded5a5fba27083dcd2a6a0962652dc3a46d9e3ebf1f540da",
+      "student_id": "S006"
+    },
+    {
+      "rank": 20,
+      "split": "heldout",
+      "split_key": "d1f55e29348410cbdb8559a112849e3b828d99a5924d4c55198e8f635dbe181f",
+      "student_id": "S001"
+    },
+    {
+      "rank": 21,
+      "split": "heldout",
+      "split_key": "d5b502f9169a30a10fc8f67afde0e9f5524edd470d48b4d46b0552b9da2b536d",
+      "student_id": "S014"
+    },
+    {
+      "rank": 22,
+      "split": "heldout",
+      "split_key": "d6f8f88152d2b75c6c0434ec19d1fd0621e4b33869eef5c2690257f3c46253d3",
+      "student_id": "S010"
+    }
+  ],
+  "student_count": 22
+}

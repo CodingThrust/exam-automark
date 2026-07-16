@@ -76,6 +76,12 @@ class ExperimentRecordFileTests(unittest.TestCase):
             if plan.experiment_id == "physics-week9-candidate-v2-plan":
                 self.assertEqual(plan.skill_version_id, "skill_candidate_v2")
                 self.assertIn("grade_candidate_v2", plan.prompt_template_hashes)
+            elif plan.experiment_id == "DSAA3071-week5-test-plan":
+                self.assertEqual(plan.skill_version_id, "skill_baseline_v1")
+                self.assertIn(
+                    "grade_standard_v1_strict_schema",
+                    plan.prompt_template_hashes,
+                )
             else:
                 self.assertEqual(plan.skill_version_id, "skill_baseline_v1")
                 self.assertIn("grade_standard_v1", plan.prompt_template_hashes)

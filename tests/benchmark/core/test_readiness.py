@@ -47,7 +47,8 @@ class RunReadinessTests(unittest.TestCase):
         self.assertEqual(_status(report, "planned_git_commit_exists"), "warning")
         self.assertEqual(_status(report, "grade_prompt_differs"), "passed")
         self.assertEqual(_status(report, "same_students_and_inputs_per_packet"), "passed")
-        self.assertIn("Run Readiness", markdown)
+        self.assertIn("# dsaa3073 hw1 Run Readiness", markdown)
+        self.assertNotIn("Physics Week 9", markdown)
 
     def test_same_grade_prompt_blocks_readiness(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -186,8 +186,9 @@ def write_readiness_markdown(report: dict[str, Any], path: Path) -> None:
 
 def render_readiness_markdown(report: dict[str, Any]) -> str:
     anchors = report["anchors"]
+    title = f"{anchors['course_id']} {anchors['assessment_id']} Run Readiness"
     lines = [
-        "# Physics Week 9 Run Readiness",
+        f"# {title}",
         "",
         f"Status: **{report['status']}**",
         "",

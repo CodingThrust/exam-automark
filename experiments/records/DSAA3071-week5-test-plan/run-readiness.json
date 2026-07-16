@@ -40,7 +40,7 @@
     "course_id": "DSAA3071",
     "course_spec_path": "experiments/course_specs/DSAA3071_week5_test.json",
     "current_git_branch": "codex/multi-course-pilot-inventory",
-    "current_git_commit": "ca8954b4be01233aa4abfec306605bd4bc2b8b3a",
+    "current_git_commit": "428f0175bac26c89db9a811374f6a63ea61b29d1",
     "data_inventory_path": "experiments/data_inventory/DSAA3071.json",
     "data_snapshot_hash": "cf87b373395e381d9d07bbd370c1faa772372b760557b0581dcf9e8a93c04c28",
     "git_branch": "codex/multi-course-pilot-inventory",
@@ -170,19 +170,19 @@
       "status": "passed"
     },
     {
-      "detail": "HEAD=ca8954b4be01233aa4abfec306605bd4bc2b8b3a; planned=ca8954b4be01233aa4abfec306605bd4bc2b8b3a",
+      "detail": "HEAD=428f0175bac26c89db9a811374f6a63ea61b29d1; planned=ca8954b4be01233aa4abfec306605bd4bc2b8b3a",
       "id": "current_git_head_contains_plan_commit",
       "status": "passed"
     },
     {
-      "detail": "HEAD is exactly the planned commit",
+      "detail": "post-anchor commits only touch experiment records",
       "id": "post_anchor_changes_are_record_only",
       "status": "passed"
     },
     {
-      "detail": "10 uncommitted/untracked entries; commit before model calls",
+      "detail": "working tree clean",
       "id": "git_worktree_clean",
-      "status": "failed"
+      "status": "passed"
     },
     {
       "detail": "Data/ is ignored and has no tracked files",
@@ -191,10 +191,8 @@
     }
   ],
   "model_run_status": "not_started",
-  "next_actions": [
-    "Commit or otherwise freeze the current repository state before model calls."
-  ],
+  "next_actions": [],
   "report_type": "run_readiness",
   "schema_version": 1,
-  "status": "not_ready"
+  "status": "ready"
 }

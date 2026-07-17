@@ -1,18 +1,18 @@
-# quantum.harness beginner-training 学习记录
+# quantum.harness 可复现实验形式调研记录
 
 记录日期：2026-07-15
 本仓库分支：`codex/quantum-harness-training-notes`
-范围：只读调研 `QuantumBFS/quantum.harness` 的 README、`/beginner-training` 及其关联技能/目录说明；未 clone 外部仓库，未运行模型，未访问或修改 `Data/`。
+范围：只读调研 `QuantumBFS/quantum.harness` 的 README、`/beginner-training`、复现/报告相关技能和目录组织；未将外部仓库复制进 `exam-automark`，未运行模型，未访问或修改 `Data/`。
 
-定位说明：本记录是 Codex 对 quantum.harness beginner-training 材料的调研总结，不等同于学习者本人完成 `/beginner-training` 的交互式训练。真正训练应由学习者按 confirm-gated Teaching Protocol 逐步完成：先理解每一步，再由学习者确认是否运行命令。
+定位说明：本记录是 Codex 对 `QuantumBFS/quantum.harness` 可复现实验组织形式和 `/beginner-training` 材料的调研总结，不等同于学习者本人完成 `/beginner-training` 的交互式训练。这里的学习重点不是迁移量子物理工具链，而是参考它如何组织可复现研究：结构化运行记录、技能流程、知识库、运行前门禁、验证检查和报告产物。
 
 ## 结论摘要
 
-`quantum.harness` 是一个面向计算量子多体研究的 agent harness：它把“研究问题、领域知识、数值方法、软件栈、验证检查、报告产物”拆成可组合的技能和知识卡片，让 AI agent 不只是运行代码，而是按研究实践确认假设、估算成本、执行计算、做负控/一致性检查，并生成可复现报告。
+`quantum.harness` 是一个面向计算量子多体研究的 agent harness。对 `exam-automark` 来说，它最值得参考的不是量子物理本身，而是它把一次研究任务拆成“结构化事实源、领域知识、技能流程、运行结果、验证检查、报告产物”的方式：让 AI agent 不只是临场运行代码，而是按可审计、可复现的研究流程行动。
 
-`/beginner-training` 是这个 harness 的入门训练入口。它不是一个自动脚本，而是一个确认门控的教学流程：先让新用户选择训练 track，再用“解释一步、展示命令、等待确认、运行、解释实际结果”的协议逐步带用户完成 setup、论文复现、文献库、专业开发流程和挑战报告。
+`/beginner-training` 是这个 harness 的入门训练入口。它不是一个自动脚本，而是一个确认门控的教学流程：先让新用户选择训练 track，再用“解释一步、展示命令、等待确认、运行、解释实际结果”的协议逐步带用户理解 setup、论文复现、文献库、专业开发流程和挑战报告。这个形式说明：可复现系统的教学本身也应留下清晰边界，不能把 agent 代跑误写成学习者已完成。
 
-对 `exam-automark` 最值得迁移的不是量子物理内容，而是它的工程形状：单一事实源、技能与知识分离、负控/完整性检查、运行前显式确认、私有数据隔离、派生报告不可反向编辑，以及让报告成为 durable record。
+对 `exam-automark` 最值得借鉴的是它的复现形状：单一事实源、技能与知识分离、运行前 readiness gate、负控/完整性检查、私有数据隔离、派生报告不可反向编辑，以及让报告成为 durable record。对应到 AI 阅卷，就是把 prompt packet、experiment/run metadata、course/rubric cards、metrics 和 Typst/PDF 报告串成可追溯链条。
 
 ## 外部资料锚点
 
@@ -129,6 +129,8 @@ run.json -> report.json -> report.html
 
 ## 对 exam-automark 的启发
 
+导师让我们看 `quantum.harness`，更合理的理解是参照它的复现实验组织方式，而不是直接采用它的量子物理工具链。它给我们的核心参照是：一次 agent 实验应当能回答“事实源在哪里、运行前确认了什么、私有数据如何隔离、结果如何验证、报告从什么派生”。
+
 `exam-automark` 和 `quantum.harness` 的领域不同，但工程问题很像：都需要让 agent 在私有数据、复杂流程和可复现报告之间保持纪律。可迁移的核心是“把事实、流程、运行、报告分层”。
 
 ### 1. Prompt packet 可以承担 run.json 的角色
@@ -232,11 +234,11 @@ quantum.harness 在计算前估算本地/集群成本。阅卷中对应的是：
 
 ## 建议的下一步
 
-1. 新增 `experiments/knowledge/` 的最小卡片草案，只覆盖一个已有 pilot，例如 Physics Week 9。
-2. 给 `check-run-readiness` 增加一组 cheap negative-control fixtures，证明 packet/schema/rubric/student-id 检查会失败。
-3. 定义 `run.json` 或 `experiment-run.json` 的固定字段，把 provider、model、prompt hash、packet hash、data snapshot、split、input mode、cost estimate 放在一个事实源。
-4. 设计一个教师 onboarding dry-run 文档，不调用模型，只解释 packet、audit、metrics、privacy boundary。
-5. 后续若做 HTML 报告，先从现有 metrics JSON 派生，不手写第二套事实。
+1. 定义 `experiment-run.json` 或 `run-metadata.json` 的固定字段，把 provider、model、prompt hash、packet hash、data snapshot、split、input mode、cost estimate 放在一个事实源。
+2. 给 `check-run-readiness` 增加一组 cheap negative-control fixtures，证明 packet/schema/rubric/student-id 检查真的会失败。
+3. 新增 `experiments/knowledge/` 的最小卡片草案，先覆盖一个已有 pilot，例如 Physics Week 9：course card、rubric card、grading-skill card。
+4. 在 readiness 和报告里明确区分 `packet-ready`、`model-run-ready`、`metrics-ready`，避免把 packet 层面的 ready 误读成准确率结论。
+5. 后续若做 HTML 报告，先从现有 metrics JSON / experiment JSON 派生，不手写第二套事实。
 
 ## 本次调研限制
 

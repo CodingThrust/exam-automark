@@ -76,6 +76,8 @@ students.
 
 Supporting directories:
 
+- `knowledge/`: reusable research-process notes, including the source-of-truth
+  layers, readiness levels, and negative controls used by grading experiments.
 - `prompt_templates/`: reusable model-facing prompt text that is copied into
   packets as `prompt.txt`.
 - `skill_versions/`: frozen grading-skill snapshots. Plans and reported

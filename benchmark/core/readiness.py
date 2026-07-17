@@ -147,6 +147,12 @@ def build_run_readiness_report(
     report = {
         "schema_version": 1,
         "report_type": "run_readiness",
+        "readiness_level": "packet",
+        "readiness_scope": (
+            "Packet-level ready means prompt packets, hashes, manifests, "
+            "and baseline/candidate comparability are checked. It is not "
+            "model-run ready, metrics-ready, or report-ready."
+        ),
         "status": "not_ready" if failed else "ready",
         "model_run_status": "not_started",
         "baseline_plan_path": baseline_plan_path.as_posix(),
@@ -193,6 +199,12 @@ def render_readiness_markdown(report: dict[str, Any]) -> str:
         f"Status: **{report['status']}**",
         "",
         "No model calls are recorded by this checklist.",
+        "",
+        "## Readiness Level",
+        "",
+        "- Packet-level ready: prompt packets, manifests, hashes, and comparison gates are checked.",
+        "- This is not model-run ready: provider/model credentials, API authorization, and run command approval are separate gates.",
+        "- This is not metrics-ready: gold scores and model outputs are required before accuracy can be computed.",
         "",
         "## Anchors",
         "",

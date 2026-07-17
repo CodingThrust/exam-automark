@@ -39,6 +39,7 @@ class RunReadinessTests(unittest.TestCase):
             markdown = render_readiness_markdown(report)
 
         self.assertEqual(report["status"], "ready")
+        self.assertEqual(report["readiness_level"], "packet")
         self.assertEqual(report["model_run_status"], "not_started")
         self.assertIsNone(report["anchors"]["current_git_branch"])
         self.assertIsNone(report["anchors"]["current_git_commit"])
@@ -48,6 +49,8 @@ class RunReadinessTests(unittest.TestCase):
         self.assertEqual(_status(report, "grade_prompt_differs"), "passed")
         self.assertEqual(_status(report, "same_students_and_inputs_per_packet"), "passed")
         self.assertIn("# dsaa3073 hw1 Run Readiness", markdown)
+        self.assertIn("Packet-level ready", markdown)
+        self.assertIn("not model-run ready", markdown)
         self.assertNotIn("Physics Week 9", markdown)
 
     def test_same_grade_prompt_blocks_readiness(self):
@@ -66,6 +69,54 @@ class RunReadinessTests(unittest.TestCase):
 
         self.assertEqual(report["status"], "not_ready")
         self.assertEqual(_status(report, "grade_prompt_differs"), "failed")
+
+    def test_changed_rubric_hash_blocks_readiness(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            baseline_path, candidate_path = _write_readiness_fixture(
+                root,
+                candidate_rubric={
+                    "questions": [
+                        {
+                            "id": "Q1",
+                            "max_score": 10,
+                            "criteria": "Different rubric text must fail the gate.",
+                        }
+                    ]
+                },
+            )
+
+            report = build_run_readiness_report(
+                baseline_plan_path=baseline_path,
+                candidate_plan_path=candidate_path,
+                repo_root=root,
+            )
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertEqual(_status(report, "same_rubric_for_grade_packets"), "failed")
+
+    def test_manifest_metadata_mismatch_blocks_readiness(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            baseline_path, candidate_path = _write_readiness_fixture(root)
+            candidate = ExperimentPlan.from_json_path(candidate_path)
+            manifest_path = root / candidate.built_packets[0].manifest_path
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["metadata"]["split"] = "heldout"
+            manifest_path.write_text(
+                json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+
+            report = build_run_readiness_report(
+                baseline_plan_path=baseline_path,
+                candidate_plan_path=candidate_path,
+                repo_root=root,
+            )
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertEqual(_status(report, "manifest_metadata_matches_plan"), "failed")
 
     def test_missing_planned_git_commit_blocks_readiness(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -126,6 +177,7 @@ def _write_readiness_fixture(
     root: Path,
     *,
     candidate_grade_prompt: str = "Candidate grading policy.",
+    candidate_rubric: dict[str, object] | None = None,
 ) -> tuple[Path, Path]:
     (root / "records").mkdir()
     course = CourseSpec.from_json_path(FIXTURES / "course_dsaa3073_hw1.json")
@@ -151,6 +203,7 @@ def _write_readiness_fixture(
         skill_hash="c" * 64,
         grade_template_id="grade_candidate_v2",
         grade_prompt=candidate_grade_prompt,
+        grade_rubric=candidate_rubric,
     )
     baseline_path = root / "records" / "baseline-plan.json"
     candidate_path = root / "records" / "candidate-plan.json"
@@ -170,6 +223,7 @@ def _build_plan(
     skill_hash: str,
     grade_template_id: str,
     grade_prompt: str,
+    grade_rubric: dict[str, object] | None = None,
 ) -> ExperimentPlan:
     transcribe_template_id = "transcribe_standard_v1"
     transcribe_prompt = "Transcribe only the visible anonymous response."
@@ -209,7 +263,7 @@ def _build_plan(
             skill_version_id=skill_version_id,
             planned_packet=planned_packets[1],
             prompt_text=grade_prompt,
-            rubric={
+            rubric=grade_rubric or {
                 "questions": [
                     {
                         "id": "Q1",

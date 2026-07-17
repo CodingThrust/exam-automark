@@ -4,6 +4,8 @@
 本仓库分支：`codex/quantum-harness-training-notes`
 范围：只读调研 `QuantumBFS/quantum.harness` 的 README、`/beginner-training` 及其关联技能/目录说明；未 clone 外部仓库，未运行模型，未访问或修改 `Data/`。
 
+定位说明：本记录是 Codex 对 quantum.harness beginner-training 材料的调研总结，不等同于学习者本人完成 `/beginner-training` 的交互式训练。真正训练应由学习者按 confirm-gated Teaching Protocol 逐步完成：先理解每一步，再由学习者确认是否运行命令。
+
 ## 结论摘要
 
 `quantum.harness` 是一个面向计算量子多体研究的 agent harness：它把“研究问题、领域知识、数值方法、软件栈、验证检查、报告产物”拆成可组合的技能和知识卡片，让 AI agent 不只是运行代码，而是按研究实践确认假设、估算成本、执行计算、做负控/一致性检查，并生成可复现报告。

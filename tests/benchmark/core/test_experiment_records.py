@@ -125,6 +125,88 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertEqual(report["status"], "not_ready" if failed_checks else "ready")
         self.assertIn("grade_prompt_differs", {check["id"] for check in report["checks"]})
 
+    def test_dsaa3071_candidate_v3_dev_ablation_record_is_ready_without_model_calls(self):
+        record_dir = Path("experiments/records/DSAA3071-week5-candidate-v3-dev-plan")
+        plan = json.loads((record_dir / "ablation-plan.json").read_text(encoding="utf-8"))
+        readiness = json.loads(
+            (record_dir / "ablation-readiness.json").read_text(encoding="utf-8")
+        )
+        protocol = (record_dir / "RUN-PROTOCOL.md").read_text(encoding="utf-8")
+
+        self.assertEqual(plan["conditions"], ["B0", "R1", "C3"])
+        self.assertEqual(plan["model_calls"], 0)
+        self.assertEqual(
+            plan["source_run_id"],
+            "T1-dev-human-reviewed-r1",
+        )
+        self.assertEqual(
+            plan["data_snapshot_hash"],
+            "95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37",
+        )
+        self.assertEqual(plan["split"], "development")
+        self.assertEqual(
+            plan["students_file"],
+            "experiments/records/DSAA3071-week5-test-plan/students-development.txt",
+        )
+        self.assertEqual(len(plan["student_ids"]), 7)
+        self.assertEqual(
+            plan["shared_run_settings"],
+            {
+                "input_mode": "text-only",
+                "model": "deepseek-v4-pro",
+                "provider": "deepseek",
+                "repetition": 1,
+            },
+        )
+        self.assertEqual(
+            plan["controlled_differences"],
+            {
+                "B0_R1": "rubric only; prompt and skill must match",
+                "R1_C3": "prompt and skill only; rubric must match",
+            },
+        )
+        self.assertEqual(
+            set(plan["packets"]),
+            {"B0", "R1", "C3"},
+        )
+        self.assertEqual(
+            plan["packets"]["B0"]["packet_path"],
+            "Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/"
+            "DSAA3071-week5-B0-v0-reviewed-dev/B0-dev-reviewed-r1",
+        )
+        self.assertEqual(
+            plan["packets"]["B0"]["prompt_hash"],
+            plan["packets"]["R1"]["prompt_hash"],
+        )
+        self.assertNotEqual(
+            plan["packets"]["B0"]["rubric_hash"],
+            plan["packets"]["R1"]["rubric_hash"],
+        )
+        self.assertEqual(
+            plan["packets"]["R1"]["rubric_hash"],
+            plan["packets"]["C3"]["rubric_hash"],
+        )
+        self.assertNotEqual(
+            plan["packets"]["R1"]["prompt_hash"],
+            plan["packets"]["C3"]["prompt_hash"],
+        )
+        self.assertEqual(
+            plan["packets"]["B0"]["skill_hash"],
+            plan["packets"]["R1"]["skill_hash"],
+        )
+        self.assertNotEqual(
+            plan["packets"]["R1"]["skill_hash"],
+            plan["packets"]["C3"]["skill_hash"],
+        )
+        self.assertEqual(readiness["status"], "ready")
+        self.assertEqual(readiness["failed_checks"], [])
+        self.assertEqual(readiness["model_run_status"], "not_started")
+        self.assertIn("Windows PowerShell", protocol)
+        self.assertIn("macOS/Linux", protocol)
+        self.assertIn("Read-Host \"DeepSeek API key\" -AsSecureString", protocol)
+        self.assertIn("run-model-packet", protocol)
+        self.assertNotIn("DEEPSEEK_API_KEY=sk-", protocol)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -343,6 +343,61 @@ class ThreeConditionAblationTests(unittest.TestCase):
             _detail(report, "packet_audits_pass"),
         )
 
+    def test_manifest_course_id_must_match_each_packet_course_spec(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            for packet in (b0, r1, c3):
+                _mutate_manifest(packet, course_id="consistently-wrong-course")
+
+            report = _check(b0, r1, c3)
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertNotIn("same_course", report["failed_checks"])
+        self.assertIn("packet_audits_pass", report["failed_checks"])
+        self.assertIn(
+            "manifest.course_id must equal course.json course_id",
+            _detail(report, "packet_audits_pass"),
+        )
+
+    def test_manifest_assessment_id_must_match_each_packet_course_spec(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            for packet in (b0, r1, c3):
+                _mutate_manifest(
+                    packet,
+                    assessment_id="consistently-wrong-assessment",
+                )
+
+            report = _check(b0, r1, c3)
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertNotIn("same_assessment", report["failed_checks"])
+        self.assertIn("packet_audits_pass", report["failed_checks"])
+        self.assertIn(
+            "manifest.assessment_id must equal course.json assessment_id",
+            _detail(report, "packet_audits_pass"),
+        )
+
+    def test_manifest_student_ids_must_match_course_anonymous_id_pattern(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root, students=("Alice", "Bob"))
+
+            report = _check(b0, r1, c3)
+
+        detail = _detail(report, "packet_audits_pass")
+        self.assertEqual(report["status"], "not_ready")
+        self.assertNotIn("same_students", report["failed_checks"])
+        self.assertIn("packet_audits_pass", report["failed_checks"])
+        self.assertIn(
+            "student_ids must match course anonymous_id_pattern",
+            detail,
+        )
+        self.assertNotIn("Alice", detail)
+        self.assertNotIn("Bob", detail)
+
     def test_invalid_concept_rubric_fails_with_updated_matching_hashes(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -531,7 +586,8 @@ def _write_packets(
     r1_rubric: dict[str, str] | None = None,
     r1_input_text: str = "synthetic input",
     c3_schema: dict[str, str] | None = None,
-    c3_students: tuple[str, ...] = ("S001", "S002"),
+    students: tuple[str, ...] = ("S001", "S002"),
+    c3_students: tuple[str, ...] | None = None,
     c3_skill_hash: str = "b" * 64,
 ) -> tuple[Path, Path, Path]:
     b0 = _write_packet(
@@ -540,6 +596,7 @@ def _write_packets(
         prompt="Baseline grading policy.",
         rubric={"version": "v0"},
         skill_hash="a" * 64,
+        students=students,
     )
     r1 = _write_packet(
         root / "R1",
@@ -548,6 +605,7 @@ def _write_packets(
         rubric=r1_rubric or {"version": "v1"},
         skill_hash="a" * 64,
         input_text=r1_input_text,
+        students=students,
     )
     c3 = _write_packet(
         root / "C3",
@@ -556,7 +614,7 @@ def _write_packets(
         rubric={"version": "v1"},
         skill_hash=c3_skill_hash,
         schema=c3_schema,
-        students=c3_students,
+        students=students if c3_students is None else c3_students,
     )
     return b0, r1, c3
 

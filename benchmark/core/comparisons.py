@@ -467,7 +467,7 @@ def _audit_packet_integrity(
             and declared_hash.lower() != _file_hash(artifact)
         ):
             findings.append(f"{hash_field} does not match {relative_path}")
-    _audit_packet_artifact_contents(path, findings)
+    _audit_packet_artifact_contents(path, manifest, students, findings)
 
     inputs = path / "inputs"
     if not inputs.is_dir():
@@ -492,7 +492,12 @@ def _audit_packet_integrity(
     return sorted(set(findings))
 
 
-def _audit_packet_artifact_contents(path: Path, findings: list[str]) -> None:
+def _audit_packet_artifact_contents(
+    path: Path,
+    manifest: dict[str, Any],
+    students: list[str] | None,
+    findings: list[str],
+) -> None:
     prompt_path = path / "prompt.txt"
     if prompt_path.is_file():
         try:
@@ -512,6 +517,25 @@ def _audit_packet_artifact_contents(path: Path, findings: list[str]) -> None:
             course = CourseSpec.from_dict(course_payload)
         except (KeyError, TypeError, ValueError, OverflowError):
             findings.append("course.json must satisfy CourseSpec")
+
+    if course is not None:
+        if manifest.get("course_id") != course.course_id:
+            findings.append("manifest.course_id must equal course.json course_id")
+        if manifest.get("assessment_id") != course.assessment_id:
+            findings.append(
+                "manifest.assessment_id must equal course.json assessment_id"
+            )
+        if students is not None:
+            invalid_student_id = False
+            for student_id in students:
+                try:
+                    course.validate_student_id(student_id)
+                except ValueError:
+                    invalid_student_id = True
+            if invalid_student_id:
+                findings.append(
+                    "student_ids must match course anonymous_id_pattern"
+                )
 
     if rubric_payload is not None and course is not None:
         try:

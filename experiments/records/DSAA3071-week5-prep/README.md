@@ -143,6 +143,18 @@ The draft English rubric was extracted from
 - source SHA-256:
   `aeab881a2e23bcd29c6174419c0d0904ab706ec560314053cb1557958370d94f`
 
+## Calibrated Rubric v1
+
+`rubric_v1.json` is the versioned concept-and-keyterm rubric for the next
+DSAA3071 week 5 experiment. It was calibrated from the official solution and
+development score discrepancies, but contains no student examples, student
+answers, identifiers, or score rows. It retains the 130-point course total and
+integer scoring.
+
+`rubric_v0.json` remains frozen as the historical rubric for earlier packet
+and run records. New v1-based packets must reference `rubric_v1.json` by its
+content hash; they must not overwrite historical v0 packets or runs.
+
 The local gold score template was generated under ignored `Data/`:
 
 - `Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv`

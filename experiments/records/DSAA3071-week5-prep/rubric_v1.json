@@ -1,0 +1,721 @@
+{
+  "assessment_id": "week5_test",
+  "course_id": "DSAA3071",
+  "grading_policy": {
+    "element_credit_rule": "For each scoring element, assign exactly one evidence level. A keyword and its explanation belong to one element and must not receive duplicate credit.",
+    "score_step": 1,
+    "score_unit": "points"
+  },
+  "model_facing_language": "English",
+  "questions": [
+    {
+      "correct_answer": "b",
+      "expected": "A multitape Turing machine running in time t(n) can be simulated by a single-tape Turing machine with quadratic time overhead, O(t(n)^2).",
+      "id": "Q1",
+      "max_score": 5,
+      "rubric": [
+        {
+          "criterion": "Selects option b or otherwise states O(t(n)^2).",
+          "points": 5
+        },
+        {
+          "criterion": "Selects a different option or gives an incompatible overhead.",
+          "points": 0
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "correct_answer": "c",
+      "expected": "A nondeterministic Turing machine can be simulated by a deterministic Turing machine with exponential time overhead, 2^O(t(n)).",
+      "id": "Q2",
+      "max_score": 5,
+      "rubric": [
+        {
+          "criterion": "Selects option c or otherwise states exponential overhead 2^O(t(n)).",
+          "points": 5
+        },
+        {
+          "criterion": "Selects a different option or gives an incompatible overhead.",
+          "points": 0
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "correct_answer": "a",
+      "expected": "An enumerator is a Turing machine with no input tape that prints strings to an output tape.",
+      "id": "Q3",
+      "max_score": 5,
+      "rubric": [
+        {
+          "criterion": "Selects option a or gives the equivalent definition of an enumerator.",
+          "points": 5
+        },
+        {
+          "criterion": "Selects a different option or gives an incompatible definition.",
+          "points": 0
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "correct_answer": "b",
+      "expected": "The Church-Turing thesis states that every effectively computable algorithm or function can be implemented by a Turing machine.",
+      "id": "Q4",
+      "max_score": 5,
+      "rubric": [
+        {
+          "criterion": "Selects option b or states the equivalent computability claim.",
+          "points": 5
+        },
+        {
+          "criterion": "Selects a different option or confuses computability with speed.",
+          "points": 0
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "expected": "A single-tape Turing machine stores both virtual tapes separated by delimiters, marks each virtual head position with dotted or otherwise distinguished symbols, uses an expanded alphabet for marked symbols and delimiters, scans to read both virtual heads, scans again to update symbols and head markers, and incurs quadratic overhead.",
+      "full_credit_rule": "Full credit requires demonstrated virtual tape encoding, demonstrated tracking of both virtual heads, and a coherent simulated step with no active material error.",
+      "id": "Q5",
+      "material_errors": [
+        {
+          "affects": [
+            "virtual_tape_encoding",
+            "virtual_head_tracking",
+            "simulated_step"
+          ],
+          "cap": 9,
+          "description": "Does not preserve both virtual tape configurations or supplies no coherent simulation mechanism.",
+          "id": "missing_coherent_two_tape_simulation"
+        }
+      ],
+      "max_score": 20,
+      "score_bands": {
+        "full": {
+          "maximum": 20,
+          "minimum": 20
+        },
+        "minimal_relevant": {
+          "maximum": 5,
+          "minimum": 1
+        },
+        "no_credit": {
+          "maximum": 0,
+          "minimum": 0
+        },
+        "partially_correct": {
+          "maximum": 12,
+          "minimum": 6
+        },
+        "substantially_correct": {
+          "maximum": 19,
+          "minimum": 13
+        }
+      },
+      "scoring_elements": [
+        {
+          "id": "virtual_tape_encoding",
+          "importance": "essential",
+          "key_terms": [
+            "virtual tape",
+            "two tracks",
+            "delimiter",
+            "separator",
+            "#"
+          ],
+          "levels": {
+            "demonstrated": 6,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Preserve both simulated tape contents in a distinguishable single-tape encoding.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Stores the two simulated configurations in separate delimited regions of one tape.",
+            "Uses an equivalent multi-track or tagged representation that keeps the two virtual tapes distinct."
+          ]
+        },
+        {
+          "id": "virtual_head_tracking",
+          "importance": "essential",
+          "key_terms": [
+            "head marker",
+            "dotted symbol",
+            "marked symbol",
+            "head position"
+          ],
+          "levels": {
+            "demonstrated": 6,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Represent the current position of each virtual head without losing its relation to the encoded tape.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Uses distinguished symbol variants to mark where each simulated head is located.",
+            "Maintains explicit position markers for both virtual heads in the encoding."
+          ]
+        },
+        {
+          "id": "simulated_step",
+          "importance": "essential",
+          "key_terms": [
+            "scan",
+            "transition",
+            "update",
+            "expanded alphabet",
+            "move marker"
+          ],
+          "levels": {
+            "demonstrated": 8,
+            "mentioned_only": 2,
+            "partial_understanding": 5
+          },
+          "meaning": "Read the marked virtual symbols, apply the simulated transition, update symbols and state, and relocate head markers coherently.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Describes repeated scans that recover both head symbols and then rewrite the encoding for one simulated transition.",
+            "Explains an equivalent finite-control procedure that updates the virtual configuration and both head locations."
+          ]
+        }
+      ],
+      "type": "short_answer"
+    },
+    {
+      "expected": "A deterministic Turing machine simulates an NTM by systematically exploring the computation tree, using addresses or branch-choice sequences, often with separate tapes for input, simulation workspace, and the current address, exploring paths in breadth-first order, accepting if any simulated path accepts, and incurring exponential time overhead.",
+      "full_credit_rule": "Full credit requires demonstrated branch addressing, systematic exploration, branch simulation with the acceptance condition, and no active material error.",
+      "id": "Q6",
+      "material_errors": [
+        {
+          "affects": [
+            "systematic_exploration",
+            "branch_simulation_and_acceptance"
+          ],
+          "cap": 10,
+          "description": "Explores only one nondeterministic branch with no fair or systematic exploration.",
+          "id": "single_branch_only"
+        }
+      ],
+      "max_score": 20,
+      "score_bands": {
+        "full": {
+          "maximum": 20,
+          "minimum": 20
+        },
+        "minimal_relevant": {
+          "maximum": 5,
+          "minimum": 1
+        },
+        "no_credit": {
+          "maximum": 0,
+          "minimum": 0
+        },
+        "partially_correct": {
+          "maximum": 12,
+          "minimum": 6
+        },
+        "substantially_correct": {
+          "maximum": 19,
+          "minimum": 13
+        }
+      },
+      "scoring_elements": [
+        {
+          "id": "branch_address",
+          "importance": "essential",
+          "key_terms": [
+            "address",
+            "branch sequence",
+            "choice sequence",
+            "computation tree"
+          ],
+          "levels": {
+            "demonstrated": 5,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Represent an NTM computation path by a finite sequence of nondeterministic choices.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Indexes each possible path by the choices made at nondeterministic steps.",
+            "Uses finite strings or codes to select a branch of the computation tree."
+          ]
+        },
+        {
+          "id": "systematic_exploration",
+          "importance": "essential",
+          "key_terms": [
+            "breadth-first",
+            "dovetailing",
+            "systematic",
+            "fair exploration"
+          ],
+          "levels": {
+            "demonstrated": 6,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Explore all candidate branches in a fair order so no finite accepting path is ignored forever.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Enumerates branch addresses by nondecreasing length.",
+            "Uses an equivalent schedule that eventually simulates every finite branch."
+          ]
+        },
+        {
+          "id": "branch_simulation_and_acceptance",
+          "importance": "essential",
+          "key_terms": [
+            "simulate branch",
+            "accepting branch",
+            "accept if any",
+            "deterministic simulation"
+          ],
+          "levels": {
+            "demonstrated": 6,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Simulate each selected branch deterministically and accept exactly when an explored branch reaches an accept state.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Replays the NTM according to an address and accepts upon finding a successful path.",
+            "Uses a deterministic search procedure whose acceptance witnesses an accepting NTM computation."
+          ]
+        },
+        {
+          "id": "resource_or_overhead_awareness",
+          "importance": "supporting",
+          "key_terms": [
+            "exponential",
+            "2^O(t(n))",
+            "workspace",
+            "multiple tapes"
+          ],
+          "levels": {
+            "demonstrated": 3,
+            "mentioned_only": 1,
+            "partial_understanding": 2
+          },
+          "meaning": "Recognize that searching many branches needs work storage or causes exponential simulation overhead.",
+          "required_for_full_credit": false,
+          "semantic_equivalents": [
+            "Explains that the number of possible branch choices grows exponentially.",
+            "Describes separate work areas for the input, current branch, or branch address."
+          ]
+        }
+      ],
+      "type": "short_answer"
+    },
+    {
+      "expected": "Prove both directions: from a recognizer for L, build an enumerator using dovetailing over strings and bounded simulation time; from an enumerator for L, build a recognizer that runs the enumerator and accepts when the input appears.",
+      "full_credit_rule": "Full credit requires demonstrated constructions in both directions and correct treatment of membership and nonmembership, with no active material error.",
+      "id": "Q7",
+      "material_errors": [
+        {
+          "affects": [
+            "correctness_and_nonmembership"
+          ],
+          "cap": 16,
+          "description": "Claims nonmembers can be rejected merely because an enumerator or recognizer has not produced an answer.",
+          "id": "invalid_nonmembership_rejection"
+        }
+      ],
+      "max_score": 20,
+      "score_bands": {
+        "full": {
+          "maximum": 20,
+          "minimum": 20
+        },
+        "minimal_relevant": {
+          "maximum": 5,
+          "minimum": 1
+        },
+        "no_credit": {
+          "maximum": 0,
+          "minimum": 0
+        },
+        "partially_correct": {
+          "maximum": 12,
+          "minimum": 6
+        },
+        "substantially_correct": {
+          "maximum": 19,
+          "minimum": 13
+        }
+      },
+      "scoring_elements": [
+        {
+          "id": "recognizer_to_enumerator",
+          "importance": "essential",
+          "key_terms": [
+            "dovetailing",
+            "bounded simulation",
+            "enumerate strings",
+            "print"
+          ],
+          "levels": {
+            "demonstrated": 9,
+            "mentioned_only": 2,
+            "partial_understanding": 5
+          },
+          "meaning": "Build an enumerator from a recognizer by systematically simulating the recognizer over candidate strings and time bounds, printing each accepted string.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Schedules simulations in stages so every eventually accepted string is eventually output.",
+            "Uses an equivalent fair search over strings and computation time."
+          ]
+        },
+        {
+          "id": "enumerator_to_recognizer",
+          "importance": "essential",
+          "key_terms": [
+            "run enumerator",
+            "input w",
+            "accept when printed",
+            "wait for output"
+          ],
+          "levels": {
+            "demonstrated": 8,
+            "mentioned_only": 2,
+            "partial_understanding": 5
+          },
+          "meaning": "Build a recognizer that runs the enumerator and accepts an input exactly when that input appears in the output.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Compares each generated string with the input and accepts on a match.",
+            "Uses an equivalent output-monitoring recognizer construction."
+          ]
+        },
+        {
+          "id": "correctness_and_nonmembership",
+          "importance": "essential",
+          "key_terms": [
+            "if and only if",
+            "membership",
+            "nonmember",
+            "may run forever"
+          ],
+          "levels": {
+            "demonstrated": 3,
+            "mentioned_only": 1,
+            "partial_understanding": 2
+          },
+          "meaning": "Justify that members are eventually accepted or printed, while nonmembers need not cause a recognizer or enumerator to halt or reject.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Explains the one-sided acceptance behavior of recognition.",
+            "States that lack of output after finite time is not a rejection certificate."
+          ]
+        }
+      ],
+      "type": "proof"
+    },
+    {
+      "expected": "Design an enumerator for L = {0^(2^n) | n >= 0}. The enumerator should output strings of zeros whose lengths are powers of two: 1, 2, 4, 8, and so on.",
+      "full_credit_rule": "Full credit requires demonstrated power-of-two outputs and a demonstrated enumerator loop or doubling procedure, with no active material error.",
+      "id": "Q8",
+      "material_errors": [
+        {
+          "affects": [
+            "power_of_two_outputs",
+            "enumerator_loop_or_doubling"
+          ],
+          "cap": 4,
+          "description": "Generates lengths 2n rather than 2^n.",
+          "id": "linear_even_lengths"
+        }
+      ],
+      "max_score": 10,
+      "score_bands": {
+        "full": {
+          "maximum": 10,
+          "minimum": 10
+        },
+        "minimal_relevant": {
+          "maximum": 2,
+          "minimum": 1
+        },
+        "no_credit": {
+          "maximum": 0,
+          "minimum": 0
+        },
+        "partially_correct": {
+          "maximum": 5,
+          "minimum": 3
+        },
+        "substantially_correct": {
+          "maximum": 9,
+          "minimum": 6
+        }
+      },
+      "scoring_elements": [
+        {
+          "id": "power_of_two_outputs",
+          "importance": "essential",
+          "key_terms": [
+            "2^n",
+            "power of two",
+            "1, 2, 4, 8",
+            "zero strings"
+          ],
+          "levels": {
+            "demonstrated": 5,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Produce exactly strings whose zero-count is a power of two, beginning with the appropriate base case.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Outputs strings with lengths 1, 2, 4, 8, and so on.",
+            "Defines each output length by repeatedly multiplying the previous length by two."
+          ]
+        },
+        {
+          "id": "enumerator_loop_or_doubling",
+          "importance": "essential",
+          "key_terms": [
+            "loop",
+            "double",
+            "increment n",
+            "repeat"
+          ],
+          "levels": {
+            "demonstrated": 5,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Give a viable iterative enumerator procedure that advances from one valid length to the next.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Prints a zero string and then doubles its stored length before the next iteration.",
+            "Uses a loop over n that constructs a string of length 2 raised to n."
+          ]
+        }
+      ],
+      "source_note": "The intended language is 0^(2^n), not 0^(2n).",
+      "type": "short_answer"
+    },
+    {
+      "expected": "Give three pieces of evidence for the Church-Turing thesis: many independently proposed computation models are equivalent to Turing machines, common Turing machine variants do not increase computability power, and no counterexample has been found despite extensive study. It is a thesis rather than a formal theorem because effective computability is informal.",
+      "full_credit_rule": "Full credit requires demonstrated evidence from all three requested families and no active material error. The informal status of the thesis may be explanatory context but is not a fourth point-bearing requirement.",
+      "id": "Q9",
+      "material_errors": [
+        {
+          "affects": [
+            "absence_of_counterexamples"
+          ],
+          "cap": 16,
+          "description": "Treats a computational speedup alone as evidence of computing an uncomputable function.",
+          "id": "speedup_implies_uncomputability"
+        }
+      ],
+      "max_score": 25,
+      "score_bands": {
+        "full": {
+          "maximum": 25,
+          "minimum": 25
+        },
+        "minimal_relevant": {
+          "maximum": 7,
+          "minimum": 1
+        },
+        "no_credit": {
+          "maximum": 0,
+          "minimum": 0
+        },
+        "partially_correct": {
+          "maximum": 16,
+          "minimum": 8
+        },
+        "substantially_correct": {
+          "maximum": 24,
+          "minimum": 17
+        }
+      },
+      "scoring_elements": [
+        {
+          "id": "equivalent_computation_models",
+          "importance": "essential",
+          "key_terms": [
+            "lambda calculus",
+            "recursive functions",
+            "Post systems",
+            "register machine",
+            "equivalent models"
+          ],
+          "levels": {
+            "demonstrated": 8,
+            "mentioned_only": 2,
+            "partial_understanding": 5
+          },
+          "meaning": "Use the convergence of independently proposed formal computation models as evidence for a common computability notion.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Names valid independently developed models and explains that they compute the same class of functions.",
+            "Explains agreement among diverse formalizations of algorithmic computation."
+          ]
+        },
+        {
+          "id": "tm_variant_robustness",
+          "importance": "essential",
+          "key_terms": [
+            "multitape",
+            "nondeterministic",
+            "multiple heads",
+            "two-way infinite tape",
+            "robustness"
+          ],
+          "levels": {
+            "demonstrated": 8,
+            "mentioned_only": 2,
+            "partial_understanding": 5
+          },
+          "meaning": "Explain that common Turing-machine variants may change efficiency or convenience without enlarging the class of computable functions.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "States that the listed variants can be simulated by an ordinary Turing machine.",
+            "Distinguishes computational power from polynomial, exponential, or other speed differences."
+          ]
+        },
+        {
+          "id": "absence_of_counterexamples",
+          "importance": "essential",
+          "key_terms": [
+            "no counterexample",
+            "extensive study",
+            "computability",
+            "quantum computation"
+          ],
+          "levels": {
+            "demonstrated": 9,
+            "mentioned_only": 2,
+            "partial_understanding": 5
+          },
+          "meaning": "Use the continuing absence of a credible effectively computable counterexample, despite extensive study and new models, as empirical support for the thesis.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Explains that newer models have not established a broader class of effectively computable functions.",
+            "Notes that a speed advantage is not by itself a new computability capability."
+          ]
+        }
+      ],
+      "type": "essay"
+    },
+    {
+      "expected": "None of the listed modifications makes a Turing machine more powerful. Stay-put moves do not add power because they can be simulated by moving right then left or left then right. Finite tape restricts power because unbounded tape may be needed. One-way left-to-right movement restricts power and behaves like a much weaker model because it cannot revisit earlier tape cells.",
+      "full_credit_rule": "Full credit requires demonstrated and correct treatment of the stay-put, finite-tape, and one-way restrictions. Misconceptions are local to their corresponding elements and do not impose a whole-question cap.",
+      "id": "Q10",
+      "material_errors": [],
+      "max_score": 15,
+      "score_bands": {
+        "full": {
+          "maximum": 15,
+          "minimum": 15
+        },
+        "minimal_relevant": {
+          "maximum": 4,
+          "minimum": 1
+        },
+        "no_credit": {
+          "maximum": 0,
+          "minimum": 0
+        },
+        "partially_correct": {
+          "maximum": 9,
+          "minimum": 5
+        },
+        "substantially_correct": {
+          "maximum": 14,
+          "minimum": 10
+        }
+      },
+      "scoring_elements": [
+        {
+          "common_misconceptions": [
+            "Claims a stay-put move makes a Turing machine more powerful."
+          ],
+          "id": "stay_put_simulation",
+          "importance": "essential",
+          "key_terms": [
+            "stay-put",
+            "left then right",
+            "right then left",
+            "simulate"
+          ],
+          "levels": {
+            "demonstrated": 5,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Explain that a stay-put transition can be simulated by ordinary moves and therefore adds no computational power.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Replaces a no-move transition with a finite sequence that returns to the same tape cell.",
+            "Shows that the machine can emulate staying on a cell using standard left and right moves."
+          ]
+        },
+        {
+          "common_misconceptions": [
+            "Claims a finite tape makes a Turing machine more powerful."
+          ],
+          "id": "finite_tape_restriction",
+          "importance": "essential",
+          "key_terms": [
+            "finite tape",
+            "unbounded tape",
+            "restriction",
+            "less powerful"
+          ],
+          "levels": {
+            "demonstrated": 5,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Explain that limiting tape to a fixed finite amount restricts computations that may require unbounded workspace.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "States that finite memory cannot replace the unbounded tape of the standard model.",
+            "Explains why a fixed tape bound limits the machine rather than enhancing it."
+          ]
+        },
+        {
+          "common_misconceptions": [
+            "Claims one-way movement makes a Turing machine more powerful."
+          ],
+          "id": "one_way_restriction",
+          "importance": "essential",
+          "key_terms": [
+            "one-way",
+            "cannot revisit",
+            "left-to-right",
+            "restriction"
+          ],
+          "levels": {
+            "demonstrated": 5,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Explain that a machine unable to revisit earlier tape cells is restricted relative to an ordinary two-way Turing machine.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "States that irreversible rightward motion prevents using previously written or read cells again.",
+            "Explains that one-pass movement is a weaker model because it cannot move back."
+          ]
+        }
+      ],
+      "type": "short_answer"
+    }
+  ],
+  "rubric_format": "concept_keyterm_v1",
+  "rubric_version": "DSAA3071-week5-v1",
+  "schema_version": 1,
+  "source": {
+    "basis": "Calibrated from the official solution and development score discrepancies without student examples.",
+    "status": "calibrated_course_rubric"
+  },
+  "total_points": 130
+}

@@ -1,4 +1,6 @@
 import copy
+import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -220,3 +222,36 @@ class ConceptKeytermRubricTests(unittest.TestCase):
                     )
                 )
             self.assertFalse((output_root / "G1-dev-r1").exists())
+
+
+class DSAA3071RubricV1AssetTests(unittest.TestCase):
+    def test_rubric_v1_is_valid_calibrated_and_privacy_safe(self) -> None:
+        repo_root = Path(__file__).resolve().parents[3]
+        course = CourseSpec.from_json_path(
+            repo_root / "experiments" / "course_specs" / "DSAA3071_week5_test.json"
+        )
+        rubric_path = (
+            repo_root
+            / "experiments"
+            / "records"
+            / "DSAA3071-week5-prep"
+            / "rubric_v1.json"
+        )
+        rubric = json.loads(rubric_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(rubric["rubric_format"], "concept_keyterm_v1")
+        self.assertEqual(validate_concept_rubric(rubric, course), [])
+        self.assertEqual(sum(question["max_score"] for question in rubric["questions"]), 130)
+        for question in rubric["questions"][4:]:
+            self.assertTrue(question["scoring_elements"])
+            self.assertTrue(
+                any(
+                    element["levels"]["mentioned_only"] > 0
+                    for element in question["scoring_elements"]
+                )
+            )
+
+        serialized = json.dumps(rubric, sort_keys=True)
+        self.assertIsNone(re.search(r"S[0-9]{3}", serialized))
+        self.assertNotIn("primary_scores", serialized)
+        self.assertNotIn("student_answer", serialized)

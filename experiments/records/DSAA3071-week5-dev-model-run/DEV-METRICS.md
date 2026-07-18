@@ -48,5 +48,5 @@ Both prompts systematically under-score this dev split: every student total erro
 ## Caveats
 
 - Development split only; do not treat this as held-out evidence.
-- Transcript text still needs human spot-check before final accuracy claims.
+- These metrics use the pre-review `T1-dev-r1` packet. A later human review changed 14 / 70 question records, including 9 transcript texts. The reviewed snapshot is frozen separately and requires new packets and model runs before its metrics can be reported.
 - `S016` PDF privacy residue was corrected after this text-only dev run; metrics are unchanged because the run used transcript packets, but future PDF packet use should rely on the corrected packet hashes.

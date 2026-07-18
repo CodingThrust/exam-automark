@@ -1,6 +1,6 @@
 # DSAA3071 Week 5 Development Transcript Production
 
-Status: **text_transcripts_ready_pending_human_spot_check**
+Status: **human_review_complete**
 
 This note records how the local transcript source for DSAA3071 week 5 development model runs was produced. It intentionally contains no student answer text. The actual transcript JSON files live under ignored `Data/` and are not tracked by GitHub.
 
@@ -11,6 +11,7 @@ This note records how the local transcript source for DSAA3071 week 5 developmen
 - Split: `development`
 - Student set: `S017`, `S021`, `S002`, `S015`, `S020`, `S016`, `S022`
 - Transcript source: `Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-r1`
+- Human-reviewed transcript source: `Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-human-reviewed-r1`
 - Source PDFs: `Data/DSAA3071/week5-benchmark-redaction-v3/anonymized/<student_id>/week5.pdf`
 - Packet generation base commit: `c9a56c4`
 - Model-run commit policy: record `git rev-parse --short HEAD` at run time
@@ -54,7 +55,25 @@ Correction anchors:
 
 The corrected PDF was synchronized into the development T1/G1 packet copies for both baseline and candidate-v2 plans. Held-out packets are unchanged because `S016` is not in the held-out split.
 
-Remaining caveat: the transcript text still needs human spot-check before final accuracy claims, because the DeepSeek dev runs used text-only transcript packets rather than the PDF packets.
+## Human Review Update
+
+On 2026-07-18, the user completed a question-by-question comparison of all 70
+development transcript records against the anonymized PDFs. The reviewed source
+is frozen separately as `T1-dev-human-reviewed-r1`; the original `T1-dev-r1`
+source was restored from the historical model packet so the completed DeepSeek
+runs remain reproducible.
+
+- Reviewed snapshot status: `ready`
+- Reviewed snapshot hash: `95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37`
+- Question records changed: 14 / 70
+- Text changes: 9 / 70
+- `unclear` flag changes: 11 / 70
+- Remaining `unclear: true`: 6 / 70
+
+See `TRANSCRIPT-HUMAN-REVIEW.md` and `transcript-human-review.json` for the safe
+audit record. The existing DeepSeek metrics still describe the pre-review
+packet; future model comparisons must use newly built packets from the reviewed
+snapshot.
 
 ## Reproduction Commands
 

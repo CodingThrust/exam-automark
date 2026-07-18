@@ -1,0 +1,78 @@
+{
+  "assessment_id": "week5_test",
+  "comparison": {
+    "changed_question_records": 14,
+    "changed_student_count": 5,
+    "changed_students": {
+      "S002": [
+        "Q5",
+        "Q7",
+        "Q8",
+        "Q10"
+      ],
+      "S015": [
+        "Q5",
+        "Q7",
+        "Q8",
+        "Q9",
+        "Q10"
+      ],
+      "S016": [
+        "Q7",
+        "Q8"
+      ],
+      "S020": [
+        "Q5"
+      ],
+      "S022": [
+        "Q9",
+        "Q10"
+      ]
+    },
+    "text_changes": 9,
+    "total_question_records": 70,
+    "unclear_flag_changes": 11,
+    "unchanged_students": [
+      "S017",
+      "S021"
+    ]
+  },
+  "course_id": "DSAA3071",
+  "human_review": {
+    "method": "Manual question-by-question comparison against anonymized PDFs",
+    "review_completed_at": "2026-07-18",
+    "reviewed_question_records": 70,
+    "reviewed_student_count": 7
+  },
+  "original_snapshot": {
+    "directory_hash": "3e2e804049b4c70fd2e3c3252cef121ad90b049e4b9fec3454be069772ebaf2d",
+    "historical_packet_text_source_hash": "163e919ed6995d789e6cb785a1bd172567a4baf8b2751cbe789f01126660e39e",
+    "path": "Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-r1",
+    "status": "restored_from_historical_baseline_packet"
+  },
+  "privacy": {
+    "contains_student_answer_text": false,
+    "data_git_tracking_allowed": false,
+    "student_ids_are_anonymous": true
+  },
+  "record_type": "dsaa3071_week5_transcript_human_review",
+  "remaining_unclear": {
+    "S002": 1,
+    "S015": 2,
+    "S016": 0,
+    "S017": 1,
+    "S020": 0,
+    "S021": 0,
+    "S022": 2,
+    "total": 6
+  },
+  "reviewed_snapshot": {
+    "directory_hash": "95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37",
+    "path": "Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-human-reviewed-r1",
+    "readiness_report": "experiments/records/DSAA3071-week5-dev-model-run/transcript-readiness-dev-human-reviewed.json",
+    "status": "ready"
+  },
+  "schema_version": 1,
+  "split": "development",
+  "status": "ready"
+}

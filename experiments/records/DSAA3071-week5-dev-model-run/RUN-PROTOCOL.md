@@ -31,6 +31,22 @@ DeepSeek public API is treated as text-only in this repository, so it cannot run
 
 Future PDF/image grading needs a multimodal or headless runner, while DeepSeek text-only runs should continue to use transcript packets.
 
+## Human-Reviewed Transcript Snapshot
+
+The completed DeepSeek runs in this record used the pre-review source
+`T1-dev-r1`. After those runs, the user reviewed all 70 development transcript
+records against the anonymized PDFs. The reviewed source is frozen at:
+
+`Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-human-reviewed-r1`
+
+- Validation status: `ready`, 7 / 7 transcripts
+- Directory hash: `95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37`
+- Readiness report: `transcript-readiness-dev-human-reviewed.json`
+
+Do not overwrite the packet or run paths shown later in this protocol. Any
+post-review experiment must use new packet and output directories and must
+record the reviewed hash above.
+
 ## Transcript Schema
 
 Each transcript file may be either `<student_id>.json` or
@@ -86,6 +102,10 @@ Tracked report:
 Current status: `ready`
 
 Missing transcripts: none
+
+Human-reviewed readiness report:
+
+`experiments/records/DSAA3071-week5-dev-model-run/transcript-readiness-dev-human-reviewed.json`
 
 ## Recheck Transcript Readiness
 

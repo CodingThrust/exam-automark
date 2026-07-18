@@ -46,6 +46,26 @@ class ThreeConditionAblationTests(unittest.TestCase):
         self.assertEqual(report["status"], "not_ready")
         self.assertIn("same_students", report["failed_checks"])
 
+    def test_valid_course_content_drift_fails_same_course(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            _write_json(
+                c3 / "course.json",
+                {
+                    "assessment_id": "week5",
+                    "course_id": "synthetic",
+                    "revision": 2,
+                },
+            )
+            _mutate_manifest(c3, course_hash=_sha256_file(c3 / "course.json"))
+
+            report = _check(b0, r1, c3)
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn("same_course", report["failed_checks"])
+        self.assertNotIn("packet_audits_pass", report["failed_checks"])
+
     def test_text_source_drift_is_not_ready(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -103,6 +123,83 @@ class ThreeConditionAblationTests(unittest.TestCase):
 
         self.assertEqual(report["status"], "not_ready")
         self.assertIn("packet_audits_pass", report["failed_checks"])
+
+    def test_packet_input_mode_must_match_shared_text_only_mode(self):
+        for packet_mode in (None, "multimodal"):
+            with self.subTest(packet_mode=packet_mode), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                b0, r1, c3 = _write_packets(root)
+                _set_packet_input_mode(r1, packet_mode)
+
+                report = _check(b0, r1, c3)
+
+            self.assertEqual(report["status"], "not_ready")
+            self.assertIn("packet_audits_pass", report["failed_checks"])
+            self.assertIn(
+                "metadata.input_mode must equal shared input_mode text-only",
+                _detail(report, "packet_audits_pass"),
+            )
+
+    def test_pdf_inputs_fail_even_when_all_declared_hashes_are_updated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            for packet in (b0, r1, c3):
+                _replace_student_input(
+                    packet,
+                    "S001",
+                    "submission.pdf",
+                    b"%PDF-1.7 synthetic",
+                )
+
+            report = _check(b0, r1, c3)
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn("packet_audits_pass", report["failed_checks"])
+        self.assertIn(
+            "text-only input cannot be image/PDF: S001/submission.pdf",
+            _detail(report, "packet_audits_pass"),
+        )
+
+    def test_binary_inputs_fail_even_when_all_declared_hashes_are_updated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            for packet in (b0, r1, c3):
+                _replace_student_input(
+                    packet,
+                    "S001",
+                    "payload.bin",
+                    b"\x00\xff\x10\x80",
+                )
+
+            report = _check(b0, r1, c3)
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn(
+            "unsupported text-only input file: S001/payload.bin",
+            _detail(report, "packet_audits_pass"),
+        )
+
+    def test_binary_content_with_text_suffix_fails_without_crashing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            for packet in (b0, r1, c3):
+                _replace_student_input(
+                    packet,
+                    "S001",
+                    "payload.txt",
+                    b"\x80\x81\xff",
+                )
+
+            report = _check(b0, r1, c3)
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn(
+            "text-only input is not UTF-8: S001/payload.txt",
+            _detail(report, "packet_audits_pass"),
+        )
 
     def test_deleted_prompt_is_an_integrity_finding_not_an_exception(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -395,6 +492,34 @@ def _mutate_manifest(packet: Path, **updates: object) -> None:
     manifest = json.loads(path.read_text(encoding="utf-8"))
     manifest.update(updates)
     _write_json(path, manifest)
+
+
+def _set_packet_input_mode(packet: Path, value: str | None) -> None:
+    path = packet / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    if value is None:
+        manifest["metadata"].pop("input_mode")
+    else:
+        manifest["metadata"]["input_mode"] = value
+    _write_json(path, manifest)
+
+
+def _replace_student_input(
+    packet: Path,
+    student_id: str,
+    filename: str,
+    payload: bytes,
+) -> None:
+    student_input = packet / "inputs" / student_id
+    for path in student_input.rglob("*"):
+        if path.is_file():
+            path.unlink()
+    (student_input / filename).write_bytes(payload)
+    manifest_path = packet / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["input_hashes"][student_id] = _directory_digest(student_input)
+    manifest["metadata"]["text_source_hash"] = _directory_digest(packet / "inputs")
+    _write_json(manifest_path, manifest)
 
 
 def _uppercase_manifest_hashes(packet: Path) -> None:

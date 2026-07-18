@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from .model_runner import IMAGE_OR_DOCUMENT_SUFFIXES, TEXT_SUFFIXES
 from .packets import audit_prompt_packet, directory_digest
 
 
@@ -52,14 +53,14 @@ def check_three_condition_ablation(
         raise ValueError("model must not be blank")
 
     packets = {
-        "B0": _load_packet(Path(b0)),
-        "R1": _load_packet(Path(r1)),
-        "C3": _load_packet(Path(c3)),
+        "B0": _load_packet(Path(b0), expected_input_mode=input_mode),
+        "R1": _load_packet(Path(r1), expected_input_mode=input_mode),
+        "C3": _load_packet(Path(c3), expected_input_mode=input_mode),
     }
     manifests = {label: packet["manifest"] for label, packet in packets.items()}
     checks: list[dict[str, str]] = []
 
-    _check_same_field(checks, "same_course", manifests, "course_id")
+    _check_same_course(checks, manifests)
     _check_same_field(checks, "same_assessment", manifests, "assessment_id")
     _check_same_field(checks, "same_students", manifests, "student_ids")
     _check_same_metadata(checks, "same_split", manifests, "split")
@@ -182,13 +183,17 @@ def render_three_condition_ablation_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _load_packet(path: Path) -> dict[str, Any]:
+def _load_packet(path: Path, *, expected_input_mode: str) -> dict[str, Any]:
     manifest_path = path / "manifest.json"
     if not path.is_dir():
         raise FileNotFoundError(f"packet directory missing: {path}")
     manifest, manifest_findings = _load_manifest(manifest_path)
-    privacy_findings = audit_prompt_packet(path)
-    integrity_findings = _audit_packet_integrity(path, manifest)
+    privacy_findings = _audit_packet_privacy(path)
+    integrity_findings = _audit_packet_integrity(
+        path,
+        manifest,
+        expected_input_mode=expected_input_mode,
+    )
     return {
         "manifest": manifest,
         "packet_hash": directory_digest(path),
@@ -196,6 +201,31 @@ def _load_packet(path: Path) -> dict[str, Any]:
             set(manifest_findings + privacy_findings + integrity_findings)
         ),
     }
+
+
+def _check_same_course(
+    checks: list[dict[str, str]],
+    manifests: dict[str, dict[str, Any]],
+) -> None:
+    values = {
+        label: {
+            "course_id": manifest.get("course_id"),
+            "course_hash": _required_hash(manifest, "course_hash"),
+        }
+        for label, manifest in manifests.items()
+    }
+    valid = all(
+        _is_nonempty_string(value["course_id"])
+        and value["course_hash"] is not None
+        for value in values.values()
+    )
+    normalized = {
+        (value["course_id"], value["course_hash"])
+        for value in values.values()
+        if _is_nonempty_string(value["course_id"])
+        and value["course_hash"] is not None
+    }
+    _check(checks, "same_course", valid and len(normalized) == 1, _value_detail(values))
 
 
 def _check_same_field(
@@ -365,7 +395,19 @@ def _load_manifest(path: Path) -> tuple[dict[str, Any], list[str]]:
     return manifest, []
 
 
-def _audit_packet_integrity(path: Path, manifest: dict[str, Any]) -> list[str]:
+def _audit_packet_privacy(path: Path) -> list[str]:
+    try:
+        return audit_prompt_packet(path)
+    except UnicodeDecodeError:
+        return ["privacy audit found a text-labeled file that is not UTF-8"]
+
+
+def _audit_packet_integrity(
+    path: Path,
+    manifest: dict[str, Any],
+    *,
+    expected_input_mode: str,
+) -> list[str]:
     findings: list[str] = []
     schema_version = manifest.get("schema_version")
     if (
@@ -387,6 +429,11 @@ def _audit_packet_integrity(path: Path, manifest: dict[str, Any]) -> list[str]:
     for key in ("split", "input_mode", "skill_version_id"):
         if not _is_nonempty_string(metadata.get(key)):
             findings.append(f"metadata.{key} must be a non-empty string")
+    if metadata.get("input_mode") != expected_input_mode:
+        findings.append(
+            "metadata.input_mode must equal shared input_mode "
+            f"{expected_input_mode}"
+        )
     for key in ("data_snapshot_hash", "skill_hash", "text_source_hash"):
         if not _is_sha256(metadata.get(key)):
             findings.append(f"metadata.{key} must be a 64-hex SHA-256 value")
@@ -409,6 +456,7 @@ def _audit_packet_integrity(path: Path, manifest: dict[str, Any]) -> list[str]:
         findings.append("missing required directory: inputs")
     elif students is not None:
         _audit_student_input_directories(inputs, students, findings)
+        _audit_text_only_input_layout(inputs, students, findings)
 
     input_hashes = manifest.get("input_hashes")
     if not isinstance(input_hashes, dict):
@@ -457,6 +505,31 @@ def _audit_student_input_directories(
             findings.append(
                 f"student input directory contains no files: {student_id}"
             )
+
+
+def _audit_text_only_input_layout(
+    inputs: Path,
+    students: list[str],
+    findings: list[str],
+) -> None:
+    for student_id in students:
+        student_input = inputs / student_id
+        if not student_input.is_dir():
+            continue
+        files = sorted(path for path in student_input.rglob("*") if path.is_file())
+        for path in files:
+            relative = path.relative_to(inputs).as_posix()
+            suffix = path.suffix.lower()
+            if suffix in IMAGE_OR_DOCUMENT_SUFFIXES:
+                findings.append(f"text-only input cannot be image/PDF: {relative}")
+                continue
+            if suffix not in TEXT_SUFFIXES:
+                findings.append(f"unsupported text-only input file: {relative}")
+                continue
+            try:
+                path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                findings.append(f"text-only input is not UTF-8: {relative}")
 
 
 def _audit_input_hashes(

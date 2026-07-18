@@ -463,6 +463,56 @@ class CoreCliTests(unittest.TestCase):
         self.assertEqual(result["status"], "ready")
         self.assertEqual(report["filled_score_rows"], 3)
 
+    def test_validate_transcripts_command_writes_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            transcript_root = root / "transcripts"
+            transcript_root.mkdir()
+            transcript_path = transcript_root / "S001.json"
+            report_path = root / "transcript-readiness.json"
+            transcript_path.write_text(
+                json.dumps(
+                    {
+                        "student_id": "S001",
+                        "answers": [
+                            {
+                                "question_id": question_id,
+                                "text": "visible answer",
+                                "unclear": False,
+                            }
+                            for question_id in ("Q1", "Q2a", "Q2b")
+                        ],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "validate-transcripts",
+                        "--course",
+                        str(FIXTURES / "course_dsaa3073_hw1.json"),
+                        "--transcript-source",
+                        str(transcript_root),
+                        "--student-id",
+                        "S001",
+                        "--output",
+                        str(report_path),
+                    ]
+                )
+            result = json.loads(stdout.getvalue())
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(code, 0)
+        self.assertEqual(result["status"], "ready")
+        self.assertEqual(report["valid_transcript_count"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

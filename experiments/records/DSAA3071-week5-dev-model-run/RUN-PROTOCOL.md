@@ -1,10 +1,11 @@
 # DSAA3071 Week 5 Development Model-Run Protocol
 
-Status: **text_packets_ready_pending_model_runs**
+Status: **dev_metrics_recorded**
 
-No model calls are recorded by this note. This record starts the DSAA3071 week 5
-development model-run stage after the official per-question gold scores became
-ready.
+This record tracks the DSAA3071 week 5 development model-run stage after the
+official per-question gold scores became ready. DeepSeek model calls were run
+from local text-only transcript packets; raw outputs live under ignored `Data/`,
+and safe metrics summaries live in this record directory.
 
 ## Anchors
 
@@ -15,7 +16,7 @@ ready.
 - Development students: `S017`, `S021`, `S002`, `S015`, `S020`, `S016`, `S022`
 - Official gold status: `ready`
 - PDF packet readiness status: `packet-ready`
-- Model-run status: `text_packets_ready_model_runs_not_started`
+- Model-run status: `completed_dev_metrics_recorded`
 
 ## Current Blocker
 
@@ -168,6 +169,9 @@ These commands should not be run until transcript readiness is `ready`.
 - Baseline text packet hash: `edd797e817b12daec0e6efea5167d0b107c59ab67f18ff9b77d285dbc648a26f`
 - Candidate v2 text packet hash: `febdb58c74b1f031d6f84a2c20e3edd5a8da0e811df6ce26864f2ea9df82d011`
 - Shared transcript source hash: `163e919ed6995d789e6cb785a1bd172567a4baf8b2751cbe789f01126660e39e`
-- Model calls recorded by this update: none.
+- DeepSeek baseline run status: `passed`, 7 / 7 students.
+- DeepSeek candidate v2 run status: `passed`, 7 / 7 students.
+- Metrics summary: `experiments/records/DSAA3071-week5-dev-model-run/DEV-METRICS.md`
+- Metrics JSON: `experiments/records/DSAA3071-week5-dev-model-run/dev-metrics-deepseek.json`
 
 Privacy note: visual inspection found a residual handwritten identity string on `S016` page 1 in the anonymized v3 PDF. The text-only transcripts exclude it, but PDF packets from this redaction version should not be sent to a model until the PDF is corrected.

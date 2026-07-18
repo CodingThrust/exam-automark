@@ -1,0 +1,214 @@
+{
+  "analysis_commit": "619b0a9",
+  "assessment_id": "week5_test",
+  "baseline": {
+    "confidence_accuracy": {
+      "high": 0.8888888888888888,
+      "low": 0.0,
+      "medium": 0.125
+    },
+    "exact_agreement": 0.5,
+    "legacy_total_error_gt_2_point_rate": 1.0,
+    "macro_accuracy": 0.5,
+    "mean_signed_error": -2.8,
+    "normalized_question_mae": 0.17861904761904762,
+    "per_question_accuracy": {
+      "Q1": 1.0,
+      "Q10": 0.5714285714285714,
+      "Q2": 1.0,
+      "Q3": 1.0,
+      "Q4": 1.0,
+      "Q5": 0.0,
+      "Q6": 0.14285714285714285,
+      "Q7": 0.14285714285714285,
+      "Q8": 0.14285714285714285,
+      "Q9": 0.0
+    },
+    "per_question_mae": {
+      "Q1": 0.0,
+      "Q10": 1.5714285714285714,
+      "Q2": 0.0,
+      "Q3": 0.0,
+      "Q4": 0.0,
+      "Q5": 5.285714285714286,
+      "Q6": 2.142857142857143,
+      "Q7": 4.142857142857143,
+      "Q8": 4.857142857142857,
+      "Q9": 15.428571428571429
+    },
+    "question_score_mae": 3.342857142857143,
+    "severe_error_rate": 1.0,
+    "student_total_errors": {
+      "S002": -40.0,
+      "S015": -30.0,
+      "S016": -26.0,
+      "S017": -30.0,
+      "S020": -29.0,
+      "S021": -16.0,
+      "S022": -25.0
+    },
+    "subquestion_mae": 3.342857142857143,
+    "total_error_gt_10_point_rate": 1.0,
+    "total_error_gt_20_point_rate": 0.8571428571428571,
+    "total_error_within_10_point_rate": 0.0,
+    "total_error_within_20_point_rate": 0.14285714285714285,
+    "total_error_within_5_point_rate": 0.0,
+    "total_score_mae": 28.0,
+    "total_score_mae_fraction_of_max": 0.2153846153846154,
+    "total_score_max": 130.0,
+    "total_score_rmse": 28.779953340575698,
+    "within_1_point_rate": 0.0
+  },
+  "baseline_run": {
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "packet_hash": "edd797e817b12daec0e6efea5167d0b107c59ab67f18ff9b77d285dbc648a26f",
+    "path": "Data\\DSAA3071\\week5-benchmark-redaction-v3\\runs\\deepseek-baseline-text-G1-dev-r1",
+    "prompt_hash": "8fe0b9bb69d56109b2bbecfcdd6ca05ebe2ae9dff76efe610ecfde0d831cfa5e",
+    "provider": "deepseek",
+    "rubric_hash": "432dc6ea0461228171eca86a1890a3021a77b0fdddcf72e1458b125c97b6cb04",
+    "run_commit": "619b0a9",
+    "usage": {
+      "completion_tokens": 42706,
+      "prompt_cache_hit_tokens": 5504,
+      "prompt_cache_miss_tokens": 20316,
+      "prompt_tokens": 25820,
+      "total_tokens": 68526
+    },
+    "validation": {
+      "status": "passed",
+      "students_expected": 7,
+      "students_failed": 0,
+      "students_passed": 7
+    },
+    "validation_status": "passed"
+  },
+  "benchmark_root": "Data\\DSAA3071\\week5-benchmark-redaction-v3",
+  "bootstrap": {
+    "exact_agreement_candidate_minus_baseline": {
+      "lower": -0.05714285714285713,
+      "mean_difference": 0.0,
+      "upper": 0.05714285714285713
+    },
+    "samples": 10000,
+    "seed": 20260701
+  },
+  "candidate": {
+    "confidence_accuracy": {
+      "high": 0.8378378378378378,
+      "low": 0.1111111111111111,
+      "medium": 0.125
+    },
+    "exact_agreement": 0.5,
+    "legacy_total_error_gt_2_point_rate": 1.0,
+    "macro_accuracy": 0.5,
+    "mean_signed_error": -3.057142857142857,
+    "normalized_question_mae": 0.1800952380952381,
+    "per_question_accuracy": {
+      "Q1": 1.0,
+      "Q10": 0.5714285714285714,
+      "Q2": 1.0,
+      "Q3": 1.0,
+      "Q4": 1.0,
+      "Q5": 0.0,
+      "Q6": 0.0,
+      "Q7": 0.2857142857142857,
+      "Q8": 0.14285714285714285,
+      "Q9": 0.0
+    },
+    "per_question_mae": {
+      "Q1": 0.0,
+      "Q10": 1.4285714285714286,
+      "Q2": 0.0,
+      "Q3": 0.0,
+      "Q4": 0.0,
+      "Q5": 5.714285714285714,
+      "Q6": 2.5714285714285716,
+      "Q7": 3.7142857142857144,
+      "Q8": 4.714285714285714,
+      "Q9": 15.857142857142858
+    },
+    "question_score_mae": 3.4,
+    "severe_error_rate": 1.0,
+    "student_total_errors": {
+      "S002": -38.0,
+      "S015": -33.0,
+      "S016": -35.0,
+      "S017": -20.0,
+      "S020": -19.0,
+      "S021": -43.0,
+      "S022": -26.0
+    },
+    "subquestion_mae": 3.4,
+    "total_error_gt_10_point_rate": 1.0,
+    "total_error_gt_20_point_rate": 0.7142857142857143,
+    "total_error_within_10_point_rate": 0.0,
+    "total_error_within_20_point_rate": 0.2857142857142857,
+    "total_error_within_5_point_rate": 0.0,
+    "total_score_mae": 30.571428571428573,
+    "total_score_mae_fraction_of_max": 0.2351648351648352,
+    "total_score_max": 130.0,
+    "total_score_rmse": 31.722006782133352,
+    "within_1_point_rate": 0.0
+  },
+  "candidate_minus_baseline": {
+    "exact_agreement": 0.0,
+    "macro_accuracy": 0.0,
+    "mean_signed_error": -0.2571428571428571,
+    "normalized_question_mae": 0.001476190476190492,
+    "question_score_mae": 0.05714285714285694,
+    "severe_error_rate": 0.0,
+    "subquestion_mae": 0.05714285714285694,
+    "total_error_gt_10_point_rate": 0.0,
+    "total_error_gt_20_point_rate": -0.1428571428571428,
+    "total_error_within_10_point_rate": 0.0,
+    "total_error_within_20_point_rate": 0.14285714285714285,
+    "total_error_within_5_point_rate": 0.0,
+    "total_score_mae": 2.571428571428573,
+    "total_score_mae_fraction_of_max": 0.019780219780219793,
+    "total_score_rmse": 2.942053441557654,
+    "within_1_point_rate": 0.0
+  },
+  "candidate_run": {
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "packet_hash": "febdb58c74b1f031d6f84a2c20e3edd5a8da0e811df6ce26864f2ea9df82d011",
+    "path": "Data\\DSAA3071\\week5-benchmark-redaction-v3\\runs\\deepseek-candidate-text-G1-dev-r1",
+    "prompt_hash": "1eb905236e6f4e4623399e4dc5cd77b80c69fa7a5ea3a2d6a2777f2dcc902c3f",
+    "provider": "deepseek",
+    "rubric_hash": "432dc6ea0461228171eca86a1890a3021a77b0fdddcf72e1458b125c97b6cb04",
+    "run_commit": "619b0a9",
+    "usage": {
+      "completion_tokens": 48596,
+      "prompt_cache_hit_tokens": 3200,
+      "prompt_cache_miss_tokens": 24421,
+      "prompt_tokens": 27621,
+      "total_tokens": 76217
+    },
+    "validation": {
+      "status": "passed",
+      "students_expected": 7,
+      "students_failed": 0,
+      "students_passed": 7
+    },
+    "validation_status": "passed"
+  },
+  "caveats": [
+    "Development split only; do not treat as held-out evidence.",
+    "Transcript text was produced by local visual inspection and needs human spot-check before final claims.",
+    "PDF packets remain privacy-blocked because S016 page 1 in redaction v3 contains a residual handwritten identity string."
+  ],
+  "course_id": "DSAA3071",
+  "generated_at": "2026-07-18T13:40:29.565710Z",
+  "gold_source": "official per-question scores",
+  "input_mode": "text-only transcript",
+  "metric_notes": {
+    "normalized_question_mae": "Mean abs(question score error / question max score) across all student-question rows.",
+    "severe_error_rate": "Legacy physics metric: abs(total score error) > 2 points. It is retained for continuity but is too strict for a 130-point DSAA3071 exam.",
+    "total_error_gt_20_point_rate": "Scale-aware DSAA3071 diagnostic: abs(total score error) > 20 points on a 130-point exam."
+  },
+  "record_type": "dsaa3071_week5_dev_run_metrics_comparison",
+  "score_count": 70,
+  "split": "development",
+  "student_count": 7
+}

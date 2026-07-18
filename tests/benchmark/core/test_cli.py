@@ -1,4 +1,5 @@
 import contextlib
+import csv
 import io
 import json
 import tempfile
@@ -419,6 +420,48 @@ class CoreCliTests(unittest.TestCase):
         self.assertEqual(plan["status"], "packets_built")
         self.assertEqual(plan["built_packets"][0]["audit_status"], "passed")
         self.assertEqual(plan["built_packets"][0]["packet_hash"], result["packet_hash"])
+
+    def test_validate_gold_command_writes_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            gold_path = root / "primary_scores.csv"
+            report_path = root / "gold-readiness.json"
+            with gold_path.open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(
+                    handle,
+                    fieldnames=("student_id", "question_id", "score"),
+                )
+                writer.writeheader()
+                for question_id, score in (("Q1", "10"), ("Q2a", "3"), ("Q2b", "2")):
+                    writer.writerow(
+                        {
+                            "student_id": "S001",
+                            "question_id": question_id,
+                            "score": score,
+                        }
+                    )
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "validate-gold",
+                        "--course",
+                        str(FIXTURES / "course_dsaa3073_hw1.json"),
+                        "--gold",
+                        str(gold_path),
+                        "--student-id",
+                        "S001",
+                        "--output",
+                        str(report_path),
+                    ]
+                )
+            result = json.loads(stdout.getvalue())
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(code, 0)
+        self.assertEqual(result["status"], "ready")
+        self.assertEqual(report["filled_score_rows"], 3)
 
 
 if __name__ == "__main__":

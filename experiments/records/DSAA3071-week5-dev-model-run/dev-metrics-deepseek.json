@@ -196,7 +196,7 @@
   "caveats": [
     "Development split only; do not treat as held-out evidence.",
     "Transcript text was produced by local visual inspection and needs human spot-check before final claims.",
-    "PDF packets remain privacy-blocked because S016 page 1 in redaction v3 contains a residual handwritten identity string."
+    "S016 PDF privacy residue was corrected after this text-only dev run; metrics are unchanged because the run used transcript packets, but future PDF packet use should rely on the corrected packet hashes."
   ],
   "course_id": "DSAA3071",
   "generated_at": "2026-07-18T13:40:29.565710Z",
@@ -208,6 +208,15 @@
     "total_error_gt_20_point_rate": "Scale-aware DSAA3071 diagnostic: abs(total score error) > 20 points on a 130-point exam."
   },
   "record_type": "dsaa3071_week5_dev_run_metrics_comparison",
+  "redaction_corrections": [
+    {
+      "corrected_input_hash_in_dev_pdf_packets": "948b8fbd7f8a1f6251bd7d70fca47c49b8a0161aa7c51686a8f0d6f10076e440",
+      "corrected_source_pdf_sha256": "385782d3f0ab1192a40af5743fb005cada550f7132bbea1f039ad7fb434fd40a",
+      "correction_id": "DSAA3071-week5-S016-redaction-2026-07-18",
+      "metrics_impact": "none_for_recorded_text_only_runs",
+      "student_id": "S016"
+    }
+  ],
   "score_count": 70,
   "split": "development",
   "student_count": 7

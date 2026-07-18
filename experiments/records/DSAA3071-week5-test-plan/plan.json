@@ -5,7 +5,7 @@
       "audit_status": "passed",
       "condition": "T1",
       "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1/manifest.json",
-      "packet_hash": "710b4d97de4310a51549d53d8cb2df6d6ba25e9891076302872ff26c8f260f34",
+      "packet_hash": "f3954dfa147467b564cf8c7d7d5f669587f4e64a57aa645b07a217360df621ad",
       "packet_id": "T1-dev-r1",
       "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1",
       "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1/prompt.txt",
@@ -27,7 +27,7 @@
       "audit_status": "passed",
       "condition": "G1",
       "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1/manifest.json",
-      "packet_hash": "fabee03c35acb9826a28df90989c4bcc2b5d8243d983d535f9bf26911d95b6f1",
+      "packet_hash": "0814dc999791cc8a6521cdfa6eb6aaeabfbea22523ca59d79bcec8442ae3343e",
       "packet_id": "G1-dev-r1",
       "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1",
       "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1/prompt.txt",
@@ -51,13 +51,15 @@
   "data_inventory_path": "experiments/data_inventory/DSAA3071.json",
   "data_snapshot_hash": "cf87b373395e381d9d07bbd370c1faa772372b760557b0581dcf9e8a93c04c28",
   "experiment_id": "DSAA3071-week5-test-plan",
-  "git_branch": "codex/multi-course-pilot-inventory",
-  "git_commit": "ca8954b",
+  "git_branch": "codex/dsaa3071-week5-dev-transcripts",
+  "git_commit": "bcafbd1",
   "notes": [
     "Baseline DSAA3071 week 5 packet dry-run plan; no model calls.",
     "Uses privacy-approved anonymized v3 PDFs under ignored Data/DSAA3071/week5-benchmark-redaction-v3.",
     "DeepSeek text API cannot consume PDF inputs directly; PDF packets are for multimodal/headless runners, and text-only runs require a completed transcript packet first.",
-    "Gold scores remain pending, so model accuracy metrics are still blocked."
+    "2026-07-18 redaction correction: S016 anonymized PDF was manually corrected after a residual identity string was found on page 1; development T1/G1 packet hashes were re-recorded from the corrected PDF.",
+    "The data_snapshot_hash remains the privacy-preserving DSAA3071 inventory anchor; corrected prompt-packet hashes are the authoritative anchors for S016 dev PDF inputs.",
+    "Official per-question gold scores were added later for development metrics; this plan remains the packet construction record."
   ],
   "planned_packets": [
     {

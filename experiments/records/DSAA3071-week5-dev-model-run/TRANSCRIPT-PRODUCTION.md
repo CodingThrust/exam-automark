@@ -39,11 +39,22 @@ No external API was used to produce these transcripts.
   - `S021`: 0 / 10
   - `S022`: 4 / 10
 
-## Privacy Finding
+## Privacy Finding And Correction
 
-During visual inspection, `S016` page 1 in `week5-benchmark-redaction-v3` still showed a residual handwritten identity string near the top margin. The transcript excludes it, so the text-only dev packets do not contain that identity string.
+During transcript production, `S016` page 1 in `week5-benchmark-redaction-v3` showed a residual handwritten identity string near the top margin. The transcript excluded it, so the text-only dev packets did not contain that identity string.
 
-Until a corrected PDF redaction is generated, PDF-based grading packets from `week5-benchmark-redaction-v3` should be treated as privacy-blocked for model calls. The DSAA3071 week 5 development experiment should proceed only with the text-only transcript packets recorded in `text-packet-readiness-dev.json`.
+On 2026-07-18, the user manually corrected the `S016` anonymized PDF. The corrected file was rendered for all 3 pages with Poppler and no visible name or student-number residue was found.
+
+Correction anchors:
+
+- Correction ID: `DSAA3071-week5-S016-redaction-2026-07-18`
+- Corrected source PDF: `Data/DSAA3071/week5-benchmark-redaction-v3/anonymized/S016/week5.pdf`
+- Corrected source PDF SHA-256: `385782d3f0ab1192a40af5743fb005cada550f7132bbea1f039ad7fb434fd40a`
+- Corrected `inputs/S016` directory hash in dev packets: `948b8fbd7f8a1f6251bd7d70fca47c49b8a0161aa7c51686a8f0d6f10076e440`
+
+The corrected PDF was synchronized into the development T1/G1 packet copies for both baseline and candidate-v2 plans. Held-out packets are unchanged because `S016` is not in the held-out split.
+
+Remaining caveat: the transcript text still needs human spot-check before final accuracy claims, because the DeepSeek dev runs used text-only transcript packets rather than the PDF packets.
 
 ## Reproduction Commands
 

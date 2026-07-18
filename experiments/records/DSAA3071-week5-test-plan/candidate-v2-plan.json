@@ -5,7 +5,7 @@
       "audit_status": "passed",
       "condition": "T1",
       "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-dev-r1/manifest.json",
-      "packet_hash": "0f361a1691af59c80a6c723e5599eabe5314189a6c8f7471bfc7f331c9334c06",
+      "packet_hash": "a9a965ed019dcbbd3d67db564d532eec29a2aff1e100d326a270d8a0fea6d463",
       "packet_id": "T1-dev-r1",
       "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-dev-r1",
       "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-dev-r1/prompt.txt",
@@ -27,7 +27,7 @@
       "audit_status": "passed",
       "condition": "G1",
       "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-dev-r1/manifest.json",
-      "packet_hash": "5ef409aaa9344c54c7f4bef59417897e455c0eac62ed2e2a0e12df19081257f9",
+      "packet_hash": "7a51e58eb55960405cfd145cbe41a862f3d5a8505ceec73d7e0b60ac9f76ebba",
       "packet_id": "G1-dev-r1",
       "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-dev-r1",
       "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-dev-r1/prompt.txt",
@@ -51,13 +51,15 @@
   "data_inventory_path": "experiments/data_inventory/DSAA3071.json",
   "data_snapshot_hash": "cf87b373395e381d9d07bbd370c1faa772372b760557b0581dcf9e8a93c04c28",
   "experiment_id": "DSAA3071-week5-candidate-v2-plan",
-  "git_branch": "codex/multi-course-pilot-inventory",
-  "git_commit": "ca8954b",
+  "git_branch": "codex/dsaa3071-week5-dev-transcripts",
+  "git_commit": "bcafbd1",
   "notes": [
     "Candidate-v2 DSAA3071 week 5 packet dry-run plan; no model calls.",
     "Uses the same anonymized v3 PDF inputs, split, course spec, and rubric as the baseline plan.",
     "Candidate-v2 keeps evidence-first grading, integer score discipline, answer-first full-credit policy, second-pass review, strict confidence strings, and total consistency checks.",
-    "Gold scores remain pending, so model accuracy metrics are still blocked."
+    "2026-07-18 redaction correction: S016 anonymized PDF was manually corrected after a residual identity string was found on page 1; development T1/G1 packet hashes were re-recorded from the corrected PDF.",
+    "The data_snapshot_hash remains the privacy-preserving DSAA3071 inventory anchor; corrected prompt-packet hashes are the authoritative anchors for S016 dev PDF inputs.",
+    "Official per-question gold scores were added later for development metrics; this plan remains the packet construction record."
   ],
   "planned_packets": [
     {

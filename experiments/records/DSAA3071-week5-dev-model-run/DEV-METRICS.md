@@ -49,4 +49,4 @@ Both prompts systematically under-score this dev split: every student total erro
 
 - Development split only; do not treat this as held-out evidence.
 - Transcript text still needs human spot-check before final accuracy claims.
-- PDF packets remain privacy-blocked because S016 page 1 in redaction v3 contains a residual handwritten identity string.
+- `S016` PDF privacy residue was corrected after this text-only dev run; metrics are unchanged because the run used transcript packets, but future PDF packet use should rely on the corrected packet hashes.

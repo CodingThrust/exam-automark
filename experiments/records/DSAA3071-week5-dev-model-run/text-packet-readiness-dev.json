@@ -45,6 +45,15 @@
       "student_count": 7
     }
   ],
+  "redaction_corrections": [
+    {
+      "corrected_input_hash_in_dev_pdf_packets": "948b8fbd7f8a1f6251bd7d70fca47c49b8a0161aa7c51686a8f0d6f10076e440",
+      "corrected_source_pdf_sha256": "385782d3f0ab1192a40af5743fb005cada550f7132bbea1f039ad7fb434fd40a",
+      "correction_id": "DSAA3071-week5-S016-redaction-2026-07-18",
+      "status": "corrected_and_synced_to_development_pdf_packets",
+      "student_id": "S016"
+    }
+  ],
   "report_type": "text_packet_readiness",
   "schema_version": 1,
   "split": "development",
@@ -63,7 +72,7 @@
   "transcript_source": "Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-r1",
   "warnings": [
     "Transcript content was produced by local visual inspection and still needs human spot-check before reporting accuracy claims.",
-    "S016 page 1 in the anonymized v3 PDF contains a residual handwritten identity string near the top margin; do not use PDF packets for model calls until a corrected redaction is produced.",
+    "S016 page 1 in the anonymized v3 PDF previously contained a residual handwritten identity string; it was corrected on 2026-07-18 and synchronized into development PDF packets.",
     "Teacher grading marks visible in PDFs were intentionally excluded from transcript text to preserve blind grading."
   ]
 }

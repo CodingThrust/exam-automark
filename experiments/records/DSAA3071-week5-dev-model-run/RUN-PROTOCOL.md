@@ -9,29 +9,27 @@ and safe metrics summaries live in this record directory.
 
 ## Anchors
 
-- Branch: `codex/dsaa3071-week5-dev-model-runs`
+- Branch: `codex/dsaa3071-week5-dev-transcripts`
 - Base commit: `ff854ef`
 - Course: `DSAA3071`
 - Assessment: `week5_test`
 - Development students: `S017`, `S021`, `S002`, `S015`, `S020`, `S016`, `S022`
 - Official gold status: `ready`
-- PDF packet readiness status: `packet-ready`
+- PDF packet readiness status: `packet-ready-after-S016-redaction-correction`
 - Model-run status: `completed_dev_metrics_recorded`
 
-## Current Blocker
+## Input Mode Constraint
 
-The existing development grading packets use PDF inputs:
+The development PDF grading packets are privacy-ready after the `S016` redaction correction:
 
 - Baseline: `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/G1-dev-r1`
 - Candidate v2: `Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-dev-r1`
 
-DeepSeek public API is treated as text-only in this repository, so it cannot run
-these PDF grading packets directly. The next required source artifact is one
-transcript JSON file per development student.
-
-Expected transcript source:
+DeepSeek public API is treated as text-only in this repository, so it cannot run these PDF grading packets directly. The completed development runs used transcript JSON files instead:
 
 `Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-r1`
+
+Future PDF/image grading needs a multimodal or headless runner, while DeepSeek text-only runs should continue to use transcript packets.
 
 ## Transcript Schema
 
@@ -174,4 +172,4 @@ These commands should not be run until transcript readiness is `ready`.
 - Metrics summary: `experiments/records/DSAA3071-week5-dev-model-run/DEV-METRICS.md`
 - Metrics JSON: `experiments/records/DSAA3071-week5-dev-model-run/dev-metrics-deepseek.json`
 
-Privacy note: visual inspection found a residual handwritten identity string on `S016` page 1 in the anonymized v3 PDF. The text-only transcripts exclude it, but PDF packets from this redaction version should not be sent to a model until the PDF is corrected.
+Privacy note: `S016` page 1 previously had a residual handwritten identity string in the anonymized v3 PDF. It was manually corrected on 2026-07-18, rendered for all 3 pages, and synchronized into development PDF packets. Corrected source PDF SHA-256: `385782d3f0ab1192a40af5743fb005cada550f7132bbea1f039ad7fb434fd40a`. The text-only DeepSeek metrics are unchanged because those runs used transcript packets.

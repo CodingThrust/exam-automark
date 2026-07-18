@@ -1,0 +1,66 @@
+{
+  "base_commit": "694618f",
+  "courses": [
+    {
+      "blocking_issues": [
+        "local folder contents are inconsistent and no longer selected for the current pilot",
+        "four previously observed student-answer PDFs were corrected to DSAA3071 week 2, 3, 4, and 6 sources",
+        "a clean confirmed DSAA3073 submission set, rubric, and gold scores would be required to reopen DSAA3073"
+      ],
+      "course_id": "DSAA3073",
+      "data_inventory": "experiments/data_inventory/DSAA3073.json",
+      "draft_course_spec": "experiments/course_specs/DSAA3073_week2_test.json",
+      "observed_assets": [
+        "1 remaining top-level PDF after correcting misfiled assets",
+        "4 DSAA3071 week 2, 3, 4, and 6 student-answer PDFs moved to DSAA3071 on 2026-07-13"
+      ],
+      "recommended_next_action": "do not use DSAA3073 until a clean confirmed DSAA3073 data snapshot is supplied",
+      "status": "retired_not_selected_misfiled_assets"
+    },
+    {
+      "blocking_issues": [
+        "gold score template exists but scores are not filled",
+        "prompt packets have not been built or audited",
+        "week 2, 3, 4, and 6 student-answer and answer-key PDFs still need privacy review, anonymization, rubric extraction, gold-score decisions, and packet planning before use"
+      ],
+      "course_id": "DSAA3071",
+      "course_id_confirmed": true,
+      "data_inventory": "experiments/data_inventory/DSAA3071.json",
+      "draft_course_spec": "experiments/course_specs/DSAA3071_week5_test.json",
+      "observed_assets": [
+        "1 user-confirmed combined PDF containing 22 students' answers",
+        "1 user-confirmed question-plus-answer-key PDF",
+        "v3 anonymized candidate PDFs approved by user privacy review",
+        "draft English rubric extracted from the question-plus-answer-key PDF",
+        "Q8 confirmed as 0^(2^n)",
+        "blank gold score template created for 22 anonymous students and 10 questions",
+        "additional student-answer source PDFs for weeks 2, 3, 4, and 6 moved from DSAA3073 into DSAA3071 on 2026-07-13",
+        "question-plus-answer-key PDFs for weeks 2, 3, 4, and 6 added on 2026-07-13",
+        "week 5 student-answer source renamed to DSAA3071-W5Test.pdf with unchanged source hash"
+      ],
+      "prep_result": "experiments/records/DSAA3071-week5-prep/prep-result-v3.json",
+      "recommended_next_action": "finish the week 5 gold scores first, then build and audit week 5 prompt packets; treat weeks 2, 3, 4, and 6 as later DSAA3071 expansion data",
+      "status": "week5_privacy_approved_rubric_draft_confirmed_gold_template_created_scores_pending_additional_weeks_collected"
+    },
+    {
+      "blocking_issues": [
+        "raw submission filenames contain identity-like prefixes",
+        "rubric or solution file is not visible in the current local tree",
+        "gold scores are not visible in the current local tree",
+        "HEIC and docx inputs need conversion policy before packet construction"
+      ],
+      "course_id": "linearalgebra",
+      "data_inventory": "experiments/data_inventory/linearalgebra.json",
+      "draft_course_spec": "experiments/course_specs/linearalgebra_quiz1.json",
+      "observed_assets": [
+        "quiz PDF",
+        "135 raw submission files",
+        "image, PDF, HEIC, and docx input formats"
+      ],
+      "recommended_next_action": "anonymize submissions, extract rubric and gold scores, then build the next prompt packet dry run",
+      "status": "best_representative_pilot_after_privacy_and_rubric_work"
+    }
+  ],
+  "record_type": "multi_course_pilot_inventory",
+  "scan_date": "2026-07-13"
+}

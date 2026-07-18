@@ -32,14 +32,14 @@ class DataInventoryTests(unittest.TestCase):
     def test_write_inventory_is_stable_for_same_tree(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            course_root = root / "Data" / "DSAA3701"
+            course_root = root / "Data" / "DSAA3071"
             course_root.mkdir(parents=True)
             (course_root / "exam.pdf").write_bytes(b"exam")
             first = root / "first.json"
             second = root / "second.json"
 
-            inv_a = write_data_inventory(root / "Data", "DSAA3701", first)
-            inv_b = write_data_inventory(root / "Data", "DSAA3701", second)
+            inv_a = write_data_inventory(root / "Data", "DSAA3071", first)
+            inv_b = write_data_inventory(root / "Data", "DSAA3071", second)
             first_exists = first.exists()
             second_exists = second.exists()
 
@@ -51,7 +51,7 @@ class DataInventoryTests(unittest.TestCase):
         inventory_paths = [
             Path("experiments/data_inventory/physics.json"),
             Path("experiments/data_inventory/DSAA3073.json"),
-            Path("experiments/data_inventory/DSAA3701.json"),
+            Path("experiments/data_inventory/DSAA3071.json"),
             Path("experiments/data_inventory/linearalgebra.json"),
         ]
 

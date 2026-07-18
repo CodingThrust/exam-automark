@@ -1,0 +1,228 @@
+{
+  "assessment_id": "week5_test",
+  "course_id": "DSAA3071",
+  "grading_policy": {
+    "answer_first_policy": "If a final answer is correct and the reasoning is broadly consistent with the expected solution, award full credit unless the reasoning seriously contradicts the standard answer. If the final answer is wrong, inspect the reasoning carefully and award partial credit only for correct relevant work.",
+    "score_step": 1.0,
+    "score_unit": "points"
+  },
+  "model_facing_language": "English",
+  "questions": [
+    {
+      "correct_answer": "b",
+      "expected": "A multitape Turing machine running in time t(n) can be simulated by a single-tape Turing machine with quadratic time overhead, O(t(n)^2).",
+      "id": "Q1",
+      "max_score": 5.0,
+      "rubric": [
+        {
+          "points": 5,
+          "criterion": "Selects option b or otherwise states O(t(n)^2)."
+        },
+        {
+          "points": 0,
+          "criterion": "Selects a different option or gives an incompatible overhead."
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "correct_answer": "c",
+      "expected": "A nondeterministic Turing machine can be simulated by a deterministic Turing machine with exponential time overhead, 2^O(t(n)).",
+      "id": "Q2",
+      "max_score": 5.0,
+      "rubric": [
+        {
+          "points": 5,
+          "criterion": "Selects option c or otherwise states exponential overhead 2^O(t(n))."
+        },
+        {
+          "points": 0,
+          "criterion": "Selects a different option or gives an incompatible overhead."
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "correct_answer": "a",
+      "expected": "An enumerator is a Turing machine with no input tape that prints strings to an output tape.",
+      "id": "Q3",
+      "max_score": 5.0,
+      "rubric": [
+        {
+          "points": 5,
+          "criterion": "Selects option a or gives the equivalent definition of an enumerator."
+        },
+        {
+          "points": 0,
+          "criterion": "Selects a different option or gives an incompatible definition."
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "correct_answer": "b",
+      "expected": "The Church-Turing thesis states that every effectively computable algorithm or function can be implemented by a Turing machine.",
+      "id": "Q4",
+      "max_score": 5.0,
+      "rubric": [
+        {
+          "points": 5,
+          "criterion": "Selects option b or states the equivalent computability claim."
+        },
+        {
+          "points": 0,
+          "criterion": "Selects a different option or confuses computability with speed."
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "expected": "A single-tape Turing machine stores both virtual tapes separated by delimiters, marks each virtual head position with dotted or otherwise distinguished symbols, uses an expanded alphabet for marked symbols and delimiters, scans to read both virtual heads, scans again to update symbols and head markers, and incurs quadratic overhead.",
+      "id": "Q5",
+      "max_score": 20.0,
+      "rubric": [
+        {
+          "points": 4,
+          "criterion": "Encodes two virtual tapes on one tape with a clear delimiter such as #."
+        },
+        {
+          "points": 4,
+          "criterion": "Tracks each virtual head position using marked, dotted, or otherwise distinguished symbols."
+        },
+        {
+          "points": 4,
+          "criterion": "Defines or explains the expanded alphabet including original symbols, marked variants, and delimiters."
+        },
+        {
+          "points": 5,
+          "criterion": "Explains the simulated step: scan to find head positions, remember/read symbols, update symbols, move head markers, and update state."
+        },
+        {
+          "points": 3,
+          "criterion": "States the quadratic O(t(n)^2) time overhead or explains why repeated scanning causes quadratic overhead."
+        }
+      ],
+      "type": "short_answer"
+    },
+    {
+      "expected": "A deterministic Turing machine simulates an NTM by systematically exploring the computation tree, using addresses or branch-choice sequences, often with separate tapes for input, simulation workspace, and the current address, exploring paths in breadth-first order, accepting if any simulated path accepts, and incurring exponential time overhead.",
+      "id": "Q6",
+      "max_score": 20.0,
+      "rubric": [
+        {
+          "points": 4,
+          "criterion": "Represents NTM computation paths using addresses or sequences of branch choices."
+        },
+        {
+          "points": 4,
+          "criterion": "Describes systematic exploration of the computation tree, preferably breadth-first or by nondecreasing address length."
+        },
+        {
+          "points": 4,
+          "criterion": "Explains the use of tapes or work areas for the original input, current simulated branch, and current address or control information."
+        },
+        {
+          "points": 5,
+          "criterion": "Correctly states how each path is simulated and that the DTM accepts if any branch reaches an accept state."
+        },
+        {
+          "points": 3,
+          "criterion": "States exponential time overhead, such as 2^O(t(n)), due to exponentially many paths."
+        }
+      ],
+      "type": "short_answer"
+    },
+    {
+      "expected": "Prove both directions: from a recognizer for L, build an enumerator using dovetailing over strings and bounded simulation time; from an enumerator for L, build a recognizer that runs the enumerator and accepts when the input appears.",
+      "id": "Q7",
+      "max_score": 20.0,
+      "rubric": [
+        {
+          "points": 8,
+          "criterion": "Recognizer to enumerator: describes dovetailing over strings and time bounds so every accepted string is eventually printed."
+        },
+        {
+          "points": 8,
+          "criterion": "Enumerator to recognizer: on input w, runs the enumerator and accepts when w is printed."
+        },
+        {
+          "points": 4,
+          "criterion": "Explains correctness for both membership and nonmembership behavior, including that nonmembers may run forever."
+        }
+      ],
+      "type": "proof"
+    },
+    {
+      "expected": "Design an enumerator for L = {0^(2^n) | n >= 0}. The enumerator should output strings of zeros whose lengths are powers of two: 1, 2, 4, 8, and so on.",
+      "id": "Q8",
+      "max_score": 10.0,
+      "rubric": [
+        {
+          "points": 4,
+          "criterion": "Provides a valid enumerator loop or algorithm rather than only listing examples."
+        },
+        {
+          "points": 4,
+          "criterion": "Correctly generates zero strings with lengths 2^n for n >= 0, such as 0, 00, 0000, and 00000000."
+        },
+        {
+          "points": 2,
+          "criterion": "Mentions implementation details such as incrementing n and doubling the length."
+        }
+      ],
+      "source_note": "User confirmed on 2026-07-13 that the intended language is 0^(2^n), not 0^(2n).",
+      "type": "short_answer"
+    },
+    {
+      "expected": "Give three pieces of evidence for the Church-Turing thesis: many independently proposed computation models are equivalent to Turing machines, common Turing machine variants do not increase computability power, and no counterexample has been found despite extensive study. It is a thesis rather than a formal theorem because effective computability is informal.",
+      "id": "Q9",
+      "max_score": 25.0,
+      "rubric": [
+        {
+          "points": 8,
+          "criterion": "Names and explains equivalent models such as lambda calculus, recursive functions, Post systems, register machines, or programming languages."
+        },
+        {
+          "points": 8,
+          "criterion": "Explains TM robustness: variants such as multitape, nondeterministic, two-way infinite tape, or multiple-head machines do not increase computability power."
+        },
+        {
+          "points": 7,
+          "criterion": "Explains the absence of counterexamples, including that quantum computation changes efficiency for some tasks but not the class of computable functions."
+        },
+        {
+          "points": 2,
+          "criterion": "Notes that the Church-Turing thesis is not a theorem because effectively computable is an informal notion."
+        }
+      ],
+      "type": "essay"
+    },
+    {
+      "expected": "None of the listed modifications makes a Turing machine more powerful. Stay-put moves do not add power because they can be simulated by moving right then left or left then right. Finite tape restricts power because unbounded tape may be needed. One-way left-to-right movement restricts power and behaves like a much weaker model because it cannot revisit earlier tape cells.",
+      "id": "Q10",
+      "max_score": 15.0,
+      "rubric": [
+        {
+          "points": 5,
+          "criterion": "Correctly explains that a stay-put move does not add power and can be simulated."
+        },
+        {
+          "points": 5,
+          "criterion": "Correctly explains that finite tape makes the model less powerful, not more powerful."
+        },
+        {
+          "points": 5,
+          "criterion": "Correctly explains that one-way movement makes the model less powerful, not more powerful."
+        }
+      ],
+      "type": "short_answer"
+    }
+  ],
+  "schema_version": 1,
+  "source": {
+    "pdf": "Data/DSAA3071/week5-5.test-solution.pdf",
+    "source_sha256": "aeab881a2e23bcd29c6174419c0d0904ab706ec560314053cb1557958370d94f",
+    "status": "draft_extracted_from_solution_pdf"
+  },
+  "total_points": 130.0
+}

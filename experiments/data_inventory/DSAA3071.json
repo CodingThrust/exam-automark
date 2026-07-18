@@ -1,0 +1,64 @@
+{
+  "counts": {
+    "directories": 3,
+    "files": 10,
+    "submission_files": 0,
+    "top_level_files": 10
+  },
+  "course_id": "DSAA3071",
+  "extension_counts": {
+    ".pdf": 10
+  },
+  "layout": {
+    "has_benchmark_dir": true,
+    "has_grades_dir": false,
+    "has_report_dir": false,
+    "has_submissions_dir": false
+  },
+  "notes": [
+    "Inventory is local-only; private anonymous data snapshots should live in HKUST-GZ GitLab.",
+    "Raw filenames are intentionally omitted because they may contain student identifiers.",
+    "User-confirmed asset roles: five top-level PDFs contain student answers for weeks 2, 3, 4, 5, and 6; five top-level PDFs contain the matching question-plus-answer keys.",
+    "Supervisor/user correction on 2026-07-13: four student-answer PDFs for DSAA3071 weeks 2, 3, 4, and 6 were moved from Data/DSAA3073 into Data/DSAA3071.",
+    "The week 5 combined student-answer source was renamed from Data/DSAA3071/week5.pdf to Data/DSAA3071/DSAA3071-W5Test.pdf; its SHA-256 is unchanged.",
+    "The week 5 combined student-answer PDF has been split into anonymous S### candidate inputs; the week 2, 3, 4, and 6 student-answer PDFs still need separate privacy review and preparation before use.",
+    "Question-plus-answer key PDFs for weeks 2, 3, 4, and 6 were added on 2026-07-13 for later rubric extraction.",
+    "Course ID confirmed by user as DSAA3071 on 2026-07-13.",
+    "This inventory counts top-level DSAA3071 source PDFs and notes generated benchmark directories separately; generated anonymized outputs remain under ignored Data/ and are recorded in experiments/records/DSAA3071-week5-prep."
+  ],
+  "packet_exclusion_policy": [],
+  "user_confirmed_assets": {
+    "confirmation_date": "2026-07-13",
+    "additional_student_answer_pdfs_moved_from_DSAA3073": 4,
+    "additional_question_plus_answer_key_pdfs_added": 4,
+    "confirmed_weeks_with_question_plus_answer_keys": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "confirmed_weeks_with_student_answer_sources": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "course_id_confirmed": true,
+    "question_plus_answer_key_pdfs": 5,
+    "student_answer_pdfs": 5,
+    "week5_student_answer_source_current": "Data/DSAA3071/DSAA3071-W5Test.pdf",
+    "week5_student_answer_source_previous": "Data/DSAA3071/week5.pdf",
+    "student_answers_in_combined_pdf": 22
+  },
+  "privacy_policy": {
+    "git_tracking_allowed": false,
+    "raw_filenames_recorded": false,
+    "student_identity_maps_recorded": false
+  },
+  "schema_version": 1,
+  "snapshot_hash": "cf87b373395e381d9d07bbd370c1faa772372b760557b0581dcf9e8a93c04c28",
+  "source_root": "Data/DSAA3071",
+  "submission_extension_counts": {}
+}

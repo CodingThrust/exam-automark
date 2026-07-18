@@ -22,9 +22,16 @@
   "notes": [
     "Inventory is local-only; private anonymous data snapshots should live in HKUST-GZ GitLab.",
     "Raw filenames are intentionally omitted because they may contain student identifiers.",
-    "Submissions directory exists; create an anonymous packet input tree before model runs."
+    "Submissions directory exists; create an anonymous packet input tree before model runs.",
+    "Local submission filenames have identity-like prefixes; do not build prompt packets from this raw tree."
   ],
   "packet_exclusion_policy": [],
+  "privacy_findings": {
+    "distinct_identity_like_submission_filename_prefixes": 43,
+    "identity_like_submission_filenames_observed": true,
+    "raw_filename_examples_recorded": false,
+    "required_action": "copy or rename submissions into an anonymous S### packet input tree before any model run"
+  },
   "privacy_policy": {
     "git_tracking_allowed": false,
     "raw_filenames_recorded": false,

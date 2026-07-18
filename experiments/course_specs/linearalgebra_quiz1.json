@@ -10,13 +10,14 @@
   ],
   "notes": [
     "Draft only: extract real question IDs, max scores, and rubric before grading.",
-    "Local submissions are raw and file names may contain student identifiers; anonymize before packet construction."
+    "Local submissions are raw and file names may contain student identifiers; anonymize before packet construction.",
+    "The placeholder score step is not a grading rule; replace it with the rubric-defined increment before any model run."
   ],
   "questions": [
     {
       "id": "Q1",
       "max_score": 1.0,
-      "score_step": 0.25,
+      "score_step": 1.0,
       "title": "Placeholder question - replace after rubric extraction"
     }
   ],

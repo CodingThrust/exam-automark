@@ -1,0 +1,107 @@
+{
+  "assessment_id": "week5_test",
+  "built_packets": [
+    {
+      "audit_status": "passed",
+      "condition": "T1",
+      "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-dev-r1/manifest.json",
+      "packet_hash": "0f361a1691af59c80a6c723e5599eabe5314189a6c8f7471bfc7f331c9334c06",
+      "packet_id": "T1-dev-r1",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-dev-r1",
+      "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-dev-r1/prompt.txt",
+      "split": "development",
+      "task": "transcribe"
+    },
+    {
+      "audit_status": "passed",
+      "condition": "T1",
+      "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-test-r1/manifest.json",
+      "packet_hash": "13a6299c61868a32177a800d776597a28697b9a90fe397a42eebc40e52b6d573",
+      "packet_id": "T1-test-r1",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-test-r1",
+      "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/T1-test-r1/prompt.txt",
+      "split": "heldout",
+      "task": "transcribe"
+    },
+    {
+      "audit_status": "passed",
+      "condition": "G1",
+      "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-dev-r1/manifest.json",
+      "packet_hash": "5ef409aaa9344c54c7f4bef59417897e455c0eac62ed2e2a0e12df19081257f9",
+      "packet_id": "G1-dev-r1",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-dev-r1",
+      "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-dev-r1/prompt.txt",
+      "split": "development",
+      "task": "grade"
+    },
+    {
+      "audit_status": "passed",
+      "condition": "G1",
+      "manifest_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-test-r1/manifest.json",
+      "packet_hash": "6b6c00faa16c5b6b88329000161f800fc96803541424fdcb5e2453e539ba0de6",
+      "packet_id": "G1-test-r1",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-test-r1",
+      "prompt_path": "Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-candidate-v2-lf/G1-test-r1/prompt.txt",
+      "split": "heldout",
+      "task": "grade"
+    }
+  ],
+  "course_id": "DSAA3071",
+  "course_spec_path": "experiments/course_specs/DSAA3071_week5_test.json",
+  "data_inventory_path": "experiments/data_inventory/DSAA3071.json",
+  "data_snapshot_hash": "cf87b373395e381d9d07bbd370c1faa772372b760557b0581dcf9e8a93c04c28",
+  "experiment_id": "DSAA3071-week5-candidate-v2-plan",
+  "git_branch": "codex/multi-course-pilot-inventory",
+  "git_commit": "ca8954b",
+  "notes": [
+    "Candidate-v2 DSAA3071 week 5 packet dry-run plan; no model calls.",
+    "Uses the same anonymized v3 PDF inputs, split, course spec, and rubric as the baseline plan.",
+    "Candidate-v2 keeps evidence-first grading, integer score discipline, answer-first full-credit policy, second-pass review, strict confidence strings, and total consistency checks.",
+    "Gold scores remain pending, so model accuracy metrics are still blocked."
+  ],
+  "planned_packets": [
+    {
+      "condition": "T1",
+      "packet_id": "T1-dev-r1",
+      "prompt_template_id": "transcribe_standard_v1",
+      "split": "development",
+      "task": "transcribe"
+    },
+    {
+      "condition": "T1",
+      "packet_id": "T1-test-r1",
+      "prompt_template_id": "transcribe_standard_v1",
+      "split": "heldout",
+      "task": "transcribe"
+    },
+    {
+      "condition": "G1",
+      "packet_id": "G1-dev-r1",
+      "prompt_template_id": "grade_candidate_v2_strict_schema",
+      "split": "development",
+      "task": "grade"
+    },
+    {
+      "condition": "G1",
+      "packet_id": "G1-test-r1",
+      "prompt_template_id": "grade_candidate_v2_strict_schema",
+      "split": "heldout",
+      "task": "grade"
+    }
+  ],
+  "prompt_template_hashes": {
+    "grade_candidate_v2_strict_schema": "1eb905236e6f4e4623399e4dc5cd77b80c69fa7a5ea3a2d6a2777f2dcc902c3f",
+    "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
+  },
+  "schema_version": 1,
+  "skill_hashes": {
+    "agents": "d8ba4c855e772e6562b521a12a80558297e8c310788c4bbbca3cdc663d56e9c0",
+    "claude": "d8ba4c855e772e6562b521a12a80558297e8c310788c4bbbca3cdc663d56e9c0"
+  },
+  "skill_source_paths": {
+    "agents": ".agents/skills/grade-homework",
+    "claude": ".claude/skills/grade-homework"
+  },
+  "skill_version_id": "skill_candidate_v2",
+  "status": "packets_built"
+}

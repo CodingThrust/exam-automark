@@ -209,7 +209,7 @@ It should include:
 - limitations
 
 The report must state that Physics Week 9 is a pilot-derived benchmark and must
-not be generalized to all courses without DSAA3073, DSAA3701, and linear algebra
+not be generalized to all courses without DSAA3073, DSAA3071, and linear algebra
 follow-up experiments.
 
 ## Stop Conditions

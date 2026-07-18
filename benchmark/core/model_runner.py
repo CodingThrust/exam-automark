@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from .packets import directory_digest
+from .run_metadata import validate_run_metadata
 from .schema import CONFIDENCE_LEVELS, CourseSpec, ScoreRecord, validate_score_records
 
 
@@ -88,7 +89,7 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
     provider = _provider_from_config(config)
     output.mkdir(parents=True)
     (output / "outputs").mkdir()
-    _write_command_records(output, config)
+    command = _write_command_records(output, config)
 
     raw_responses = output / "raw-responses.jsonl"
     failures = output / "failures.jsonl"
@@ -98,7 +99,8 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
     usage: dict[str, int | float] = {}
     successful = 0
 
-    metadata = _metadata(config, packet, manifest)
+    metadata = _metadata(config, packet, manifest, command=command)
+    validate_run_metadata(metadata)
     metadata["started_at"] = _utc_now()
     _write_json(output / "run-metadata.json", metadata)
 
@@ -416,8 +418,18 @@ def _validate_grade_payload(payload: dict[str, Any], student_id: str, course: Co
             raise ValueError(f"invalid confidence: {row['confidence']}")
 
 
-def _metadata(config: ModelPacketRunConfig, packet: Path, manifest: dict[str, Any]) -> dict[str, Any]:
+def _metadata(
+    config: ModelPacketRunConfig,
+    packet: Path,
+    manifest: dict[str, Any],
+    *,
+    command: str,
+) -> dict[str, Any]:
+    manifest_metadata = manifest.get("metadata", {})
+    if not isinstance(manifest_metadata, dict):
+        manifest_metadata = {}
     return {
+        "schema_version": 1,
         "record_type": "model_packet_run",
         "provider": config.provider,
         "model": config.model,
@@ -434,6 +446,16 @@ def _metadata(config: ModelPacketRunConfig, packet: Path, manifest: dict[str, An
             if config.max_retries
             else "no retries"
         ),
+        "command": command,
+        "course_id": manifest.get("course_id"),
+        "assessment_id": manifest.get("assessment_id"),
+        "packet_id": manifest.get("packet_id"),
+        "condition": manifest.get("condition"),
+        "task": manifest.get("task"),
+        "split": manifest_metadata.get("split"),
+        "skill_version_id": manifest_metadata.get("skill_version_id"),
+        "prompt_template_id": manifest_metadata.get("prompt_template_id"),
+        "data_snapshot_hash": manifest_metadata.get("data_snapshot_hash"),
         "packet": packet.as_posix(),
         "packet_hash": directory_digest(packet),
         "prompt_hash": manifest["prompt_hash"],
@@ -442,10 +464,17 @@ def _metadata(config: ModelPacketRunConfig, packet: Path, manifest: dict[str, An
         "student_ids": list(manifest.get("student_ids", ())),
         "run_commit": config.run_commit or _git_commit(),
         "api_key_source": "DEEPSEEK_API_KEY environment variable",
+        "cost_estimate": {
+            "estimated": True,
+            "currency": "USD",
+            "input_tokens": None,
+            "output_tokens": None,
+            "total_cost": None,
+        },
     }
 
 
-def _write_command_records(output: Path, config: ModelPacketRunConfig) -> None:
+def _write_command_records(output: Path, config: ModelPacketRunConfig) -> str:
     argv = list(config.command_argv)
     if not argv:
         argv = [
@@ -464,6 +493,7 @@ def _write_command_records(output: Path, config: ModelPacketRunConfig) -> None:
     command = "python -m benchmark.core.cli " + shlex.join(argv)
     _write_json(output / "command.argv.json", argv)
     (output / "command.txt").write_text(command + "\n", encoding="utf-8", newline="\n")
+    return command
 
 
 def _parse_json_result(raw_text: str) -> dict[str, Any]:

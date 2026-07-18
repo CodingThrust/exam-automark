@@ -1,0 +1,53 @@
+{
+  "anonymous_id_pattern": "S###",
+  "anonymized_root": "Data/DSAA3071/week5-benchmark-redaction-v3/anonymized",
+  "generated_at": "2026-07-13T10:07:44.489867Z",
+  "generated_page_preview_count": 66,
+  "generated_student_pdf_count": 22,
+  "gold_score_template": {
+    "filled_scores": 0,
+    "path": "Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv",
+    "question_count": 10,
+    "row_count": 220,
+    "status": "created_scores_pending",
+    "student_count": 22
+  },
+  "model_run_allowed": false,
+  "model_run_blockers": [
+    "gold score filling pending",
+    "prompt packet audit pending"
+  ],
+  "output_root": "Data/DSAA3071/week5-benchmark-redaction-v3",
+  "page_count": 66,
+  "pages_per_student": 3,
+  "prep_script": "experiments/records/DSAA3071-week5-prep/prepare_anonymized_week5.py",
+  "privacy_review_csv_rows": 66,
+  "privacy_gate_passed": true,
+  "privacy_review_status": "approved",
+  "privacy_reviewed_at": "2026-07-13T10:26:50.903989Z",
+  "privacy_reviewer": "user",
+  "record_type": "dsaa3071_week5_anonymization_prep_result",
+  "redaction_method": "render each page to raster image, whiten identity rectangles, write new PDF",
+  "redaction_rects": [
+    {
+      "bottom": 0.08,
+      "left": 0.0,
+      "right": 1.0,
+      "top": 0.0
+    }
+  ],
+  "scale": 2.0,
+  "source_pdf": "Data/DSAA3071/DSAA3071-W5Test.pdf",
+  "source_pdf_previous_name": "Data/DSAA3071/week5.pdf",
+  "source_pdf_renamed_at": "2026-07-13",
+  "source_sha256": "ab691a2614ce854e53f7830c6ae3c4d35c98b1961db34cbaac99ee7563258cb9",
+  "rubric": {
+    "path": "experiments/records/DSAA3071-week5-prep/rubric_v0.json",
+    "question_count": 10,
+    "q8_interpretation": "confirmed as 0^(2^n) on 2026-07-13",
+    "source_pdf": "Data/DSAA3071/week5-5.test-solution.pdf",
+    "source_sha256": "aeab881a2e23bcd29c6174419c0d0904ab706ec560314053cb1557958370d94f",
+    "status": "draft_extracted_needs_human_review"
+  },
+  "student_count": 22
+}

@@ -170,7 +170,7 @@ that PDF compilation was not verified.
 
 ### 6. Cross-course schema
 
-For DSAA3073, DSAA3701, linear algebra, or future courses, the PR should add
+For DSAA3073, DSAA3071, linear algebra, or future courses, the PR should add
 course specs instead of copying physics-specific constants. Check that:
 
 - Question IDs are data-driven.

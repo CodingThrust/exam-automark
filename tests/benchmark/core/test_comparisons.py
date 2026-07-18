@@ -55,6 +55,9 @@ class ThreeConditionAblationTests(unittest.TestCase):
                 {
                     "assessment_id": "week5",
                     "course_id": "synthetic",
+                    "questions": [
+                        {"id": "Q1", "max_score": 1, "score_step": 1}
+                    ],
                     "revision": 2,
                 },
             )
@@ -249,6 +252,149 @@ class ThreeConditionAblationTests(unittest.TestCase):
             _detail(report, "packet_audits_pass"),
         )
 
+    def test_blank_prompt_fails_even_when_manifest_hash_is_updated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            for packet in (b0, r1):
+                _replace_hashed_artifact(
+                    packet,
+                    "prompt.txt",
+                    "prompt_hash",
+                    b"  \n\t",
+                )
+
+            report = _check(b0, r1, c3)
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn("packet_audits_pass", report["failed_checks"])
+        self.assertIn(
+            "prompt.txt must contain non-whitespace UTF-8 text",
+            _detail(report, "packet_audits_pass"),
+        )
+
+    def test_non_utf8_prompt_fails_deterministically_with_updated_hash(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            for packet in (b0, r1):
+                _replace_hashed_artifact(
+                    packet,
+                    "prompt.txt",
+                    "prompt_hash",
+                    b"\xff\xfe",
+                )
+
+            report = _check(b0, r1, c3)
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn(
+            "prompt.txt must contain non-whitespace UTF-8 text",
+            _detail(report, "packet_audits_pass"),
+        )
+
+    def test_json_artifacts_require_utf8_json_objects_with_updated_hashes(self):
+        cases = (
+            ("course.json", "course_hash", b"{not-json"),
+            ("rubric.json", "rubric_hash", b"\xff\xfe"),
+            ("output.schema.json", "output_schema_hash", b"[]\n"),
+        )
+        for filename, hash_field, payload in cases:
+            with self.subTest(filename=filename), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                b0, r1, c3 = _write_packets(root)
+                for packet in (b0, r1, c3):
+                    _replace_hashed_artifact(packet, filename, hash_field, payload)
+
+                report = _check(b0, r1, c3)
+
+            self.assertEqual(report["status"], "not_ready")
+            self.assertIn("packet_audits_pass", report["failed_checks"])
+            self.assertIn(
+                f"{filename} must contain a UTF-8 JSON object",
+                _detail(report, "packet_audits_pass"),
+            )
+
+    def test_invalid_course_spec_fails_with_updated_matching_hashes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            payload = json.dumps(
+                {
+                    "assessment_id": "week5",
+                    "course_id": "synthetic",
+                    "questions": [],
+                },
+                sort_keys=True,
+            ).encode("utf-8")
+            for packet in (b0, r1, c3):
+                _replace_hashed_artifact(
+                    packet,
+                    "course.json",
+                    "course_hash",
+                    payload,
+                )
+
+            report = _check(b0, r1, c3)
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn(
+            "course.json must satisfy CourseSpec",
+            _detail(report, "packet_audits_pass"),
+        )
+
+    def test_invalid_concept_rubric_fails_with_updated_matching_hashes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            payload = json.dumps(
+                {"questions": [], "rubric_format": "concept_keyterm_v1"},
+                sort_keys=True,
+            ).encode("utf-8")
+            for packet in (r1, c3):
+                _replace_hashed_artifact(
+                    packet,
+                    "rubric.json",
+                    "rubric_hash",
+                    payload,
+                )
+
+            report = _check(b0, r1, c3)
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn(
+            "rubric.json concept-rubric finding: missing rubric question IDs: Q1",
+            _detail(report, "packet_audits_pass"),
+        )
+
+    def test_packet_conditions_must_match_b0_r1_c3_roles(self):
+        cases = (
+            ({"B0": "b0"}, ("condition must equal packet role B0",)),
+            ({"C3": "R1"}, ("condition must equal packet role C3",)),
+            (
+                {"B0": "R1", "R1": "B0"},
+                (
+                    "condition must equal packet role B0",
+                    "condition must equal packet role R1",
+                ),
+            ),
+        )
+        for mutations, expected_findings in cases:
+            with self.subTest(mutations=mutations), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                b0, r1, c3 = _write_packets(root)
+                packets = {"B0": b0, "R1": r1, "C3": c3}
+                for role, condition in mutations.items():
+                    _mutate_manifest(packets[role], condition=condition)
+
+                report = _check(b0, r1, c3)
+
+            detail = _detail(report, "packet_audits_pass")
+            self.assertEqual(report["status"], "not_ready")
+            self.assertIn("packet_audits_pass", report["failed_checks"])
+            for finding in expected_findings:
+                self.assertIn(finding, detail)
+
     def test_malformed_student_ids_string_fails_packet_integrity(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -428,7 +574,14 @@ def _write_packet(
 ) -> Path:
     root.mkdir(parents=True)
     output_schema = schema or {"type": "object"}
-    _write_json(root / "course.json", {"course_id": "synthetic", "assessment_id": "week5"})
+    _write_json(
+        root / "course.json",
+        {
+            "assessment_id": "week5",
+            "course_id": "synthetic",
+            "questions": [{"id": "Q1", "max_score": 1, "score_step": 1}],
+        },
+    )
     _write_json(root / "output.schema.json", output_schema)
     _write_json(root / "rubric.json", rubric)
     (root / "prompt.txt").write_text(prompt + "\n", encoding="utf-8", newline="\n")
@@ -492,6 +645,17 @@ def _mutate_manifest(packet: Path, **updates: object) -> None:
     manifest = json.loads(path.read_text(encoding="utf-8"))
     manifest.update(updates)
     _write_json(path, manifest)
+
+
+def _replace_hashed_artifact(
+    packet: Path,
+    filename: str,
+    hash_field: str,
+    payload: bytes,
+) -> None:
+    artifact = packet / filename
+    artifact.write_bytes(payload)
+    _mutate_manifest(packet, **{hash_field: _sha256_file(artifact)})
 
 
 def _set_packet_input_mode(packet: Path, value: str | None) -> None:

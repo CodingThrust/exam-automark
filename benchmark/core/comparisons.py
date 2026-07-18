@@ -6,6 +6,8 @@ from typing import Any
 
 from .model_runner import IMAGE_OR_DOCUMENT_SUFFIXES, TEXT_SUFFIXES
 from .packets import audit_prompt_packet, directory_digest
+from .rubrics import validate_concept_rubric
+from .schema import CourseSpec
 
 
 COMMON_CHECKS = (
@@ -53,9 +55,15 @@ def check_three_condition_ablation(
         raise ValueError("model must not be blank")
 
     packets = {
-        "B0": _load_packet(Path(b0), expected_input_mode=input_mode),
-        "R1": _load_packet(Path(r1), expected_input_mode=input_mode),
-        "C3": _load_packet(Path(c3), expected_input_mode=input_mode),
+        "B0": _load_packet(
+            Path(b0), expected_input_mode=input_mode, expected_condition="B0"
+        ),
+        "R1": _load_packet(
+            Path(r1), expected_input_mode=input_mode, expected_condition="R1"
+        ),
+        "C3": _load_packet(
+            Path(c3), expected_input_mode=input_mode, expected_condition="C3"
+        ),
     }
     manifests = {label: packet["manifest"] for label, packet in packets.items()}
     checks: list[dict[str, str]] = []
@@ -183,7 +191,12 @@ def render_three_condition_ablation_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _load_packet(path: Path, *, expected_input_mode: str) -> dict[str, Any]:
+def _load_packet(
+    path: Path,
+    *,
+    expected_input_mode: str,
+    expected_condition: str,
+) -> dict[str, Any]:
     manifest_path = path / "manifest.json"
     if not path.is_dir():
         raise FileNotFoundError(f"packet directory missing: {path}")
@@ -193,6 +206,7 @@ def _load_packet(path: Path, *, expected_input_mode: str) -> dict[str, Any]:
         path,
         manifest,
         expected_input_mode=expected_input_mode,
+        expected_condition=expected_condition,
     )
     return {
         "manifest": manifest,
@@ -407,6 +421,7 @@ def _audit_packet_integrity(
     manifest: dict[str, Any],
     *,
     expected_input_mode: str,
+    expected_condition: str,
 ) -> list[str]:
     findings: list[str] = []
     schema_version = manifest.get("schema_version")
@@ -420,6 +435,8 @@ def _audit_packet_integrity(
     for field in ("packet_id", "course_id", "assessment_id", "condition", "task"):
         if not _is_nonempty_string(manifest.get(field)):
             findings.append(f"{field} must be a non-empty string")
+    if manifest.get("condition") != expected_condition:
+        findings.append(f"condition must equal packet role {expected_condition}")
 
     students = _validated_student_ids(manifest.get("student_ids"), findings)
     metadata = manifest.get("metadata")
@@ -450,6 +467,7 @@ def _audit_packet_integrity(
             and declared_hash.lower() != _file_hash(artifact)
         ):
             findings.append(f"{hash_field} does not match {relative_path}")
+    _audit_packet_artifact_contents(path, findings)
 
     inputs = path / "inputs"
     if not inputs.is_dir():
@@ -472,6 +490,56 @@ def _audit_packet_integrity(
     ):
         findings.append("metadata.text_source_hash does not match inputs directory")
     return sorted(set(findings))
+
+
+def _audit_packet_artifact_contents(path: Path, findings: list[str]) -> None:
+    prompt_path = path / "prompt.txt"
+    if prompt_path.is_file():
+        try:
+            prompt = prompt_path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            prompt = None
+        if prompt is None or not prompt.strip():
+            findings.append("prompt.txt must contain non-whitespace UTF-8 text")
+
+    course_payload = _load_json_object_artifact(path / "course.json", findings)
+    rubric_payload = _load_json_object_artifact(path / "rubric.json", findings)
+    _load_json_object_artifact(path / "output.schema.json", findings)
+
+    course: CourseSpec | None = None
+    if course_payload is not None:
+        try:
+            course = CourseSpec.from_dict(course_payload)
+        except (KeyError, TypeError, ValueError, OverflowError):
+            findings.append("course.json must satisfy CourseSpec")
+
+    if rubric_payload is not None and course is not None:
+        try:
+            rubric_findings = validate_concept_rubric(rubric_payload, course)
+        except (KeyError, TypeError, ValueError, OverflowError):
+            findings.append("rubric.json concept-rubric validation failed")
+        else:
+            findings.extend(
+                f"rubric.json concept-rubric finding: {finding}"
+                for finding in rubric_findings
+            )
+
+
+def _load_json_object_artifact(
+    path: Path,
+    findings: list[str],
+) -> dict[str, Any] | None:
+    if not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        findings.append(f"{path.name} must contain a UTF-8 JSON object")
+        return None
+    if not isinstance(payload, dict):
+        findings.append(f"{path.name} must contain a UTF-8 JSON object")
+        return None
+    return payload
 
 
 def _validated_student_ids(value: Any, findings: list[str]) -> list[str] | None:

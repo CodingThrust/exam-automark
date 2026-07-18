@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+from .gold import validate_gold_table, write_gold_report
 from .inventory import write_data_inventory
 from .model_runner import ModelPacketRunConfig, run_model_packet
 from .packets import (
@@ -150,6 +151,16 @@ def _build_parser() -> argparse.ArgumentParser:
     readiness.add_argument("--repo-root", type=Path)
     readiness.add_argument("--output", type=Path)
     readiness.add_argument("--markdown-output", type=Path)
+
+    gold = subparsers.add_parser(
+        "validate-gold",
+        help="check whether a gold score CSV is complete for a course and student set",
+    )
+    gold.add_argument("--course", type=Path, required=True)
+    gold.add_argument("--gold", type=Path, required=True)
+    gold.add_argument("--student-id", action="append", dest="student_ids")
+    gold.add_argument("--students-file", type=Path)
+    gold.add_argument("--output", type=Path)
 
     run_model = subparsers.add_parser(
         "run-model-packet",
@@ -331,6 +342,26 @@ def main(argv: Sequence[str] | None = None) -> int:
                             if args.markdown_output is not None
                             else None
                         ),
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0 if report["status"] == "ready" else 1
+        if args.command == "validate-gold":
+            course = CourseSpec.from_json_path(args.course)
+            report = validate_gold_table(
+                course,
+                args.gold,
+                _load_student_ids(args.student_ids, args.students_file),
+            )
+            if args.output is not None:
+                write_gold_report(report, args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": report["status"],
+                        "failed_checks": report["failed_checks"],
+                        "output": str(args.output) if args.output is not None else None,
                     },
                     sort_keys=True,
                 )

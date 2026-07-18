@@ -1,0 +1,41 @@
+{
+  "assessment_id": "week5_test",
+  "blank_score_rows": 0,
+  "checks": [
+    {
+      "detail": "all required columns are present",
+      "id": "required_columns_present",
+      "status": "passed"
+    },
+    {
+      "detail": "every expected student/question pair appears exactly once",
+      "id": "all_expected_pairs_present_once",
+      "status": "passed"
+    },
+    {
+      "detail": "no blank scores",
+      "id": "scores_complete",
+      "status": "passed"
+    },
+    {
+      "detail": "all scores are within course ranges and score steps",
+      "id": "scores_within_course_steps",
+      "status": "passed"
+    }
+  ],
+  "course_id": "DSAA3071",
+  "duplicate_pairs": [],
+  "expected_question_count": 10,
+  "expected_rows": 220,
+  "expected_student_count": 22,
+  "failed_checks": [],
+  "filled_score_rows": 220,
+  "gold_path": "Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv",
+  "invalid_score_rows": [],
+  "missing_pairs": [],
+  "report_type": "gold_readiness",
+  "rows_read": 220,
+  "schema_version": 1,
+  "status": "ready",
+  "unexpected_pairs": []
+}

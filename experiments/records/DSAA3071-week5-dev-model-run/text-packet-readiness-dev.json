@@ -1,0 +1,69 @@
+{
+  "assessment_id": "week5_test",
+  "checks": [
+    {
+      "detail": "validate-transcripts returned ready for all 7 development students",
+      "id": "transcripts_ready",
+      "status": "passed"
+    },
+    {
+      "detail": "baseline-v1 text-only grading packet exists and has a manifest",
+      "id": "baseline_text_packet_present",
+      "status": "passed"
+    },
+    {
+      "detail": "candidate-v2 text-only grading packet exists and has a manifest",
+      "id": "candidate_text_packet_present",
+      "status": "passed"
+    },
+    {
+      "detail": "baseline and candidate packets use the same transcript source hash",
+      "id": "packet_text_source_hashes_match",
+      "status": "passed"
+    }
+  ],
+  "course_id": "DSAA3071",
+  "model_run_commit_policy": "Record the current git commit at model-run time with git rev-parse --short HEAD.",
+  "packet_generation_commit": "c9a56c4",
+  "packets": [
+    {
+      "condition": "baseline-v1",
+      "packet_hash": "edd797e817b12daec0e6efea5167d0b107c59ab67f18ff9b77d285dbc648a26f",
+      "packet_id": "G1-dev-r1",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-baseline-v1-dev-text/G1-dev-r1",
+      "prompt_hash": "8fe0b9bb69d56109b2bbecfcdd6ca05ebe2ae9dff76efe610ecfde0d831cfa5e",
+      "rubric_hash": "432dc6ea0461228171eca86a1890a3021a77b0fdddcf72e1458b125c97b6cb04",
+      "student_count": 7
+    },
+    {
+      "condition": "candidate-v2",
+      "packet_hash": "febdb58c74b1f031d6f84a2c20e3edd5a8da0e811df6ce26864f2ea9df82d011",
+      "packet_id": "G1-dev-r1",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-candidate-v2-dev-text/G1-dev-r1",
+      "prompt_hash": "1eb905236e6f4e4623399e4dc5cd77b80c69fa7a5ea3a2d6a2777f2dcc902c3f",
+      "rubric_hash": "432dc6ea0461228171eca86a1890a3021a77b0fdddcf72e1458b125c97b6cb04",
+      "student_count": 7
+    }
+  ],
+  "report_type": "text_packet_readiness",
+  "schema_version": 1,
+  "split": "development",
+  "status": "ready_for_text_only_dev_model_runs",
+  "text_source_hash": "163e919ed6995d789e6cb785a1bd172567a4baf8b2751cbe789f01126660e39e",
+  "transcript_input_hashes": {
+    "S002": "8c0fdca6cbd515f8b227e9f097636d827ed7ace8b17112957285aa8098ae9606",
+    "S015": "bf33e3cbfb6fcdca561036e90aac4f5848a3a00012484756300bbbe6c862af5b",
+    "S016": "21e5422102447d813b21b7b527cc9bdfde9587a148d7892f3fe1906b72bc1f7b",
+    "S017": "5d5aba4005eb4dd53e927a177472b7e523f3a7afb9d35f081f77f3bfcafa6431",
+    "S020": "5f471da86b21b399fcbc81706a900d0ae059e507524f5085582a13b446ef9c54",
+    "S021": "b0f7e959913e4fe461a3847d6752c78a37c5233353ebde90f2ebdd69800c3382",
+    "S022": "706b4035c71d139b952593097da42c2aedee4ee820ee50c6713a0487eed488c3"
+  },
+  "transcript_readiness_status": "ready",
+  "transcript_source": "Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-r1",
+  "warnings": [
+    "Transcript content was produced by local visual inspection and still needs human spot-check before reporting accuracy claims.",
+    "S016 page 1 in the anonymized v3 PDF contains a residual handwritten identity string near the top margin; do not use PDF packets for model calls until a corrected redaction is produced.",
+    "Teacher grading marks visible in PDFs were intentionally excluded from transcript text to preserve blind grading."
+  ]
+}

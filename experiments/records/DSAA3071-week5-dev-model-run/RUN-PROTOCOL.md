@@ -1,6 +1,6 @@
 # DSAA3071 Week 5 Development Model-Run Protocol
 
-Status: **blocked_on_transcripts**
+Status: **text_packets_ready_pending_model_runs**
 
 No model calls are recorded by this note. This record starts the DSAA3071 week 5
 development model-run stage after the official per-question gold scores became
@@ -15,7 +15,7 @@ ready.
 - Development students: `S017`, `S021`, `S002`, `S015`, `S020`, `S016`, `S022`
 - Official gold status: `ready`
 - PDF packet readiness status: `packet-ready`
-- Model-run status: `not_started`
+- Model-run status: `text_packets_ready_model_runs_not_started`
 
 ## Current Blocker
 
@@ -61,9 +61,9 @@ Tracked report:
 
 `experiments/records/DSAA3071-week5-dev-model-run/transcript-readiness-dev.json`
 
-Current status: `not_ready`
+Current status: `ready`
 
-Missing transcripts: `S017`, `S021`, `S002`, `S015`, `S020`, `S016`, `S022`
+Missing transcripts: none
 
 ## Recheck Transcript Readiness
 
@@ -136,6 +136,8 @@ python -m benchmark.core.cli build-text-grading-packet `
 Run from PowerShell after setting `DEEPSEEK_API_KEY` locally:
 
 ```powershell
+$runCommit = git rev-parse --short HEAD
+
 python -m benchmark.core.cli run-model-packet `
   --provider deepseek `
   --model deepseek-v4-pro `
@@ -143,7 +145,7 @@ python -m benchmark.core.cli run-model-packet `
   --packet Data\DSAA3071\week5-benchmark-redaction-v3\text_grading_packets\DSAA3071-week5-baseline-v1-dev-text\G1-dev-r1 `
   --output Data\DSAA3071\week5-benchmark-redaction-v3\runs\deepseek-baseline-text-G1-dev-r1 `
   --max-retries 2 `
-  --run-commit ff854ef
+  --run-commit $runCommit
 
 python -m benchmark.core.cli run-model-packet `
   --provider deepseek `
@@ -152,7 +154,20 @@ python -m benchmark.core.cli run-model-packet `
   --packet Data\DSAA3071\week5-benchmark-redaction-v3\text_grading_packets\DSAA3071-week5-candidate-v2-dev-text\G1-dev-r1 `
   --output Data\DSAA3071\week5-benchmark-redaction-v3\runs\deepseek-candidate-text-G1-dev-r1 `
   --max-retries 2 `
-  --run-commit ff854ef
+  --run-commit $runCommit
 ```
 
 These commands should not be run until transcript readiness is `ready`.
+
+## 2026-07-18 Continuation Update
+
+- Continuation branch: `codex/dsaa3071-week5-dev-transcripts`
+- Packet generation base commit: `c9a56c4`
+- Model-run commit policy: record `git rev-parse --short HEAD` at run time
+- Transcript readiness: `ready` for all 7 development students.
+- Baseline text packet hash: `edd797e817b12daec0e6efea5167d0b107c59ab67f18ff9b77d285dbc648a26f`
+- Candidate v2 text packet hash: `febdb58c74b1f031d6f84a2c20e3edd5a8da0e811df6ce26864f2ea9df82d011`
+- Shared transcript source hash: `163e919ed6995d789e6cb785a1bd172567a4baf8b2751cbe789f01126660e39e`
+- Model calls recorded by this update: none.
+
+Privacy note: visual inspection found a residual handwritten identity string on `S016` page 1 in the anonymized v3 PDF. The text-only transcripts exclude it, but PDF packets from this redaction version should not be sent to a model until the PDF is corrected.

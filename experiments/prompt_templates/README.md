@@ -13,6 +13,11 @@ grading experiments.
   teacher-confirmed partial-credit rule: no 0.25-point scores; correct answer
   plus roughly correct process receives full credit; wrong answers receive
   careful process-credit review.
+- `grade_candidate_v3.txt`: generic, concept-aware candidate prompt aligned
+  with `skill_candidate_v3`; records key-term, concept, and relation evidence;
+  assigns one evidence state per rubric element; permits limited keyword-only
+  credit and semantic equivalents; prevents duplicate credit; and applies score
+  bands and material-error caps only as upper bounds.
 
 When an experiment is planned, each template file is hashed into `plan.json`.
 When an experiment is run, the exact prompt text is copied into each prompt

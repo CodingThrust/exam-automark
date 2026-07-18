@@ -17,7 +17,7 @@ Confirm this table with the teacher before grading. Do not change question IDs,
 max scores, or increments in the middle of a run. If the rubric is incomplete,
 stop and ask.
 
-## Evidence-first scoring
+## Candidate-v3 evidence-first scoring
 
 For each student and question, write the evidence before the score:
 
@@ -32,6 +32,24 @@ correct final answer is supported by a process that seriously conflicts with
 the standard solution, required method, or visible reasoning expectations. When
 the final answer is wrong, inspect the work carefully and award process credit
 from the frozen rubric.
+
+Identify the question type before scoring. For each scoring element, record
+`key_term_evidence`, `concept_evidence`, and `relation_evidence`, then use
+exactly one state: `absent`, `mentioned_only`, `partial_understanding`,
+`demonstrated`, or `misused_or_contradicted`. A correctly used keyword can earn
+only the rubric's limited `mentioned_only` credit. An unambiguous semantic
+equivalent can demonstrate the matching meaning without standard phrasing.
+Do not award duplicate credit: a keyword and its explanation are one element,
+and overlapping evidence cannot be credited twice.
+
+Sum the integer scores for non-overlapping elements. Score bands and a
+material-error cap are upper bounds only and cannot raise the subtotal. Award
+full credit only when all required essential elements are demonstrated, required
+terminology is present when explicitly requested, and no material contradiction
+invalidates the answer. For an algorithm, credit a viable alternative method;
+for a proof, keep the completed direction's credit; for an essay, credit distinct
+valid relevant claims; and for multiple choice, require the selected option or
+an unambiguous equivalent.
 
 ## Required JSON record
 
@@ -70,6 +88,11 @@ Before writing output, revisit the source page for every item with:
 - high-impact deductions
 - total mismatches
 - any score that depends on interpreting handwriting
+
+Also check missed semantic equivalents, missed keyword credit, duplicate credit,
+keyword misuse, score-band consistency, score increments, and arithmetic. The
+`confidence` field must be exactly `high`, `medium`, or `low`, and the exact
+total must be recomputed from itemized scores.
 
 If the second pass still leaves uncertainty, keep the numeric score conservative
 and flag the item for teacher review.

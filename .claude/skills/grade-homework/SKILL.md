@@ -64,11 +64,37 @@ Skill root: the directory containing this `SKILL.md`. Resolve scripts and
 references relative to that directory; do not assume a Claude- or Codex-specific
 home path.
 
-### Candidate v2 grading contract
+### Candidate v3 grading contract
 
 Grade from visible evidence, not from assumed intent. For every scored question,
 first record the visible equation, statement, diagram feature, answer text, or
 blank-answer marker. Assign points only after that evidence is written down.
+
+For every question, identify the question type and extract
+`key_term_evidence`, `concept_evidence`, and `relation_evidence`. Map each
+non-overlapping rubric scoring element to exactly one state: `absent`,
+`mentioned_only`, `partial_understanding`, `demonstrated`, or
+`misused_or_contradicted`. A correctly used relevant keyword may receive the
+rubric's limited `mentioned_only` credit; a misused keyword receives no
+automatic credit. Treat an unambiguous semantic equivalent as evidence for the
+matching element without requiring standard wording, notation, or ordering.
+
+Award the integer credit for that one state only. Do not award duplicate credit:
+a keyword and its explanation belong to one element, and overlapping evidence
+cannot receive points twice. Sum non-overlapping element credit into a subtotal.
+Use the highest satisfied score band and any material-error cap only as upper
+bounds; they cannot raise the subtotal. Full credit requires every required
+essential element to be demonstrated or expressed by a semantic equivalent,
+required terminology when explicitly requested, and no material contradiction.
+
+When the final answer is wrong, retain justified process credit for correct
+terms, concepts, and reasoning unless the frozen rubric makes the conclusion
+indispensable. When the final answer is correct and the process is roughly
+correct, award full credit when the frozen requirements are met. For an
+algorithm, require a viable method and relevant steps or relations; for a proof,
+retain the credit for a completed direction while withholding unsupported
+directions; for an essay, score distinct valid relevant claims; and for multiple
+choice, require the selected option or an unambiguous equivalent.
 
 Freeze the grading protocol before student grading starts:
 
@@ -165,8 +191,10 @@ For each student (in alphabetical order unless the user specifies otherwise):
 
 5. Run a **second-pass** review for every low-confidence item, unreadable region,
    blank or apparently missing answer, total mismatch, and high-impact
-   deduction. The second pass must revisit the source image and evidence, not
-   merely repeat the first score.
+   deduction. Also check missed semantic equivalents, missed keyword credit,
+   duplicate credit, keyword misuse, score-band consistency, and arithmetic.
+   The second pass must revisit the source image and evidence, not merely repeat
+   the first score.
 
 6. Produce the JSON record only after those checks pass.
 

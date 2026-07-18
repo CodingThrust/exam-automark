@@ -8,6 +8,11 @@ from typing import Any
 from .gold import validate_gold_table, write_gold_report
 from .inventory import write_data_inventory
 from .model_runner import ModelPacketRunConfig, run_model_packet
+from .comparisons import (
+    check_three_condition_ablation,
+    write_three_condition_ablation_json,
+    write_three_condition_ablation_markdown,
+)
 from .packets import (
     PromptPacketSpec,
     TextGradingPacketSpec,
@@ -160,6 +165,20 @@ def _build_parser() -> argparse.ArgumentParser:
     readiness.add_argument("--repo-root", type=Path)
     readiness.add_argument("--output", type=Path)
     readiness.add_argument("--markdown-output", type=Path)
+
+    ablation = subparsers.add_parser(
+        "check-ablation-readiness",
+        help="check whether B0/R1/C3 packet differences are controlled",
+    )
+    ablation.add_argument("--b0-packet", type=Path, required=True)
+    ablation.add_argument("--r1-packet", type=Path, required=True)
+    ablation.add_argument("--c3-packet", type=Path, required=True)
+    ablation.add_argument("--provider", required=True)
+    ablation.add_argument("--model", required=True)
+    ablation.add_argument("--input-mode", required=True)
+    ablation.add_argument("--repetition", type=int, required=True)
+    ablation.add_argument("--output", type=Path)
+    ablation.add_argument("--markdown-output", type=Path)
 
     gold = subparsers.add_parser(
         "validate-gold",
@@ -375,6 +394,36 @@ def main(argv: Sequence[str] | None = None) -> int:
                             if args.markdown_output is not None
                             else None
                         ),
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0 if report["status"] == "ready" else 1
+        if args.command == "check-ablation-readiness":
+            report = check_three_condition_ablation(
+                args.b0_packet,
+                args.r1_packet,
+                args.c3_packet,
+                provider=args.provider,
+                model=args.model,
+                input_mode=args.input_mode,
+                repetition=args.repetition,
+            )
+            if args.output is not None:
+                write_three_condition_ablation_json(report, args.output)
+            if args.markdown_output is not None:
+                write_three_condition_ablation_markdown(report, args.markdown_output)
+            print(
+                json.dumps(
+                    {
+                        "failed_checks": report["failed_checks"],
+                        "markdown_output": (
+                            str(args.markdown_output)
+                            if args.markdown_output is not None
+                            else None
+                        ),
+                        "output": str(args.output) if args.output is not None else None,
+                        "status": report["status"],
                     },
                     sort_keys=True,
                 )

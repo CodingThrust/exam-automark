@@ -313,6 +313,7 @@ git commit -m "Add calibrated DSAA3071 concept rubric v1"
 - Create: `experiments/skill_versions/skill_candidate_v3.json`
 - Create: `tests/benchmark/core/test_candidate_v3_assets.py`
 - Modify: `tests/benchmark/core/test_grade_homework_candidate_skill.py`
+- Modify: `tests/benchmark/core/test_skill_snapshots.py`
 
 **Interfaces:**
 - Produces: generic candidate-v3 grading contract shared by prompt and skill.
@@ -344,6 +345,12 @@ process credit, evidence-first scoring, confidence enum values, second-pass
 review, and exact total recomputation. Assert Codex and Claude mirrors match for
 every bundled file. Assert no DSAA-specific answer terms or `S[0-9]{3}` IDs are
 present in the generic prompt or skill.
+
+Update the checked-in snapshot test so the current skill directories must match
+`skill_candidate_v3.json`. Keep a separate assertion that
+`skill_candidate_v2.json` remains loadable, synchronized as recorded, and
+different from both baseline v1 and candidate v3; do not require historical v2
+hashes to match the newly updated current directories.
 
 - [ ] **Step 2: Run tests and confirm RED**
 
@@ -393,7 +400,7 @@ Expected: `"mirror_synchronized": true`.
 Run:
 
 ```powershell
-python -m unittest tests.benchmark.core.test_candidate_v3_assets tests.benchmark.core.test_grade_homework_candidate_skill tests.benchmark.physics.test_skill_sync -v
+python -m unittest tests.benchmark.core.test_candidate_v3_assets tests.benchmark.core.test_grade_homework_candidate_skill tests.benchmark.core.test_skill_snapshots tests.benchmark.physics.test_skill_sync -v
 ```
 
 Expected: PASS.
@@ -401,7 +408,7 @@ Expected: PASS.
 Commit:
 
 ```powershell
-git add experiments/prompt_templates .agents/skills/grade-homework .claude/skills/grade-homework experiments/records/DSAA3071-week5-candidate-v3-dev-plan/prompts experiments/skill_versions/skill_candidate_v3.json tests/benchmark/core/test_candidate_v3_assets.py tests/benchmark/core/test_grade_homework_candidate_skill.py
+git add experiments/prompt_templates .agents/skills/grade-homework .claude/skills/grade-homework experiments/records/DSAA3071-week5-candidate-v3-dev-plan/prompts experiments/skill_versions/skill_candidate_v3.json tests/benchmark/core/test_candidate_v3_assets.py tests/benchmark/core/test_grade_homework_candidate_skill.py tests/benchmark/core/test_skill_snapshots.py
 git commit -m "Add concept-aware candidate v3 grading skill"
 ```
 

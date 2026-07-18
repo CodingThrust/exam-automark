@@ -420,3 +420,30 @@ class DSAA3071RubricV1AssetTests(unittest.TestCase):
             ],
         )
         self.assertEqual(question["material_errors"], [])
+
+    def test_q10_local_misconceptions_are_non_empty_and_keep_expected_meanings(
+        self,
+    ) -> None:
+        expected_meaning_patterns = {
+            "stay_put_simulation": (r"\bstay[- ]put\b", r"\bmore powerful\b"),
+            "finite_tape_restriction": (r"\bfinite tape\b", r"\bmore powerful\b"),
+            "one_way_restriction": (r"\bone[- ]way\b", r"\bmore powerful\b"),
+        }
+        elements = {
+            element["id"]: element
+            for element in self.questions["Q10"]["scoring_elements"]
+        }
+
+        for element_id, patterns in expected_meaning_patterns.items():
+            with self.subTest(element_id=element_id):
+                misconceptions = elements[element_id]["common_misconceptions"]
+                self.assertTrue(misconceptions)
+                self.assertTrue(
+                    all(
+                        isinstance(misconception, str) and misconception.strip()
+                        for misconception in misconceptions
+                    )
+                )
+                combined = " ".join(misconceptions).lower()
+                for pattern in patterns:
+                    self.assertRegex(combined, pattern)

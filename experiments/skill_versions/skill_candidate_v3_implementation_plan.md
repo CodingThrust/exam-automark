@@ -576,7 +576,8 @@ or model outputs.
 Run:
 
 ```powershell
-python -m unittest discover -s tests -v
+python -m unittest discover -s tests\benchmark\core -p "test*.py" -v
+python -m unittest discover -s tests\benchmark\physics -p "test*.py" -v
 python -m benchmark.core.cli validate-rubric --course experiments\course_specs\DSAA3071_week5_test.json --rubric experiments\records\DSAA3071-week5-prep\rubric_v1.json
 python -m benchmark.core.cli validate-transcripts --course experiments\course_specs\DSAA3071_week5_test.json --transcript-source Data\DSAA3071\week5-benchmark-redaction-v3\transcripts\T1-dev-human-reviewed-r1 --students-file experiments\records\DSAA3071-week5-test-plan\students-development.txt
 git diff --check

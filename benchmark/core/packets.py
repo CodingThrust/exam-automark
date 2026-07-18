@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .schema import CONFIDENCE_LEVELS, CourseSpec
+from .rubrics import require_valid_rubric
 
 
 SUPPORTED_TASKS = {"transcribe", "grade"}
@@ -123,6 +124,8 @@ class TextGradingPacketSpec:
 
 
 def build_prompt_packet(spec: PromptPacketSpec) -> PromptPacketResult:
+    if spec.rubric is not None:
+        require_valid_rubric(spec.rubric, spec.course)
     packet_path = spec.output_root / spec.packet_id
     if packet_path.exists():
         raise FileExistsError(f"packet already exists: {packet_path}")
@@ -190,6 +193,7 @@ def build_prompt_packet(spec: PromptPacketSpec) -> PromptPacketResult:
 
 
 def build_text_grading_packet(spec: TextGradingPacketSpec) -> PromptPacketResult:
+    require_valid_rubric(spec.rubric, spec.course)
     packet_path = spec.output_root / spec.packet_id
     if packet_path.exists():
         raise FileExistsError(f"packet already exists: {packet_path}")

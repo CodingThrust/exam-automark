@@ -26,6 +26,7 @@ from .readiness import (
     write_readiness_json,
     write_readiness_markdown,
 )
+from .rubrics import validate_concept_rubric
 from .reporting import write_typst_note
 from .schema import CourseSpec
 from .skill_snapshots import build_skill_snapshot, write_skill_snapshot
@@ -82,6 +83,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
     audit = subparsers.add_parser("audit-packet", help="audit packet isolation")
     audit.add_argument("--packet", type=Path, required=True)
+
+    rubric = subparsers.add_parser(
+        "validate-rubric", help="validate a concept-keyterm grading rubric"
+    )
+    rubric.add_argument("--course", type=Path, required=True)
+    rubric.add_argument("--rubric", type=Path, required=True)
+    rubric.add_argument("--output", type=Path)
 
     note = subparsers.add_parser(
         "render-note", help="render a Typst reproducibility note"
@@ -233,6 +241,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             findings = audit_prompt_packet(args.packet)
             print(json.dumps({"findings": findings}, sort_keys=True))
             return 1 if findings else 0
+        if args.command == "validate-rubric":
+            course = CourseSpec.from_json_path(args.course)
+            rubric = _read_json(args.rubric)
+            findings = validate_concept_rubric(rubric, course)
+            report = {
+                "course_id": course.course_id,
+                "failed_checks": findings,
+                "rubric_format": rubric.get("rubric_format"),
+                "status": "ready" if not findings else "not_ready",
+            }
+            if args.output is not None:
+                _write_json(args.output, report)
+            print(json.dumps(report, sort_keys=True))
+            return 0 if report["status"] == "ready" else 1
         if args.command == "render-note":
             output = write_typst_note(
                 args.record,
@@ -524,6 +546,14 @@ def _read_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"JSON object required: {path}")
     return payload
+
+
+def _write_json(path: Path, payload: Any) -> None:
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
 
 
 if __name__ == "__main__":

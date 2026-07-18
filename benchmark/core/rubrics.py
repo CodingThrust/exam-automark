@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from decimal import Decimal
 from typing import Any
 
 from .schema import CourseSpec, QuestionSpec
@@ -18,6 +19,7 @@ REQUIRED_BANDS = (
     "minimal_relevant",
     "no_credit",
 )
+BAND_COVERAGE_ORDER = tuple(reversed(REQUIRED_BANDS))
 FORBIDDEN_RUBRIC_KEYS = {
     "student_id",
     "student_ids",
@@ -169,20 +171,51 @@ def _validate_score_bands(
     if not isinstance(bands, dict):
         return findings
 
+    valid_bounds: dict[str, tuple[float, float]] = {}
     for band in REQUIRED_BANDS:
         bounds = bands.get(band)
         if not isinstance(bounds, dict):
             continue
         minimum = bounds.get("minimum")
         maximum = bounds.get("maximum")
-        if not _allows_score(course_question, minimum) or not _allows_score(
-            course_question, maximum
-        ):
+        boundaries_valid = _allows_score(
+            course_question, minimum
+        ) and _allows_score(course_question, maximum)
+        if not boundaries_valid:
             findings.append(
                 f"{question_id} {band} band bounds must be within 0..{_score_label(course_question.max_score)} and use the {_score_label(course_question.score_step)} score step"
             )
         if _is_number(minimum) and _is_number(maximum) and minimum > maximum:
             findings.append(f"{question_id} {band} band minimum must not exceed maximum")
+        elif boundaries_valid:
+            valid_bounds[band] = (float(minimum), float(maximum))
+
+    no_credit = bands.get("no_credit")
+    if isinstance(no_credit, dict) and _is_number(no_credit.get("minimum")):
+        if not _same_number(no_credit["minimum"], 0.0):
+            findings.append(f"{question_id} no_credit band minimum must be 0.0")
+    full = bands.get("full")
+    if isinstance(full, dict) and _is_number(full.get("maximum")):
+        if not _same_number(full["maximum"], course_question.max_score):
+            findings.append(
+                f"{question_id} full band maximum must be {_score_label(course_question.max_score)}"
+            )
+
+    for lower_band, upper_band in zip(
+        BAND_COVERAGE_ORDER[:-1],
+        BAND_COVERAGE_ORDER[1:],
+        strict=True,
+    ):
+        if lower_band not in valid_bounds or upper_band not in valid_bounds:
+            continue
+        expected_minimum = _as_decimal(valid_bounds[lower_band][1]) + _as_decimal(
+            course_question.score_step
+        )
+        actual_minimum = _as_decimal(valid_bounds[upper_band][0])
+        if actual_minimum != expected_minimum:
+            findings.append(
+                f"{question_id} {lower_band} -> {upper_band} bands must be ordered, non-overlapping, and contiguous by the {_score_label(course_question.score_step)} score step"
+            )
     return findings
 
 
@@ -196,12 +229,21 @@ def _validate_material_errors(
         return [f"{question_id} material_errors must be a list"]
 
     findings: list[str] = []
-    for material_error in material_errors:
-        if not isinstance(material_error, dict) or "cap" not in material_error:
+    for index, material_error in enumerate(material_errors):
+        label = f"{question_id} material_errors[{index}]"
+        if not isinstance(material_error, dict):
+            findings.append(f"{label} must be an object")
             continue
-        if not _allows_score(course_question, material_error["cap"]):
+        if "cap" not in material_error:
+            findings.append(f"{label} must define cap")
+            continue
+        cap = material_error["cap"]
+        if not _is_number(cap):
+            findings.append(f"{label} cap must be numeric")
+            continue
+        if not course_question.allows_score(float(cap)):
             findings.append(
-                f"{question_id} material error cap must be within 0..{_score_label(course_question.max_score)} and use the {_score_label(course_question.score_step)} score step"
+                f"{label} cap must be within 0..{_score_label(course_question.max_score)} and use the {_score_label(course_question.score_step)} score step"
             )
     return findings
 
@@ -256,3 +298,7 @@ def _duplicates(values: list[str]) -> list[str]:
 
 def _score_label(value: float) -> str:
     return f"{float(value):.1f}"
+
+
+def _as_decimal(value: float) -> Decimal:
+    return Decimal(str(value))

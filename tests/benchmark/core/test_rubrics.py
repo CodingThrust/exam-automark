@@ -119,7 +119,62 @@ class ConceptKeytermRubricTests(unittest.TestCase):
         errors = validate_concept_rubric(invalid, self.course)
         self.assertIn("Q2 score_bands must define exactly: full, substantially_correct, partially_correct, minimal_relevant, no_credit", errors)
         self.assertIn("Q2 partially_correct band minimum must not exceed maximum", errors)
-        self.assertIn("Q2 material error cap must be within 0..10.0 and use the 1.0 score step", errors)
+        self.assertIn(
+            "Q2 material_errors[0] cap must be within 0..10.0 and use the 1.0 score step",
+            errors,
+        )
+
+    def test_score_bands_must_cover_ordered_range_without_gaps_or_overlaps(self) -> None:
+        invalid_cases = {
+            "wrong_start": (
+                "no_credit",
+                {"minimum": 1, "maximum": 1},
+                "Q2 no_credit band minimum must be 0.0",
+            ),
+            "wrong_end": (
+                "full",
+                {"minimum": 9, "maximum": 9},
+                "Q2 full band maximum must be 10.0",
+            ),
+            "gap": (
+                "partially_correct",
+                {"minimum": 3, "maximum": 7},
+                "Q2 minimal_relevant -> partially_correct bands must be ordered, non-overlapping, and contiguous by the 1.0 score step",
+            ),
+            "overlap": (
+                "partially_correct",
+                {"minimum": 1, "maximum": 7},
+                "Q2 minimal_relevant -> partially_correct bands must be ordered, non-overlapping, and contiguous by the 1.0 score step",
+            ),
+            "reversed": (
+                "substantially_correct",
+                {"minimum": 5, "maximum": 7},
+                "Q2 partially_correct -> substantially_correct bands must be ordered, non-overlapping, and contiguous by the 1.0 score step",
+            ),
+        }
+        for name, (band, bounds, expected) in invalid_cases.items():
+            with self.subTest(name=name):
+                invalid = copy.deepcopy(self.valid_rubric)
+                invalid["questions"][1]["score_bands"][band] = bounds
+                errors = validate_concept_rubric(invalid, self.course)
+                self.assertIn(expected, errors)
+
+    def test_every_material_error_must_be_an_object_with_valid_numeric_cap(self) -> None:
+        invalid = copy.deepcopy(self.valid_rubric)
+        invalid["questions"][1]["material_errors"] = [
+            {},
+            "not-an-object",
+            {"cap": "10"},
+            {"cap": 2.5},
+        ]
+        errors = validate_concept_rubric(invalid, self.course)
+        self.assertIn("Q2 material_errors[0] must define cap", errors)
+        self.assertIn("Q2 material_errors[1] must be an object", errors)
+        self.assertIn("Q2 material_errors[2] cap must be numeric", errors)
+        self.assertIn(
+            "Q2 material_errors[3] cap must be within 0..10.0 and use the 1.0 score step",
+            errors,
+        )
 
     def test_rejects_forbidden_keys_recursively(self) -> None:
         invalid = copy.deepcopy(self.valid_rubric)

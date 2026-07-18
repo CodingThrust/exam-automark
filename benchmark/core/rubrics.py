@@ -173,8 +173,11 @@ def _validate_score_bands(
 
     valid_bounds: dict[str, tuple[float, float]] = {}
     for band in REQUIRED_BANDS:
-        bounds = bands.get(band)
+        if band not in bands:
+            continue
+        bounds = bands[band]
         if not isinstance(bounds, dict):
+            findings.append(f"{question_id} {band} band must be an object")
             continue
         minimum = bounds.get("minimum")
         maximum = bounds.get("maximum")

@@ -159,6 +159,12 @@ class ConceptKeytermRubricTests(unittest.TestCase):
                 errors = validate_concept_rubric(invalid, self.course)
                 self.assertIn(expected, errors)
 
+    def test_every_required_score_band_must_be_an_object(self) -> None:
+        invalid = copy.deepcopy(self.valid_rubric)
+        invalid["questions"][1]["score_bands"]["full"] = []
+        errors = validate_concept_rubric(invalid, self.course)
+        self.assertIn("Q2 full band must be an object", errors)
+
     def test_every_material_error_must_be_an_object_with_valid_numeric_cap(self) -> None:
         invalid = copy.deepcopy(self.valid_rubric)
         invalid["questions"][1]["material_errors"] = [

@@ -1,0 +1,36 @@
+{
+  "assessment_id": "week5_test",
+  "checks": [
+    {
+      "detail": "7 transcript files missing",
+      "id": "all_expected_transcripts_present",
+      "status": "failed"
+    },
+    {
+      "detail": "all transcript files match the course transcript schema",
+      "id": "transcripts_match_course_schema",
+      "status": "passed"
+    }
+  ],
+  "course_id": "DSAA3071",
+  "expected_question_count": 10,
+  "expected_student_count": 7,
+  "failed_checks": [
+    "all_expected_transcripts_present"
+  ],
+  "invalid_transcripts": [],
+  "missing_students": [
+    "S017",
+    "S021",
+    "S002",
+    "S015",
+    "S020",
+    "S016",
+    "S022"
+  ],
+  "report_type": "transcript_readiness",
+  "schema_version": 1,
+  "status": "not_ready",
+  "transcript_source": "Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-r1",
+  "valid_transcript_count": 0
+}

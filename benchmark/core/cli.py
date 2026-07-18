@@ -29,6 +29,7 @@ from .readiness import (
 from .reporting import write_typst_note
 from .schema import CourseSpec
 from .skill_snapshots import build_skill_snapshot, write_skill_snapshot
+from .transcripts import validate_transcript_source, write_transcript_report
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -161,6 +162,16 @@ def _build_parser() -> argparse.ArgumentParser:
     gold.add_argument("--student-id", action="append", dest="student_ids")
     gold.add_argument("--students-file", type=Path)
     gold.add_argument("--output", type=Path)
+
+    transcripts = subparsers.add_parser(
+        "validate-transcripts",
+        help="check whether transcript JSON files are complete for a course and student set",
+    )
+    transcripts.add_argument("--course", type=Path, required=True)
+    transcripts.add_argument("--transcript-source", type=Path, required=True)
+    transcripts.add_argument("--student-id", action="append", dest="student_ids")
+    transcripts.add_argument("--students-file", type=Path)
+    transcripts.add_argument("--output", type=Path)
 
     run_model = subparsers.add_parser(
         "run-model-packet",
@@ -356,6 +367,26 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             if args.output is not None:
                 write_gold_report(report, args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": report["status"],
+                        "failed_checks": report["failed_checks"],
+                        "output": str(args.output) if args.output is not None else None,
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0 if report["status"] == "ready" else 1
+        if args.command == "validate-transcripts":
+            course = CourseSpec.from_json_path(args.course)
+            report = validate_transcript_source(
+                course,
+                args.transcript_source,
+                _load_student_ids(args.student_ids, args.students_file),
+            )
+            if args.output is not None:
+                write_transcript_report(report, args.output)
             print(
                 json.dumps(
                     {

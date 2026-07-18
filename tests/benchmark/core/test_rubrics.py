@@ -10,6 +10,88 @@ from benchmark.core.rubrics import require_valid_rubric, validate_concept_rubric
 from benchmark.core.schema import CourseSpec, QuestionSpec
 
 
+DSAA3071_V1_ELEMENT_CREDIT = {
+    "Q5": {
+        "virtual_tape_encoding": (6, 1),
+        "virtual_head_tracking": (6, 1),
+        "simulated_step": (8, 2),
+    },
+    "Q6": {
+        "branch_address": (5, 1),
+        "systematic_exploration": (6, 1),
+        "branch_simulation_and_acceptance": (6, 1),
+        "resource_or_overhead_awareness": (3, 1),
+    },
+    "Q7": {
+        "recognizer_to_enumerator": (9, 2),
+        "enumerator_to_recognizer": (8, 2),
+        "correctness_and_nonmembership": (3, 1),
+    },
+    "Q8": {
+        "power_of_two_outputs": (5, 1),
+        "enumerator_loop_or_doubling": (5, 1),
+    },
+    "Q9": {
+        "equivalent_computation_models": (8, 2),
+        "tm_variant_robustness": (8, 2),
+        "absence_of_counterexamples": (9, 2),
+    },
+    "Q10": {
+        "stay_put_simulation": (5, 1),
+        "finite_tape_restriction": (5, 1),
+        "one_way_restriction": (5, 1),
+    },
+}
+
+DSAA3071_V1_SCORE_BANDS = {
+    10: {
+        "no_credit": {"minimum": 0, "maximum": 0},
+        "minimal_relevant": {"minimum": 1, "maximum": 2},
+        "partially_correct": {"minimum": 3, "maximum": 5},
+        "substantially_correct": {"minimum": 6, "maximum": 9},
+        "full": {"minimum": 10, "maximum": 10},
+    },
+    15: {
+        "no_credit": {"minimum": 0, "maximum": 0},
+        "minimal_relevant": {"minimum": 1, "maximum": 4},
+        "partially_correct": {"minimum": 5, "maximum": 9},
+        "substantially_correct": {"minimum": 10, "maximum": 14},
+        "full": {"minimum": 15, "maximum": 15},
+    },
+    20: {
+        "no_credit": {"minimum": 0, "maximum": 0},
+        "minimal_relevant": {"minimum": 1, "maximum": 5},
+        "partially_correct": {"minimum": 6, "maximum": 12},
+        "substantially_correct": {"minimum": 13, "maximum": 19},
+        "full": {"minimum": 20, "maximum": 20},
+    },
+    25: {
+        "no_credit": {"minimum": 0, "maximum": 0},
+        "minimal_relevant": {"minimum": 1, "maximum": 7},
+        "partially_correct": {"minimum": 8, "maximum": 16},
+        "substantially_correct": {"minimum": 17, "maximum": 24},
+        "full": {"minimum": 25, "maximum": 25},
+    },
+}
+
+DSAA3071_V1_BAND_ASSIGNMENTS = {
+    "Q5": 20,
+    "Q6": 20,
+    "Q7": 20,
+    "Q8": 10,
+    "Q9": 25,
+    "Q10": 15,
+}
+
+DSAA3071_V1_MATERIAL_ERROR_CAPS = {
+    "Q5": 9,
+    "Q6": 10,
+    "Q7": 16,
+    "Q8": 4,
+    "Q9": 16,
+}
+
+
 def _course() -> CourseSpec:
     return CourseSpec(
         course_id="DSAA3071",
@@ -225,9 +307,9 @@ class ConceptKeytermRubricTests(unittest.TestCase):
 
 
 class DSAA3071RubricV1AssetTests(unittest.TestCase):
-    def test_rubric_v1_is_valid_calibrated_and_privacy_safe(self) -> None:
+    def setUp(self) -> None:
         repo_root = Path(__file__).resolve().parents[3]
-        course = CourseSpec.from_json_path(
+        self.course = CourseSpec.from_json_path(
             repo_root / "experiments" / "course_specs" / "DSAA3071_week5_test.json"
         )
         rubric_path = (
@@ -237,12 +319,19 @@ class DSAA3071RubricV1AssetTests(unittest.TestCase):
             / "DSAA3071-week5-prep"
             / "rubric_v1.json"
         )
-        rubric = json.loads(rubric_path.read_text(encoding="utf-8"))
+        self.rubric = json.loads(rubric_path.read_text(encoding="utf-8"))
+        self.questions = {
+            question["id"]: question for question in self.rubric["questions"]
+        }
 
-        self.assertEqual(rubric["rubric_format"], "concept_keyterm_v1")
-        self.assertEqual(validate_concept_rubric(rubric, course), [])
-        self.assertEqual(sum(question["max_score"] for question in rubric["questions"]), 130)
-        for question in rubric["questions"][4:]:
+    def test_rubric_v1_is_valid_calibrated_and_privacy_safe(self) -> None:
+        self.assertEqual(self.rubric["rubric_format"], "concept_keyterm_v1")
+        self.assertEqual(validate_concept_rubric(self.rubric, self.course), [])
+        self.assertEqual(
+            sum(question["max_score"] for question in self.rubric["questions"]),
+            130,
+        )
+        for question in self.rubric["questions"][4:]:
             self.assertTrue(question["scoring_elements"])
             self.assertTrue(
                 any(
@@ -251,7 +340,83 @@ class DSAA3071RubricV1AssetTests(unittest.TestCase):
                 )
             )
 
-        serialized = json.dumps(rubric, sort_keys=True)
+        serialized = json.dumps(self.rubric, sort_keys=True)
         self.assertIsNone(re.search(r"S[0-9]{3}", serialized))
         self.assertNotIn("primary_scores", serialized)
         self.assertNotIn("student_answer", serialized)
+
+    def test_q5_to_q10_element_allocations_and_keyword_credit_are_exact(self) -> None:
+        actual = {}
+        for question_id in DSAA3071_V1_ELEMENT_CREDIT:
+            actual[question_id] = {
+                element["id"]: (
+                    element["levels"]["demonstrated"],
+                    element["levels"]["mentioned_only"],
+                )
+                for element in self.questions[question_id]["scoring_elements"]
+            }
+
+        self.assertEqual(actual, DSAA3071_V1_ELEMENT_CREDIT)
+
+    def test_score_band_boundaries_and_question_assignments_are_exact(self) -> None:
+        for question_id, maximum in DSAA3071_V1_BAND_ASSIGNMENTS.items():
+            with self.subTest(question_id=question_id):
+                question = self.questions[question_id]
+                self.assertEqual(question["max_score"], maximum)
+                self.assertEqual(
+                    question["score_bands"],
+                    DSAA3071_V1_SCORE_BANDS[maximum],
+                )
+
+    def test_question_level_material_error_caps_are_exact(self) -> None:
+        actual = {
+            question_id: [
+                error["cap"]
+                for error in self.questions[question_id]["material_errors"]
+            ]
+            for question_id in DSAA3071_V1_MATERIAL_ERROR_CAPS
+        }
+        expected = {
+            question_id: [cap]
+            for question_id, cap in DSAA3071_V1_MATERIAL_ERROR_CAPS.items()
+        }
+
+        self.assertEqual(actual, expected)
+
+    def test_q8_material_error_distinguishes_2n_from_2_to_the_n(self) -> None:
+        material_errors = self.questions["Q8"]["material_errors"]
+
+        self.assertEqual(len(material_errors), 1)
+        self.assertEqual(
+            material_errors[0]["description"],
+            "Generates lengths 2n rather than 2^n.",
+        )
+
+    def test_q9_has_exactly_three_point_bearing_evidence_families(self) -> None:
+        element_ids = [
+            element["id"] for element in self.questions["Q9"]["scoring_elements"]
+        ]
+
+        self.assertEqual(
+            element_ids,
+            [
+                "equivalent_computation_models",
+                "tm_variant_robustness",
+                "absence_of_counterexamples",
+            ],
+        )
+        self.assertNotIn("thesis_not_a_theorem", element_ids)
+
+    def test_q10_has_only_local_elements_and_no_question_level_cap(self) -> None:
+        question = self.questions["Q10"]
+        element_ids = [element["id"] for element in question["scoring_elements"]]
+
+        self.assertEqual(
+            element_ids,
+            [
+                "stay_put_simulation",
+                "finite_tape_restriction",
+                "one_way_restriction",
+            ],
+        )
+        self.assertEqual(question["material_errors"], [])

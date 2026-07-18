@@ -46,10 +46,19 @@ Sum the integer scores for non-overlapping elements. Score bands and a
 material-error cap are upper bounds only and cannot raise the subtotal. Award
 full credit only when all required essential elements are demonstrated, required
 terminology is present when explicitly requested, and no material contradiction
-invalidates the answer. For an algorithm, credit a viable alternative method;
-for a proof, keep the completed direction's credit; for an essay, credit distinct
-valid relevant claims; and for multiple choice, require the selected option or
-an unambiguous equivalent.
+invalidates the answer.
+
+Apply these explicit question-type rules:
+
+- `multiple_choice`: Require the selected option or an unambiguous equivalent.
+- `short_answer`: Combine key-term and concept evidence; exact standard-answer
+  wording is not required.
+- `algorithm`: Require a viable method plus relevant steps or relations; award
+  credit to valid alternatives.
+- `proof`: Check all required directions and logical links; a missing required
+  direction blocks full credit but preserves credit for each completed direction.
+- `essay`: Score distinct valid relevant claims; do not require fixed ordering
+  or standard phrasing.
 
 ## Required JSON record
 

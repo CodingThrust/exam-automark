@@ -13,6 +13,32 @@ REFERENCE = Path(".agents/skills/grade-homework/references/grading-prompt.md")
 CLAUDE_SKILL = Path(".claude/skills/grade-homework/SKILL.md")
 CLAUDE_REFERENCE = Path(".claude/skills/grade-homework/references/grading-prompt.md")
 
+QUESTION_TYPE_RULES = (
+    "`multiple_choice`: Require the selected option or an unambiguous equivalent.",
+    "`short_answer`: Combine key-term and concept evidence; exact standard-answer "
+    "wording is not required.",
+    "`algorithm`: Require a viable method plus relevant steps or relations; "
+    "award credit to valid alternatives.",
+    "`proof`: Check all required directions and logical links; a missing required "
+    "direction blocks full credit but preserves credit for each completed direction.",
+    "`essay`: Score distinct valid relevant claims; do not require fixed ordering "
+    "or standard phrasing.",
+)
+
+
+def _normalize_whitespace(text: str) -> str:
+    return " ".join(text.split())
+
+
+def _markdown_section(text: str, heading: str) -> str:
+    marker = f"## {heading}"
+    start = text.index(marker) + len(marker)
+    remainder = text[start:]
+    next_heading = remainder.find("\n## ")
+    if next_heading >= 0:
+        remainder = remainder[:next_heading]
+    return remainder.strip()
+
 
 class CandidateV3AssetTests(unittest.TestCase):
     def test_candidate_v3_contract_is_present_in_all_model_facing_assets(self):
@@ -63,6 +89,25 @@ class CandidateV3AssetTests(unittest.TestCase):
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)
+
+    def test_all_assets_define_the_five_question_type_rules(self):
+        for path in (PROMPT, STRICT_SNAPSHOT, SKILL, REFERENCE):
+            text = _normalize_whitespace(path.read_text(encoding="utf-8"))
+            for rule in QUESTION_TYPE_RULES:
+                with self.subTest(path=path, rule=rule):
+                    self.assertIn(_normalize_whitespace(rule), text)
+
+    def test_strict_prompt_preserves_the_generic_grading_algorithm_verbatim(self):
+        generic = _markdown_section(
+            PROMPT.read_text(encoding="utf-8"),
+            "Candidate-v3 grading algorithm",
+        )
+        strict = _markdown_section(
+            STRICT_SNAPSHOT.read_text(encoding="utf-8"),
+            "Candidate-v3 grading algorithm",
+        )
+
+        self.assertEqual(strict, generic)
 
     def test_candidate_v3_assets_are_generic_and_private(self):
         combined = "\n".join(

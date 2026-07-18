@@ -1,11 +1,11 @@
 {
-  "canonical_hash": "5797c10c6aa31b21652cdcbac0c3547a664da9ac00d4d0298ecf88892ebf0aff",
+  "canonical_hash": "1ec0f3d39e945d8d2fb685c30dd4576eba48e62bf1b994281885b9ec338752a0",
   "hash_policy": "sha256(normalized LF utf-8 text for files; recursive relative path plus normalized content for directories)",
   "mirror_synchronized": true,
   "schema_version": 1,
   "skill_hashes": {
-    "agents": "5797c10c6aa31b21652cdcbac0c3547a664da9ac00d4d0298ecf88892ebf0aff",
-    "claude": "5797c10c6aa31b21652cdcbac0c3547a664da9ac00d4d0298ecf88892ebf0aff"
+    "agents": "1ec0f3d39e945d8d2fb685c30dd4576eba48e62bf1b994281885b9ec338752a0",
+    "claude": "1ec0f3d39e945d8d2fb685c30dd4576eba48e62bf1b994281885b9ec338752a0"
   },
   "skill_source_paths": {
     "agents": ".agents/skills/grade-homework",

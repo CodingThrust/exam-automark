@@ -20,6 +20,16 @@ per student under `outputs/` and name it `<student_id>.json`.
 1. Identify the question type from the frozen rubric before scoring. Apply the
    relevant rule for multiple choice, short answer, algorithm, proof, or essay;
    accept a viable alternative method when the rubric permits it.
+
+   - `multiple_choice`: Require the selected option or an unambiguous equivalent.
+   - `short_answer`: Combine key-term and concept evidence; exact standard-answer
+     wording is not required.
+   - `algorithm`: Require a viable method plus relevant steps or relations;
+     award credit to valid alternatives.
+   - `proof`: Check all required directions and logical links; a missing required
+     direction blocks full credit but preserves credit for each completed direction.
+   - `essay`: Score distinct valid relevant claims; do not require fixed ordering
+     or standard phrasing.
 2. Use evidence before score. Record only visible student evidence; do not
    guess missing work, silently repair reasoning, or infer unreadable steps.
 3. Extract three distinct evidence layers for each question:

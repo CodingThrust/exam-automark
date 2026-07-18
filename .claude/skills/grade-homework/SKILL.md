@@ -90,11 +90,19 @@ required terminology when explicitly requested, and no material contradiction.
 When the final answer is wrong, retain justified process credit for correct
 terms, concepts, and reasoning unless the frozen rubric makes the conclusion
 indispensable. When the final answer is correct and the process is roughly
-correct, award full credit when the frozen requirements are met. For an
-algorithm, require a viable method and relevant steps or relations; for a proof,
-retain the credit for a completed direction while withholding unsupported
-directions; for an essay, score distinct valid relevant claims; and for multiple
-choice, require the selected option or an unambiguous equivalent.
+correct, award full credit when the frozen requirements are met.
+
+Apply these explicit question-type rules:
+
+- `multiple_choice`: Require the selected option or an unambiguous equivalent.
+- `short_answer`: Combine key-term and concept evidence; exact standard-answer
+  wording is not required.
+- `algorithm`: Require a viable method plus relevant steps or relations; award
+  credit to valid alternatives.
+- `proof`: Check all required directions and logical links; a missing required
+  direction blocks full credit but preserves credit for each completed direction.
+- `essay`: Score distinct valid relevant claims; do not require fixed ordering
+  or standard phrasing.
 
 Freeze the grading protocol before student grading starts:
 

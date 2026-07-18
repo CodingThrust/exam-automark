@@ -4,9 +4,9 @@
     "baseline": {
       "experiment_id": "DSAA3071-week5-test-plan",
       "packet_hashes": {
-        "G1-dev-r1": "fabee03c35acb9826a28df90989c4bcc2b5d8243d983d535f9bf26911d95b6f1",
+        "G1-dev-r1": "0814dc999791cc8a6521cdfa6eb6aaeabfbea22523ca59d79bcec8442ae3343e",
         "G1-test-r1": "19a6f140e5b197973ff64c4e0b80becfc2221ff1d97b4b411c8d39052308dd6b",
-        "T1-dev-r1": "710b4d97de4310a51549d53d8cb2df6d6ba25e9891076302872ff26c8f260f34",
+        "T1-dev-r1": "f3954dfa147467b564cf8c7d7d5f669587f4e64a57aa645b07a217360df621ad",
         "T1-test-r1": "8dc513924b99cb2e34019b1aafd6c314be80e526594ee0d53dd75eacb1c65d0a"
       },
       "prompt_template_hashes": {
@@ -22,9 +22,9 @@
     "candidate": {
       "experiment_id": "DSAA3071-week5-candidate-v2-plan",
       "packet_hashes": {
-        "G1-dev-r1": "5ef409aaa9344c54c7f4bef59417897e455c0eac62ed2e2a0e12df19081257f9",
+        "G1-dev-r1": "7a51e58eb55960405cfd145cbe41a862f3d5a8505ceec73d7e0b60ac9f76ebba",
         "G1-test-r1": "6b6c00faa16c5b6b88329000161f800fc96803541424fdcb5e2453e539ba0de6",
-        "T1-dev-r1": "0f361a1691af59c80a6c723e5599eabe5314189a6c8f7471bfc7f331c9334c06",
+        "T1-dev-r1": "a9a965ed019dcbbd3d67db564d532eec29a2aff1e100d326a270d8a0fea6d463",
         "T1-test-r1": "13a6299c61868a32177a800d776597a28697b9a90fe397a42eebc40e52b6d573"
       },
       "prompt_template_hashes": {
@@ -39,12 +39,12 @@
     },
     "course_id": "DSAA3071",
     "course_spec_path": "experiments/course_specs/DSAA3071_week5_test.json",
-    "current_git_branch": "codex/multi-course-pilot-inventory",
-    "current_git_commit": "c5fd48a8875d48747da4d2c3360b07da5d25915f",
+    "current_git_branch": "codex/dsaa3071-week5-dev-transcripts",
+    "current_git_commit": "04d51cd201cfba96412a32643612bb4d7318297b",
     "data_inventory_path": "experiments/data_inventory/DSAA3071.json",
     "data_snapshot_hash": "cf87b373395e381d9d07bbd370c1faa772372b760557b0581dcf9e8a93c04c28",
-    "git_branch": "codex/multi-course-pilot-inventory",
-    "git_commit": "ca8954b"
+    "git_branch": "codex/dsaa3071-week5-dev-transcripts",
+    "git_commit": "bcafbd1"
   },
   "baseline_plan_path": "experiments/records/DSAA3071-week5-test-plan/plan.json",
   "candidate_plan_path": "experiments/records/DSAA3071-week5-test-plan/candidate-v2-plan.json",
@@ -70,7 +70,7 @@
       "status": "passed"
     },
     {
-      "detail": "codex/multi-course-pilot-inventory@ca8954b vs codex/multi-course-pilot-inventory@ca8954b",
+      "detail": "codex/dsaa3071-week5-dev-transcripts@bcafbd1 vs codex/dsaa3071-week5-dev-transcripts@bcafbd1",
       "id": "same_git_anchor",
       "status": "passed"
     },
@@ -160,17 +160,17 @@
       "status": "passed"
     },
     {
-      "detail": "current=codex/multi-course-pilot-inventory; planned=codex/multi-course-pilot-inventory",
+      "detail": "current=codex/dsaa3071-week5-dev-transcripts; planned=codex/dsaa3071-week5-dev-transcripts",
       "id": "current_git_branch_matches_plan",
       "status": "passed"
     },
     {
-      "detail": "planned=ca8954b; resolved=ca8954b4be01233aa4abfec306605bd4bc2b8b3a",
+      "detail": "planned=bcafbd1; resolved=bcafbd1ae0c7eb0c57bfbcb8e77a8b24b9880fd8",
       "id": "planned_git_commit_exists",
       "status": "passed"
     },
     {
-      "detail": "HEAD=c5fd48a8875d48747da4d2c3360b07da5d25915f; planned=ca8954b4be01233aa4abfec306605bd4bc2b8b3a",
+      "detail": "HEAD=04d51cd201cfba96412a32643612bb4d7318297b; planned=bcafbd1ae0c7eb0c57bfbcb8e77a8b24b9880fd8",
       "id": "current_git_head_contains_plan_commit",
       "status": "passed"
     },
@@ -192,6 +192,8 @@
   ],
   "model_run_status": "not_started",
   "next_actions": [],
+  "readiness_level": "packet",
+  "readiness_scope": "Packet-level ready means prompt packets, hashes, manifests, and baseline/candidate comparability are checked. It is not model-run ready, metrics-ready, or report-ready.",
   "report_type": "run_readiness",
   "schema_version": 1,
   "status": "ready"

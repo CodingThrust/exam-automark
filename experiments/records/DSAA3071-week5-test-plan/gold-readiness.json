@@ -1,6 +1,6 @@
 {
   "assessment_id": "week5_test",
-  "blank_score_rows": 220,
+  "blank_score_rows": 0,
   "checks": [
     {
       "detail": "all required columns are present",
@@ -13,9 +13,9 @@
       "status": "passed"
     },
     {
-      "detail": "220 blank scores",
+      "detail": "no blank scores",
       "id": "scores_complete",
-      "status": "failed"
+      "status": "passed"
     },
     {
       "detail": "all scores are within course ranges and score steps",
@@ -28,16 +28,14 @@
   "expected_question_count": 10,
   "expected_rows": 220,
   "expected_student_count": 22,
-  "failed_checks": [
-    "scores_complete"
-  ],
-  "filled_score_rows": 0,
+  "failed_checks": [],
+  "filled_score_rows": 220,
   "gold_path": "Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv",
   "invalid_score_rows": [],
   "missing_pairs": [],
   "report_type": "gold_readiness",
   "rows_read": 220,
   "schema_version": 1,
-  "status": "not_ready",
+  "status": "ready",
   "unexpected_pairs": []
 }

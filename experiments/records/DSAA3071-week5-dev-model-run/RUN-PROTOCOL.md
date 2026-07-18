@@ -54,6 +54,29 @@ Each file must contain:
 There must be exactly one answer for every question in
 `experiments/course_specs/DSAA3071_week5_test.json`.
 
+
+## Gold Score Validation
+
+The official per-question gold CSV contains all 22 anonymous students, not only the development split. Validate the full gold table with `students-all.txt`; use `students-development.txt` only when computing development metrics.
+
+Windows PowerShell:
+
+```powershell
+python -m benchmark.core.cli validate-gold `
+  --course experiments\course_specs\DSAA3071_week5_test.json `
+  --gold Data\DSAA3071\week5-benchmark-redaction-v3\gold\primary_scores.csv `
+  --students-file experiments\records\DSAA3071-week5-test-plan\students-all.txt
+```
+
+macOS/Linux:
+
+```bash
+python -m benchmark.core.cli validate-gold \
+  --course experiments/course_specs/DSAA3071_week5_test.json \
+  --gold Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv \
+  --students-file experiments/records/DSAA3071-week5-test-plan/students-all.txt
+```
+
 ## Current Transcript Readiness
 
 Tracked report:

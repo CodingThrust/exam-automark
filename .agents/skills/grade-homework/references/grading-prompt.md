@@ -17,7 +17,7 @@ Confirm this table with the teacher before grading. Do not change question IDs,
 max scores, or increments in the middle of a run. If the rubric is incomplete,
 stop and ask.
 
-## Candidate-v3 evidence-first scoring
+## Candidate-v3.1 evidence-first scoring
 
 For each student and question, write the evidence before the score:
 
@@ -50,6 +50,23 @@ material-error cap are upper bounds only and cannot raise the subtotal. Award
 full credit only when all required essential elements are demonstrated, required
 terminology is present when explicitly requested, and no material contradiction
 invalidates the answer.
+
+Apply these Candidate v3.1 calibration rules before finalizing the score:
+
+- cap-locality: apply a material-error cap only when the cap condition is directly visible and active;
+  do not trigger a cap merely because an element is
+  partial, under-detailed, or expressed through a non-standard but viable route.
+- contradiction-locality: when a misconception or contradiction is local to one
+  element, proof direction, or construction step, preserve unrelated element credit
+  unless the frozen rubric explicitly defines a question-level cap.
+- key-term semantics: key terms are evidence signals, not mandatory wording
+  unless the rubric or full-credit rule explicitly requires that terminology.
+  Correctly used key terms can earn limited keyword credit, and semantic
+  equivalents should still be mapped to the matching rubric element.
+- indirect-construction: score valid indirect constructions by mapping visible
+  steps to rubric elements and required output behavior. Do not require the
+  standard direct construction when an indirect route demonstrates the same
+  result.
 
 Apply these explicit question-type rules:
 
@@ -109,7 +126,8 @@ Before writing output, revisit the source page for every item with:
 - any score that depends on interpreting handwriting
 
 Also check missed semantic equivalents, missed keyword credit, duplicate credit,
-keyword misuse, score-band consistency, score increments, and arithmetic. The
+keyword misuse, score-band consistency, score increments, material-error caps,
+local contradictions, indirect constructions, and arithmetic. The
 `confidence` field must be exactly `high`, `medium`, or `low`, and the exact
 total must be recomputed from itemized scores.
 

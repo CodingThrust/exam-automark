@@ -78,8 +78,8 @@ class SkillSnapshotTests(unittest.TestCase):
         )
         self.assertEqual(len(set(snapshot.skill_hashes.values())), 1)
 
-    def test_current_skill_directories_match_candidate_v3_snapshot(self):
-        snapshot_path = Path("experiments/skill_versions/skill_candidate_v3.json")
+    def test_current_skill_directories_match_candidate_v31_snapshot(self):
+        snapshot_path = Path("experiments/skill_versions/skill_candidate_v3_1.json")
         snapshot = SkillSnapshot.from_json_path(snapshot_path)
         rebuilt = build_skill_snapshot(
             skill_version_id=snapshot.skill_version_id,
@@ -92,6 +92,23 @@ class SkillSnapshotTests(unittest.TestCase):
         self.assertEqual(rebuilt.skill_hashes, snapshot.skill_hashes)
         self.assertTrue(snapshot.mirror_synchronized)
 
+    def test_historical_candidate_v3_snapshot_remains_loadable_and_distinct(self):
+        baseline = SkillSnapshot.from_json_path(
+            Path("experiments/skill_versions/skill_baseline_v1.json")
+        )
+        candidate_v3 = SkillSnapshot.from_json_path(
+            Path("experiments/skill_versions/skill_candidate_v3.json")
+        )
+        candidate_v31 = SkillSnapshot.from_json_path(
+            Path("experiments/skill_versions/skill_candidate_v3_1.json")
+        )
+
+        self.assertEqual(candidate_v3.skill_version_id, "skill_candidate_v3")
+        self.assertTrue(candidate_v3.mirror_synchronized)
+        self.assertEqual(len(set(candidate_v3.skill_hashes.values())), 1)
+        self.assertNotEqual(candidate_v3.canonical_hash, baseline.canonical_hash)
+        self.assertNotEqual(candidate_v3.canonical_hash, candidate_v31.canonical_hash)
+
     def test_historical_candidate_v2_snapshot_remains_loadable_and_distinct(self):
         baseline = SkillSnapshot.from_json_path(
             Path("experiments/skill_versions/skill_baseline_v1.json")
@@ -102,19 +119,23 @@ class SkillSnapshotTests(unittest.TestCase):
         candidate_v3 = SkillSnapshot.from_json_path(
             Path("experiments/skill_versions/skill_candidate_v3.json")
         )
+        candidate_v31 = SkillSnapshot.from_json_path(
+            Path("experiments/skill_versions/skill_candidate_v3_1.json")
+        )
 
         self.assertEqual(candidate_v2.skill_version_id, "skill_candidate_v2")
         self.assertTrue(candidate_v2.mirror_synchronized)
         self.assertEqual(len(set(candidate_v2.skill_hashes.values())), 1)
         self.assertNotEqual(candidate_v2.canonical_hash, baseline.canonical_hash)
         self.assertNotEqual(candidate_v2.canonical_hash, candidate_v3.canonical_hash)
+        self.assertNotEqual(candidate_v2.canonical_hash, candidate_v31.canonical_hash)
 
-    def test_candidate_v3_snapshot_differs_from_baseline(self):
+    def test_candidate_v31_snapshot_differs_from_baseline(self):
         baseline = SkillSnapshot.from_json_path(
             Path("experiments/skill_versions/skill_baseline_v1.json")
         )
         candidate = SkillSnapshot.from_json_path(
-            Path("experiments/skill_versions/skill_candidate_v3.json")
+            Path("experiments/skill_versions/skill_candidate_v3_1.json")
         )
 
         self.assertNotEqual(candidate.canonical_hash, baseline.canonical_hash)

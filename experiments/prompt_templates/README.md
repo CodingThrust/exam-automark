@@ -18,6 +18,10 @@ grading experiments.
   assigns one evidence state per rubric element; permits limited keyword-only
   credit and semantic equivalents; prevents duplicate credit; and applies score
   bands and material-error caps only as upper bounds.
+- `grade_candidate_v3_1.txt`: minimal development calibration aligned with
+  `skill_candidate_v3_1`; keeps candidate-v3 and calculation behavior while
+  adding cap-locality, contradiction-locality, key-term semantics, and
+  indirect-construction rules.
 
 When an experiment is planned, each template file is hashed into `plan.json`.
 When an experiment is run, the exact prompt text is copied into each prompt

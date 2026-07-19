@@ -64,7 +64,7 @@ Skill root: the directory containing this `SKILL.md`. Resolve scripts and
 references relative to that directory; do not assume a Claude- or Codex-specific
 home path.
 
-### Candidate v3 grading contract
+### Candidate v3.1 grading contract
 
 Grade from visible evidence, not from assumed intent. For every scored question,
 first record the visible equation, statement, diagram feature, answer text, or
@@ -94,6 +94,24 @@ calculation problems, arithmetic mistakes should not erase a correct method
 unless the frozen rubric requires the exact result. When the final answer is
 correct and the process is roughly correct, award full credit when the frozen
 requirements are met.
+
+Candidate v3.1 adds four calibration rules for concept, proof, and construction
+answers:
+
+- cap-locality: apply a material-error cap only when the cap condition is directly visible and active;
+  do not trigger a cap merely because an element is
+  partial, under-detailed, or expressed through a non-standard but viable route.
+- contradiction-locality: when a misconception or contradiction is local to one
+  element, proof direction, or construction step, preserve unrelated element credit
+  unless the frozen rubric explicitly defines a question-level cap.
+- key-term semantics: key terms are evidence signals, not mandatory wording
+  unless the rubric or full-credit rule explicitly requires that terminology.
+  Correctly used key terms can earn limited keyword credit, and semantic
+  equivalents should still be mapped to the matching rubric element.
+- indirect-construction: score valid indirect constructions by mapping visible
+  steps to rubric elements and required output behavior. Do not require the
+  standard direct construction when an indirect route demonstrates the same
+  result.
 
 Apply these explicit question-type rules:
 
@@ -206,7 +224,8 @@ For each student (in alphabetical order unless the user specifies otherwise):
 5. Run a **second-pass** review for every low-confidence item, unreadable region,
    blank or apparently missing answer, total mismatch, and high-impact
    deduction. Also check missed semantic equivalents, missed keyword credit,
-   duplicate credit, keyword misuse, score-band consistency, and arithmetic.
+   duplicate credit, keyword misuse, score-band consistency, material-error
+   caps, local contradictions, indirect constructions, and arithmetic.
    The second pass must revisit the source image and evidence, not merely repeat
    the first score.
 

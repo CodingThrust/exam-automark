@@ -4,9 +4,14 @@ from pathlib import Path
 
 
 PROMPT = Path("experiments/prompt_templates/grade_candidate_v3.txt")
+PROMPT_V31 = Path("experiments/prompt_templates/grade_candidate_v3_1.txt")
 STRICT_SNAPSHOT = Path(
     "experiments/records/DSAA3071-week5-candidate-v3-dev-plan/"
     "prompts/grade_candidate_v3_strict_schema.txt"
+)
+STRICT_SNAPSHOT_V31 = Path(
+    "experiments/records/DSAA3071-week5-candidate-v31-dev-plan/"
+    "prompts/grade_candidate_v3_1_strict_schema.txt"
 )
 SKILL = Path(".agents/skills/grade-homework/SKILL.md")
 REFERENCE = Path(".agents/skills/grade-homework/references/grading-prompt.md")
@@ -165,6 +170,42 @@ class CandidateV3AssetTests(unittest.TestCase):
             REFERENCE.read_text(encoding="utf-8"),
             CLAUDE_REFERENCE.read_text(encoding="utf-8"),
         )
+
+    def test_candidate_v31_calibration_rules_are_present(self):
+        required = (
+            "cap-locality",
+            "contradiction-locality",
+            "key-term semantics",
+            "indirect-construction",
+            "cap condition is directly visible and active",
+            "preserve unrelated element credit",
+            "key terms are evidence signals",
+            "valid indirect constructions",
+        )
+        expected = (
+            PROMPT_V31,
+            STRICT_SNAPSHOT_V31,
+            SKILL,
+            REFERENCE,
+        )
+
+        for path in expected:
+            with self.subTest(path=path):
+                text = path.read_text(encoding="utf-8")
+                for phrase in required:
+                    self.assertIn(phrase, text)
+
+    def test_candidate_v31_strict_prompt_preserves_generic_algorithm_verbatim(self):
+        generic = _markdown_section(
+            PROMPT_V31.read_text(encoding="utf-8"),
+            "Candidate-v3.1 grading algorithm",
+        )
+        strict = _markdown_section(
+            STRICT_SNAPSHOT_V31.read_text(encoding="utf-8"),
+            "Candidate-v3.1 grading algorithm",
+        )
+
+        self.assertEqual(strict, generic)
 
 
 if __name__ == "__main__":

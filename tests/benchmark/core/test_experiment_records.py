@@ -385,6 +385,45 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("held-out not run", markdown)
         self.assertIn("not a final accuracy claim", markdown)
 
+    def test_dsaa3071_candidate_v32_dev_metrics_record_summarizes_result(self):
+        record_dir = Path("experiments/records/DSAA3071-week5-candidate-v31-dev-plan")
+        metrics = json.loads(
+            (record_dir / "dev-metrics-deepseek-c32.json").read_text(encoding="utf-8")
+        )
+        markdown = (record_dir / "DEV-METRICS-DEEPSEEK-C32.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertEqual(
+            metrics["report_type"],
+            "dsaa3071_week5_candidate_v32_dev_metrics",
+        )
+        self.assertEqual(metrics["split"], "development")
+        self.assertEqual(set(metrics["runs"]), {"B0", "R1", "C3", "C31_r2", "C32"})
+        self.assertEqual(metrics["runs"]["C32"]["validation_status"], "passed")
+        self.assertEqual(metrics["runs"]["C32"]["students_passed"], 7)
+        self.assertLess(
+            metrics["comparisons"]["C32_minus_R1"]["question_score_mae_delta"],
+            0,
+        )
+        self.assertLess(
+            metrics["comparisons"]["C32_minus_R1"]["total_score_mae_delta"],
+            0,
+        )
+        self.assertLess(
+            metrics["comparisons"]["C32_minus_C31_r2"]["question_score_mae_delta"],
+            0,
+        )
+        self.assertGreater(
+            metrics["comparisons"]["C32_minus_R1"][
+                "severe_error_rate_abs_ge_5_delta"
+            ],
+            0,
+        )
+        self.assertIn("held-out not run", markdown)
+        self.assertIn("not a final accuracy claim", markdown)
+        self.assertIn("Q8 remains", markdown)
+
 
 if __name__ == "__main__":
     unittest.main()

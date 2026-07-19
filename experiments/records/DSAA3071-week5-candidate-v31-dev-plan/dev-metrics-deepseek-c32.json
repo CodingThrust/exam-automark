@@ -1,0 +1,1100 @@
+{
+  "schema_version": 1,
+  "report_type": "dsaa3071_week5_candidate_v32_dev_metrics",
+  "generated_at": "2026-07-19T09:30:50Z",
+  "analysis_commit": "7f4e06a",
+  "course_id": "DSAA3071",
+  "assessment_id": "week5_test",
+  "split": "development",
+  "student_ids": [
+    "S017",
+    "S021",
+    "S002",
+    "S015",
+    "S020",
+    "S016",
+    "S022"
+  ],
+  "gold_reference": {
+    "type": "official per-question scores",
+    "path": "Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv",
+    "rationale_available": false
+  },
+  "input_snapshot": {
+    "transcript_source": "Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-human-reviewed-r1",
+    "data_snapshot_hash": "95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37",
+    "text_source_hash": "9f9be72bf088f211a3b5fc35db1439b3e965059ff55d5c0563e2880bdc7f4a00"
+  },
+  "metrics_definition": {
+    "question_score_mae": "mean absolute error over all student-question pairs",
+    "normalized_question_score_mae": "mean abs(error)/question_max_score over all student-question pairs",
+    "question_exact_agreement": "fraction of student-question pairs with exact score match",
+    "severe_error_rate_abs_ge_5": "fraction of student-question pairs with absolute error >= 5 points",
+    "signed_error_mean": "mean(predicted_score - gold_score) over student-question pairs",
+    "total_score_mae": "mean absolute error between predicted and gold total scores per student"
+  },
+  "runs": {
+    "B0": {
+      "items": 70,
+      "question_score_mae": 3.342857,
+      "normalized_question_score_mae": 0.173476,
+      "question_exact_agreement": 0.5,
+      "severe_error_rate_abs_ge_5": 0.242857,
+      "signed_error_mean": -2.742857,
+      "total_score_mae": 27.428571,
+      "total_signed_error_mean": -27.428571,
+      "student_total_errors": {
+        "S017": -27.0,
+        "S021": -27.0,
+        "S002": -26.0,
+        "S015": -27.0,
+        "S020": -21.0,
+        "S016": -33.0,
+        "S022": -31.0
+      },
+      "per_question": [
+        {
+          "question_id": "Q1",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q2",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q3",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q4",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q5",
+          "max_score": 20.0,
+          "mae": 7.0,
+          "normalized_mae": 0.35,
+          "exact_agreement": 0.0,
+          "severe_error_rate_abs_ge_5": 0.714286,
+          "signed_error_mean": -7.0
+        },
+        {
+          "question_id": "Q6",
+          "max_score": 20.0,
+          "mae": 2.142857,
+          "normalized_mae": 0.107143,
+          "exact_agreement": 0.142857,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": -0.142857
+        },
+        {
+          "question_id": "Q7",
+          "max_score": 20.0,
+          "mae": 4.428571,
+          "normalized_mae": 0.221429,
+          "exact_agreement": 0.142857,
+          "severe_error_rate_abs_ge_5": 0.428571,
+          "signed_error_mean": -3.285714
+        },
+        {
+          "question_id": "Q8",
+          "max_score": 10.0,
+          "mae": 3.857143,
+          "normalized_mae": 0.385714,
+          "exact_agreement": 0.142857,
+          "severe_error_rate_abs_ge_5": 0.428571,
+          "signed_error_mean": -1.0
+        },
+        {
+          "question_id": "Q9",
+          "max_score": 25.0,
+          "mae": 14.857143,
+          "normalized_mae": 0.594286,
+          "exact_agreement": 0.0,
+          "severe_error_rate_abs_ge_5": 0.857143,
+          "signed_error_mean": -14.857143
+        },
+        {
+          "question_id": "Q10",
+          "max_score": 15.0,
+          "mae": 1.142857,
+          "normalized_mae": 0.07619,
+          "exact_agreement": 0.571429,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": -1.142857
+        }
+      ],
+      "condition": "B0",
+      "description": "baseline prompt + rubric v0",
+      "output_dirs": [
+        "Data/DSAA3071/week5-benchmark-redaction-v3/runs/deepseek-B0-text-dev-reviewed-r1-authfix"
+      ],
+      "packet_id": "B0-dev-reviewed-r1",
+      "packet_hash": "7acbfba40fb0542ccebbc45727f6b259f59c759d39b71dc6f56acfb254f01538",
+      "packet_hashes": [
+        "7acbfba40fb0542ccebbc45727f6b259f59c759d39b71dc6f56acfb254f01538"
+      ],
+      "prompt_hash": "8fe0b9bb69d56109b2bbecfcdd6ca05ebe2ae9dff76efe610ecfde0d831cfa5e",
+      "rubric_hash": "432dc6ea0461228171eca86a1890a3021a77b0fdddcf72e1458b125c97b6cb04",
+      "skill_version_id": "skill_baseline_v1",
+      "run_commit": "3aecbcf",
+      "run_commits": [
+        "3aecbcf"
+      ],
+      "students_expected": 7,
+      "students_passed": 7,
+      "usage": {
+        "completion_tokens": 37601,
+        "prompt_cache_hit_tokens": 9088,
+        "prompt_cache_miss_tokens": 16759,
+        "prompt_tokens": 25847,
+        "total_tokens": 63448
+      },
+      "validation_status": "passed"
+    },
+    "R1": {
+      "items": 70,
+      "question_score_mae": 2.614286,
+      "normalized_question_score_mae": 0.152429,
+      "question_exact_agreement": 0.514286,
+      "severe_error_rate_abs_ge_5": 0.214286,
+      "signed_error_mean": -2.014286,
+      "total_score_mae": 20.142857,
+      "total_signed_error_mean": -20.142857,
+      "student_total_errors": {
+        "S017": -6.0,
+        "S021": -16.0,
+        "S002": -29.0,
+        "S015": -20.0,
+        "S020": -16.0,
+        "S016": -33.0,
+        "S022": -21.0
+      },
+      "per_question": [
+        {
+          "question_id": "Q1",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q2",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q3",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q4",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q5",
+          "max_score": 20.0,
+          "mae": 4.857143,
+          "normalized_mae": 0.242857,
+          "exact_agreement": 0.285714,
+          "severe_error_rate_abs_ge_5": 0.428571,
+          "signed_error_mean": -4.857143
+        },
+        {
+          "question_id": "Q6",
+          "max_score": 20.0,
+          "mae": 1.714286,
+          "normalized_mae": 0.085714,
+          "exact_agreement": 0.142857,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 1.714286
+        },
+        {
+          "question_id": "Q7",
+          "max_score": 20.0,
+          "mae": 2.428571,
+          "normalized_mae": 0.121429,
+          "exact_agreement": 0.285714,
+          "severe_error_rate_abs_ge_5": 0.285714,
+          "signed_error_mean": -2.142857
+        },
+        {
+          "question_id": "Q8",
+          "max_score": 10.0,
+          "mae": 5.714286,
+          "normalized_mae": 0.571429,
+          "exact_agreement": 0.0,
+          "severe_error_rate_abs_ge_5": 0.571429,
+          "signed_error_mean": -3.428571
+        },
+        {
+          "question_id": "Q9",
+          "max_score": 25.0,
+          "mae": 9.714286,
+          "normalized_mae": 0.388571,
+          "exact_agreement": 0.0,
+          "severe_error_rate_abs_ge_5": 0.714286,
+          "signed_error_mean": -9.714286
+        },
+        {
+          "question_id": "Q10",
+          "max_score": 15.0,
+          "mae": 1.714286,
+          "normalized_mae": 0.114286,
+          "exact_agreement": 0.428571,
+          "severe_error_rate_abs_ge_5": 0.142857,
+          "signed_error_mean": -1.714286
+        }
+      ],
+      "condition": "R1",
+      "description": "baseline prompt + rubric v1",
+      "output_dirs": [
+        "Data/DSAA3071/week5-benchmark-redaction-v3/runs/deepseek-R1-text-dev-reviewed-r1-authfix"
+      ],
+      "packet_id": "R1-dev-reviewed-r1",
+      "packet_hash": "9daaa68706c10d3871e2503e8e588e092e3c5c27bb2f6060d69dfbda24983827",
+      "packet_hashes": [
+        "9daaa68706c10d3871e2503e8e588e092e3c5c27bb2f6060d69dfbda24983827"
+      ],
+      "prompt_hash": "8fe0b9bb69d56109b2bbecfcdd6ca05ebe2ae9dff76efe610ecfde0d831cfa5e",
+      "rubric_hash": "6798e56675bc16429eb98543ed4f85822b0658b8f412d902443130a754e7444c",
+      "skill_version_id": "skill_baseline_v1",
+      "run_commit": "3aecbcf",
+      "run_commits": [
+        "3aecbcf"
+      ],
+      "students_expected": 7,
+      "students_passed": 7,
+      "usage": {
+        "completion_tokens": 46671,
+        "prompt_cache_hit_tokens": 6912,
+        "prompt_cache_miss_tokens": 39050,
+        "prompt_tokens": 45962,
+        "total_tokens": 92633
+      },
+      "validation_status": "passed"
+    },
+    "C3": {
+      "items": 70,
+      "question_score_mae": 2.814286,
+      "normalized_question_score_mae": 0.157667,
+      "question_exact_agreement": 0.5,
+      "severe_error_rate_abs_ge_5": 0.242857,
+      "signed_error_mean": -2.014286,
+      "total_score_mae": 20.142857,
+      "total_signed_error_mean": -20.142857,
+      "student_total_errors": {
+        "S017": -9.0,
+        "S021": -23.0,
+        "S002": -23.0,
+        "S015": -14.0,
+        "S020": -19.0,
+        "S016": -19.0,
+        "S022": -34.0
+      },
+      "per_question": [
+        {
+          "question_id": "Q1",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q2",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q3",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q4",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q5",
+          "max_score": 20.0,
+          "mae": 5.857143,
+          "normalized_mae": 0.292857,
+          "exact_agreement": 0.142857,
+          "severe_error_rate_abs_ge_5": 0.571429,
+          "signed_error_mean": -5.857143
+        },
+        {
+          "question_id": "Q6",
+          "max_score": 20.0,
+          "mae": 1.857143,
+          "normalized_mae": 0.092857,
+          "exact_agreement": 0.285714,
+          "severe_error_rate_abs_ge_5": 0.142857,
+          "signed_error_mean": 1.857143
+        },
+        {
+          "question_id": "Q7",
+          "max_score": 20.0,
+          "mae": 4.428571,
+          "normalized_mae": 0.221429,
+          "exact_agreement": 0.142857,
+          "severe_error_rate_abs_ge_5": 0.285714,
+          "signed_error_mean": -2.714286
+        },
+        {
+          "question_id": "Q8",
+          "max_score": 10.0,
+          "mae": 4.857143,
+          "normalized_mae": 0.485714,
+          "exact_agreement": 0.0,
+          "severe_error_rate_abs_ge_5": 0.571429,
+          "signed_error_mean": -2.285714
+        },
+        {
+          "question_id": "Q9",
+          "max_score": 25.0,
+          "mae": 9.714286,
+          "normalized_mae": 0.388571,
+          "exact_agreement": 0.0,
+          "severe_error_rate_abs_ge_5": 0.857143,
+          "signed_error_mean": -9.714286
+        },
+        {
+          "question_id": "Q10",
+          "max_score": 15.0,
+          "mae": 1.428571,
+          "normalized_mae": 0.095238,
+          "exact_agreement": 0.428571,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": -1.428571
+        }
+      ],
+      "condition": "C3",
+      "description": "candidate-v3 prompt + rubric v1",
+      "output_dirs": [
+        "Data/DSAA3071/week5-benchmark-redaction-v3/runs/deepseek-C3-text-dev-reviewed-r3"
+      ],
+      "packet_id": "C3-dev-reviewed-r3",
+      "packet_hash": "ffb968c7f8e2470bb35251ee7c87117c5e16d51e38334549e39e83e13b29ab9e",
+      "packet_hashes": [
+        "ffb968c7f8e2470bb35251ee7c87117c5e16d51e38334549e39e83e13b29ab9e"
+      ],
+      "prompt_hash": "8273f8c5743bfc9bb687baeec44b6bb18da154689191d55fb8da8a18f541eec4",
+      "rubric_hash": "6798e56675bc16429eb98543ed4f85822b0658b8f412d902443130a754e7444c",
+      "skill_version_id": "skill_candidate_v3",
+      "run_commit": "70dd248",
+      "run_commits": [
+        "70dd248"
+      ],
+      "students_expected": 7,
+      "students_passed": 7,
+      "usage": {
+        "completion_tokens": 53418,
+        "prompt_cache_hit_tokens": 14208,
+        "prompt_cache_miss_tokens": 37177,
+        "prompt_tokens": 51385,
+        "total_tokens": 104803
+      },
+      "validation_status": "passed"
+    },
+    "C31_r2": {
+      "items": 70,
+      "question_score_mae": 2.928571,
+      "normalized_question_score_mae": 0.163524,
+      "question_exact_agreement": 0.528571,
+      "severe_error_rate_abs_ge_5": 0.257143,
+      "signed_error_mean": -1.842857,
+      "total_score_mae": 18.428571,
+      "total_signed_error_mean": -18.428571,
+      "student_total_errors": {
+        "S017": -9.0,
+        "S021": -16.0,
+        "S002": -23.0,
+        "S015": -13.0,
+        "S020": -31.0,
+        "S016": -17.0,
+        "S022": -20.0
+      },
+      "per_question": [
+        {
+          "question_id": "Q1",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q2",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q3",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q4",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q5",
+          "max_score": 20.0,
+          "mae": 2.571429,
+          "normalized_mae": 0.128571,
+          "exact_agreement": 0.428571,
+          "severe_error_rate_abs_ge_5": 0.285714,
+          "signed_error_mean": -2.571429
+        },
+        {
+          "question_id": "Q6",
+          "max_score": 20.0,
+          "mae": 2.714286,
+          "normalized_mae": 0.135714,
+          "exact_agreement": 0.142857,
+          "severe_error_rate_abs_ge_5": 0.142857,
+          "signed_error_mean": 2.714286
+        },
+        {
+          "question_id": "Q7",
+          "max_score": 20.0,
+          "mae": 5.0,
+          "normalized_mae": 0.25,
+          "exact_agreement": 0.142857,
+          "severe_error_rate_abs_ge_5": 0.571429,
+          "signed_error_mean": -2.714286
+        },
+        {
+          "question_id": "Q8",
+          "max_score": 10.0,
+          "mae": 5.0,
+          "normalized_mae": 0.5,
+          "exact_agreement": 0.142857,
+          "severe_error_rate_abs_ge_5": 0.428571,
+          "signed_error_mean": -1.857143
+        },
+        {
+          "question_id": "Q9",
+          "max_score": 25.0,
+          "mae": 11.714286,
+          "normalized_mae": 0.468571,
+          "exact_agreement": 0.0,
+          "severe_error_rate_abs_ge_5": 1.0,
+          "signed_error_mean": -11.714286
+        },
+        {
+          "question_id": "Q10",
+          "max_score": 15.0,
+          "mae": 2.285714,
+          "normalized_mae": 0.152381,
+          "exact_agreement": 0.428571,
+          "severe_error_rate_abs_ge_5": 0.142857,
+          "signed_error_mean": -2.285714
+        }
+      ],
+      "condition": "C31_r2",
+      "description": "candidate-v3.1 r2 open-ended adequacy prompt + rubric v1",
+      "output_dirs": [
+        "Data/DSAA3071/week5-benchmark-redaction-v3/runs/deepseek-C31-r2-text-dev-reviewed-r1",
+        "Data/DSAA3071/week5-benchmark-redaction-v3/runs/deepseek-C31-r2-text-dev-reviewed-r1-recovery2"
+      ],
+      "packet_id": "C3-dev-reviewed-v31-r2",
+      "packet_hash": "d30d5366d8386f6fdbe4621d428e8b739c0b4f0f95b5f7d69941046a6f5e7173",
+      "packet_hashes": [
+        "d30d5366d8386f6fdbe4621d428e8b739c0b4f0f95b5f7d69941046a6f5e7173",
+        "a9898d58f14071fadab935175d946f04842ecfdc08c0dde12235c6d186246f64"
+      ],
+      "prompt_hash": "ba5113e1dec1a0a690422dc44a4cd03dce83c37d28eab68cb310974bea0c47c5",
+      "rubric_hash": "6798e56675bc16429eb98543ed4f85822b0658b8f412d902443130a754e7444c",
+      "skill_version_id": "skill_candidate_v3_1_r2",
+      "run_commit": "416fedb",
+      "run_commits": [
+        "416fedb",
+        "7c255a2"
+      ],
+      "students_expected": 11,
+      "students_passed": 7,
+      "usage": {
+        "completion_tokens": 53872,
+        "prompt_cache_hit_tokens": 15232,
+        "prompt_cache_miss_tokens": 38554,
+        "prompt_tokens": 53786,
+        "total_tokens": 107658
+      },
+      "validation_status": "failed"
+    },
+    "C32": {
+      "items": 70,
+      "question_score_mae": 2.557143,
+      "normalized_question_score_mae": 0.149095,
+      "question_exact_agreement": 0.528571,
+      "severe_error_rate_abs_ge_5": 0.228571,
+      "signed_error_mean": -1.242857,
+      "total_score_mae": 14.428571,
+      "total_signed_error_mean": -12.428571,
+      "student_total_errors": {
+        "S017": -20.0,
+        "S021": 7.0,
+        "S002": -6.0,
+        "S015": -13.0,
+        "S020": -15.0,
+        "S016": -19.0,
+        "S022": -21.0
+      },
+      "per_question": [
+        {
+          "question_id": "Q1",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q2",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q3",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q4",
+          "max_score": 5.0,
+          "mae": 0.0,
+          "normalized_mae": 0.0,
+          "exact_agreement": 1.0,
+          "severe_error_rate_abs_ge_5": 0.0,
+          "signed_error_mean": 0.0
+        },
+        {
+          "question_id": "Q5",
+          "max_score": 20.0,
+          "mae": 2.714286,
+          "normalized_mae": 0.135714,
+          "exact_agreement": 0.285714,
+          "severe_error_rate_abs_ge_5": 0.142857,
+          "signed_error_mean": -2.142857
+        },
+        {
+          "question_id": "Q6",
+          "max_score": 20.0,
+          "mae": 4.428571,
+          "normalized_mae": 0.221429,
+          "exact_agreement": 0.0,
+          "severe_error_rate_abs_ge_5": 0.285714,
+          "signed_error_mean": 4.142857
+        },
+        {
+          "question_id": "Q7",
+          "max_score": 20.0,
+          "mae": 2.428571,
+          "normalized_mae": 0.121429,
+          "exact_agreement": 0.285714,
+          "severe_error_rate_abs_ge_5": 0.285714,
+          "signed_error_mean": 0.142857
+        },
+        {
+          "question_id": "Q8",
+          "max_score": 10.0,
+          "mae": 5.571429,
+          "normalized_mae": 0.557143,
+          "exact_agreement": 0.0,
+          "severe_error_rate_abs_ge_5": 0.714286,
+          "signed_error_mean": -4.142857
+        },
+        {
+          "question_id": "Q9",
+          "max_score": 25.0,
+          "mae": 9.0,
+          "normalized_mae": 0.36,
+          "exact_agreement": 0.142857,
+          "severe_error_rate_abs_ge_5": 0.714286,
+          "signed_error_mean": -9.0
+        },
+        {
+          "question_id": "Q10",
+          "max_score": 15.0,
+          "mae": 1.428571,
+          "normalized_mae": 0.095238,
+          "exact_agreement": 0.571429,
+          "severe_error_rate_abs_ge_5": 0.142857,
+          "signed_error_mean": -1.428571
+        }
+      ],
+      "condition": "C32",
+      "description": "candidate-v3.2 prompt + rubric v2",
+      "output_dirs": [
+        "Data/DSAA3071/week5-benchmark-redaction-v3/runs/deepseek-C32-text-dev-reviewed-r1"
+      ],
+      "packet_id": "C32-dev-reviewed-r1",
+      "packet_hash": "b9146715f6b0dc014f079e07625d98cef62e1954d3e6d0e76bedcc464f4b8439",
+      "packet_hashes": [
+        "b9146715f6b0dc014f079e07625d98cef62e1954d3e6d0e76bedcc464f4b8439"
+      ],
+      "prompt_hash": "1dd7d0c211fd1b1414478b275230832ed7f2802617f17f6b715c69a490c04106",
+      "rubric_hash": "3678212e27dd4a506c5e8ee581d49ce651ddabd42fe30b4191a5e3f5992e4740",
+      "skill_version_id": "skill_candidate_v3_2",
+      "run_commit": "7f4e06a",
+      "run_commits": [
+        "7f4e06a"
+      ],
+      "students_expected": 7,
+      "students_passed": 7,
+      "usage": {
+        "completion_tokens": 56222,
+        "prompt_cache_hit_tokens": 9600,
+        "prompt_cache_miss_tokens": 50936,
+        "prompt_tokens": 60536,
+        "total_tokens": 116758
+      },
+      "validation_status": "passed"
+    }
+  },
+  "comparisons": {
+    "R1_minus_B0": {
+      "question_score_mae_delta": -0.728571,
+      "normalized_question_score_mae_delta": -0.021047,
+      "total_score_mae_delta": -7.285714,
+      "question_exact_agreement_delta": 0.014286,
+      "severe_error_rate_abs_ge_5_delta": -0.028571
+    },
+    "C3_minus_R1": {
+      "question_score_mae_delta": 0.2,
+      "normalized_question_score_mae_delta": 0.005238,
+      "total_score_mae_delta": 0.0,
+      "question_exact_agreement_delta": -0.014286,
+      "severe_error_rate_abs_ge_5_delta": 0.028571
+    },
+    "C31_r2_minus_R1": {
+      "question_score_mae_delta": 0.314285,
+      "normalized_question_score_mae_delta": 0.011095,
+      "total_score_mae_delta": -1.714286,
+      "question_exact_agreement_delta": 0.014285,
+      "severe_error_rate_abs_ge_5_delta": 0.042857
+    },
+    "C31_r2_minus_C3": {
+      "question_score_mae_delta": 0.114285,
+      "normalized_question_score_mae_delta": 0.005857,
+      "total_score_mae_delta": -1.714286,
+      "question_exact_agreement_delta": 0.028571,
+      "severe_error_rate_abs_ge_5_delta": 0.014286
+    },
+    "C31_r2_minus_B0": {
+      "question_score_mae_delta": -0.414286,
+      "normalized_question_score_mae_delta": -0.009952,
+      "total_score_mae_delta": -9.0,
+      "question_exact_agreement_delta": 0.028571,
+      "severe_error_rate_abs_ge_5_delta": 0.014286
+    },
+    "C32_minus_R1": {
+      "question_score_mae_delta": -0.057143,
+      "normalized_question_score_mae_delta": -0.003334,
+      "total_score_mae_delta": -5.714286,
+      "question_exact_agreement_delta": 0.014285,
+      "severe_error_rate_abs_ge_5_delta": 0.014285
+    },
+    "C32_minus_C31_r2": {
+      "question_score_mae_delta": -0.371428,
+      "normalized_question_score_mae_delta": -0.014429,
+      "total_score_mae_delta": -4.0,
+      "question_exact_agreement_delta": 0.0,
+      "severe_error_rate_abs_ge_5_delta": -0.028572
+    },
+    "C32_minus_C3": {
+      "question_score_mae_delta": -0.257143,
+      "normalized_question_score_mae_delta": -0.008572,
+      "total_score_mae_delta": -5.714286,
+      "question_exact_agreement_delta": 0.028571,
+      "severe_error_rate_abs_ge_5_delta": -0.014286
+    },
+    "C32_minus_B0": {
+      "question_score_mae_delta": -0.785714,
+      "normalized_question_score_mae_delta": -0.024381,
+      "total_score_mae_delta": -13.0,
+      "question_exact_agreement_delta": 0.028571,
+      "severe_error_rate_abs_ge_5_delta": -0.014286
+    }
+  },
+  "best_by_question": [
+    {
+      "question_id": "Q1",
+      "mae_by_condition": {
+        "B0": 0.0,
+        "R1": 0.0,
+        "C3": 0.0,
+        "C31_r2": 0.0,
+        "C32": 0.0
+      },
+      "best_conditions": [
+        "B0",
+        "R1",
+        "C3",
+        "C31_r2",
+        "C32"
+      ]
+    },
+    {
+      "question_id": "Q2",
+      "mae_by_condition": {
+        "B0": 0.0,
+        "R1": 0.0,
+        "C3": 0.0,
+        "C31_r2": 0.0,
+        "C32": 0.0
+      },
+      "best_conditions": [
+        "B0",
+        "R1",
+        "C3",
+        "C31_r2",
+        "C32"
+      ]
+    },
+    {
+      "question_id": "Q3",
+      "mae_by_condition": {
+        "B0": 0.0,
+        "R1": 0.0,
+        "C3": 0.0,
+        "C31_r2": 0.0,
+        "C32": 0.0
+      },
+      "best_conditions": [
+        "B0",
+        "R1",
+        "C3",
+        "C31_r2",
+        "C32"
+      ]
+    },
+    {
+      "question_id": "Q4",
+      "mae_by_condition": {
+        "B0": 0.0,
+        "R1": 0.0,
+        "C3": 0.0,
+        "C31_r2": 0.0,
+        "C32": 0.0
+      },
+      "best_conditions": [
+        "B0",
+        "R1",
+        "C3",
+        "C31_r2",
+        "C32"
+      ]
+    },
+    {
+      "question_id": "Q5",
+      "mae_by_condition": {
+        "B0": 7.0,
+        "R1": 4.857143,
+        "C3": 5.857143,
+        "C31_r2": 2.571429,
+        "C32": 2.714286
+      },
+      "best_conditions": [
+        "C31_r2"
+      ]
+    },
+    {
+      "question_id": "Q6",
+      "mae_by_condition": {
+        "B0": 2.142857,
+        "R1": 1.714286,
+        "C3": 1.857143,
+        "C31_r2": 2.714286,
+        "C32": 4.428571
+      },
+      "best_conditions": [
+        "R1"
+      ]
+    },
+    {
+      "question_id": "Q7",
+      "mae_by_condition": {
+        "B0": 4.428571,
+        "R1": 2.428571,
+        "C3": 4.428571,
+        "C31_r2": 5.0,
+        "C32": 2.428571
+      },
+      "best_conditions": [
+        "R1",
+        "C32"
+      ]
+    },
+    {
+      "question_id": "Q8",
+      "mae_by_condition": {
+        "B0": 3.857143,
+        "R1": 5.714286,
+        "C3": 4.857143,
+        "C31_r2": 5.0,
+        "C32": 5.571429
+      },
+      "best_conditions": [
+        "B0"
+      ]
+    },
+    {
+      "question_id": "Q9",
+      "mae_by_condition": {
+        "B0": 14.857143,
+        "R1": 9.714286,
+        "C3": 9.714286,
+        "C31_r2": 11.714286,
+        "C32": 9.0
+      },
+      "best_conditions": [
+        "C32"
+      ]
+    },
+    {
+      "question_id": "Q10",
+      "mae_by_condition": {
+        "B0": 1.142857,
+        "R1": 1.714286,
+        "C3": 1.428571,
+        "C31_r2": 2.285714,
+        "C32": 1.428571
+      },
+      "best_conditions": [
+        "B0"
+      ]
+    }
+  ],
+  "focus_question_scores": [
+    {
+      "student_id": "S017",
+      "question_id": "Q7",
+      "gold": 20.0,
+      "c32": 17.0,
+      "c32_error": -3.0
+    },
+    {
+      "student_id": "S017",
+      "question_id": "Q8",
+      "gold": 9.0,
+      "c32": 5.0,
+      "c32_error": -4.0
+    },
+    {
+      "student_id": "S017",
+      "question_id": "Q9",
+      "gold": 25.0,
+      "c32": 12.0,
+      "c32_error": -13.0
+    },
+    {
+      "student_id": "S021",
+      "question_id": "Q7",
+      "gold": 15.0,
+      "c32": 16.0,
+      "c32_error": 1.0
+    },
+    {
+      "student_id": "S021",
+      "question_id": "Q8",
+      "gold": 0.0,
+      "c32": 5.0,
+      "c32_error": 5.0
+    },
+    {
+      "student_id": "S021",
+      "question_id": "Q9",
+      "gold": 12.0,
+      "c32": 10.0,
+      "c32_error": -2.0
+    },
+    {
+      "student_id": "S002",
+      "question_id": "Q7",
+      "gold": 10.0,
+      "c32": 15.0,
+      "c32_error": 5.0
+    },
+    {
+      "student_id": "S002",
+      "question_id": "Q8",
+      "gold": 10.0,
+      "c32": 3.0,
+      "c32_error": -7.0
+    },
+    {
+      "student_id": "S002",
+      "question_id": "Q9",
+      "gold": 25.0,
+      "c32": 25.0,
+      "c32_error": 0.0
+    },
+    {
+      "student_id": "S015",
+      "question_id": "Q7",
+      "gold": 10.0,
+      "c32": 13.0,
+      "c32_error": 3.0
+    },
+    {
+      "student_id": "S015",
+      "question_id": "Q8",
+      "gold": 10.0,
+      "c32": 4.0,
+      "c32_error": -6.0
+    },
+    {
+      "student_id": "S015",
+      "question_id": "Q9",
+      "gold": 25.0,
+      "c32": 17.0,
+      "c32_error": -8.0
+    },
+    {
+      "student_id": "S020",
+      "question_id": "Q7",
+      "gold": 18.0,
+      "c32": 18.0,
+      "c32_error": 0.0
+    },
+    {
+      "student_id": "S020",
+      "question_id": "Q8",
+      "gold": 10.0,
+      "c32": 1.0,
+      "c32_error": -9.0
+    },
+    {
+      "student_id": "S020",
+      "question_id": "Q9",
+      "gold": 10.0,
+      "c32": 2.0,
+      "c32_error": -8.0
+    },
+    {
+      "student_id": "S016",
+      "question_id": "Q7",
+      "gold": 0.0,
+      "c32": 0.0,
+      "c32_error": 0.0
+    },
+    {
+      "student_id": "S016",
+      "question_id": "Q8",
+      "gold": 8.0,
+      "c32": 5.0,
+      "c32_error": -3.0
+    },
+    {
+      "student_id": "S016",
+      "question_id": "Q9",
+      "gold": 25.0,
+      "c32": 5.0,
+      "c32_error": -20.0
+    },
+    {
+      "student_id": "S022",
+      "question_id": "Q7",
+      "gold": 10.0,
+      "c32": 5.0,
+      "c32_error": -5.0
+    },
+    {
+      "student_id": "S022",
+      "question_id": "Q8",
+      "gold": 10.0,
+      "c32": 5.0,
+      "c32_error": -5.0
+    },
+    {
+      "student_id": "S022",
+      "question_id": "Q9",
+      "gold": 25.0,
+      "c32": 13.0,
+      "c32_error": -12.0
+    }
+  ],
+  "notes": [
+    "C32 is the first candidate in this DSAA3071 development sequence to improve question_score_mae versus R1 while also improving total_score_mae.",
+    "C32 improves Q7 and Q9 versus C31_r2, but Q8 remains a major unresolved error source and Q6 worsens versus R1.",
+    "C32 still has a higher severe_error_rate_abs_ge_5 than R1 on this seven-student development split.",
+    "This is development split evidence only; held-out not run and this is not a final accuracy claim."
+  ]
+}

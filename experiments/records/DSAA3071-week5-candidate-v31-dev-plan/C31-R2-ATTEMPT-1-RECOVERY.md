@@ -118,3 +118,21 @@ try {
   Remove-Item Env:DEEPSEEK_API_KEY -ErrorAction SilentlyContinue
 }
 ```
+
+## Recovery 2 Result
+
+`deepseek-C31-r2-text-dev-reviewed-r1-recovery2` passed validation for all 4
+remaining students.
+
+Passed:
+
+- `S015`: 1 attempt
+- `S020`: 1 attempt
+- `S016`: 1 attempt
+- `S022`: 1 attempt
+
+The complete C31-r2 development condition is therefore composed of the 3
+successful outputs from `deepseek-C31-r2-text-dev-reviewed-r1` and the 4
+successful outputs from `deepseek-C31-r2-text-dev-reviewed-r1-recovery2`.
+Metrics are recorded in `dev-metrics-deepseek-c31-r2.json` and
+`DEV-METRICS-DEEPSEEK-C31-R2.md`.

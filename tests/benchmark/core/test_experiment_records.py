@@ -456,6 +456,10 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("codex.cmd exec", protocol)
         self.assertIn("codex exec", protocol)
         self.assertIn("claude", protocol)
+        self.assertIn("--output-format json", protocol)
+        self.assertIn("--max-turns 1", protocol)
+        self.assertIn("result", protocol)
+        self.assertIn("CLAUDE-CODE-REPRODUCTION.md", protocol)
         self.assertIn("DeepSeek", protocol)
         self.assertIn("git rev-parse --short HEAD", protocol)
         self.assertIn("run-headless-packet", protocol)
@@ -463,6 +467,27 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("Do not inspect parent directories", prompt)
         self.assertIn("benchmark.core.cli", script)
         self.assertIn("run-headless-packet", script)
+
+    def test_claude_code_reproduction_guide_is_actionable(self):
+        guide = Path(
+            "experiments/records/Codex-CLI-headless-mode/"
+            "CLAUDE-CODE-REPRODUCTION.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("Claude Code Reproduction Guide", guide)
+        self.assertIn("claude --version", guide)
+        self.assertIn("claude -p", guide)
+        self.assertIn("--output-format json", guide)
+        self.assertIn("--max-turns 1", guide)
+        self.assertIn("claude-sonnet-4-20250514", guide)
+        self.assertIn("codex/claude-headless-support", guide)
+        self.assertIn("Data/physics/benchmark/text_packets", guide)
+        self.assertIn("physics-week9-baseline-text-strict-schema", guide)
+        self.assertIn("physics-week9-candidate-v2-text-strict-schema", guide)
+        self.assertIn("benchmark.physics.cli metrics", guide)
+        self.assertIn("Do not commit", guide)
+        self.assertIn("raw-responses.jsonl", guide)
+        self.assertIn("run-metadata.json", guide)
 
     def test_physics_codex_headless_attempt_1_records_cli_argument_failure(self):
         record = Path(

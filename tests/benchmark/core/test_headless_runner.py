@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 
 from benchmark.core.cli import main
+from benchmark.core.headless_runner import _extract_headless_cli_raw_text
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
@@ -68,6 +69,69 @@ class HeadlessRunnerCliTests(unittest.TestCase):
         self.assertIn("Blind headless grading run", prompt)
         self.assertIn("Packet context:", prompt)
         self.assertNotIn("DEEPSEEK_API_KEY", command)
+
+    def test_claude_headless_dry_run_records_json_print_command(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = _write_text_grading_packet(root)
+            output = root / "runs" / "claude-synthetic-G1-dev-r1"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "run-headless-packet",
+                        "--engine",
+                        "claude",
+                        "--model",
+                        "claude-sonnet-4-20250514",
+                        "--input-mode",
+                        "text-only",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(output),
+                        "--dry-run",
+                        "--run-commit",
+                        "abc1234",
+                    ]
+                )
+            result = json.loads(stdout.getvalue())
+            metadata = json.loads((output / "run-metadata.json").read_text())
+            validation = json.loads((output / "validation.json").read_text())
+            command = (output / "command.txt").read_text(encoding="utf-8")
+
+        self.assertEqual(code, 0)
+        self.assertEqual(result["provider"], "claude_cli")
+        self.assertEqual(result["validation_status"], "passed")
+        self.assertEqual(metadata["provider"], "claude_cli")
+        self.assertEqual(metadata["engine"], "claude")
+        self.assertEqual(metadata["model"], "claude-sonnet-4-20250514")
+        self.assertEqual(metadata["api_key_source"], "claude_cli_external_auth")
+        self.assertEqual(validation["students_passed"], 1)
+        self.assertIn("claude -p", command)
+        self.assertIn("--output-format json", command)
+        self.assertIn("--max-turns 1", command)
+        self.assertIn("--model claude-sonnet-4-20250514", command)
+        self.assertNotIn("--output-schema", command)
+        self.assertNotIn("codex.cmd exec", command)
+        self.assertNotIn("DEEPSEEK_API_KEY", command)
+
+    def test_claude_json_print_output_uses_result_field_as_model_text(self):
+        stdout = json.dumps(
+            {
+                "type": "result",
+                "subtype": "success",
+                "is_error": False,
+                "result": "{\"student_id\":\"S001\",\"scores\":[]}",
+                "session_id": "claude-session-1",
+            }
+        )
+
+        self.assertEqual(
+            _extract_headless_cli_raw_text("claude", stdout, Path("missing.txt")),
+            "{\"student_id\":\"S001\",\"scores\":[]}",
+        )
 
     def test_reproducing_script_help_runs_from_repo_root(self):
         completed = subprocess.run(

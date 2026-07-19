@@ -281,10 +281,10 @@ def _complete_with_headless_cli(
         raise RuntimeError(
             f"{config.engine} headless command failed with exit {completed.returncode}"
         )
-    raw_text = (
-        last_message.read_text(encoding="utf-8")
-        if last_message.exists()
-        else completed.stdout
+    raw_text = _extract_headless_cli_raw_text(
+        config.engine,
+        completed.stdout,
+        last_message,
     )
     return ModelProviderResult(raw_text=raw_text.strip(), model=config.model)
 
@@ -355,10 +355,35 @@ def _student_command_argv(
         config.engine_bin or "claude",
         "-p",
         "--output-format",
-        "text",
+        "json",
+        "--max-turns",
+        "1",
         "--model",
         config.model,
     ]
+
+
+def _extract_headless_cli_raw_text(
+    engine: str,
+    stdout: str,
+    last_message: Path,
+) -> str:
+    if engine == "codex":
+        return (
+            last_message.read_text(encoding="utf-8")
+            if last_message.exists()
+            else stdout
+        )
+
+    payload = json.loads(stdout)
+    if not isinstance(payload, dict):
+        raise ValueError("Claude CLI JSON output must be an object")
+    if payload.get("is_error") is True:
+        raise ValueError(f"Claude CLI reported an error: {payload}")
+    result = payload.get("result")
+    if not isinstance(result, str):
+        raise ValueError("Claude CLI JSON output missing string result")
+    return result
 
 
 def _metadata(

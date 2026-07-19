@@ -1,7 +1,9 @@
 # Codex CLI Headless Mode Run Protocol
 
-Status: protocol and runner dry-run ready. No real Codex or Claude model calls
-were made in this branch.
+Status: Codex and Claude runner boundaries are dry-run ready. A real Codex
+physics development run is recorded separately under
+`experiments/records/physics-week9-codex-headless-run/`. No real Claude model
+call has been made in this repository yet.
 
 ## Purpose
 
@@ -29,6 +31,19 @@ The local Codex manual fetched on 2026-07-19 identifies Codex CLI as the termina
 entry point for developer work and documents `codex exec` as the non-interactive
 command. It also distinguishes ChatGPT plan usage from API-key usage for Codex
 CLI automation.
+
+## Source From Official Claude Code CLI Reference
+
+The Anthropic Claude Code CLI reference documents `claude -p` / `--print` as
+non-interactive print mode, `--output-format json` as structured print output,
+`--max-turns` as a bound on non-interactive agent turns, and `--model` as the
+model selector:
+
+- <https://docs.anthropic.com/en/docs/claude-code/cli-usage>
+
+The Claude JSON print output wraps the assistant response in a JSON object. The
+runner therefore reads the outer `result` field and treats that string as the
+model's grading JSON.
 
 ## Headless Prompt Snapshot
 
@@ -141,25 +156,60 @@ codex exec --json --output-last-message <last-message-file> \
   --cd <packet> --model gpt-5.6-codex -
 ```
 
-## Claude Compatibility Boundary
+## Claude Headless Boundary
 
 Claude CLI is not installed on the current Windows machine, so Claude support is
-implemented as a compatible runner boundary rather than a verified local model
-run. If Claude CLI is installed later, use:
+implemented as a dry-run verified runner boundary rather than a verified local
+model run. If Claude CLI is installed later, use the same packet runner with
+`--engine claude`.
 
-```bash
-python scripts/run_headless_packet.py \
-  --engine claude \
-  --model <claude-model-id> \
-  --input-mode text-only \
-  --packet Data/physics/benchmark/text_packets/physics-week9-baseline-text/G1-dev-r1 \
-  --output Data/physics/benchmark/runs/physics-week9-headless-claude/claude-baseline-text-G1-dev-r1 \
-  --max-retries 2 \
-  --run-commit "$(git rev-parse --short HEAD)"
+A reviewer-facing step-by-step guide is tracked at:
+
+- `experiments/records/Codex-CLI-headless-mode/CLAUDE-CODE-REPRODUCTION.md`
+
+Windows PowerShell:
+
+```powershell
+$runCommit = git rev-parse --short HEAD
+
+python scripts\run_headless_packet.py `
+  --engine claude `
+  --model claude-sonnet-4-20250514 `
+  --input-mode text-only `
+  --packet Data\physics\benchmark\text_packets\physics-week9-baseline-text-strict-schema\G1-dev-r1 `
+  --output Data\physics\benchmark\runs\physics-week9-headless-claude\claude-baseline-text-G1-dev-r1 `
+  --max-retries 2 `
+  --run-commit $runCommit
 ```
 
+macOS/Linux:
+
+```bash
+run_commit="$(git rev-parse --short HEAD)"
+
+python scripts/run_headless_packet.py \
+  --engine claude \
+  --model claude-sonnet-4-20250514 \
+  --input-mode text-only \
+  --packet Data/physics/benchmark/text_packets/physics-week9-baseline-text-strict-schema/G1-dev-r1 \
+  --output Data/physics/benchmark/runs/physics-week9-headless-claude/claude-baseline-text-G1-dev-r1 \
+  --max-retries 2 \
+  --run-commit "$run_commit"
+```
+
+Equivalent direct Claude command shape used internally for each student:
+
+```bash
+claude -p --output-format json --max-turns 1 --model claude-sonnet-4-20250514
+```
+
+The student's prompt is piped to stdin. Claude's outer JSON response is kept in
+the ignored `raw-responses.jsonl` and the runner parses its `result` field as the
+actual grading response to validate against `output.schema.json`.
+
 Before reporting Claude results, record the exact Claude CLI version, model ID,
-authentication mode, and command help output in the experiment record.
+authentication mode, command help output, and whether the account uses Claude
+subscription access or API billing in the experiment record.
 
 ## Comparison With DeepSeek
 
@@ -174,9 +224,10 @@ This can form a fair model/provider comparison only when all of these are fixed:
 - no prompt or rubric edits after readiness.
 
 The DeepSeek condition remains `provider=deepseek` through the public API. The
-Codex condition should be recorded as `provider=codex_cli`. Differences in
-hidden system behavior, CLI version, model routing, and account/auth mode must be
-reported as limitations.
+Codex condition should be recorded as `provider=codex_cli`. The Claude condition
+should be recorded as `provider=claude_cli`. Differences in hidden system
+behavior, CLI version, model routing, output wrapper format, and account/auth
+mode must be reported as limitations.
 
 ## Stop Conditions
 

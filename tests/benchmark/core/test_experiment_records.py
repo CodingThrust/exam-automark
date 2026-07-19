@@ -464,6 +464,19 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("benchmark.core.cli", script)
         self.assertIn("run-headless-packet", script)
 
+    def test_physics_codex_headless_attempt_1_records_cli_argument_failure(self):
+        record = Path(
+            "experiments/records/physics-week9-codex-headless-run/"
+            "CODEX-DEV-ATTEMPT-1.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("CLI argument failure", record)
+        self.assertIn("--ask-for-approval", record)
+        self.assertIn("exit 2", record)
+        self.assertIn("0/8", record)
+        self.assertIn("not an accuracy result", record)
+        self.assertIn("No raw student transcript", record)
+
     def test_dsaa3071_w2_w6_source_inventory_records_private_pdf_pairs(self):
         record_dir = Path("experiments/records/DSAA3071-w2-w6-source-inventory")
         inventory = json.loads(

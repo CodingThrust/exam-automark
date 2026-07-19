@@ -344,8 +344,6 @@ def _student_command_argv(
             str(schema),
             "--sandbox",
             "read-only",
-            "--ask-for-approval",
-            "never",
             "--cd",
             str(packet),
         ]

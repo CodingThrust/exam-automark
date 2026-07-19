@@ -11,7 +11,7 @@ STRICT_SNAPSHOT = Path(
 )
 STRICT_SNAPSHOT_V31 = Path(
     "experiments/records/DSAA3071-week5-candidate-v31-dev-plan/"
-    "prompts/grade_candidate_v3_1_strict_schema.txt"
+    "prompts/grade_candidate_v3_1_open_ended_strict_schema.txt"
 )
 SKILL = Path(".agents/skills/grade-homework/SKILL.md")
 REFERENCE = Path(".agents/skills/grade-homework/references/grading-prompt.md")
@@ -181,6 +181,27 @@ class CandidateV3AssetTests(unittest.TestCase):
             "preserve unrelated element credit",
             "key terms are evidence signals",
             "valid indirect constructions",
+        )
+        expected = (
+            PROMPT_V31,
+            STRICT_SNAPSHOT_V31,
+            SKILL,
+            REFERENCE,
+        )
+
+        for path in expected:
+            with self.subTest(path=path):
+                text = path.read_text(encoding="utf-8")
+                for phrase in required:
+                    self.assertIn(phrase, text)
+
+    def test_candidate_v31_open_ended_adequacy_rule_is_present(self):
+        required = (
+            "open-ended adequacy",
+            "score whether the answer satisfies the task requirement",
+            "standard answer as an anchor, not as an exhaustive whitelist",
+            "valid, relevant, non-contradictory approaches",
+            "not listed in the expected answer or semantic equivalents",
         )
         expected = (
             PROMPT_V31,

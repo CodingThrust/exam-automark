@@ -113,6 +113,12 @@ answers:
   standard direct construction when an indirect route demonstrates the same
   result.
 
+Candidate v3.1 r2 adds open-ended adequacy: for open-ended short-answer, proof,
+construction, and essay questions, score whether the answer satisfies the task requirement.
+Use the standard answer as an anchor, not as an exhaustive whitelist. Award
+credit for valid, relevant, non-contradictory approaches, examples, or
+constructions that answer the prompt, even when they are not listed in the expected answer or semantic equivalents.
+
 Apply these explicit question-type rules:
 
 - `multiple_choice`: Require the selected option or an unambiguous equivalent.
@@ -225,7 +231,7 @@ For each student (in alphabetical order unless the user specifies otherwise):
    blank or apparently missing answer, total mismatch, and high-impact
    deduction. Also check missed semantic equivalents, missed keyword credit,
    duplicate credit, keyword misuse, score-band consistency, material-error
-   caps, local contradictions, indirect constructions, and arithmetic.
+   caps, local contradictions, indirect constructions, open-ended adequacy, and arithmetic.
    The second pass must revisit the source image and evidence, not merely repeat
    the first score.
 

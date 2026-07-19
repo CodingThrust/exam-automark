@@ -68,6 +68,12 @@ Apply these Candidate v3.1 calibration rules before finalizing the score:
   standard direct construction when an indirect route demonstrates the same
   result.
 
+Apply open-ended adequacy for open-ended short-answer, proof, construction, and
+essay questions: score whether the answer satisfies the task requirement. Use
+the standard answer as an anchor, not as an exhaustive whitelist. Award credit
+for valid, relevant, non-contradictory approaches, examples, or constructions
+that answer the prompt, even when they are not listed in the expected answer or semantic equivalents.
+
 Apply these explicit question-type rules:
 
 - `multiple_choice`: Require the selected option or an unambiguous equivalent.
@@ -127,7 +133,7 @@ Before writing output, revisit the source page for every item with:
 
 Also check missed semantic equivalents, missed keyword credit, duplicate credit,
 keyword misuse, score-band consistency, score increments, material-error caps,
-local contradictions, indirect constructions, and arithmetic. The
+local contradictions, indirect constructions, open-ended adequacy, and arithmetic. The
 `confidence` field must be exactly `high`, `medium`, or `low`, and the exact
 total must be recomputed from itemized scores.
 

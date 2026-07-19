@@ -22,7 +22,9 @@ not limited to `SKILL.md`.
 `skill_candidate_v2_design.md` explains the intended grading-behavior changes
 before any model run uses the candidate.
 
-`skill_candidate_v3.json` and `skill_candidate_v3_1.json` record later
-concept-aware grading contracts. Candidate v3.1 is a development calibration of
-v3 that preserves the calculation rule while adding locality and semantic
-equivalence safeguards.
+`skill_candidate_v3.json`, `skill_candidate_v3_1.json`, and
+`skill_candidate_v3_1_r2.json` record later concept-aware grading contracts.
+Candidate v3.1 is a development calibration of v3 that preserves the
+calculation rule while adding locality and semantic equivalence safeguards. The
+r2 snapshot adds open-ended adequacy for open-ended short-answer, proof,
+construction, and essay questions.

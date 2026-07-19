@@ -19,9 +19,11 @@ grading experiments.
   credit and semantic equivalents; prevents duplicate credit; and applies score
   bands and material-error caps only as upper bounds.
 - `grade_candidate_v3_1.txt`: minimal development calibration aligned with
-  `skill_candidate_v3_1`; keeps candidate-v3 and calculation behavior while
+  `skill_candidate_v3_1_r2`; keeps candidate-v3 and calculation behavior while
   adding cap-locality, contradiction-locality, key-term semantics, and
-  indirect-construction rules.
+  indirect-construction rules. The current r2 prompt also adds open-ended
+  adequacy so open-ended answers are scored against the task requirement rather
+  than a closed standard-answer whitelist.
 
 When an experiment is planned, each template file is hashed into `plan.json`.
 When an experiment is run, the exact prompt text is copied into each prompt

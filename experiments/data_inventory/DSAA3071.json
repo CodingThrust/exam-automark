@@ -23,6 +23,7 @@
     "The week 5 combined student-answer source was renamed from Data/DSAA3071/week5.pdf to Data/DSAA3071/DSAA3071-W5Test.pdf; its SHA-256 is unchanged.",
     "The week 5 combined student-answer PDF has been split into anonymous S### candidate inputs; the week 2, 3, 4, and 6 student-answer PDFs still need separate privacy review and preparation before use.",
     "Question-plus-answer key PDFs for weeks 2, 3, 4, and 6 were added on 2026-07-13 for later rubric extraction.",
+    "Detailed safe source-PDF pairing metadata for weeks 2, 3, 4, and 6 is tracked at experiments/records/DSAA3071-w2-w6-source-inventory/source-inventory.json.",
     "Course ID confirmed by user as DSAA3071 on 2026-07-13.",
     "This inventory counts top-level DSAA3071 source PDFs and notes generated benchmark directories separately; generated anonymized outputs remain under ignored Data/ and are recorded in experiments/records/DSAA3071-week5-prep."
   ],

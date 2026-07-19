@@ -464,6 +464,50 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("benchmark.core.cli", script)
         self.assertIn("run-headless-packet", script)
 
+    def test_dsaa3071_w2_w6_source_inventory_records_private_pdf_pairs(self):
+        record_dir = Path("experiments/records/DSAA3071-w2-w6-source-inventory")
+        inventory = json.loads(
+            (record_dir / "source-inventory.json").read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(inventory["course_id"], "DSAA3071")
+        self.assertEqual(inventory["scope"]["weeks"], [2, 3, 4, 6])
+        self.assertEqual(inventory["git_policy"]["data_root"], "Data/")
+        self.assertFalse(inventory["git_policy"]["raw_pdfs_git_tracked"])
+
+        assets = inventory["assets"]
+        self.assertEqual(len(assets), 8)
+        by_week = {}
+        for asset in assets:
+            by_week.setdefault(asset["week"], set()).add(asset["role"])
+            self.assertTrue(asset["local_path"].startswith("Data/DSAA3071/"))
+            self.assertNotIn("D:", asset["local_path"])
+            self.assertEqual(asset["git_status"], "ignored_by_Data_rule")
+            self.assertRegex(asset["sha256"], r"^[0-9a-f]{64}$")
+            self.assertGreater(asset["pages"], 0)
+
+        self.assertEqual(
+            by_week,
+            {
+                2: {"student_answer_combined_pdf", "question_solution_pdf"},
+                3: {"student_answer_combined_pdf", "question_solution_pdf"},
+                4: {"student_answer_combined_pdf", "question_solution_pdf"},
+                6: {"student_answer_combined_pdf", "question_solution_pdf"},
+            },
+        )
+        student_assets = [
+            asset
+            for asset in assets
+            if asset["role"] == "student_answer_combined_pdf"
+        ]
+        self.assertTrue(
+            all(
+                asset["privacy_status"] == "raw_private_not_anonymized"
+                for asset in student_assets
+            )
+        )
+        self.assertTrue(all(asset["model_run_allowed"] is False for asset in assets))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,129 @@
+{
+  "record_type": "dsaa3071_w2_w6_source_pdf_inventory",
+  "schema_version": 1,
+  "created_date": "2026-07-19",
+  "course_id": "DSAA3071",
+  "assessment_family": "weekly_tests",
+  "scope": {
+    "weeks": [
+      2,
+      3,
+      4,
+      6
+    ],
+    "purpose": "Pair DSAA3071 student-answer source PDFs with their question-plus-solution PDFs before anonymization, rubric extraction, or model runs.",
+    "excluded_weeks": [
+      5
+    ],
+    "excluded_week_reason": "Week 5 already has a separate anonymization and development-run record."
+  },
+  "git_policy": {
+    "data_root": "Data/",
+    "raw_pdfs_git_tracked": false,
+    "tracked_record_contains_pdf_text": false,
+    "tracked_record_contains_student_identifiers": false,
+    "tracked_record_contains_hashes_and_counts_only": true
+  },
+  "assets": [
+    {
+      "week": 2,
+      "role": "student_answer_combined_pdf",
+      "local_path": "Data/DSAA3071/DSAA3071-W2Test.pdf",
+      "bytes": 19185952,
+      "pages": 92,
+      "sha256": "e7aef3640cd7b524f641b18ba7dee1c2c274ef4cd32b0737a415535048e630c4",
+      "git_status": "ignored_by_Data_rule",
+      "privacy_status": "raw_private_not_anonymized",
+      "model_run_allowed": false
+    },
+    {
+      "week": 2,
+      "role": "question_solution_pdf",
+      "local_path": "Data/DSAA3071/week2-2.test-solution.pdf",
+      "bytes": 113498,
+      "pages": 4,
+      "sha256": "1441bb01cf9c04d10905e1ca2b2dae4f1b61ada2fd3295bd957b6e9403f04527",
+      "git_status": "ignored_by_Data_rule",
+      "privacy_status": "private_course_material",
+      "model_run_allowed": false
+    },
+    {
+      "week": 3,
+      "role": "student_answer_combined_pdf",
+      "local_path": "Data/DSAA3071/DSAA3071-W3Test.pdf",
+      "bytes": 1106923,
+      "pages": 46,
+      "sha256": "62d5c86174965557c5ff753d787d2c533431d464f929af6b72cb83f285c05324",
+      "git_status": "ignored_by_Data_rule",
+      "privacy_status": "raw_private_not_anonymized",
+      "model_run_allowed": false
+    },
+    {
+      "week": 3,
+      "role": "question_solution_pdf",
+      "local_path": "Data/DSAA3071/week3-3.test-solution.pdf",
+      "bytes": 104693,
+      "pages": 4,
+      "sha256": "e4e797bf6cadbfe0ca4be9ad2a8ac4454a03f1def548b1aa4a93a19d0e643383",
+      "git_status": "ignored_by_Data_rule",
+      "privacy_status": "private_course_material",
+      "model_run_allowed": false
+    },
+    {
+      "week": 4,
+      "role": "student_answer_combined_pdf",
+      "local_path": "Data/DSAA3071/DSAA3071-W4Test.pdf",
+      "bytes": 1689674,
+      "pages": 90,
+      "sha256": "69f573c496d09635730756400b4a162939333f43b90a9db94acec63cddc238c0",
+      "git_status": "ignored_by_Data_rule",
+      "privacy_status": "raw_private_not_anonymized",
+      "model_run_allowed": false
+    },
+    {
+      "week": 4,
+      "role": "question_solution_pdf",
+      "local_path": "Data/DSAA3071/week4-4.test-solution.pdf",
+      "bytes": 117499,
+      "pages": 4,
+      "sha256": "1ee6feceb9836a4d1da872dab0f19b1206e4191402849c375689a5cc347baf78",
+      "git_status": "ignored_by_Data_rule",
+      "privacy_status": "private_course_material",
+      "model_run_allowed": false
+    },
+    {
+      "week": 6,
+      "role": "student_answer_combined_pdf",
+      "local_path": "Data/DSAA3071/DSAA3071-W6Test.pdf",
+      "bytes": 1535115,
+      "pages": 86,
+      "sha256": "f67ac7938c0a4de7bad6357a8d87faf0d7cb8f9ebc1c65fdd5534b90e564878f",
+      "git_status": "ignored_by_Data_rule",
+      "privacy_status": "raw_private_not_anonymized",
+      "model_run_allowed": false
+    },
+    {
+      "week": 6,
+      "role": "question_solution_pdf",
+      "local_path": "Data/DSAA3071/week6-6.test-solution.pdf",
+      "bytes": 112400,
+      "pages": 4,
+      "sha256": "baf59a5ff26632fb937cf158f0f2548cb66fc7c94b6c8effd02a61122db604a2",
+      "git_status": "ignored_by_Data_rule",
+      "privacy_status": "private_course_material",
+      "model_run_allowed": false
+    }
+  ],
+  "out_of_scope_notes": [
+    "Data/DSAA3073/week2-test-sol.pdf remains outside this DSAA3071 inventory because it is not one of the user-confirmed DSAA3071 W2/W3/W4/W6 source pairs.",
+    "The raw student-answer PDFs likely include names or student IDs and must be anonymized before prompt packet construction.",
+    "No transcript, rubric, gold score, prompt packet, or model-run result is claimed by this record."
+  ],
+  "next_steps": [
+    "For each week, confirm the expected number of students and pages per student.",
+    "Create an anonymization script or configuration for each combined student-answer PDF.",
+    "Render privacy-review previews and manually approve them before any model call.",
+    "Extract an English rubric from each question-plus-solution PDF.",
+    "Create or obtain per-question gold scores before computing accuracy metrics."
+  ]
+}

@@ -400,6 +400,12 @@ class ExperimentRecordFileTests(unittest.TestCase):
         )
         self.assertEqual(metrics["split"], "development")
         self.assertEqual(set(metrics["runs"]), {"B0", "R1", "C3", "C31_r2", "C32"})
+        self.assertEqual(
+            metrics["runs"]["C31_r2"]["validation_status"],
+            "passed_after_recovery",
+        )
+        self.assertEqual(metrics["runs"]["C31_r2"]["students_passed"], 7)
+        self.assertEqual(metrics["runs"]["C31_r2"]["students_expected"], 7)
         self.assertEqual(metrics["runs"]["C32"]["validation_status"], "passed")
         self.assertEqual(metrics["runs"]["C32"]["students_passed"], 7)
         self.assertLess(
@@ -423,6 +429,20 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("held-out not run", markdown)
         self.assertIn("not a final accuracy claim", markdown)
         self.assertIn("Q8 remains", markdown)
+
+    def test_dsaa3071_candidate_v32_typst_note_records_dev_result(self):
+        record_dir = Path("experiments/records/DSAA3071-week5-candidate-v31-dev-plan")
+        note = (record_dir / "note.typ").read_text(encoding="utf-8")
+
+        self.assertTrue((record_dir / "note.pdf").exists())
+        self.assertIn("DSAA3071 Week 5 Candidate-v3.2", note)
+        self.assertIn("C32", note)
+        self.assertIn("held-out not run", note)
+        self.assertIn("not a final accuracy claim", note)
+        self.assertIn("Q8 remains", note)
+        self.assertIn("dev-metrics-deepseek-c32.json", note)
+        self.assertIn("RUN-PROTOCOL-C32.md", note)
+        self.assertIn("rubric_v2.json", note)
 
 
 if __name__ == "__main__":

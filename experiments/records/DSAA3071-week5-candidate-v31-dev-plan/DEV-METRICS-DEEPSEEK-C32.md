@@ -17,7 +17,7 @@ The result is still not clean enough to freeze the skill: Q8 remains a major unr
 | `B0` | baseline prompt + rubric v0 | passed (7/7) | 63448 | 3.343 | 0.173 | 0.500 | 0.243 | 27.429 | -2.743 |
 | `R1` | baseline prompt + rubric v1 | passed (7/7) | 92633 | 2.614 | 0.152 | 0.514 | 0.214 | 20.143 | -2.014 |
 | `C3` | candidate-v3 prompt + rubric v1 | passed (7/7) | 104803 | 2.814 | 0.158 | 0.500 | 0.243 | 20.143 | -2.014 |
-| `C31_r2` | candidate-v3.1 r2 open-ended adequacy prompt + rubric v1 | failed (7/11) | 107658 | 2.929 | 0.164 | 0.529 | 0.257 | 18.429 | -1.843 |
+| `C31_r2` | candidate-v3.1 r2 open-ended adequacy prompt + rubric v1 | passed_after_recovery (7/7) | 107658 | 2.929 | 0.164 | 0.529 | 0.257 | 18.429 | -1.843 |
 | `C32` | candidate-v3.2 prompt + rubric v2 | passed (7/7) | 116758 | 2.557 | 0.149 | 0.529 | 0.229 | 14.429 | -1.243 |
 
 ## Comparisons

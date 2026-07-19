@@ -578,7 +578,7 @@
         "416fedb",
         "7c255a2"
       ],
-      "students_expected": 11,
+      "students_expected": 7,
       "students_passed": 7,
       "usage": {
         "completion_tokens": 53872,
@@ -587,7 +587,7 @@
         "prompt_tokens": 53786,
         "total_tokens": 107658
       },
-      "validation_status": "failed"
+      "validation_status": "passed_after_recovery"
     },
     "C32": {
       "items": 70,

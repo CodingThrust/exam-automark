@@ -1,0 +1,15 @@
+{
+  "canonical_hash": "21b3db8b096b7fc672d1d3442fbc1753949d7e3d3b8f6721804b56566f2cba96",
+  "hash_policy": "sha256(normalized LF utf-8 text for files; recursive relative path plus normalized content for directories)",
+  "mirror_synchronized": true,
+  "schema_version": 1,
+  "skill_hashes": {
+    "agents": "21b3db8b096b7fc672d1d3442fbc1753949d7e3d3b8f6721804b56566f2cba96",
+    "claude": "21b3db8b096b7fc672d1d3442fbc1753949d7e3d3b8f6721804b56566f2cba96"
+  },
+  "skill_source_paths": {
+    "agents": ".agents/skills/grade-homework",
+    "claude": ".claude/skills/grade-homework"
+  },
+  "skill_version_id": "skill_candidate_v3"
+}

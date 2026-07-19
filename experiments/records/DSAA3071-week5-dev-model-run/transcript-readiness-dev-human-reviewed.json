@@ -1,0 +1,26 @@
+{
+  "assessment_id": "week5_test",
+  "checks": [
+    {
+      "detail": "all expected transcript files are present",
+      "id": "all_expected_transcripts_present",
+      "status": "passed"
+    },
+    {
+      "detail": "all transcript files match the course transcript schema",
+      "id": "transcripts_match_course_schema",
+      "status": "passed"
+    }
+  ],
+  "course_id": "DSAA3071",
+  "expected_question_count": 10,
+  "expected_student_count": 7,
+  "failed_checks": [],
+  "invalid_transcripts": [],
+  "missing_students": [],
+  "report_type": "transcript_readiness",
+  "schema_version": 1,
+  "status": "ready",
+  "transcript_source": "Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-human-reviewed-r1",
+  "valid_transcript_count": 7
+}

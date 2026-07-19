@@ -64,11 +64,97 @@ Skill root: the directory containing this `SKILL.md`. Resolve scripts and
 references relative to that directory; do not assume a Claude- or Codex-specific
 home path.
 
-### Candidate v2 grading contract
+### Candidate v3.2 grading contract
 
 Grade from visible evidence, not from assumed intent. For every scored question,
 first record the visible equation, statement, diagram feature, answer text, or
 blank-answer marker. Assign points only after that evidence is written down.
+
+For every question, identify the question type and extract
+`key_term_evidence`, `concept_evidence`, and `relation_evidence`. Map each
+non-overlapping rubric scoring element to exactly one state: `absent`,
+`mentioned_only`, `partial_understanding`, `demonstrated`, or
+`misused_or_contradicted`. A correctly used relevant keyword may receive the
+rubric's limited `mentioned_only` credit; a misused keyword receives no
+automatic credit. Treat an unambiguous semantic equivalent as evidence for the
+matching element without requiring standard wording, notation, or ordering.
+
+Award the integer credit for that one state only. Do not award duplicate credit:
+a keyword and its explanation belong to one element, and overlapping evidence
+cannot receive points twice. Sum non-overlapping element credit into a subtotal.
+Use the highest satisfied score band and any material-error cap only as upper
+bounds; they cannot raise the subtotal. Full credit requires every required
+essential element to be demonstrated or expressed by a semantic equivalent,
+required terminology when explicitly requested, and no material contradiction.
+
+When the final answer is wrong, retain justified process credit for correct
+terms, concepts, formulas, substitutions, units, and reasoning unless the
+frozen rubric makes the conclusion indispensable. For physics or other
+calculation problems, arithmetic mistakes should not erase a correct method
+unless the frozen rubric requires the exact result. When the final answer is
+correct and the process is roughly correct, award full credit when the frozen
+requirements are met.
+
+Candidate v3.1 adds four calibration rules for concept, proof, and construction
+answers:
+
+- cap-locality: apply a material-error cap only when the cap condition is directly visible and active;
+  do not trigger a cap merely because an element is
+  partial, under-detailed, or expressed through a non-standard but viable route.
+- contradiction-locality: when a misconception or contradiction is local to one
+  element, proof direction, or construction step, preserve unrelated element credit
+  unless the frozen rubric explicitly defines a question-level cap.
+- key-term semantics: key terms are evidence signals, not mandatory wording
+  unless the rubric or full-credit rule explicitly requires that terminology.
+  Correctly used key terms can earn limited keyword credit, and semantic
+  equivalents should still be mapped to the matching rubric element.
+- indirect-construction: score valid indirect constructions by mapping visible
+  steps to rubric elements and required output behavior. Do not require the
+  standard direct construction when an indirect route demonstrates the same
+  result.
+
+Candidate v3.1 r2 adds open-ended adequacy: for open-ended short-answer, proof,
+construction, and essay questions, score whether the answer satisfies the task requirement.
+Use the standard answer as an anchor, not as an exhaustive whitelist. Award
+credit for valid, relevant, non-contradictory approaches, examples, or
+constructions that answer the prompt, even when they are not listed in the expected answer or semantic equivalents.
+
+Candidate v3.2 adds official-style adequacy: grade for official-style adequacy,
+not ideal-answer completeness, and avoid being overly harsh. Preserve reasonable
+partial credit for demonstrated understanding even when terminology, ordering,
+or detail is imperfect. Distinguish missing ideal detail from a visible misconception.
+Apply large deductions only for material errors, contradictions,
+wrong language/output behavior, or missing required answer behavior.
+
+Candidate v3.2 also adds targeted calibration rules:
+
+- Q7 proof-locality: preserve construction credit for each correctly
+  demonstrated proof direction. A local nonmembership or rejection mistake
+  should reduce the affected correctness element but should not erase unrelated
+  construction credit unless it invalidates the whole proof direction.
+- Q8 enumerator policy: first determine the actual output language. Separate 2n versus 2^n,
+  invalid extra outputs, wrong base cases, and vague loop
+  mechanisms. A correct power-of-two sequence with a minor extra-output or
+  base-case issue should receive partial credit; linear even lengths are not a
+  correct enumerator for the target power-of-two language.
+- Q9 conceptual essay policy: score broad valid evidence for the Church-Turing thesis
+  when it is relevant, non-contradictory, and supports effective
+  computability, even if it does not name the exact reference families.
+
+Apply these explicit question-type rules:
+
+- `multiple_choice`: Require the selected option or an unambiguous equivalent.
+- `short_answer`: Combine key-term and concept evidence; exact standard-answer
+  wording is not required.
+- `calculation`: Check the final numeric or symbolic answer, units, formula
+  choice, substitutions, arithmetic, and physical or mathematical reasoning;
+  retain justified method credit when the final answer is wrong.
+- `algorithm`: Require a viable method plus relevant steps or relations; award
+  credit to valid alternatives.
+- `proof`: Check all required directions and logical links; a missing required
+  direction blocks full credit but preserves credit for each completed direction.
+- `essay`: Score distinct valid relevant claims; do not require fixed ordering
+  or standard phrasing.
 
 Freeze the grading protocol before student grading starts:
 
@@ -165,10 +251,19 @@ For each student (in alphabetical order unless the user specifies otherwise):
 
 5. Run a **second-pass** review for every low-confidence item, unreadable region,
    blank or apparently missing answer, total mismatch, and high-impact
-   deduction. The second pass must revisit the source image and evidence, not
-   merely repeat the first score.
+  deduction. Also check missed semantic equivalents, missed keyword credit,
+  duplicate credit, keyword misuse, score-band consistency, material-error
+  caps, local contradictions, indirect constructions, open-ended adequacy,
+  official-style adequacy, and arithmetic.
+   The second pass must revisit the source image and evidence, not merely repeat
+   the first score.
 
 6. Produce the JSON record only after those checks pass.
+   `extracted_evidence` and `evidence` must be plain text strings. Do not output
+   arrays or objects for these fields. If you use `key_term_evidence`,
+   `concept_evidence`, or `relation_evidence` internally, summarize those layers
+   inside the single `extracted_evidence` string or the single `evidence`
+   string.
 
 7. Pipe the record into `write_outputs.py`:
 

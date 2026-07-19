@@ -46,6 +46,31 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
         self.assertNotIn("if the rubric allows quarter points", combined)
         self.assertNotIn("quarter-point increment", combined)
 
+    def test_skill_uses_candidate_v3_evidence_states_and_caps(self):
+        combined = "\n".join(
+            (
+                (AGENT_SKILL / "SKILL.md").read_text(encoding="utf-8"),
+                (AGENT_SKILL / "references" / "grading-prompt.md").read_text(
+                    encoding="utf-8"
+                ),
+            )
+        )
+        for phrase in (
+            "key_term_evidence",
+            "concept_evidence",
+            "relation_evidence",
+            "mentioned_only",
+            "partial_understanding",
+            "demonstrated",
+            "misused_or_contradicted",
+            "Do not award duplicate credit",
+            "semantic equivalent",
+            "question type",
+            "cannot raise the subtotal",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, combined)
+
     def test_discover_script_reports_solution_submissions_and_late_students(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

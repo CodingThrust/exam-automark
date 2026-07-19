@@ -1,0 +1,76 @@
+{
+    "schema_version":  1,
+    "report_type":  "c32_joint_calibration_readiness",
+    "status":  "ready",
+    "readiness_level":  "packet",
+    "readiness_scope":  "C32 readiness verifies packet integrity and controlled comparison design before model calls. It does not establish score accuracy.",
+    "model_run_status":  "not_started",
+    "model_calls":  0,
+    "legacy_gate_expected_failure":  "r1_c3_rubric_matches",
+    "legacy_gate_path":  "experiments/records/DSAA3071-week5-candidate-v31-dev-plan/ablation-readiness-c32-legacy-gate.json",
+    "failed_checks":  [
+
+                      ],
+    "shared_run_settings":  {
+                                "provider":  "deepseek",
+                                "model":  "deepseek-v4-pro",
+                                "input_mode":  "text-only",
+                                "repetition":  1
+                            },
+    "expected_differences":  {
+                                 "B0_R1":  "rubric only; prompt and skill must match",
+                                 "R1_C32-v3.2-rubric-v2":  "rubric, prompt, and skill jointly differ by design"
+                             },
+    "packet_hashes":  {
+                          "B0":  "7acbfba40fb0542ccebbc45727f6b259f59c759d39b71dc6f56acfb254f01538",
+                          "R1":  "9daaa68706c10d3871e2503e8e588e092e3c5c27bb2f6060d69dfbda24983827",
+                          "C32-v3.2-rubric-v2":  "b9146715f6b0dc014f079e07625d98cef62e1954d3e6d0e76bedcc464f4b8439"
+                      },
+    "checks":  [
+                   {
+                       "id":  "same_course",
+                       "status":  "passed",
+                       "detail":  "B0, R1, and C32 all target DSAA3071 week5_test using course hash ec88c329127550cf283912d85dcd9a6316edfc588e2f8aba6fe1080d24ce69f7."
+                   },
+                   {
+                       "id":  "same_students",
+                       "status":  "passed",
+                       "detail":  "All packets contain the same seven development students: S017, S021, S002, S015, S020, S016, S022."
+                   },
+                   {
+                       "id":  "same_split",
+                       "status":  "passed",
+                       "detail":  "All packets declare split=development."
+                   },
+                   {
+                       "id":  "same_task_and_schema",
+                       "status":  "passed",
+                       "detail":  "All packets are text-only grade packets with output schema hash b5fe4ab6c03b967c6ded896e05c494c86a6ba8912cc587c5f23f87da5eb3ea77."
+                   },
+                   {
+                       "id":  "same_text_source_and_snapshot",
+                       "status":  "passed",
+                       "detail":  "All packets use transcript hash 9f9be72bf088f211a3b5fc35db1439b3e965059ff55d5c0563e2880bdc7f4a00 and data snapshot hash 95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37."
+                   },
+                   {
+                       "id":  "packet_audits_pass",
+                       "status":  "passed",
+                       "detail":  "B0, R1, and C32 packet audits pass. The stale legacy gate file records the earlier bad C32 packet and is retained only as a negative audit trail."
+                   },
+                   {
+                       "id":  "b0_r1_controlled_difference",
+                       "status":  "passed",
+                       "detail":  "B0 and R1 share prompt and skill; only rubric hash changes from rubric_v0 to rubric_v1."
+                   },
+                   {
+                       "id":  "r1_c32_joint_calibration_declared",
+                       "status":  "passed",
+                       "detail":  "R1 to C32 intentionally changes rubric, prompt, and skill together to test a calibrated candidate after C31-r2 development diagnosis."
+                   },
+                   {
+                       "id":  "no_data_committed",
+                       "status":  "passed",
+                       "detail":  "Data remains ignored by the GitHub repository; only metadata, hashes, prompt text, rubric JSON, and reproducibility notes are tracked."
+                   }
+               ]
+}

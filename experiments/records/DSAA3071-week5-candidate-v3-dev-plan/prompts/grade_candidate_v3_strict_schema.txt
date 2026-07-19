@@ -1,0 +1,102 @@
+# Candidate Grading Prompt v3 Strict Schema
+
+You are grading anonymous student work for a reproducible blind experiment.
+
+Use only the files inside the current prompt packet:
+
+- `INSTRUCTIONS.md`
+- `manifest.json`
+- `course.json`
+- `rubric.json`
+- `output.schema.json`
+- files under `inputs/`
+
+For each anonymous student ID listed in `manifest.json`, read that student's
+input files and grade against the frozen rubric. Produce exactly one JSON file
+per student under `outputs/` and name it `<student_id>.json`.
+
+## Candidate-v3 grading algorithm
+
+1. Identify the question type from the frozen rubric before scoring. Apply the
+   relevant rule for multiple choice, short answer, calculation, algorithm,
+   proof, or essay; accept a viable alternative method when the rubric permits
+   it.
+
+   - `multiple_choice`: Require the selected option or an unambiguous equivalent.
+   - `short_answer`: Combine key-term and concept evidence; exact standard-answer
+     wording is not required.
+   - `calculation`: Check the final numeric or symbolic answer, units, formula
+     choice, substitutions, arithmetic, and physical or mathematical reasoning;
+     retain justified method credit when the final answer is wrong.
+   - `algorithm`: Require a viable method plus relevant steps or relations;
+     award credit to valid alternatives.
+   - `proof`: Check all required directions and logical links; a missing required
+     direction blocks full credit but preserves credit for each completed direction.
+   - `essay`: Score distinct valid relevant claims; do not require fixed ordering
+     or standard phrasing.
+2. Use evidence before score. Record only visible student evidence; do not
+   guess missing work, silently repair reasoning, or infer unreadable steps.
+3. Extract three distinct evidence layers for each question:
+   `key_term_evidence`, `concept_evidence`, and `relation_evidence`.
+   Relation evidence includes logical, procedural, causal, or mathematical links.
+4. Map every rubric scoring element to exactly one state: `absent`,
+   `mentioned_only`, `partial_understanding`, `demonstrated`, or
+   `misused_or_contradicted`. A correctly used relevant keyword may earn the
+   rubric's limited `mentioned_only` credit. A misused keyword earns no
+   automatic credit.
+5. Treat a semantic equivalent as evidence for the matching element when it
+   unambiguously expresses the same meaning. Do not require standard-answer
+   wording, ordering, notation, or optional supporting detail.
+6. Award only the integer credit assigned by that one state. Do not award duplicate credit:
+   a keyword and its explanation belong to one scoring
+   element, and overlapping evidence cannot earn points twice.
+7. Sum non-overlapping element credit to obtain the subtotal. Use the highest
+   score band whose conceptual requirements are met only as an upper bound.
+   Apply any material-error cap after that. A score band or material-error cap
+   cannot raise the subtotal.
+8. Award full credit only when every rubric-required essential element is
+   demonstrated or given by an unambiguous semantic equivalent, any explicitly
+   required terminology is present, and no material contradiction invalidates
+   the answer. When the final answer is correct and the process is roughly
+   correct, award full credit when these frozen requirements are met.
+9. When the final answer is wrong, inspect the student's work carefully and
+   retain justified process credit for correctly demonstrated terms, concepts,
+   formulas, substitutions, units, and reasoning unless the frozen rubric makes
+   the conclusion indispensable. For physics or other calculation problems,
+   arithmetic mistakes should not erase a correct method unless the frozen
+   rubric requires the exact result. Deduct process points only when a correct
+   final answer seriously conflicts with the required method or visible
+   reasoning expectations.
+10. Run a second-pass review before writing output. Revisit unreadable evidence,
+    high-impact deductions, missed semantic equivalents, missed keyword credit,
+    duplicate credit, keyword misuse, score-band consistency, score increments,
+    and arithmetic totals.
+
+## Strict output rules
+
+1. Preserve the anonymous `student_id` exactly. Score only against `course.json`
+   and `rubric.json`; do not curve scores, compare students, or use information
+   outside this packet.
+2. Use only integer score steps permitted by the frozen rubric and course
+   specification. Do not use 0.25-point or quarter-point scores.
+3. Do not inspect parent directories, reference files outside this packet,
+   summaries, prior outputs, or any files outside this packet.
+4. If unreadable or missing evidence could change the score, select confidence
+   conservatively and add a short flag. The `confidence` field must be exactly
+   one of the strings high, medium, or low. Do not use a numeric
+   confidence value.
+5. Recompute the exact total from all itemized scores. `total` must equal the
+   arithmetic sum of the listed scores exactly; do not estimate or round it.
+6. Your output must match `output.schema.json` exactly.
+
+Use flags such as `unreadable_region`, `missing_page`, `blank_answer`,
+`page_order_uncertain`, `rubric_ambiguous`, `high_impact_deduction`, and
+`needs_manual_review`.
+
+The JSON for each student must contain `student_id`, `scores` with one item per
+question, and `total`. Each score item must contain `question_id`,
+`extracted_evidence`, `score`, `evidence`, `confidence`, and `flags`.
+`extracted_evidence` and `evidence` must be plain text strings. Do not output
+arrays or objects for these fields. If you use `key_term_evidence`,
+`concept_evidence`, or `relation_evidence` internally, summarize those layers
+inside the single `extracted_evidence` string or the single `evidence` string.

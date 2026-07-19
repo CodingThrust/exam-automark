@@ -7,8 +7,10 @@ Date: 2026-07-16
 Workspace:
 
 - Worktree: `D:\AI-Grading-Platform\exam-automark-multicourse`
-- Branch: `codex/multi-course-pilot-inventory`
-- Recorded code commit: `ca8954b`
+- Original packet dry-run branch: `codex/multi-course-pilot-inventory`
+- Original recorded code commit: `ca8954b`
+- Redaction-correction branch: `codex/dsaa3071-week5-dev-transcripts`
+- Redaction-correction anchor commit: `bcafbd1`
 
 ## Purpose
 
@@ -20,9 +22,11 @@ model run. It records:
 - audit-passed packet hashes
 - exact packet paths under ignored `Data/`
 
-The dry-run packets use the privacy-approved anonymized v3 PDFs:
+The dry-run packets use anonymized v3 PDFs:
 
 `Data/DSAA3071/week5-benchmark-redaction-v3/anonymized/S###/week5.pdf`
+
+On 2026-07-18, `S016` page 1 was manually corrected after a residual identity string was found. The development packet hashes below reflect the corrected `S016` copy. Held-out packet hashes are unchanged because `S016` is in the development split.
 
 ## Split
 
@@ -80,18 +84,18 @@ Baseline:
 
 | Packet | Split | Task | Packet hash |
 |---|---|---|---|
-| `T1-dev-r1` | development | transcribe | `710b4d97de4310a51549d53d8cb2df6d6ba25e9891076302872ff26c8f260f34` |
+| `T1-dev-r1` | development | transcribe | `f3954dfa147467b564cf8c7d7d5f669587f4e64a57aa645b07a217360df621ad` |
 | `T1-test-r1` | held-out | transcribe | `8dc513924b99cb2e34019b1aafd6c314be80e526594ee0d53dd75eacb1c65d0a` |
-| `G1-dev-r1` | development | grade | `fabee03c35acb9826a28df90989c4bcc2b5d8243d983d535f9bf26911d95b6f1` |
+| `G1-dev-r1` | development | grade | `0814dc999791cc8a6521cdfa6eb6aaeabfbea22523ca59d79bcec8442ae3343e` |
 | `G1-test-r1` | held-out | grade | `19a6f140e5b197973ff64c4e0b80becfc2221ff1d97b4b411c8d39052308dd6b` |
 
 Candidate v2:
 
 | Packet | Split | Task | Packet hash |
 |---|---|---|---|
-| `T1-dev-r1` | development | transcribe | `0f361a1691af59c80a6c723e5599eabe5314189a6c8f7471bfc7f331c9334c06` |
+| `T1-dev-r1` | development | transcribe | `a9a965ed019dcbbd3d67db564d532eec29a2aff1e100d326a270d8a0fea6d463` |
 | `T1-test-r1` | held-out | transcribe | `13a6299c61868a32177a800d776597a28697b9a90fe397a42eebc40e52b6d573` |
-| `G1-dev-r1` | development | grade | `5ef409aaa9344c54c7f4bef59417897e455c0eac62ed2e2a0e12df19081257f9` |
+| `G1-dev-r1` | development | grade | `7a51e58eb55960405cfd145cbe41a862f3d5a8505ceec73d7e0b60ac9f76ebba` |
 | `G1-test-r1` | held-out | grade | `6b6c00faa16c5b6b88329000161f800fc96803541424fdcb5e2453e539ba0de6` |
 
 ## Reproduce On Windows PowerShell
@@ -156,14 +160,13 @@ python -m benchmark.core.cli record-built-packet \
   --packet Data/DSAA3071/week5-benchmark-redaction-v3/dry_run_packets/DSAA3071-week5-baseline-v1-lf/T1-dev-r1
 ```
 
-## Current Blocks
+## Current Status After Continuation
 
-This dry run is not an accuracy experiment yet.
+This dry run is still not a held-out accuracy experiment. Since the original dry run:
 
-Blocked items:
-
-- `Data/DSAA3071/week5-benchmark-redaction-v3/gold/primary_scores.csv` is still empty.
-- No transcript outputs have been produced yet.
-- DeepSeek's public text API cannot directly grade PDF/image inputs.
-- The multimodal/headless runner is not implemented yet.
-- Model calls should wait until gold scores, transcript workflow, and run protocol are ready.
+- Official per-question gold scores were added for the development split.
+- Text-only transcripts and DeepSeek development runs were produced.
+- `S016` anonymized PDF was corrected and synchronized into development PDF packets.
+- DeepSeek's public API remains text-only in this repository; PDF/image grading still needs a multimodal or headless runner.
+- Transcript text still needs human spot-check before final accuracy claims.
+- Held-out DSAA3071 week 5 model runs have not been run.

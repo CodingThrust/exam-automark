@@ -4,6 +4,12 @@ Status: **ready**
 
 No model calls are recorded by this checklist.
 
+## Readiness Level
+
+- Packet-level ready: prompt packets, manifests, hashes, and comparison gates are checked.
+- This is not model-run ready: provider/model credentials, API authorization, and run command approval are separate gates.
+- This is not metrics-ready: gold scores and model outputs are required before accuracy can be computed.
+
 ## Anchors
 
 - Course: `DSAA3071`
@@ -11,8 +17,8 @@ No model calls are recorded by this checklist.
 - Data snapshot: `cf87b373395e381d9d07bbd370c1faa772372b760557b0581dcf9e8a93c04c28`
 - Course spec: `experiments/course_specs/DSAA3071_week5_test.json`
 - Data inventory: `experiments/data_inventory/DSAA3071.json`
-- Git: `codex/multi-course-pilot-inventory @ ca8954b`
-- Current Git: `codex/multi-course-pilot-inventory @ c5fd48a8875d48747da4d2c3360b07da5d25915f`
+- Git: `codex/dsaa3071-week5-dev-transcripts @ bcafbd1`
+- Current Git: `codex/dsaa3071-week5-dev-transcripts @ 04d51cd201cfba96412a32643612bb4d7318297b`
 - Baseline skill: `skill_baseline_v1`
 - Candidate skill: `skill_candidate_v2`
 
@@ -24,7 +30,7 @@ No model calls are recorded by this checklist.
 | `same_course_and_assessment` | passed | DSAA3071/week5_test vs DSAA3071/week5_test |
 | `same_data_snapshot` | passed | cf87b373395e... vs cf87b373395e... |
 | `same_data_inventory_and_course_spec` | passed | inventory=experiments/data_inventory/DSAA3071.json; course_spec=experiments/course_specs/DSAA3071_week5_test.json |
-| `same_git_anchor` | passed | codex/multi-course-pilot-inventory@ca8954b vs codex/multi-course-pilot-inventory@ca8954b |
+| `same_git_anchor` | passed | codex/dsaa3071-week5-dev-transcripts@bcafbd1 vs codex/dsaa3071-week5-dev-transcripts@bcafbd1 |
 | `different_skill_versions` | passed | skill_baseline_v1 vs skill_candidate_v2 |
 | `different_skill_hashes` | passed | candidate skill hash must differ from baseline skill hash |
 | `same_planned_packet_ids` | passed | G1-dev-r1, G1-test-r1, T1-dev-r1, T1-test-r1 |
@@ -42,9 +48,9 @@ No model calls are recorded by this checklist.
 | `same_students_and_inputs_per_packet` | passed | matching packet ids use the same student ids and input hashes |
 | `same_rubric_for_grade_packets` | passed | grade packets use the same rubric hash |
 | `no_model_result_artifacts_in_plan_dirs` | passed | no experiment, metrics, or prediction artifacts found |
-| `current_git_branch_matches_plan` | passed | current=codex/multi-course-pilot-inventory; planned=codex/multi-course-pilot-inventory |
-| `planned_git_commit_exists` | passed | planned=ca8954b; resolved=ca8954b4be01233aa4abfec306605bd4bc2b8b3a |
-| `current_git_head_contains_plan_commit` | passed | HEAD=c5fd48a8875d48747da4d2c3360b07da5d25915f; planned=ca8954b4be01233aa4abfec306605bd4bc2b8b3a |
+| `current_git_branch_matches_plan` | passed | current=codex/dsaa3071-week5-dev-transcripts; planned=codex/dsaa3071-week5-dev-transcripts |
+| `planned_git_commit_exists` | passed | planned=bcafbd1; resolved=bcafbd1ae0c7eb0c57bfbcb8e77a8b24b9880fd8 |
+| `current_git_head_contains_plan_commit` | passed | HEAD=04d51cd201cfba96412a32643612bb4d7318297b; planned=bcafbd1ae0c7eb0c57bfbcb8e77a8b24b9880fd8 |
 | `post_anchor_changes_are_record_only` | passed | post-anchor commits only touch experiment records |
 | `git_worktree_clean` | passed | working tree clean |
 | `data_ignored_by_git` | passed | Data/ is ignored and has no tracked files |

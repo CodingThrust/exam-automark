@@ -1,0 +1,83 @@
+{
+  "assessment_id": "week5_test",
+  "conditions": [
+    "B0",
+    "R1",
+    "C3-v3.1"
+  ],
+  "controlled_differences": {
+    "B0_R1": "rubric only; prompt and skill must match",
+    "R1_C3-v3.1": "prompt and skill only; rubric must match"
+  },
+  "course_id": "DSAA3071",
+  "course_spec_hash": "ec88c329127550cf283912d85dcd9a6316edfc588e2f8aba6fe1080d24ce69f7",
+  "course_spec_path": "experiments/course_specs/DSAA3071_week5_test.json",
+  "data_snapshot_hash": "95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37",
+  "experiment_id": "DSAA3071-week5-candidate-v31-dev-plan",
+  "model_calls": 0,
+  "model_run_status": "not_started",
+  "packets": {
+    "B0": {
+      "condition": "B0",
+      "output_schema_hash": "b5fe4ab6c03b967c6ded896e05c494c86a6ba8912cc587c5f23f87da5eb3ea77",
+      "packet_hash": "7acbfba40fb0542ccebbc45727f6b259f59c759d39b71dc6f56acfb254f01538",
+      "packet_id": "B0-dev-reviewed-r1",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-B0-v0-reviewed-dev/B0-dev-reviewed-r1",
+      "prompt_hash": "8fe0b9bb69d56109b2bbecfcdd6ca05ebe2ae9dff76efe610ecfde0d831cfa5e",
+      "prompt_path": "experiments/records/DSAA3071-week5-test-plan/prompts/grade_standard_v1_strict_schema.txt",
+      "prompt_template_id": "grade_standard_v1_strict_schema",
+      "rubric_hash": "432dc6ea0461228171eca86a1890a3021a77b0fdddcf72e1458b125c97b6cb04",
+      "rubric_path": "experiments/records/DSAA3071-week5-prep/rubric_v0.json",
+      "skill_hash": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27",
+      "skill_version_id": "skill_baseline_v1"
+    },
+    "C3-v3.1": {
+      "condition": "C3",
+      "packet_hash": "f295322f5e7d22576266810bd6c60d076967aecff4beeba19078dca9f705c21a",
+      "packet_id": "C3-dev-reviewed-v31-r1",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-C3-v31-reviewed-dev/C3-dev-reviewed-v31-r1",
+      "prompt_hash": "b5a7baf7b748164fb6e12e1700868b1c07f42708ff9cb5a45f1b43cfcdc75a37",
+      "prompt_path": "experiments/records/DSAA3071-week5-candidate-v31-dev-plan/prompts/grade_candidate_v3_1_strict_schema.txt",
+      "prompt_template_id": "grade_candidate_v3_1_strict_schema",
+      "rubric_hash": "6798e56675bc16429eb98543ed4f85822b0658b8f412d902443130a754e7444c",
+      "rubric_path": "experiments/records/DSAA3071-week5-prep/rubric_v1.json",
+      "skill_hash": "8cbdb7d2e5f4b2ad66f87dd545af621d966baf3e356cb90a33b9b734e6d1b55a",
+      "skill_version_id": "skill_candidate_v3_1"
+    },
+    "R1": {
+      "condition": "R1",
+      "output_schema_hash": "b5fe4ab6c03b967c6ded896e05c494c86a6ba8912cc587c5f23f87da5eb3ea77",
+      "packet_hash": "9daaa68706c10d3871e2503e8e588e092e3c5c27bb2f6060d69dfbda24983827",
+      "packet_id": "R1-dev-reviewed-r1",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-R1-v1-reviewed-dev/R1-dev-reviewed-r1",
+      "prompt_hash": "8fe0b9bb69d56109b2bbecfcdd6ca05ebe2ae9dff76efe610ecfde0d831cfa5e",
+      "prompt_path": "experiments/records/DSAA3071-week5-test-plan/prompts/grade_standard_v1_strict_schema.txt",
+      "prompt_template_id": "grade_standard_v1_strict_schema",
+      "rubric_hash": "6798e56675bc16429eb98543ed4f85822b0658b8f412d902443130a754e7444c",
+      "rubric_path": "experiments/records/DSAA3071-week5-prep/rubric_v1.json",
+      "skill_hash": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27",
+      "skill_version_id": "skill_baseline_v1"
+    }
+  },
+  "schema_version": 1,
+  "shared_run_settings": {
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "provider": "deepseek",
+    "repetition": 1
+  },
+  "source_run_id": "T1-dev-human-reviewed-r1",
+  "split": "development",
+  "student_ids": [
+    "S017",
+    "S021",
+    "S002",
+    "S015",
+    "S020",
+    "S016",
+    "S022"
+  ],
+  "students_file": "experiments/records/DSAA3071-week5-test-plan/students-development.txt",
+  "transcript_source": "Data/DSAA3071/week5-benchmark-redaction-v3/transcripts/T1-dev-human-reviewed-r1",
+  "transcript_source_hash": "9f9be72bf088f211a3b5fc35db1439b3e965059ff55d5c0563e2880bdc7f4a00"
+}

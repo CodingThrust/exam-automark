@@ -8,6 +8,7 @@ from pathlib import Path
 
 from benchmark.core.cli import main
 from benchmark.core.manifests import ExperimentRecord, write_record
+from tests.benchmark.core.test_comparisons import _write_packets
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
@@ -108,6 +109,77 @@ class CoreCliTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("primary_scores", stdout.getvalue())
 
+    def test_validate_rubric_command_reports_ready_status(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            course_path = root / "course.json"
+            rubric_path = root / "rubric.json"
+            output_path = root / "rubric-readiness.json"
+            course_path.write_text(
+                json.dumps(
+                    {
+                        "course_id": "DSAA3071",
+                        "assessment_id": "week5",
+                        "questions": [{"id": "Q1", "max_score": 5, "score_step": 1}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            rubric_path.write_text(
+                json.dumps(
+                    {
+                        "rubric_format": "concept_keyterm_v1",
+                        "questions": [
+                            {
+                                "question_id": "Q1",
+                                "max_score": 5,
+                                "scoring_elements": [
+                                    {
+                                        "element_id": "idea",
+                                        "levels": {
+                                            "mentioned_only": 1,
+                                            "partial_understanding": 2,
+                                            "demonstrated": 5,
+                                        },
+                                    }
+                                ],
+                                "score_bands": {
+                                    "full": {"minimum": 5, "maximum": 5},
+                                    "substantially_correct": {"minimum": 3, "maximum": 4},
+                                    "partially_correct": {"minimum": 2, "maximum": 2},
+                                    "minimal_relevant": {"minimum": 1, "maximum": 1},
+                                    "no_credit": {"minimum": 0, "maximum": 0},
+                                },
+                                "material_errors": [{"id": "none", "cap": 5}],
+                                "full_credit_rule": "Demonstrate the idea.",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "validate-rubric",
+                        "--course",
+                        str(course_path),
+                        "--rubric",
+                        str(rubric_path),
+                        "--output",
+                        str(output_path),
+                    ]
+                )
+            result = json.loads(stdout.getvalue())
+            report = json.loads(output_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(code, 0)
+        self.assertEqual(result["status"], "ready")
+        self.assertEqual(report["course_id"], "DSAA3071")
+        self.assertEqual(report["failed_checks"], [])
+
     def test_render_note_command_writes_typst_source(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -175,10 +247,10 @@ class CoreCliTests(unittest.TestCase):
                         str(root / "Data"),
                         "--course",
                         "linearalgebra",
-                        "--output",
-                        str(output),
-                    ]
-                )
+                    "--output",
+                    str(output),
+                ]
+            )
             result = json.loads(stdout.getvalue())
             inventory_text = output.read_text(encoding="utf-8")
 
@@ -512,6 +584,78 @@ class CoreCliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(result["status"], "ready")
         self.assertEqual(report["valid_transcript_count"], 1)
+
+    def test_check_ablation_readiness_writes_json_and_markdown(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            output = root / "records" / "ablation.json"
+            markdown_output = root / "records" / "ablation.md"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "check-ablation-readiness",
+                        "--b0-packet",
+                        str(b0),
+                        "--r1-packet",
+                        str(r1),
+                        "--c3-packet",
+                        str(c3),
+                        "--provider",
+                        "synthetic-provider",
+                        "--model",
+                        "synthetic-model-v1",
+                        "--input-mode",
+                        "text-only",
+                        "--repetition",
+                        "1",
+                        "--output",
+                        str(output),
+                        "--markdown-output",
+                        str(markdown_output),
+                    ]
+                )
+            result = json.loads(stdout.getvalue())
+            report = json.loads(output.read_text(encoding="utf-8"))
+            markdown = markdown_output.read_text(encoding="utf-8")
+
+        self.assertEqual(code, 0)
+        self.assertEqual(result["status"], "ready")
+        self.assertEqual(report["status"], "ready")
+        self.assertIn("Three-Condition Ablation", markdown)
+
+    def test_check_ablation_readiness_invalid_arguments_create_no_output(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            b0, r1, c3 = _write_packets(root)
+            output = root / "records" / "ablation.json"
+            code = main(
+                [
+                    "check-ablation-readiness",
+                    "--b0-packet",
+                    str(b0),
+                    "--r1-packet",
+                    str(r1),
+                    "--c3-packet",
+                    str(c3),
+                    "--provider",
+                    "synthetic-provider",
+                    "--model",
+                    "synthetic-model-v1",
+                    "--input-mode",
+                    "text-only",
+                    "--repetition",
+                    "0",
+                    "--output",
+                    str(output),
+                    ]
+                )
+            output_exists = output.exists()
+
+        self.assertEqual(code, 1)
+        self.assertFalse(output_exists)
 
 
 if __name__ == "__main__":

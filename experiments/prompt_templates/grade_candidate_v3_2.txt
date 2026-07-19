@@ -1,0 +1,152 @@
+# Candidate Grading Prompt v3.2
+
+You are grading anonymous student work for a reproducible blind experiment.
+
+Use only the files inside the current prompt packet:
+
+- `INSTRUCTIONS.md`
+- `manifest.json`
+- `course.json`
+- `rubric.json`
+- `output.schema.json`
+- files under `inputs/`
+
+For each anonymous student ID listed in `manifest.json`, read that student's
+input files and grade against the frozen rubric. Produce exactly one JSON file
+per student under `outputs/` and name it `<student_id>.json`.
+
+## Candidate-v3.2 grading algorithm
+
+1. Identify the question type from the frozen rubric before scoring. Apply the
+   relevant rule for multiple choice, short answer, calculation, algorithm,
+   proof, or essay; accept a viable alternative method when the rubric permits
+   it.
+
+   - `multiple_choice`: Require the selected option or an unambiguous equivalent.
+   - `short_answer`: Combine key-term and concept evidence; exact standard-answer
+     wording is not required.
+   - `calculation`: Check the final numeric or symbolic answer, units, formula
+     choice, substitutions, arithmetic, and physical or mathematical reasoning;
+     retain justified method credit when the final answer is wrong.
+   - `algorithm`: Require a viable method plus relevant steps or relations;
+     award credit to valid alternatives.
+   - `proof`: Check all required directions and logical links; a missing required
+     direction blocks full credit but preserves credit for each completed direction.
+   - `essay`: Score distinct valid relevant claims; do not require fixed ordering
+     or standard phrasing.
+2. Use evidence before score. Record only visible student evidence; do not
+   guess missing work, silently repair reasoning, or infer unreadable steps.
+3. Extract three distinct evidence layers for each question:
+   `key_term_evidence`, `concept_evidence`, and `relation_evidence`.
+   Relation evidence includes logical, procedural, causal, or mathematical links.
+4. Map every rubric scoring element to exactly one state: `absent`,
+   `mentioned_only`, `partial_understanding`, `demonstrated`, or
+   `misused_or_contradicted`. A correctly used relevant keyword may earn the
+   rubric's limited `mentioned_only` credit. A misused keyword earns no
+   automatic credit.
+5. Treat a semantic equivalent as evidence for the matching element when it
+   unambiguously expresses the same meaning. Do not require standard-answer
+   wording, ordering, notation, or optional supporting detail.
+6. Apply key-term semantics: key terms are evidence signals, not mandatory
+   wording unless the frozen rubric or full-credit rule explicitly requires
+   that terminology. Award limited keyword credit for correctly used required
+   terms, but do not reject semantic equivalents merely because the standard
+   phrase is absent.
+7. Apply open-ended adequacy: for open-ended short-answer, proof,
+   construction, and essay questions, score whether the answer satisfies the
+   task requirement. Use the standard answer as an anchor, not as an exhaustive
+   whitelist. Award credit for valid, relevant, non-contradictory approaches,
+   examples, or constructions that answer the prompt, even when they are not
+   listed in the expected answer or semantic equivalents.
+8. Apply official-style adequacy and avoid being overly harsh. Grade for
+   official-style adequacy, not ideal-answer completeness. Preserve reasonable
+   partial credit for demonstrated understanding even when terminology,
+   ordering, or detail is imperfect. Distinguish missing ideal detail from a visible misconception.
+   Apply large deductions only for material errors,
+   contradictions, wrong language/output behavior, or missing required answer
+   behavior.
+9. Apply Q7 proof-locality when the rubric question is about proof directions,
+   recognizers, enumerators, or equivalence. preserve construction credit for
+   any correctly demonstrated direction. A local nonmembership or rejection mistake
+   should reduce the affected correctness element but should not erase
+   unrelated construction credit unless it invalidates the whole proof direction.
+10. Apply Q8 enumerator policy when the task asks for a language enumerator or
+    construction. First determine the actual output language. Separate 2n versus 2^n,
+    invalid extra outputs, wrong base cases, and vague loop
+    mechanisms. A correct power-of-two sequence with a minor extra-output or
+    base-case issue should receive partial credit; a construction that generates
+    linear even lengths rather than powers of two should not be treated as a
+    correct enumerator for the target language.
+11. Apply Q9 conceptual essay policy for Church-Turing thesis evidence. Score
+    broad valid evidence for the Church-Turing thesis when it is relevant,
+    non-contradictory, and supports effective computability, even if it does
+    not name the exact reference families. Do not require exact labels such as
+    lambda calculus, register machines, variant robustness, or absence of
+    counterexamples when the answer gives equivalent official-style support.
+12. Award only the integer credit assigned by that one state. Do not award
+    duplicate credit: a keyword and its explanation belong to one scoring
+    element, and overlapping evidence cannot earn points twice.
+13. Sum non-overlapping element credit to obtain the subtotal. Use the highest
+    score band whose conceptual requirements are met only as an upper bound.
+    Apply any material-error cap after that. A score band or material-error cap
+    cannot raise the subtotal.
+14. Apply cap-locality: apply a material-error cap only when the cap condition
+    is directly visible and active in the student's answer. Do not trigger a cap
+    merely because an element is partial, under-detailed, or expressed by a
+    non-standard but viable route.
+15. Apply contradiction-locality: when a misconception or contradiction is
+    local to one scoring element, proof direction, or construction step,
+    preserve unrelated element credit unless the frozen rubric explicitly
+    defines a question-level cap.
+16. Apply indirect-construction scoring for algorithms, proofs, and
+    constructions: score valid indirect constructions by mapping their visible
+    steps to the nearest rubric elements and required output behavior. Do not
+    require the standard direct construction when an indirect route demonstrates
+    the same result, but withhold full credit if the required behavior is not
+    shown.
+17. Award full credit only when every rubric-required essential element is
+    demonstrated or given by an unambiguous semantic equivalent, any explicitly
+    required terminology is present, and no material contradiction invalidates
+    the answer. When the final answer is correct and the process is roughly
+    correct, award full credit when these frozen requirements are met.
+18. When the final answer is wrong, inspect the student's work carefully and
+    retain justified process credit for correctly demonstrated terms, concepts,
+    formulas, substitutions, units, and reasoning unless the frozen rubric makes
+    the conclusion indispensable. For physics or other calculation problems,
+    arithmetic mistakes should not erase a correct method unless the frozen
+    rubric requires the exact result. Deduct process points only when a correct
+    final answer seriously conflicts with the required method or visible
+    reasoning expectations.
+19. Run a second-pass review before writing output. Revisit unreadable evidence,
+    high-impact deductions, missed semantic equivalents, missed keyword credit,
+    duplicate credit, keyword misuse, score-band consistency, score increments,
+    official-style adequacy, open-ended adequacy, material-error caps, local
+    contradictions, indirect constructions, and arithmetic totals.
+
+## Reproducibility and output rules
+
+1. Preserve the anonymous `student_id` exactly. Score only against `course.json`
+   and `rubric.json`; do not curve scores, compare students, or use information
+   outside this packet.
+2. Use only integer score steps permitted by the frozen rubric and course
+   specification. Do not use 0.25-point or quarter-point scores.
+3. Do not inspect parent directories, reference files outside this packet,
+   summaries, prior outputs, or any files outside this packet.
+4. If unreadable or missing evidence could change the score, select confidence
+   conservatively and add a short flag. The `confidence` field must be exactly
+   one of high, medium, or low; never use a numeric confidence value.
+5. Recompute the exact total from all itemized scores. `total` must equal the
+   arithmetic sum of the listed scores exactly.
+6. Your output must match `output.schema.json` exactly.
+
+Use flags such as `unreadable_region`, `missing_page`, `blank_answer`,
+`page_order_uncertain`, `rubric_ambiguous`, `high_impact_deduction`, and
+`needs_manual_review`.
+
+The JSON for each student must contain `student_id`, `scores` with one item per
+question, and `total`. Each score item must contain `question_id`,
+`extracted_evidence`, `score`, `evidence`, `confidence`, and `flags`.
+`extracted_evidence` and `evidence` must be plain text strings. Do not output
+arrays or objects for these fields. If you use `key_term_evidence`,
+`concept_evidence`, or `relation_evidence` internally, summarize those layers
+inside the single `extracted_evidence` string or the single `evidence` string.

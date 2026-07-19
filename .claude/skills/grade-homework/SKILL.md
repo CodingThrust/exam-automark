@@ -211,6 +211,11 @@ For each student (in alphabetical order unless the user specifies otherwise):
    the first score.
 
 6. Produce the JSON record only after those checks pass.
+   `extracted_evidence` and `evidence` must be plain text strings. Do not output
+   arrays or objects for these fields. If you use `key_term_evidence`,
+   `concept_evidence`, or `relation_evidence` internally, summarize those layers
+   inside the single `extracted_evidence` string or the single `evidence`
+   string.
 
 7. Pipe the record into `write_outputs.py`:
 

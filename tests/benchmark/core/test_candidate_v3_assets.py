@@ -120,6 +120,21 @@ class CandidateV3AssetTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)
 
+    def test_evidence_fields_are_plain_strings_for_schema_compatibility(self):
+        combined = _normalize_whitespace(
+            "\n".join(
+                path.read_text(encoding="utf-8")
+                for path in (PROMPT, STRICT_SNAPSHOT, SKILL, REFERENCE)
+            )
+        )
+
+        for phrase in (
+            "`extracted_evidence` and `evidence` must be plain text strings",
+            "Do not output arrays or objects for these fields",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, combined)
+
     def test_strict_prompt_preserves_the_generic_grading_algorithm_verbatim(self):
         generic = _markdown_section(
             PROMPT.read_text(encoding="utf-8"),

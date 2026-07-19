@@ -45,8 +45,8 @@ try {
 
   python -m benchmark.core.cli run-model-packet `
     --provider deepseek --model deepseek-v4-pro --input-mode text-only `
-    --packet Data\DSAA3071\week5-benchmark-redaction-v3\text_grading_packets\DSAA3071-week5-C3-v1-reviewed-dev\C3-dev-reviewed-r2 `
-    --output Data\DSAA3071\week5-benchmark-redaction-v3\runs\deepseek-C3-text-dev-reviewed-r2 `
+    --packet Data\DSAA3071\week5-benchmark-redaction-v3\text_grading_packets\DSAA3071-week5-C3-v1-reviewed-dev\C3-dev-reviewed-r3 `
+    --output Data\DSAA3071\week5-benchmark-redaction-v3\runs\deepseek-C3-text-dev-reviewed-r3 `
     --max-retries 2 --run-commit $runCommit
   $c3 = $LASTEXITCODE
 
@@ -82,8 +82,8 @@ r1=$?
 
 python -m benchmark.core.cli run-model-packet \
   --provider deepseek --model deepseek-v4-pro --input-mode text-only \
-  --packet Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-C3-v1-reviewed-dev/C3-dev-reviewed-r2 \
-  --output Data/DSAA3071/week5-benchmark-redaction-v3/runs/deepseek-C3-text-dev-reviewed-r2 \
+  --packet Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-C3-v1-reviewed-dev/C3-dev-reviewed-r3 \
+  --output Data/DSAA3071/week5-benchmark-redaction-v3/runs/deepseek-C3-text-dev-reviewed-r3 \
   --max-retries 2 --run-commit "$run_commit"
 c3=$?
 

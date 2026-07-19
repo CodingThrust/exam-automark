@@ -44,6 +44,8 @@ Candidate v3 defines a reusable grading procedure. It is responsible for:
 - second-pass checks for both excessive deductions and superficial keyword
   matching;
 - schema, confidence, flag, and total validation.
+- schema-compatible evidence serialization: internal evidence layers must be
+  summarized into plain text `extracted_evidence` and `evidence` fields.
 
 It must not contain DSAA3071-specific answers or student examples.
 
@@ -226,6 +228,8 @@ Historical v0/v2 files and outputs remain unchanged.
   readiness.
 - Missing required score bands, question IDs, or full-credit rules blocks
   readiness.
+- Object-valued or array-valued `extracted_evidence` or `evidence` fails model
+  output validation; candidate-v3 must serialize these fields as plain text.
 - Student text or gold-score leakage into tracked prompt/rubric artifacts blocks
   readiness.
 - Baseline and candidate plans with different data, student, model, rubric where

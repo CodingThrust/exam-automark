@@ -92,6 +92,10 @@ Write one JSON object per student before passing it to `write_outputs.py`:
 Confidence must be `high`, `medium`, or `low`. Use flags such as
 `unreadable_region`, `missing_page`, `blank_answer`, `page_order_uncertain`,
 `rubric_ambiguous`, `high_impact_deduction`, or `needs_manual_review`.
+`extracted_evidence` and `evidence` must be plain text strings. Do not output
+arrays or objects for these fields. If you use `key_term_evidence`,
+`concept_evidence`, or `relation_evidence` internally, summarize those layers
+inside the single `extracted_evidence` string or the single `evidence` string.
 
 ## Second-pass triggers
 

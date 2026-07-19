@@ -20,7 +20,7 @@ No model calls are recorded by this checklist.
 
 - B0: `7acbfba40fb0542ccebbc45727f6b259f59c759d39b71dc6f56acfb254f01538`
 - R1: `9daaa68706c10d3871e2503e8e588e092e3c5c27bb2f6060d69dfbda24983827`
-- C3: `f5187512fdad3927f16b9ba37d3c18a9ec331036662bc231356c3ac273c7a500`
+- C3: `ffb968c7f8e2470bb35251ee7c87117c5e16d51e38334549e39e83e13b29ab9e`
 
 ## Checks
 
@@ -38,4 +38,4 @@ No model calls are recorded by this checklist.
 | `b0_r1_prompt_and_skill_match` | passed | prompt=8fe0b9bb69d5/8fe0b9bb69d5; skill=('skill_baseline_v1', '23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27')/('skill_baseline_v1', '23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27') |
 | `b0_r1_rubric_differs` | passed | B0=432dc6ea0461; R1=6798e56675bc |
 | `r1_c3_rubric_matches` | passed | R1=6798e56675bc; C3=6798e56675bc |
-| `r1_c3_prompt_and_skill_differ` | passed | prompt=8fe0b9bb69d5/854fb1956162; skill=('skill_baseline_v1', '23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27')/('skill_candidate_v3', 'f6c071273b306fe1cb15d0592f560c9eca521ddb2706204cd09b9c10d99089de') |
+| `r1_c3_prompt_and_skill_differ` | passed | prompt=8fe0b9bb69d5/8273f8c5743b; skill=('skill_baseline_v1', '23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27')/('skill_candidate_v3', '21b3db8b096b7fc672d1d3442fbc1753949d7e3d3b8f6721804b56566f2cba96') |

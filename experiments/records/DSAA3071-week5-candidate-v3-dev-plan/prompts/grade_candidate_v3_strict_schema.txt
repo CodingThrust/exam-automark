@@ -96,3 +96,7 @@ Use flags such as `unreadable_region`, `missing_page`, `blank_answer`,
 The JSON for each student must contain `student_id`, `scores` with one item per
 question, and `total`. Each score item must contain `question_id`,
 `extracted_evidence`, `score`, `evidence`, `confidence`, and `flags`.
+`extracted_evidence` and `evidence` must be plain text strings. Do not output
+arrays or objects for these fields. If you use `key_term_evidence`,
+`concept_evidence`, or `relation_evidence` internally, summarize those layers
+inside the single `extracted_evidence` string or the single `evidence` string.

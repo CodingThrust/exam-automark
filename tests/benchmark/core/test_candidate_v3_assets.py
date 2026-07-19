@@ -5,6 +5,7 @@ from pathlib import Path
 
 PROMPT = Path("experiments/prompt_templates/grade_candidate_v3.txt")
 PROMPT_V31 = Path("experiments/prompt_templates/grade_candidate_v3_1.txt")
+PROMPT_V32 = Path("experiments/prompt_templates/grade_candidate_v3_2.txt")
 STRICT_SNAPSHOT = Path(
     "experiments/records/DSAA3071-week5-candidate-v3-dev-plan/"
     "prompts/grade_candidate_v3_strict_schema.txt"
@@ -13,6 +14,11 @@ STRICT_SNAPSHOT_V31 = Path(
     "experiments/records/DSAA3071-week5-candidate-v31-dev-plan/"
     "prompts/grade_candidate_v3_1_open_ended_strict_schema.txt"
 )
+STRICT_SNAPSHOT_V32 = Path(
+    "experiments/records/DSAA3071-week5-candidate-v31-dev-plan/"
+    "prompts/grade_candidate_v3_2_strict_schema.txt"
+)
+RUBRIC_V2 = Path("experiments/records/DSAA3071-week5-prep/rubric_v2.json")
 SKILL = Path(".agents/skills/grade-homework/SKILL.md")
 REFERENCE = Path(".agents/skills/grade-homework/references/grading-prompt.md")
 CLAUDE_SKILL = Path(".claude/skills/grade-homework/SKILL.md")
@@ -227,6 +233,83 @@ class CandidateV3AssetTests(unittest.TestCase):
         )
 
         self.assertEqual(strict, generic)
+
+    def test_candidate_v32_official_style_tolerance_rule_is_present(self):
+        required = (
+            "official-style adequacy",
+            "not ideal-answer completeness",
+            "avoid being overly harsh",
+            "missing ideal detail",
+            "visible misconception",
+            "large deductions only for material errors",
+        )
+        expected = (
+            PROMPT_V32,
+            STRICT_SNAPSHOT_V32,
+            SKILL,
+            REFERENCE,
+        )
+
+        for path in expected:
+            with self.subTest(path=path):
+                text = path.read_text(encoding="utf-8")
+                for phrase in required:
+                    self.assertIn(phrase, text)
+
+    def test_candidate_v32_targeted_q7_q8_q9_rules_are_present(self):
+        required = (
+            "Q7 proof-locality",
+            "preserve construction credit",
+            "local nonmembership or rejection mistake",
+            "Q8 enumerator policy",
+            "2n versus 2^n",
+            "invalid extra outputs",
+            "Q9 conceptual essay policy",
+            "broad valid evidence",
+            "Church-Turing thesis",
+        )
+        expected = (
+            PROMPT_V32,
+            STRICT_SNAPSHOT_V32,
+            SKILL,
+            REFERENCE,
+        )
+
+        for path in expected:
+            with self.subTest(path=path):
+                text = path.read_text(encoding="utf-8")
+                for phrase in required:
+                    self.assertIn(phrase, text)
+
+    def test_candidate_v32_strict_prompt_preserves_generic_algorithm_verbatim(self):
+        generic = _markdown_section(
+            PROMPT_V32.read_text(encoding="utf-8"),
+            "Candidate-v3.2 grading algorithm",
+        )
+        strict = _markdown_section(
+            STRICT_SNAPSHOT_V32.read_text(encoding="utf-8"),
+            "Candidate-v3.2 grading algorithm",
+        )
+
+        self.assertEqual(strict, generic)
+
+    def test_dsaa3071_rubric_v2_contains_targeted_q7_q8_q9_calibration(self):
+        text = RUBRIC_V2.read_text(encoding="utf-8")
+
+        required = (
+            "official_style_tolerance",
+            "proof_locality_calibration",
+            "preserve construction credit",
+            "invalid extra outputs",
+            "linear_even_lengths",
+            "conceptual_essay_calibration",
+            "broad valid evidence",
+            "avoid being overly harsh",
+        )
+
+        for phrase in required:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
 
 
 if __name__ == "__main__":

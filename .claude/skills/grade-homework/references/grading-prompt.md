@@ -17,7 +17,7 @@ Confirm this table with the teacher before grading. Do not change question IDs,
 max scores, or increments in the middle of a run. If the rubric is incomplete,
 stop and ask.
 
-## Candidate-v3.1 evidence-first scoring
+## Candidate-v3.2 evidence-first scoring
 
 For each student and question, write the evidence before the score:
 
@@ -73,6 +73,29 @@ essay questions: score whether the answer satisfies the task requirement. Use
 the standard answer as an anchor, not as an exhaustive whitelist. Award credit
 for valid, relevant, non-contradictory approaches, examples, or constructions
 that answer the prompt, even when they are not listed in the expected answer or semantic equivalents.
+
+Apply official-style adequacy and avoid being overly harsh. Grade for
+official-style adequacy, not ideal-answer completeness. Preserve reasonable
+partial credit for demonstrated understanding even when terminology, ordering,
+or detail is imperfect. Distinguish missing ideal detail from a visible misconception.
+Apply large deductions only for material errors, contradictions,
+wrong language/output behavior, or missing required answer behavior.
+
+Apply these targeted Candidate v3.2 calibration rules when the matching task is
+present:
+
+- Q7 proof-locality: preserve construction credit for each correctly
+  demonstrated proof direction. A local nonmembership or rejection mistake
+  should reduce the affected correctness element but should not erase unrelated
+  construction credit unless it invalidates the whole proof direction.
+- Q8 enumerator policy: first determine the actual output language. Separate 2n versus 2^n,
+  invalid extra outputs, wrong base cases, and vague loop
+  mechanisms. A correct power-of-two sequence with a minor extra-output or
+  base-case issue should receive partial credit; linear even lengths are not a
+  correct enumerator for the target power-of-two language.
+- Q9 conceptual essay policy: score broad valid evidence for the Church-Turing thesis
+  when it is relevant, non-contradictory, and supports effective
+  computability, even if it does not name the exact reference families.
 
 Apply these explicit question-type rules:
 
@@ -133,7 +156,8 @@ Before writing output, revisit the source page for every item with:
 
 Also check missed semantic equivalents, missed keyword credit, duplicate credit,
 keyword misuse, score-band consistency, score increments, material-error caps,
-local contradictions, indirect constructions, open-ended adequacy, and arithmetic. The
+local contradictions, indirect constructions, open-ended adequacy,
+official-style adequacy, and arithmetic. The
 `confidence` field must be exactly `high`, `medium`, or `low`, and the exact
 total must be recomputed from itemized scores.
 

@@ -319,6 +319,46 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("open-ended adequacy", note)
         self.assertIn("not as an exhaustive whitelist", note)
 
+    def test_dsaa3071_candidate_v32_dev_record_is_ready_without_model_calls(self):
+        record_dir = Path("experiments/records/DSAA3071-week5-candidate-v31-dev-plan")
+        plan = json.loads(
+            (record_dir / "ablation-plan-c32.json").read_text(encoding="utf-8")
+        )
+        readiness = json.loads(
+            (record_dir / "ablation-readiness-c32.json").read_text(encoding="utf-8")
+        )
+        protocol = (record_dir / "RUN-PROTOCOL-C32.md").read_text(encoding="utf-8")
+
+        self.assertEqual(plan["conditions"], ["B0", "R1", "C32-v3.2-rubric-v2"])
+        self.assertEqual(plan["model_calls"], 0)
+        self.assertEqual(plan["model_run_status"], "not_started")
+        self.assertEqual(plan["calibration_scope"], "Q7_Q8_Q9_dev_only")
+        self.assertEqual(
+            plan["controlled_differences"],
+            {
+                "B0_R1": "rubric only; prompt and skill must match",
+                "R1_C32-v3.2-rubric-v2": "rubric, prompt, and skill jointly differ by design",
+            },
+        )
+        self.assertEqual(set(plan["packets"]), {"B0", "R1", "C32-v3.2-rubric-v2"})
+        self.assertEqual(
+            plan["packets"]["C32-v3.2-rubric-v2"]["skill_version_id"],
+            "skill_candidate_v3_2",
+        )
+        self.assertEqual(
+            plan["packets"]["C32-v3.2-rubric-v2"]["rubric_path"],
+            "experiments/records/DSAA3071-week5-prep/rubric_v2.json",
+        )
+        self.assertEqual(readiness["status"], "ready")
+        self.assertEqual(readiness["failed_checks"], [])
+        self.assertEqual(readiness["legacy_gate_expected_failure"], "r1_c3_rubric_matches")
+        self.assertEqual(readiness["model_run_status"], "not_started")
+        self.assertIn("C32-dev-reviewed-r1", protocol)
+        self.assertIn("Windows PowerShell", protocol)
+        self.assertIn("macOS/Linux", protocol)
+        self.assertIn("Read-Host \"DeepSeek API key\" -AsSecureString", protocol)
+        self.assertNotIn("DEEPSEEK_API_KEY=sk-", protocol)
+
     def test_dsaa3071_candidate_v3_dev_metrics_record_summarizes_passed_runs(self):
         record_dir = Path("experiments/records/DSAA3071-week5-candidate-v3-dev-plan")
         metrics = json.loads(

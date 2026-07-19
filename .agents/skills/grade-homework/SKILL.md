@@ -64,7 +64,7 @@ Skill root: the directory containing this `SKILL.md`. Resolve scripts and
 references relative to that directory; do not assume a Claude- or Codex-specific
 home path.
 
-### Candidate v3.1 grading contract
+### Candidate v3.2 grading contract
 
 Grade from visible evidence, not from assumed intent. For every scored question,
 first record the visible equation, statement, diagram feature, answer text, or
@@ -118,6 +118,28 @@ construction, and essay questions, score whether the answer satisfies the task r
 Use the standard answer as an anchor, not as an exhaustive whitelist. Award
 credit for valid, relevant, non-contradictory approaches, examples, or
 constructions that answer the prompt, even when they are not listed in the expected answer or semantic equivalents.
+
+Candidate v3.2 adds official-style adequacy: grade for official-style adequacy,
+not ideal-answer completeness, and avoid being overly harsh. Preserve reasonable
+partial credit for demonstrated understanding even when terminology, ordering,
+or detail is imperfect. Distinguish missing ideal detail from a visible misconception.
+Apply large deductions only for material errors, contradictions,
+wrong language/output behavior, or missing required answer behavior.
+
+Candidate v3.2 also adds targeted calibration rules:
+
+- Q7 proof-locality: preserve construction credit for each correctly
+  demonstrated proof direction. A local nonmembership or rejection mistake
+  should reduce the affected correctness element but should not erase unrelated
+  construction credit unless it invalidates the whole proof direction.
+- Q8 enumerator policy: first determine the actual output language. Separate 2n versus 2^n,
+  invalid extra outputs, wrong base cases, and vague loop
+  mechanisms. A correct power-of-two sequence with a minor extra-output or
+  base-case issue should receive partial credit; linear even lengths are not a
+  correct enumerator for the target power-of-two language.
+- Q9 conceptual essay policy: score broad valid evidence for the Church-Turing thesis
+  when it is relevant, non-contradictory, and supports effective
+  computability, even if it does not name the exact reference families.
 
 Apply these explicit question-type rules:
 
@@ -229,9 +251,10 @@ For each student (in alphabetical order unless the user specifies otherwise):
 
 5. Run a **second-pass** review for every low-confidence item, unreadable region,
    blank or apparently missing answer, total mismatch, and high-impact
-   deduction. Also check missed semantic equivalents, missed keyword credit,
-   duplicate credit, keyword misuse, score-band consistency, material-error
-   caps, local contradictions, indirect constructions, open-ended adequacy, and arithmetic.
+  deduction. Also check missed semantic equivalents, missed keyword credit,
+  duplicate credit, keyword misuse, score-band consistency, material-error
+  caps, local contradictions, indirect constructions, open-ended adequacy,
+  official-style adequacy, and arithmetic.
    The second pass must revisit the source image and evidence, not merely repeat
    the first score.
 

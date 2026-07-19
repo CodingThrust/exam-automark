@@ -75,3 +75,46 @@ After the recovery run passes, combine the 3 successful outputs from the
 original partial run with the 4 outputs from the recovery run for development
 metrics. Do not make held-out or final accuracy claims from this development
 record.
+
+## Recovery 1 Result
+
+`deepseek-C31-r2-text-dev-reviewed-r1-recovery1` also failed because all 4
+students hit provider/network errors. No model JSON output was produced for any
+student in this recovery run.
+
+Failed:
+
+- `S015`: `APIConnectionError`, 5 attempts
+- `S020`: `APIConnectionError`, 5 attempts
+- `S016`: `APITimeoutError`, 5 attempts
+- `S022`: `APIConnectionError`, 5 attempts
+
+This second failure confirms that the blocker is external API connectivity or
+timeout behavior, not prompt schema validation. The next attempt should reuse
+the same recovery packet and write to a fresh output directory, preferably after
+waiting for the public API connection to stabilize.
+
+## Windows PowerShell Recovery 2 Command
+
+```powershell
+$secure = Read-Host "DeepSeek API key" -AsSecureString
+$bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+try {
+  $env:DEEPSEEK_API_KEY = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
+  $runCommit = git rev-parse --short HEAD
+
+  python -m benchmark.core.cli run-model-packet `
+    --provider deepseek --model deepseek-v4-pro --input-mode text-only `
+    --packet Data\DSAA3071\week5-benchmark-redaction-v3\text_grading_packets\DSAA3071-week5-C3-v31-reviewed-dev\C3-dev-reviewed-v31-r2-recovery1 `
+    --output Data\DSAA3071\week5-benchmark-redaction-v3\runs\deepseek-C31-r2-text-dev-reviewed-r1-recovery2 `
+    --max-retries 6 --run-commit $runCommit
+  $recovery = $LASTEXITCODE
+
+  "C31-r2 recovery2 exit=$recovery"
+} finally {
+  if ($bstr -ne [IntPtr]::Zero) {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+  }
+  Remove-Item Env:DEEPSEEK_API_KEY -ErrorAction SilentlyContinue
+}
+```

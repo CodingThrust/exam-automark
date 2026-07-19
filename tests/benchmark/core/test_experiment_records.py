@@ -548,11 +548,13 @@ class ExperimentRecordFileTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertEqual(summary["report_type"], "physics_week9_model_benchmark_v0")
+        self.assertEqual(summary["report_type"], "physics_week9_model_benchmark_v1")
         self.assertEqual(summary["course_id"], "physics")
         self.assertEqual(summary["assessment_id"], "week9")
         self.assertEqual(summary["current_answer"]["meets_good_enough_bar"], True)
-        self.assertIn("DeepSeek public API", summary["current_answer"]["best_supported_condition"])
+        self.assertIn(
+            "Codex CLI", summary["current_answer"]["best_supported_condition"]
+        )
         self.assertEqual(
             summary["evidence"]["deepseek_public_api_held_out"]["validation_status"],
             "passed",
@@ -568,18 +570,35 @@ class ExperimentRecordFileTests(unittest.TestCase):
             0,
         )
         self.assertEqual(
-            summary["evidence"]["codex_cli_dev"]["good_enough_assessment"],
-            "development_only_directional_not_eligible_for_held_out_bar",
+            summary["evidence"]["codex_cli_held_out"]["validation_status"],
+            "passed",
+        )
+        self.assertEqual(summary["evidence"]["codex_cli_held_out"]["students"], 18)
+        self.assertGreater(
+            summary["evidence"]["codex_cli_held_out"][
+                "candidate_v2_minus_baseline"
+            ]["exact_agreement"],
+            0,
+        )
+        self.assertGreater(
+            summary["evidence"]["codex_cli_held_out"]["candidate_v2"][
+                "exact_agreement"
+            ],
+            summary["evidence"]["deepseek_public_api_held_out"]["candidate_v2"][
+                "exact_agreement"
+            ],
         )
         self.assertEqual(
             summary["evidence"]["claude_code_headless"]["validation_status"],
             "not_run",
         )
         self.assertFalse(summary["privacy"]["raw_student_data_tracked"])
-        self.assertIn("DeepSeek public API + candidate-v2", report)
-        self.assertIn("Codex CLI has encouraging development-split evidence", report)
+        self.assertIn("Codex CLI + candidate-v2", report)
+        self.assertIn("0.8981", report)
+        self.assertIn("Held-Out Provider Comparison", report)
+        self.assertIn("DeepSeek public API", report)
         self.assertIn("Claude Code is not evaluated yet", report)
-        self.assertIn("Run Codex CLI baseline and candidate-v2 on `G1-test-r1`", report)
+        self.assertIn("bootstrap interval", report)
         self.assertIn("codex-baseline-text-G1-test-r1", report)
         self.assertIn("codex-candidate-text-G1-test-r1", report)
         self.assertIn("codex-heldout-G1-baseline-vs-candidate.metrics.json", report)

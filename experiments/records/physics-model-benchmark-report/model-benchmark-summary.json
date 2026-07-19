@@ -1,0 +1,218 @@
+{
+  "report_type": "physics_week9_model_benchmark_v1",
+  "status": "codex_held_out_added",
+  "generated_at": "2026-07-19T23:01:42+08:00",
+  "record_commit": "780e75a",
+  "branch": "codex/physics-model-benchmark-report",
+  "course_id": "physics",
+  "assessment_id": "week9",
+  "input_mode": "text-only",
+  "skill_conditions": [
+    "baseline",
+    "candidate_v2"
+  ],
+  "good_enough_bar": {
+    "status": "provisional_pilot_bar",
+    "criteria": [
+      "All expected students pass schema validation.",
+      "Held-out exact agreement is at least 0.84.",
+      "Held-out exact agreement improves over the baseline under the same provider/model.",
+      "Held-out total-score MAE is at most 2.10 and improves over the baseline.",
+      "Held-out within-1-point rate is at least 0.50.",
+      "Severe-error rate must be reported and must not worsen; production use requires further severe-error reduction."
+    ]
+  },
+  "evidence": {
+    "deepseek_public_api_dev": {
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "split": "development",
+      "students": 8,
+      "score_rows": 96,
+      "validation_status": "passed",
+      "source_metrics": "Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/dev-metrics-strict-schema.json",
+      "committed_record": "experiments/records/physics-week9-baseline-candidate-v2-run/DEV-METRICS-STRICT-SCHEMA.md",
+      "baseline": {
+        "exact_agreement": 0.7916666666666666,
+        "subquestion_mae": 0.22135416666666666,
+        "total_score_mae": 2.15625,
+        "within_1_point_rate": 0.375,
+        "severe_error_rate": 0.375,
+        "macro_accuracy": 0.7916666666666666
+      },
+      "candidate_v2": {
+        "exact_agreement": 0.8541666666666666,
+        "subquestion_mae": 0.10416666666666667,
+        "total_score_mae": 0.75,
+        "within_1_point_rate": 0.75,
+        "severe_error_rate": 0.125,
+        "macro_accuracy": 0.8541666666666666
+      },
+      "candidate_v2_minus_baseline": {
+        "exact_agreement": 0.0625,
+        "subquestion_mae": -0.1171875,
+        "total_score_mae": -1.40625,
+        "within_1_point_rate": 0.375,
+        "severe_error_rate": -0.25,
+        "macro_accuracy": 0.0625
+      }
+    },
+    "deepseek_public_api_held_out": {
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "split": "held_out_test",
+      "students": 18,
+      "score_rows": 216,
+      "validation_status": "passed",
+      "source_metrics": "Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/held-out-metrics-strict-schema.json",
+      "committed_record": "experiments/records/physics-week9-baseline-candidate-v2-run/HELD-OUT-METRICS-STRICT-SCHEMA.md",
+      "run_commit": "9cce18378abb19d817040cb56599457108d7d575",
+      "baseline": {
+        "exact_agreement": 0.8101851851851852,
+        "subquestion_mae": 0.20023148148148148,
+        "total_score_mae": 2.263888888888889,
+        "within_1_point_rate": 0.3333333333333333,
+        "severe_error_rate": 0.4444444444444444,
+        "macro_accuracy": 0.8101851851851851
+      },
+      "candidate_v2": {
+        "exact_agreement": 0.8425925925925926,
+        "subquestion_mae": 0.18518518518518517,
+        "total_score_mae": 2.0833333333333335,
+        "within_1_point_rate": 0.5,
+        "severe_error_rate": 0.4444444444444444,
+        "macro_accuracy": 0.8425925925925926
+      },
+      "candidate_v2_minus_baseline": {
+        "exact_agreement": 0.03240740740740744,
+        "subquestion_mae": -0.015046296296296307,
+        "total_score_mae": -0.18055555555555536,
+        "within_1_point_rate": 0.16666666666666669,
+        "severe_error_rate": 0.0,
+        "macro_accuracy": 0.03240740740740744
+      },
+      "bootstrap_exact_agreement_candidate_minus_baseline": {
+        "mean_difference": 0.0324074074074074,
+        "lower": 0.004629629629629632,
+        "upper": 0.06018518518518517
+      },
+      "good_enough_assessment": "candidate_v2_meets_provisional_pilot_bar_with_severe_error_caveat"
+    },
+    "codex_cli_dev": {
+      "provider": "codex_cli",
+      "engine": "codex",
+      "model": "gpt-5.5",
+      "split": "development",
+      "students": 8,
+      "score_rows": 96,
+      "validation_status": "passed",
+      "source_metrics": "Data/physics/benchmark/runs/physics-week9-codex-headless/codex-dev-G1-baseline-vs-candidate-argfix.metrics.json",
+      "committed_record": "experiments/records/physics-week9-codex-headless-run/DEV-METRICS-CODEX-ARGFIX.md",
+      "run_commit": "0b38ebd",
+      "baseline": {
+        "exact_agreement": 0.875,
+        "subquestion_mae": 0.09895833333333333,
+        "total_score_mae": 0.4375,
+        "within_1_point_rate": 0.875,
+        "severe_error_rate": 0.125,
+        "macro_accuracy": 0.875
+      },
+      "candidate_v2": {
+        "exact_agreement": 0.8958333333333334,
+        "subquestion_mae": 0.08072916666666667,
+        "total_score_mae": 0.59375,
+        "within_1_point_rate": 0.875,
+        "severe_error_rate": 0.125,
+        "macro_accuracy": 0.8958333333333334
+      },
+      "candidate_v2_minus_baseline": {
+        "exact_agreement": 0.02083333333333337,
+        "subquestion_mae": -0.018229166666666657,
+        "total_score_mae": 0.15625,
+        "within_1_point_rate": 0.0,
+        "severe_error_rate": 0.0,
+        "macro_accuracy": 0.02083333333333337
+      },
+      "good_enough_assessment": "development_only_directional"
+    },
+    "codex_cli_held_out": {
+      "provider": "codex_cli",
+      "engine": "codex",
+      "model": "gpt-5.5",
+      "split": "held_out_test",
+      "students": 18,
+      "score_rows": 216,
+      "validation_status": "passed",
+      "source_metrics": "Data/physics/benchmark/runs/physics-week9-codex-headless/codex-heldout-G1-baseline-vs-candidate.metrics.json",
+      "run_commit": "780e75a",
+      "engine_version": "codex-cli 0.133.0",
+      "baseline": {
+        "exact_agreement": 0.8657407407407407,
+        "subquestion_mae": 0.1261574074074074,
+        "total_score_mae": 1.3194444444444444,
+        "within_1_point_rate": 0.6666666666666666,
+        "severe_error_rate": 0.3333333333333333,
+        "macro_accuracy": 0.8657407407407408
+      },
+      "candidate_v2": {
+        "exact_agreement": 0.8981481481481481,
+        "subquestion_mae": 0.09953703703703703,
+        "total_score_mae": 1.0833333333333333,
+        "within_1_point_rate": 0.6666666666666666,
+        "severe_error_rate": 0.3333333333333333,
+        "macro_accuracy": 0.898148148148148
+      },
+      "candidate_v2_minus_baseline": {
+        "exact_agreement": 0.03240740740740744,
+        "subquestion_mae": -0.026620370370370378,
+        "total_score_mae": -0.23611111111111116,
+        "within_1_point_rate": 0.0,
+        "severe_error_rate": 0.0,
+        "macro_accuracy": 0.03240740740740722
+      },
+      "candidate_v2_minus_deepseek_candidate_v2": {
+        "exact_agreement": 0.05555555555555547,
+        "subquestion_mae": -0.08564814814814814,
+        "total_score_mae": -1.0,
+        "within_1_point_rate": 0.16666666666666663,
+        "severe_error_rate": -0.1111111111111111,
+        "macro_accuracy": 0.05555555555555536
+      },
+      "bootstrap_exact_agreement_candidate_minus_baseline": {
+        "mean_difference": 0.03240740740740741,
+        "lower": -0.004629629629629632,
+        "upper": 0.08333333333333333
+      },
+      "good_enough_assessment": "candidate_v2_meets_provisional_pilot_bar_with_severe_error_caveat"
+    },
+    "claude_code_headless": {
+      "provider": "claude_cli",
+      "model": "claude-sonnet-4-20250514",
+      "split": "not_run",
+      "validation_status": "not_run",
+      "committed_reproduction_guide": "experiments/records/Codex-CLI-headless-mode/CLAUDE-CODE-REPRODUCTION.md",
+      "good_enough_assessment": "not_evaluated"
+    }
+  },
+  "current_answer": {
+    "best_supported_condition": "Codex CLI + candidate_v2 on the held-out physics Week 9 text-only split",
+    "meets_good_enough_bar": true,
+    "caveat": "Codex CLI candidate-v2 has the best held-out aggregate metrics among completed providers, but its severe-error rate remains 0.3333 and its paired bootstrap interval for improvement over Codex baseline includes 0.",
+    "not_yet_comparable": [
+      "Claude Code has a reproduction path but no real model run.",
+      "No multimodal model comparison has been run.",
+      "Codex CLI uses external ChatGPT/Codex account routing, so hidden system behavior and usage accounting differ from DeepSeek public API."
+    ]
+  },
+  "next_required_runs": [
+    "Run Claude Code baseline and candidate-v2 on G1-dev-r1.",
+    "If Claude dev validation passes, run Claude Code on G1-test-r1.",
+    "Generate a final cross-provider report only after each provider has the same split, packet hashes, prompt hashes, rubric hash, and validation status.",
+    "Investigate severe-error cases before making an operational grading claim."
+  ],
+  "privacy": {
+    "raw_student_data_tracked": false,
+    "raw_model_responses_tracked": false,
+    "tracked_record_contains_aggregate_metrics_only": true
+  }
+}

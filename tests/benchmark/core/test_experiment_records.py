@@ -539,6 +539,71 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("aggregate metrics", markdown)
         self.assertIn("DeepSeek-vs-Codex", markdown)
 
+    def test_physics_model_benchmark_report_summarizes_available_evidence(self):
+        record_dir = Path("experiments/records/physics-model-benchmark-report")
+        summary = json.loads(
+            (record_dir / "model-benchmark-summary.json").read_text(encoding="utf-8")
+        )
+        report = (record_dir / "MODEL-BENCHMARK-REPORT.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertEqual(summary["report_type"], "physics_week9_model_benchmark_v1")
+        self.assertEqual(summary["course_id"], "physics")
+        self.assertEqual(summary["assessment_id"], "week9")
+        self.assertEqual(summary["current_answer"]["meets_good_enough_bar"], True)
+        self.assertIn(
+            "Codex CLI", summary["current_answer"]["best_supported_condition"]
+        )
+        self.assertEqual(
+            summary["evidence"]["deepseek_public_api_held_out"]["validation_status"],
+            "passed",
+        )
+        self.assertEqual(
+            summary["evidence"]["deepseek_public_api_held_out"]["students"],
+            18,
+        )
+        self.assertGreater(
+            summary["evidence"]["deepseek_public_api_held_out"][
+                "candidate_v2_minus_baseline"
+            ]["exact_agreement"],
+            0,
+        )
+        self.assertEqual(
+            summary["evidence"]["codex_cli_held_out"]["validation_status"],
+            "passed",
+        )
+        self.assertEqual(summary["evidence"]["codex_cli_held_out"]["students"], 18)
+        self.assertGreater(
+            summary["evidence"]["codex_cli_held_out"][
+                "candidate_v2_minus_baseline"
+            ]["exact_agreement"],
+            0,
+        )
+        self.assertGreater(
+            summary["evidence"]["codex_cli_held_out"]["candidate_v2"][
+                "exact_agreement"
+            ],
+            summary["evidence"]["deepseek_public_api_held_out"]["candidate_v2"][
+                "exact_agreement"
+            ],
+        )
+        self.assertEqual(
+            summary["evidence"]["claude_code_headless"]["validation_status"],
+            "not_run",
+        )
+        self.assertFalse(summary["privacy"]["raw_student_data_tracked"])
+        self.assertIn("Codex CLI + candidate-v2", report)
+        self.assertIn("0.8981", report)
+        self.assertIn("Held-Out Provider Comparison", report)
+        self.assertIn("DeepSeek public API", report)
+        self.assertIn("Claude Code is not evaluated yet", report)
+        self.assertIn("bootstrap interval", report)
+        self.assertIn("codex-baseline-text-G1-test-r1", report)
+        self.assertIn("codex-candidate-text-G1-test-r1", report)
+        self.assertIn("codex-heldout-G1-baseline-vs-candidate.metrics.json", report)
+        self.assertIn("Raw student transcripts", report)
+
     def test_dsaa3071_w2_w6_source_inventory_records_private_pdf_pairs(self):
         record_dir = Path("experiments/records/DSAA3071-w2-w6-source-inventory")
         inventory = json.loads(

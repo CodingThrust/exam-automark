@@ -111,7 +111,7 @@ Equivalent direct Codex command shape used internally for each student:
 ```powershell
 codex.cmd exec --json --output-last-message <last-message-file> `
   --output-schema <packet>\output.schema.json `
-  --sandbox read-only --ask-for-approval never `
+  --sandbox read-only `
   --cd <packet> --model gpt-5.6-codex -
 ```
 
@@ -137,7 +137,7 @@ Equivalent direct command shape:
 ```bash
 codex exec --json --output-last-message <last-message-file> \
   --output-schema <packet>/output.schema.json \
-  --sandbox read-only --ask-for-approval never \
+  --sandbox read-only \
   --cd <packet> --model gpt-5.6-codex -
 ```
 

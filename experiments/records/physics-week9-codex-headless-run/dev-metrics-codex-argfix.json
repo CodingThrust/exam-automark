@@ -1,0 +1,94 @@
+{
+  "report_type": "physics_week9_codex_headless_dev_metrics",
+  "status": "dev_run_completed",
+  "generated_at": "2026-07-19T11:54:08.549464Z",
+  "course_id": "physics",
+  "assessment_id": "week9",
+  "split": "development",
+  "provider": "codex_cli",
+  "engine": "codex",
+  "model": "gpt-5.5",
+  "engine_version": "codex-cli 0.133.0",
+  "run_commit": "0b38ebd",
+  "student_count": 8,
+  "score_count": 96,
+  "runs": {
+    "baseline": {
+      "output": "Data/physics/benchmark/runs/physics-week9-codex-headless/codex-baseline-text-G1-dev-r1-argfix",
+      "validation_status": "passed",
+      "students_expected": 8,
+      "students_passed": 8,
+      "packet_hash": "e556b8f12cc32e975c6a27545efeddb2891cb85fa6d3060f57dec3d6abf92601",
+      "prompt_hash": "8fe0b9bb69d56109b2bbecfcdd6ca05ebe2ae9dff76efe610ecfde0d831cfa5e",
+      "rubric_hash": "a02e0531b3d78590c66d32e76eba170d2e0400e3e4a1c60436f4f5c2c8e93b21",
+      "skill_version_id": "skill_baseline_v1",
+      "command": "python -m benchmark.core.cli run-headless-packet --engine codex --model gpt-5.5 --input-mode text-only --packet Data/physics/benchmark/text_packets/physics-week9-baseline-text-strict-schema/G1-dev-r1 --output Data/physics/benchmark/runs/physics-week9-codex-headless/codex-baseline-text-G1-dev-r1-argfix --max-retries 2 --run-commit 0b38ebd"
+    },
+    "candidate_v2": {
+      "output": "Data/physics/benchmark/runs/physics-week9-codex-headless/codex-candidate-text-G1-dev-r1-argfix",
+      "validation_status": "passed",
+      "students_expected": 8,
+      "students_passed": 8,
+      "packet_hash": "8987ce06f54a46ba242703df0d028ffb8de56143a00a312b289e1f39fc7aed6d",
+      "prompt_hash": "1eb905236e6f4e4623399e4dc5cd77b80c69fa7a5ea3a2d6a2777f2dcc902c3f",
+      "rubric_hash": "a02e0531b3d78590c66d32e76eba170d2e0400e3e4a1c60436f4f5c2c8e93b21",
+      "skill_version_id": "skill_candidate_v2",
+      "command": "python -m benchmark.core.cli run-headless-packet --engine codex --model gpt-5.5 --input-mode text-only --packet Data/physics/benchmark/text_packets/physics-week9-candidate-v2-text-strict-schema/G1-dev-r1 --output Data/physics/benchmark/runs/physics-week9-codex-headless/codex-candidate-text-G1-dev-r1-argfix --max-retries 2 --run-commit 0b38ebd"
+    }
+  },
+  "metrics": {
+    "baseline": {
+      "exact_agreement": 0.875,
+      "subquestion_mae": 0.09895833333333333,
+      "total_score_mae": 0.4375,
+      "within_1_point_rate": 0.875,
+      "severe_error_rate": 0.125,
+      "mean_signed_error": -0.036458333333333336,
+      "macro_accuracy": 0.875
+    },
+    "candidate_v2": {
+      "exact_agreement": 0.8958333333333334,
+      "subquestion_mae": 0.08072916666666667,
+      "total_score_mae": 0.59375,
+      "within_1_point_rate": 0.875,
+      "severe_error_rate": 0.125,
+      "mean_signed_error": -0.018229166666666668,
+      "macro_accuracy": 0.8958333333333334
+    },
+    "candidate_v2_minus_baseline": {
+      "exact_agreement": 0.02083333333333337,
+      "subquestion_mae": -0.018229166666666657,
+      "total_score_mae": 0.15625,
+      "within_1_point_rate": 0.0,
+      "severe_error_rate": 0.0,
+      "mean_signed_error": 0.018229166666666668,
+      "macro_accuracy": 0.02083333333333337
+    },
+    "bootstrap": {
+      "seed": 20260701,
+      "samples": 10000,
+      "exact_agreement_candidate_minus_baseline": {
+        "mean_difference": 0.02083333333333333,
+        "lower": 0.0,
+        "upper": 0.0520833333333333
+      }
+    }
+  },
+  "interpretation": [
+    "Both Codex CLI dev runs passed schema validation after removing the unsupported --ask-for-approval argument.",
+    "Candidate-v2 improved exact agreement and macro accuracy by 0.0208 on the 8-student development split.",
+    "Candidate-v2 reduced subquestion MAE by 0.0182 but increased total-score MAE by 0.1562.",
+    "Severe error rate and within-1-point rate were unchanged."
+  ],
+  "limitations": [
+    "This is a development split result, not a held-out test result.",
+    "The sample contains 8 students and 96 score rows, so the result should be treated as directional evidence.",
+    "This record compares Codex CLI baseline versus Codex CLI candidate-v2 only; it does not yet provide a full multi-model benchmark.",
+    "Data/ run directories remain ignored and are not tracked in Git."
+  ],
+  "privacy": {
+    "raw_student_transcripts_tracked": false,
+    "raw_model_responses_tracked": false,
+    "tracked_record_contains_aggregate_metrics_only": true
+  }
+}

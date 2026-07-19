@@ -24,6 +24,18 @@ IMAGE_OR_DOCUMENT_SUFFIXES = {
     ".webp",
 }
 TEXT_SUFFIXES = {".csv", ".json", ".md", ".text", ".txt"}
+OPENAI_COMPATIBLE_PROVIDERS = {
+    "deepseek": {
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "default_endpoint": "https://api.deepseek.com",
+        "display_name": "DeepSeek",
+    },
+    "kimi": {
+        "api_key_env": "MOONSHOT_API_KEY",
+        "default_endpoint": "https://api.moonshot.ai/v1",
+        "display_name": "Kimi",
+    },
+}
 
 
 @dataclass(frozen=True)
@@ -37,7 +49,7 @@ class ModelPacketRunConfig:
     top_p: float | None = None
     max_tokens: int | None = None
     response_format: str = "json_object"
-    endpoint: str = "https://api.deepseek.com"
+    endpoint: str | None = None
     max_retries: int = 0
     dry_run: bool = False
     command_argv: tuple[str, ...] = ()
@@ -68,10 +80,10 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
     output = config.output
     if output.exists():
         raise FileExistsError(f"run output already exists: {output}")
-    if config.provider != "deepseek":
+    if config.provider not in OPENAI_COMPATIBLE_PROVIDERS:
         raise ValueError(f"unsupported provider: {config.provider}")
     if config.input_mode != "text-only":
-        raise ValueError("only --input-mode text-only is supported for DeepSeek")
+        raise ValueError("only --input-mode text-only is supported for model packet runs")
     if config.max_retries < 0:
         raise ValueError("--max-retries must be non-negative")
 
@@ -148,9 +160,12 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
 def _provider_from_config(config: ModelPacketRunConfig) -> TextModelProvider:
     if config.dry_run:
         return DryRunTextProvider(config.model)
-    return DeepSeekTextProvider(
+    settings = _provider_settings(config.provider)
+    return OpenAICompatibleTextProvider(
         model=config.model,
-        endpoint=config.endpoint,
+        endpoint=_provider_endpoint(config),
+        api_key_env=settings["api_key_env"],
+        display_name=settings["display_name"],
         temperature=config.temperature,
         top_p=config.top_p,
         max_tokens=config.max_tokens,
@@ -191,12 +206,14 @@ class DryRunTextProvider:
         )
 
 
-class DeepSeekTextProvider:
+class OpenAICompatibleTextProvider:
     def __init__(
         self,
         *,
         model: str,
         endpoint: str,
+        api_key_env: str,
+        display_name: str,
         temperature: float | None,
         top_p: float | None,
         max_tokens: int | None,
@@ -204,6 +221,8 @@ class DeepSeekTextProvider:
     ):
         self.model = model
         self.endpoint = endpoint
+        self.api_key_env = api_key_env
+        self.display_name = display_name
         self.temperature = temperature
         self.top_p = top_p
         self.max_tokens = max_tokens
@@ -216,9 +235,11 @@ class DeepSeekTextProvider:
         student_id: str,
         course: CourseSpec,
     ) -> ModelProviderResult:
-        api_key = os.environ.get("DEEPSEEK_API_KEY")
+        api_key = os.environ.get(self.api_key_env)
         if not api_key:
-            raise ValueError("DEEPSEEK_API_KEY is required for non-dry DeepSeek runs")
+            raise ValueError(
+                f"{self.api_key_env} is required for non-dry {self.display_name} runs"
+            )
         from openai import OpenAI
 
         client = OpenAI(api_key=api_key, base_url=self.endpoint)
@@ -435,7 +456,7 @@ def _metadata(
         "model": config.model,
         "dry_run": config.dry_run,
         "input_mode": config.input_mode,
-        "endpoint": config.endpoint,
+        "endpoint": _provider_endpoint(config),
         "temperature": config.temperature,
         "top_p": config.top_p,
         "max_tokens": config.max_tokens,
@@ -463,7 +484,9 @@ def _metadata(
         "text_source_hash": directory_digest(packet / "inputs"),
         "student_ids": list(manifest.get("student_ids", ())),
         "run_commit": config.run_commit or _git_commit(),
-        "api_key_source": "DEEPSEEK_API_KEY environment variable",
+        "api_key_source": (
+            f"{_provider_settings(config.provider)['api_key_env']} environment variable"
+        ),
         "cost_estimate": {
             "estimated": True,
             "currency": "USD",
@@ -494,6 +517,19 @@ def _write_command_records(output: Path, config: ModelPacketRunConfig) -> str:
     _write_json(output / "command.argv.json", argv)
     (output / "command.txt").write_text(command + "\n", encoding="utf-8", newline="\n")
     return command
+
+
+def _provider_settings(provider: str) -> dict[str, str]:
+    try:
+        return OPENAI_COMPATIBLE_PROVIDERS[provider]
+    except KeyError as error:
+        raise ValueError(f"unsupported provider: {provider}") from error
+
+
+def _provider_endpoint(config: ModelPacketRunConfig) -> str:
+    if config.endpoint:
+        return config.endpoint
+    return _provider_settings(config.provider)["default_endpoint"]
 
 
 def _parse_json_result(raw_text: str) -> dict[str, Any]:

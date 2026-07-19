@@ -604,6 +604,23 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("codex-heldout-G1-baseline-vs-candidate.metrics.json", report)
         self.assertIn("Raw student transcripts", report)
 
+    def test_physics_kimi_benchmark_protocol_records_reproducible_commands(self):
+        protocol = Path(
+            "experiments/records/physics-kimi-benchmark-run/RUN-PROTOCOL.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("kimi-k2.6", protocol)
+        self.assertIn("MOONSHOT_API_KEY", protocol)
+        self.assertIn("https://api.moonshot.ai/v1", protocol)
+        self.assertIn("--provider kimi", protocol)
+        self.assertIn("G1-dev-r1", protocol)
+        self.assertIn("G1-test-r1", protocol)
+        self.assertIn("kimi-heldout-G1-baseline-vs-candidate.metrics.json", protocol)
+        self.assertIn("Windows PowerShell", protocol)
+        self.assertIn("macOS/Linux", protocol)
+        self.assertIn("Raw student transcripts", protocol)
+        self.assertNotIn("MOONSHOT_API_KEY=sk-", protocol)
+
     def test_dsaa3071_w2_w6_source_inventory_records_private_pdf_pairs(self):
         record_dir = Path("experiments/records/DSAA3071-w2-w6-source-inventory")
         inventory = json.loads(

@@ -1,0 +1,94 @@
+{
+  "run_date": "2026-07-19",
+  "sci_brain_repo": "https://github.com/QuantumBFS/sci-brain",
+  "workflow": [
+    "survey",
+    "download-ref",
+    "survey-writer"
+  ],
+  "install": {
+    "repo_path": "C:\\Users\\\u8881\u7fca\\.codex\\skills\\sci-brain",
+    "python": "D:\\Miniforge\\python.exe",
+    "renderer_dependency": "pymupdf4llm 1.28.0"
+  },
+  "outputs": {
+    "knowledge_base": ".knowledge",
+    "bibtex_entries": 32,
+    "metadata_json": 32,
+    "downloaded_arxiv_pdfs": 32,
+    "rendered_markdown_files": 32,
+    "reports": [
+      "experiments/records/literature-surveys/skill_optimization_survey.typ",
+      "experiments/records/literature-surveys/skill_optimization_survey.pdf",
+      "experiments/records/literature-surveys/llm_grading_survey.typ",
+      "experiments/records/literature-surveys/llm_grading_survey.pdf"
+    ]
+  },
+  "notes": [
+    "No arXiv, Semantic Scholar, CrossRef, or Sci-Hub MCP server was detected in Codex.",
+    "The survey stage therefore used WebSearch-style discovery and visible arXiv IDs.",
+    "download-ref helpers are run from the installed sci-brain checkout to populate .knowledge metadata, PDFs, and rendered markdown where available.",
+    ".knowledge/.raw, .knowledge/.figures, and rendered paper markdown are local caches and are intentionally gitignored."
+  ],
+  "topics": [
+    {
+      "slug": "skill-optimization",
+      "title": "Optimizing skills - the automated approaches",
+      "strategies": [
+        "Landscape mapping",
+        "Cross-method",
+        "Historical lineage",
+        "Benchmarks and datasets"
+      ],
+      "arxiv": [
+        "2010.15980",
+        "2101.00190",
+        "2104.08691",
+        "2211.01910",
+        "2303.11366",
+        "2303.17651",
+        "2305.03495",
+        "2305.16291",
+        "2309.03409",
+        "2310.03714",
+        "2312.13382",
+        "2406.07496",
+        "2406.11695",
+        "2507.19457"
+      ],
+      "doi": []
+    },
+    {
+      "slug": "llm-grading",
+      "title": "Paper marking / exam marking / automated grading / LLM-based grading skills",
+      "strategies": [
+        "Landscape mapping",
+        "Historical lineage",
+        "Cross-vocabulary",
+        "Benchmarks and datasets",
+        "Negative results"
+      ],
+      "arxiv": [
+        "1807.10543",
+        "2204.03503",
+        "2205.04083",
+        "2303.16634",
+        "2305.17926",
+        "2306.05685",
+        "2307.05553",
+        "2309.11508",
+        "2310.18373",
+        "2403.06149",
+        "2404.04941",
+        "2406.16510",
+        "2407.12818",
+        "2409.18596",
+        "2410.02165",
+        "2411.05231",
+        "2603.13083",
+        "2605.19043"
+      ],
+      "doi": []
+    }
+  ]
+}

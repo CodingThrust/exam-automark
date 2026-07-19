@@ -477,6 +477,43 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("not an accuracy result", record)
         self.assertIn("No raw student transcript", record)
 
+    def test_physics_codex_headless_dev_metrics_records_passed_argfix_runs(self):
+        record_dir = Path("experiments/records/physics-week9-codex-headless-run")
+        metrics = json.loads(
+            (record_dir / "dev-metrics-codex-argfix.json").read_text(encoding="utf-8")
+        )
+        markdown = (record_dir / "DEV-METRICS-CODEX-ARGFIX.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertEqual(
+            metrics["report_type"],
+            "physics_week9_codex_headless_dev_metrics",
+        )
+        self.assertEqual(metrics["split"], "development")
+        self.assertEqual(metrics["provider"], "codex_cli")
+        self.assertEqual(metrics["model"], "gpt-5.5")
+        self.assertEqual(metrics["run_commit"], "0b38ebd")
+        self.assertEqual(set(metrics["runs"]), {"baseline", "candidate_v2"})
+        self.assertTrue(
+            all(run["validation_status"] == "passed" for run in metrics["runs"].values())
+        )
+        self.assertTrue(
+            all(run["students_passed"] == 8 for run in metrics["runs"].values())
+        )
+        self.assertGreater(
+            metrics["metrics"]["candidate_v2_minus_baseline"]["exact_agreement"],
+            0,
+        )
+        self.assertEqual(
+            metrics["metrics"]["candidate_v2_minus_baseline"]["severe_error_rate"],
+            0.0,
+        )
+        self.assertFalse(metrics["privacy"]["raw_student_transcripts_tracked"])
+        self.assertIn("not a held-out test result", markdown)
+        self.assertIn("aggregate metrics", markdown)
+        self.assertIn("DeepSeek-vs-Codex", markdown)
+
     def test_dsaa3071_w2_w6_source_inventory_records_private_pdf_pairs(self):
         record_dir = Path("experiments/records/DSAA3071-w2-w6-source-inventory")
         inventory = json.loads(

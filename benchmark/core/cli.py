@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from .gold import validate_gold_table, write_gold_report
+from .headless_runner import HeadlessPacketRunConfig, run_headless_packet
 from .inventory import write_data_inventory
 from .model_runner import ModelPacketRunConfig, run_model_packet
 from .comparisons import (
@@ -220,6 +221,24 @@ def _build_parser() -> argparse.ArgumentParser:
         "--dry-run",
         action="store_true",
         help="exercise packet IO and validation without calling the provider API",
+    )
+
+    headless = subparsers.add_parser(
+        "run-headless-packet",
+        help="run a text-only grading packet through a headless CLI",
+    )
+    headless.add_argument("--engine", choices=("codex", "claude"), required=True)
+    headless.add_argument("--model", required=True)
+    headless.add_argument("--input-mode", choices=("text-only",), required=True)
+    headless.add_argument("--packet", type=Path, required=True)
+    headless.add_argument("--output", type=Path, required=True)
+    headless.add_argument("--engine-bin")
+    headless.add_argument("--max-retries", type=int, default=0)
+    headless.add_argument("--run-commit")
+    headless.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="exercise packet IO and validation without calling the headless CLI",
     )
     return parser
 
@@ -483,6 +502,23 @@ def main(argv: Sequence[str] | None = None) -> int:
                     max_retries=args.max_retries,
                     response_format=args.response_format,
                     endpoint=args.endpoint,
+                    dry_run=args.dry_run,
+                    command_argv=raw_argv,
+                    run_commit=args.run_commit,
+                )
+            )
+            print(json.dumps(result, sort_keys=True))
+            return 0 if result["validation_status"] == "passed" else 1
+        if args.command == "run-headless-packet":
+            result = run_headless_packet(
+                HeadlessPacketRunConfig(
+                    engine=args.engine,
+                    model=args.model,
+                    input_mode=args.input_mode,
+                    packet=args.packet,
+                    output=args.output,
+                    engine_bin=args.engine_bin,
+                    max_retries=args.max_retries,
                     dry_run=args.dry_run,
                     command_argv=raw_argv,
                     run_commit=args.run_commit,

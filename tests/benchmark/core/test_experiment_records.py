@@ -444,6 +444,26 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("RUN-PROTOCOL-C32.md", note)
         self.assertIn("rubric_v2.json", note)
 
+    def test_codex_cli_headless_mode_record_has_prompt_script_and_protocol(self):
+        record_dir = Path("experiments/records/Codex-CLI-headless-mode")
+        protocol = (record_dir / "HEADLESS-RUN-PROTOCOL.md").read_text(
+            encoding="utf-8"
+        )
+        prompt = (record_dir / "headless-mode-prompt.md").read_text(encoding="utf-8")
+        script = Path("scripts/run_headless_packet.py").read_text(encoding="utf-8")
+
+        self.assertIn("Codex CLI headless", protocol)
+        self.assertIn("codex.cmd exec", protocol)
+        self.assertIn("codex exec", protocol)
+        self.assertIn("claude", protocol)
+        self.assertIn("DeepSeek", protocol)
+        self.assertIn("git rev-parse --short HEAD", protocol)
+        self.assertIn("run-headless-packet", protocol)
+        self.assertIn("Blind headless grading run", prompt)
+        self.assertIn("Do not inspect parent directories", prompt)
+        self.assertIn("benchmark.core.cli", script)
+        self.assertIn("run-headless-packet", script)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -163,6 +163,10 @@ implemented as a dry-run verified runner boundary rather than a verified local
 model run. If Claude CLI is installed later, use the same packet runner with
 `--engine claude`.
 
+A reviewer-facing step-by-step guide is tracked at:
+
+- `experiments/records/Codex-CLI-headless-mode/CLAUDE-CODE-REPRODUCTION.md`
+
 Windows PowerShell:
 
 ```powershell

@@ -207,6 +207,32 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("run-model-packet", protocol)
         self.assertNotIn("DEEPSEEK_API_KEY=sk-", protocol)
 
+    def test_dsaa3071_candidate_v3_dev_metrics_record_summarizes_passed_runs(self):
+        record_dir = Path("experiments/records/DSAA3071-week5-candidate-v3-dev-plan")
+        metrics = json.loads(
+            (record_dir / "dev-metrics-deepseek-r3.json").read_text(encoding="utf-8")
+        )
+        markdown = (record_dir / "DEV-METRICS-DEEPSEEK-R3.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertEqual(metrics["report_type"], "dsaa3071_week5_dev_metrics")
+        self.assertEqual(metrics["split"], "development")
+        self.assertEqual(set(metrics["runs"]), {"B0", "R1", "C3"})
+        self.assertTrue(
+            all(run["validation_status"] == "passed" for run in metrics["runs"].values())
+        )
+        self.assertLess(
+            metrics["comparisons"]["R1_minus_B0"]["question_score_mae_delta"],
+            0,
+        )
+        self.assertGreater(
+            metrics["comparisons"]["C3_minus_R1"]["question_score_mae_delta"],
+            0,
+        )
+        self.assertIn("held-out not run", markdown)
+        self.assertIn("not a final accuracy claim", markdown)
+
 
 if __name__ == "__main__":
     unittest.main()

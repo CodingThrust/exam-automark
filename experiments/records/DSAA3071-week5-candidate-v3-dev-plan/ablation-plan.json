@@ -36,15 +36,15 @@
     "C3": {
       "condition": "C3",
       "output_schema_hash": "b5fe4ab6c03b967c6ded896e05c494c86a6ba8912cc587c5f23f87da5eb3ea77",
-      "packet_hash": "5c087e3433cbd1f0e0e34285e78a000487f0b55583a5562c612a5cccba24a4a5",
-      "packet_id": "C3-dev-reviewed-r1",
-      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-C3-v1-reviewed-dev/C3-dev-reviewed-r1",
-      "prompt_hash": "5b1b1ce826d4c5f6f7fb8f02f0f7779774207603649c8be82b6ac6fe0668cbb1",
+      "packet_hash": "f5187512fdad3927f16b9ba37d3c18a9ec331036662bc231356c3ac273c7a500",
+      "packet_id": "C3-dev-reviewed-r2",
+      "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-C3-v1-reviewed-dev/C3-dev-reviewed-r2",
+      "prompt_hash": "854fb1956162f9d78e4fb6011866d1840d1f4537af89ac3d2ebf9ce07cc0b83d",
       "prompt_path": "experiments/records/DSAA3071-week5-candidate-v3-dev-plan/prompts/grade_candidate_v3_strict_schema.txt",
       "prompt_template_id": "grade_candidate_v3_strict_schema",
       "rubric_hash": "6798e56675bc16429eb98543ed4f85822b0658b8f412d902443130a754e7444c",
       "rubric_path": "experiments/records/DSAA3071-week5-prep/rubric_v1.json",
-      "skill_hash": "1ec0f3d39e945d8d2fb685c30dd4576eba48e62bf1b994281885b9ec338752a0",
+      "skill_hash": "f6c071273b306fe1cb15d0592f560c9eca521ddb2706204cd09b9c10d99089de",
       "skill_version_id": "skill_candidate_v3"
     },
     "R1": {

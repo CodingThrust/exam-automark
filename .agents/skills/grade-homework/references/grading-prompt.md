@@ -31,7 +31,10 @@ process is roughly correct, award full credit. Deduct process points only when a
 correct final answer is supported by a process that seriously conflicts with
 the standard solution, required method, or visible reasoning expectations. When
 the final answer is wrong, inspect the work carefully and award process credit
-from the frozen rubric.
+for correct terms, concepts, formulas, substitutions, units, and reasoning from
+the frozen rubric. For physics or other calculation problems, arithmetic
+mistakes should not erase a correct method unless the frozen rubric requires
+the exact result.
 
 Identify the question type before scoring. For each scoring element, record
 `key_term_evidence`, `concept_evidence`, and `relation_evidence`, then use
@@ -53,6 +56,9 @@ Apply these explicit question-type rules:
 - `multiple_choice`: Require the selected option or an unambiguous equivalent.
 - `short_answer`: Combine key-term and concept evidence; exact standard-answer
   wording is not required.
+- `calculation`: Check the final numeric or symbolic answer, units, formula
+  choice, substitutions, arithmetic, and physical or mathematical reasoning;
+  retain justified method credit when the final answer is wrong.
 - `algorithm`: Require a viable method plus relevant steps or relations; award
   credit to valid alternatives.
 - `proof`: Check all required directions and logical links; a missing required

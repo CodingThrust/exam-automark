@@ -17,6 +17,9 @@ QUESTION_TYPE_RULES = (
     "`multiple_choice`: Require the selected option or an unambiguous equivalent.",
     "`short_answer`: Combine key-term and concept evidence; exact standard-answer "
     "wording is not required.",
+    "`calculation`: Check the final numeric or symbolic answer, units, formula "
+    "choice, substitutions, arithmetic, and physical or mathematical reasoning; "
+    "retain justified method credit when the final answer is wrong.",
     "`algorithm`: Require a viable method plus relevant steps or relations; "
     "award credit to valid alternatives.",
     "`proof`: Check all required directions and logical links; a missing required "
@@ -90,12 +93,32 @@ class CandidateV3AssetTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)
 
-    def test_all_assets_define_the_five_question_type_rules(self):
+    def test_all_assets_define_the_six_question_type_rules(self):
         for path in (PROMPT, STRICT_SNAPSHOT, SKILL, REFERENCE):
             text = _normalize_whitespace(path.read_text(encoding="utf-8"))
             for rule in QUESTION_TYPE_RULES:
                 with self.subTest(path=path, rule=rule):
                     self.assertIn(_normalize_whitespace(rule), text)
+
+    def test_calculation_rule_preserves_physics_process_credit(self):
+        combined = _normalize_whitespace(
+            "\n".join(
+                path.read_text(encoding="utf-8")
+                for path in (PROMPT, STRICT_SNAPSHOT, SKILL, REFERENCE)
+            )
+        )
+
+        for phrase in (
+            "final numeric or symbolic answer",
+            "units",
+            "formula choice",
+            "substitutions",
+            "arithmetic",
+            "method credit",
+            "physics",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, combined)
 
     def test_strict_prompt_preserves_the_generic_grading_algorithm_verbatim(self):
         generic = _markdown_section(

@@ -6,11 +6,12 @@ Date: 2026-07-18
 
 ## Objective
 
-Improve grading accuracy for concept-heavy short-answer, algorithm-description,
-proof, and essay questions while preserving reproducibility and the existing
-physics-compatible grading safeguards. The immediate development target is
-DSAA3071 week 5. The reusable output is a course-independent candidate-v3
-grading policy plus a course-specific rubric v1.
+Improve grading accuracy for calculation, concept-heavy short-answer,
+algorithm-description, proof, and essay questions while preserving
+reproducibility and the existing physics-compatible grading safeguards. The
+immediate development target is DSAA3071 week 5. The reusable output is a
+course-independent candidate-v3 grading policy plus a course-specific rubric
+v1.
 
 ## Constraints
 
@@ -34,6 +35,8 @@ Candidate v3 defines a reusable grading procedure. It is responsible for:
 
 - question-type-aware grading;
 - extracting key-term, conceptual, and relational evidence;
+- calculation-aware handling of final numeric or symbolic answers, units,
+  formulas, substitutions, arithmetic, and justified method credit;
 - semantic-equivalence decisions;
 - partial-credit decisions;
 - handling omissions, misuse, and contradictions;
@@ -132,8 +135,10 @@ For every question:
 8. Do not penalize different wording, order, notation, concise expression,
    minor language errors, or omission of optional supporting detail.
 9. If the final conclusion is wrong, retain justified credit for correctly
-   demonstrated terms, concepts, and reasoning unless the rubric explicitly
-   makes the conclusion indispensable.
+   demonstrated terms, concepts, formulas, substitutions, units, and reasoning
+   unless the rubric explicitly makes the conclusion indispensable. In physics
+   or other calculation problems, arithmetic mistakes should not erase a
+   correct method unless the rubric requires the exact result.
 10. Run a second pass that checks unreadable evidence, high-impact deductions,
     missed semantic equivalents, missed keyword credit, duplicate credit,
     keyword misuse, score-band consistency, and arithmetic totals.
@@ -143,6 +148,9 @@ For every question:
 - `multiple_choice`: score the selected option or an unambiguous equivalent.
 - `short_answer`: combine key-term and concept evidence; exact standard-answer
   wording is not required.
+- `calculation`: check the final numeric or symbolic answer, units, formula
+  choice, substitutions, arithmetic, and physical or mathematical reasoning;
+  retain justified method credit when the final answer is wrong.
 - `algorithm`: require a viable method and relevant steps or relationships;
   alternative valid constructions receive credit.
 - `proof`: identify required directions and logical links; missing a required
@@ -231,6 +239,8 @@ Historical v0/v2 files and outputs remain unchanged.
 - Every concept-heavy question has explicit scoring elements, keyword-only
   partial credit, semantic equivalents, score bands, and material-error rules.
 - Candidate v3 follows the agreed key-term, concept, and relation algorithm.
+- Candidate v3 includes a calculation rule that preserves physics-style process
+  credit for correct methods, formulas, substitutions, units, and reasoning.
 - Codex and Claude skill mirrors are byte-synchronized.
 - v0, v2, historical packets, and historical runs remain unchanged.
 - No `Data/` files or student answer text are tracked.

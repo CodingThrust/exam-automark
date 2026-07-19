@@ -14,7 +14,8 @@ no API key. Run commands only after explicit approval.
 - Settings: `deepseek`, `deepseek-v4-pro`, `text-only`, repetition `1`
 - B0: baseline strict prompt, rubric v0, `skill_baseline_v1`
 - R1: baseline strict prompt, rubric v1, `skill_baseline_v1`
-- C3: candidate-v3 strict prompt, rubric v1, `skill_candidate_v3`
+- C3: candidate-v3 strict prompt with calculation support, rubric v1,
+  `skill_candidate_v3`
 
 ## Windows PowerShell
 
@@ -44,8 +45,8 @@ try {
 
   python -m benchmark.core.cli run-model-packet `
     --provider deepseek --model deepseek-v4-pro --input-mode text-only `
-    --packet Data\DSAA3071\week5-benchmark-redaction-v3\text_grading_packets\DSAA3071-week5-C3-v1-reviewed-dev\C3-dev-reviewed-r1 `
-    --output Data\DSAA3071\week5-benchmark-redaction-v3\runs\deepseek-C3-text-dev-reviewed-r1 `
+    --packet Data\DSAA3071\week5-benchmark-redaction-v3\text_grading_packets\DSAA3071-week5-C3-v1-reviewed-dev\C3-dev-reviewed-r2 `
+    --output Data\DSAA3071\week5-benchmark-redaction-v3\runs\deepseek-C3-text-dev-reviewed-r2 `
     --max-retries 2 --run-commit $runCommit
   $c3 = $LASTEXITCODE
 
@@ -81,8 +82,8 @@ r1=$?
 
 python -m benchmark.core.cli run-model-packet \
   --provider deepseek --model deepseek-v4-pro --input-mode text-only \
-  --packet Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-C3-v1-reviewed-dev/C3-dev-reviewed-r1 \
-  --output Data/DSAA3071/week5-benchmark-redaction-v3/runs/deepseek-C3-text-dev-reviewed-r1 \
+  --packet Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-C3-v1-reviewed-dev/C3-dev-reviewed-r2 \
+  --output Data/DSAA3071/week5-benchmark-redaction-v3/runs/deepseek-C3-text-dev-reviewed-r2 \
   --max-retries 2 --run-commit "$run_commit"
 c3=$?
 

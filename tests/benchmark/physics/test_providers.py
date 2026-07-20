@@ -93,6 +93,27 @@ class ProviderTests(unittest.TestCase):
         self.assertEqual(result.raw_text, '{"student_id":"S001","scores":[]}')
         self.assertEqual(result.model, "deepseek-v4-pro")
 
+    def test_deepseek_chat_request_uses_system_and_user_messages(self):
+        completions = FakeCompletions()
+        chat = type("Chat", (), {"completions": completions})()
+        client = type("Client", (), {"chat": chat})()
+        provider = DeepSeekProvider(client, model="deepseek-v4-pro")
+
+        result = provider.complete_chat("system guidance", "user payload")
+
+        self.assertEqual(
+            completions.kwargs["messages"],
+            [
+                {"role": "system", "content": "system guidance"},
+                {"role": "user", "content": "user payload"},
+            ],
+        )
+        self.assertEqual(
+            completions.kwargs["response_format"], {"type": "json_object"}
+        )
+        self.assertEqual(result.raw_text, '{"student_id":"S001","scores":[]}')
+        self.assertEqual(result.model, "deepseek-v4-pro")
+
     def test_deepseek_factory_pins_official_base_url(self):
         calls = []
 

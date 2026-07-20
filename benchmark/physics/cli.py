@@ -39,6 +39,7 @@ from .skillopt import (
     write_skillopt_pilot_markdown,
 )
 from .skillopt_adapter import build_skillopt_split, validate_skillopt_split
+from .skillopt_preflight import run_target_preflight
 from .skillopt_training import (
     DEFAULT_DEEPSEEK_BASE_URL,
     DEFAULT_DEEPSEEK_MODEL,
@@ -209,6 +210,17 @@ def _build_parser() -> argparse.ArgumentParser:
         "--run-name",
         default="physics-week9-deepseek-skillopt-r1",
     )
+    target_preflight_parser = subparsers.add_parser(
+        "skillopt-target-preflight",
+        help="check SkillOpt target-model JSON reliability on a split",
+    )
+    target_preflight_parser.add_argument("--split-dir", type=Path, required=True)
+    target_preflight_parser.add_argument("--output-dir", type=Path, required=True)
+    target_preflight_parser.add_argument(
+        "--split", choices=("train", "val", "test"), default="val"
+    )
+    target_preflight_parser.add_argument("--model", default=DEFAULT_DEEPSEEK_MODEL)
+    target_preflight_parser.add_argument("--limit", type=int, default=0)
     return parser
 
 
@@ -326,6 +338,20 @@ def main(argv: Sequence[str] | None = None) -> int:
                 run_name=args.run_name,
             )
             print(json.dumps(result, sort_keys=True))
+        elif args.command == "skillopt-target-preflight":
+            key = os.environ.get("DEEPSEEK_API_KEY")
+            if not key:
+                raise ValueError("DEEPSEEK_API_KEY is required")
+            provider = DeepSeekProvider.from_api_key(key, model=args.model)
+            result = run_target_preflight(
+                split_dir=args.split_dir,
+                output_dir=args.output_dir,
+                split=args.split,
+                provider=provider,
+                limit=args.limit,
+            )
+            print(json.dumps(result, sort_keys=True))
+            return 0 if result["status"] == "ready" else 1
         return 0
     except SystemExit as error:
         return int(error.code)

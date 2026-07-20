@@ -53,7 +53,9 @@ The runner intentionally refuses to overwrite an existing output directory. If a
 listed output directory already exists, append a suffix such as `-r2`,
 `-authfix`, or `-cn-authfix` and report the actual path used.
 
-## Private Data Bootstrap From GitLab
+## Private Data Handoff
+
+### Private Data Bootstrap From GitLab
 
 The reviewer or the reviewer's AI assistant must restore the private `Data/`
 directory before any model run can start. YY has already invited the advisor's

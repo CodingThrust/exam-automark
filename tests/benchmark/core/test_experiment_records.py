@@ -540,7 +540,7 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("DeepSeek-vs-Codex", markdown)
 
     def test_physics_model_benchmark_report_summarizes_available_evidence(self):
-        record_dir = Path("experiments/records/physics-model-benchmark-report")
+        record_dir = Path("experiments/records/physics-codex-benchmark-report")
         summary = json.loads(
             (record_dir / "model-benchmark-summary.json").read_text(encoding="utf-8")
         )

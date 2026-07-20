@@ -5,8 +5,9 @@ title: AI Grading Test Handoff
 # AI Grading Test Handoff
 
 This page is for an external reviewer or an AI coding assistant. Read this page,
-then run the grading benchmark from a local checkout that has the private
-`Data/` directory restored.
+then run the grading benchmark from a local checkout. If `Data/` is missing,
+restore it from the private HKUST-GZ GitLab repository documented below before
+running models.
 
 Do not upload raw student transcripts, raw model responses, per-student outputs,
 or private PDFs to GitHub Pages.
@@ -52,13 +53,221 @@ The runner intentionally refuses to overwrite an existing output directory. If a
 listed output directory already exists, append a suffix such as `-r2`,
 `-authfix`, or `-cn-authfix` and report the actual path used.
 
-## Private Data Handoff
+## Private Data Bootstrap From GitLab
 
-The reviewer must have a private copy of the `Data/` directory before any model
-run can start. This GitHub Pages site is only the public instruction layer; it
-does not contain private student data.
+The reviewer or the reviewer's AI assistant must restore the private `Data/`
+directory before any model run can start. YY has already invited the advisor's
+HKUST-GZ GitLab account to the private project, so the advisor's AI should use
+the advisor's own GitLab login or advisor-owned read-only token to fetch
+`Data/`. Do not ask YY to manually download `Data/` unless advisor-owned
+GitLab access is unavailable. The private data source is:
 
-Place the private data at the repository root:
+```text
+http://gitlab.hkust-gz.edu.cn/yyuan308/exam-automark-private.git
+```
+
+The GitHub Pages site is only the public instruction layer. It must not contain
+raw student data, API keys, GitLab tokens, raw transcripts, raw model responses,
+or per-student outputs.
+
+### Required GitLab Access
+
+Use advisor-owned GitLab access. The AI assistant should authenticate as the
+advisor or external reviewer account that YY has invited to YY's private GitLab project.
+It must not request YY's GitLab password, YY's browser session, or YY's personal
+token.
+
+Expected access flow:
+
+1. YY has already invited the advisor's HKUST-GZ GitLab account to
+   `yyuan308/exam-automark-private` with at least read repository access.
+2. The advisor confirms that this URL opens when signed in as the advisor:
+   `http://gitlab.hkust-gz.edu.cn/yyuan308/exam-automark-private`.
+3. The advisor's AI uses one of the authentication paths below to restore
+   `Data/`.
+
+Authentication paths:
+
+- Preferred for AI automation: the advisor creates a temporary GitLab Personal
+  Access Token from the advisor account with read-only repository access, then
+  sets `GITLAB_TOKEN` in the local shell. Delete or revoke the token after the
+  benchmark if it was created only for this run.
+- Fallback for interactive review: the advisor's machine has Git Credential
+  Manager or an equivalent credential helper configured, and the advisor logs in
+  when `git clone` prompts for GitLab credentials.
+
+Advisor-token setup examples:
+
+Windows PowerShell:
+
+```powershell
+$secure = Read-Host "Advisor GitLab token with read_repository access" -AsSecureString
+$bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+try {
+  $env:GITLAB_TOKEN = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr).Trim()
+} finally {
+  [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+}
+```
+
+macOS/Linux:
+
+```bash
+read -rsp "Advisor GitLab token with read_repository access: " GITLAB_TOKEN
+echo
+export GITLAB_TOKEN
+```
+
+Optional advisor-account preflight before downloading `Data/`:
+
+Windows PowerShell:
+
+```powershell
+$projectApi = "http://gitlab.hkust-gz.edu.cn/api/v4/projects/yyuan308%2Fexam-automark-private"
+Invoke-WebRequest -Headers @{ "PRIVATE-TOKEN" = $env:GITLAB_TOKEN } -Uri $projectApi -UseBasicParsing | Select-Object -ExpandProperty StatusCode
+```
+
+macOS/Linux:
+
+```bash
+curl -fL --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+  "http://gitlab.hkust-gz.edu.cn/api/v4/projects/yyuan308%2Fexam-automark-private" >/dev/null
+```
+
+If neither advisor-owned path is available, stop and report
+`gitlab_auth_missing` as a blocker. If the already-invited advisor account
+still receives a permission error, stop and report `advisor_gitlab_access_denied`.
+Do not bypass permissions and do not request that private data be moved to the
+public GitHub repo.
+
+### Recommended: Download Repository Archive And Restore Data
+
+This method is preferred for an AI assistant because it uses the advisor-owned
+`GITLAB_TOKEN` from the environment and restores only the `Data/` directory
+into the public checkout.
+
+Windows PowerShell:
+
+```powershell
+Set-Location "D:\AI-Grading-Platform\exam-automark-multicourse"
+
+if (-not $env:GITLAB_TOKEN) {
+  throw "Set advisor-owned GITLAB_TOKEN with read_repository access to YY's private GitLab repo before running this step."
+}
+
+$privateRoot = Join-Path (Get-Location) ".private-data"
+New-Item -ItemType Directory -Force -Path $privateRoot | Out-Null
+
+$archive = Join-Path $privateRoot "exam-automark-private.zip"
+$apiUrl = "http://gitlab.hkust-gz.edu.cn/api/v4/projects/yyuan308%2Fexam-automark-private/repository/archive.zip"
+
+Invoke-WebRequest `
+  -Headers @{ "PRIVATE-TOKEN" = $env:GITLAB_TOKEN } `
+  -Uri $apiUrl `
+  -OutFile $archive
+
+Expand-Archive -LiteralPath $archive -DestinationPath $privateRoot -Force
+
+$archiveRoot = Get-ChildItem -LiteralPath $privateRoot -Directory |
+  Where-Object { $_.Name -like "exam-automark-private-*" } |
+  Sort-Object LastWriteTime -Descending |
+  Select-Object -First 1
+
+if (-not $archiveRoot) { throw "Could not find extracted GitLab archive root." }
+if (-not (Test-Path -LiteralPath (Join-Path $archiveRoot.FullName "Data"))) {
+  throw "The extracted private archive does not contain Data/."
+}
+if (Test-Path -LiteralPath ".\Data") {
+  throw "Data/ already exists. Move or remove the existing local Data/ before restoring to avoid mixed snapshots."
+}
+
+Copy-Item -Recurse -LiteralPath (Join-Path $archiveRoot.FullName "Data") -Destination ".\Data"
+
+Test-Path Data\physics\benchmark
+```
+
+macOS/Linux:
+
+```bash
+cd /path/to/exam-automark
+
+if [ -z "${GITLAB_TOKEN:-}" ]; then
+  echo "Set advisor-owned GITLAB_TOKEN with read_repository access to YY's private GitLab repo before running this step." >&2
+  exit 2
+fi
+
+private_root=".private-data"
+mkdir -p "$private_root"
+archive="$private_root/exam-automark-private.zip"
+api_url="http://gitlab.hkust-gz.edu.cn/api/v4/projects/yyuan308%2Fexam-automark-private/repository/archive.zip"
+
+curl -fL --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" "$api_url" -o "$archive"
+unzip -q "$archive" -d "$private_root"
+
+archive_root="$(find "$private_root" -maxdepth 1 -type d -name 'exam-automark-private-*' | sort | tail -n 1)"
+if [ -z "$archive_root" ] || [ ! -d "$archive_root/Data" ]; then
+  echo "Could not find Data/ inside the extracted private GitLab archive." >&2
+  exit 2
+fi
+if [ -e Data ]; then
+  echo "Data/ already exists. Move or remove it before restoring to avoid mixed snapshots." >&2
+  exit 2
+fi
+
+cp -R "$archive_root/Data" ./Data
+test -d Data/physics/benchmark
+```
+
+### Fallback: Sparse Clone The Private GitLab Repository
+
+Use this only when the archive API is unavailable. This relies on GitLab
+credentials being available interactively or through the local Git credential
+manager. Do not put credentials in the URL.
+
+Windows PowerShell:
+
+```powershell
+Set-Location "D:\AI-Grading-Platform\exam-automark-multicourse"
+
+New-Item -ItemType Directory -Force -Path ".private-data" | Out-Null
+git clone --filter=blob:none --no-checkout `
+  http://gitlab.hkust-gz.edu.cn/yyuan308/exam-automark-private.git `
+  .private-data\exam-automark-private
+
+git -C .private-data\exam-automark-private sparse-checkout init --cone
+git -C .private-data\exam-automark-private sparse-checkout set Data
+git -C .private-data\exam-automark-private checkout main
+
+if (Test-Path -LiteralPath ".\Data") {
+  throw "Data/ already exists. Move or remove it before restoring to avoid mixed snapshots."
+}
+Copy-Item -Recurse -LiteralPath ".private-data\exam-automark-private\Data" -Destination ".\Data"
+```
+
+macOS/Linux:
+
+```bash
+cd /path/to/exam-automark
+
+mkdir -p .private-data
+git clone --filter=blob:none --no-checkout \
+  http://gitlab.hkust-gz.edu.cn/yyuan308/exam-automark-private.git \
+  .private-data/exam-automark-private
+
+git -C .private-data/exam-automark-private sparse-checkout init --cone
+git -C .private-data/exam-automark-private sparse-checkout set Data
+git -C .private-data/exam-automark-private checkout main
+
+if [ -e Data ]; then
+  echo "Data/ already exists. Move or remove it before restoring to avoid mixed snapshots." >&2
+  exit 2
+fi
+cp -R .private-data/exam-automark-private/Data ./Data
+```
+
+### Required Data Layout
+
+After restore, the repository should look like this:
 
 ```text
 exam-automark/
@@ -78,10 +287,6 @@ Minimum data needed for this Physics Week 9 benchmark:
 - `Data/physics/benchmark/text_packets/physics-week9-candidate-v2-text-strict-schema/G1-test-r1`
 - the Physics benchmark gold-score files under `Data/physics/benchmark`
 
-Share `Data/` only through the private HKUST-GZ GitLab repository or another
-advisor-approved private channel. Do not put `Data/` in the public GitHub repo
-or GitHub Pages.
-
 Before running models, verify the packets exist:
 
 ```powershell
@@ -92,6 +297,27 @@ Test-Path Data\physics\benchmark\text_packets\physics-week9-candidate-v2-text-st
 ```
 
 All four checks should return `True`.
+
+Also verify `Data/` and the temporary private checkout are not going to be committed.
+
+Windows PowerShell:
+
+```powershell
+git status --short -- Data .private-data
+git check-ignore -q Data/physics/benchmark; $LASTEXITCODE
+git check-ignore -q .private-data; $LASTEXITCODE
+```
+
+macOS/Linux:
+
+```bash
+git status --short -- Data .private-data
+git check-ignore -q Data/physics/benchmark; echo $?
+git check-ignore -q .private-data; echo $?
+```
+
+`git status --short -- Data .private-data` should print nothing. Both
+`git check-ignore` checks should return exit code `0`.
 
 ## Required Per-Student Output Shape
 
@@ -408,12 +634,19 @@ These files stay local under ignored `Data/`.
 
 ## Return This Summary To YY
 
-After running, return this JSON summary in chat. Do not paste raw student
-answers or raw model responses.
+After running, return this JSON summary in chat. Include how `Data/` was
+restored, but do not paste raw student answers, raw model responses, tokens,
+or private GitLab URLs containing credentials.
 
 ```json
 {
   "operator": "advisor_or_external_ai",
+  "data_restore": {
+    "source": "HKUST-GZ GitLab yyuan308/exam-automark-private",
+    "auth_identity": "advisor_gitlab_account_already_invited_by_YY",
+    "method": "advisor_token_archive_or_advisor_interactive_sparse_clone",
+    "status": "restored_or_blocked"
+  },
   "engine_route": "kimi_api_or_kimi_code_executor_or_claude_code",
   "repo_commit": "short git commit hash",
   "split": "development",
@@ -441,8 +674,10 @@ answers or raw model responses.
 
 Stop and report a blocker if:
 
-- the local `Data/` directory is missing;
+- the local `Data/` directory is missing and GitLab restore cannot run;
 - the target packet path is missing;
+- advisor-owned GitLab authentication is missing or fails;
+- the already-invited advisor GitLab account still receives access denied;
 - API authentication fails before a model run;
 - output JSON fails validation for every student;
 - one arm passes and the other arm fails for an infrastructure reason;

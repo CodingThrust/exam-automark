@@ -10,6 +10,7 @@ __pycache__
 
 # Local data folder
 /Data/
+.private-data/
 
 # Compiled outputs (PDFs are built artifacts, not sources)
 *.learning-sheet.pdf

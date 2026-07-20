@@ -105,6 +105,11 @@ This run is successful as a SkillOpt improvement only if the selected/best skill
 improves held-out score accuracy against the initial skill. Do not claim
 improvement from a successful exit alone.
 
+## Recorded Result
+
+The R4 run completed, but it did not improve held-out hard score accuracy.
+See `RESULT-SUMMARY.md` in this directory for the safe aggregate result summary.
+
 ## Stop Conditions
 
 Stop and report the blocker if:

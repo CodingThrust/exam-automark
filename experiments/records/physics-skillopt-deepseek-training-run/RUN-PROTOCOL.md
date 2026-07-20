@@ -59,6 +59,57 @@ Data/physics/benchmark/skillopt/physics-week9-deepseek-training-r1/
 The generated package contains no API key. It is ignored because it lives under
 `Data/`.
 
+## External SkillOpt Adapter Setup
+
+The external SkillOpt checkout is prepared locally at:
+
+```text
+D:\AI-Grading-Platform\SkillOpt
+```
+
+Local files added or modified in that checkout:
+
+```text
+configs/physics_grading/deepseek.yaml
+skillopt/envs/physics_grading/__init__.py
+skillopt/envs/physics_grading/adapter.py
+skillopt/envs/physics_grading/dataloader.py
+skillopt/envs/physics_grading/rollout.py
+skillopt/envs/physics_grading/skills/initial.md
+scripts/train.py
+scripts/eval_only.py
+```
+
+`scripts/train.py` and `scripts/eval_only.py` register `physics_grading` as a
+local environment so SkillOpt can load the exported physics split. These are
+local source-checkout changes for running the experiment; they are not committed
+to the upstream Microsoft SkillOpt repository.
+
+No-model smoke check:
+
+```powershell
+Set-Location D:\AI-Grading-Platform\SkillOpt
+
+python -c "import json; from pathlib import Path; from skillopt.config import load_config, flatten_config; from scripts.train import get_adapter; cfg=flatten_config(load_config('configs/physics_grading/deepseek.yaml')); adapter=get_adapter(cfg); adapter.setup(cfg); loader=adapter.get_dataloader(); summary={'env':cfg.get('env'), 'optimizer_backend':cfg.get('optimizer_backend'), 'target_backend':cfg.get('target_backend'), 'train':len(loader.train_items), 'val':len(loader.val_items), 'test':len(loader.test_items), 'task_types':adapter.get_task_types(), 'skill_init_exists':Path(cfg.get('skill_init')).exists()}; print(json.dumps(summary, indent=2, sort_keys=True))"
+```
+
+Observed result:
+
+```json
+{
+  "env": "physics_grading",
+  "optimizer_backend": "openai_compatible",
+  "skill_init_exists": true,
+  "target_backend": "openai_compatible",
+  "task_types": [
+    "physics_week9_text_grading"
+  ],
+  "test": 18,
+  "train": 4,
+  "val": 4
+}
+```
+
 ## Actual Training Command
 
 The generated PowerShell command is:
@@ -115,11 +166,12 @@ Completed:
 
 - no-secret DeepSeek training package generator,
 - generated local package under ignored `Data/`,
+- external SkillOpt checkout cloned from Microsoft SkillOpt `main`,
+- local `physics_grading` SkillOpt adapter copied and registered,
+- no-model SkillOpt adapter smoke check passed,
 - tests for the package generator.
 
 Not completed:
 
-- installing or updating SkillOpt source checkout,
-- copying/registering the physics adapter inside SkillOpt,
 - running DeepSeek SkillOpt training,
 - evaluating returned `best_skill.md`.

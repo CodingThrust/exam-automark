@@ -297,6 +297,41 @@ The returned `best_skill.md` should then be evaluated inside `exam-automark`
 against the existing physics metrics pipeline. The held-out `test/items.json` split
 must only be used after the SkillOpt candidate is selected on validation.
 
+## R3 Result
+
+The first completed DeepSeek SkillOpt run is recorded in:
+
+```text
+experiments/records/physics-skillopt-deepseek-training-run/R3-RUN-SUMMARY.md
+```
+
+Run output:
+
+```text
+Data/physics/benchmark/skillopt/physics-week9-deepseek-training-r1/outputs/physics-week9-deepseek-skillopt-r3-compact-utf8
+```
+
+Result:
+
+- exit code: 0
+- steps: 1
+- accepts: 0
+- rejects: 1
+- best step: 0
+- best origin: `initial_skill`
+- baseline test hard: 0.1111
+- best-on-val test hard: 0.0000
+- final test hard: 0.0000
+- total tokens: 476,749
+
+Interpretation:
+
+- the SkillOpt loop ran end-to-end;
+- the candidate skill was rejected by the selection gate;
+- this run does not show improved score accuracy;
+- per-item diagnostics show many target JSON parse failures, so the result is a
+  negative/diagnostic run rather than a valid successful optimization result.
+
 ## Current Status
 
 Completed:
@@ -312,10 +347,15 @@ Completed:
 - generated DeepSeek command sets `PYTHONUTF8=1`,
 - generated package manifest excludes ignored `outputs/` run artifacts,
 - local `physics_grading` rollout uses compact score-only JSON for SkillOpt reward,
+- completed DeepSeek SkillOpt R3 run with exit code 0,
+- recorded R3 as a negative/diagnostic run with no accuracy improvement,
 - no-model SkillOpt adapter smoke check passed,
 - tests for the package generator.
 
 Not completed:
 
-- running DeepSeek SkillOpt training,
-- evaluating returned `best_skill.md`.
+- demonstrating improved score accuracy on the physics dataset,
+- reducing target JSON parse failures enough for a scientifically reliable
+  SkillOpt result,
+- converting a successful SkillOpt-generated skill back into the main
+  exam-automark physics benchmark.

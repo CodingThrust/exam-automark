@@ -77,6 +77,7 @@ skillopt/envs/physics_grading/adapter.py
 skillopt/envs/physics_grading/dataloader.py
 skillopt/envs/physics_grading/rollout.py
 skillopt/envs/physics_grading/skills/initial.md
+skillopt/gradient/reflect.py
 scripts/train.py
 scripts/eval_only.py
 ```
@@ -177,6 +178,32 @@ No-model verification for this local patch simulated a non-JSON target response
 and confirmed that `raw_response.txt`, `conversation.json`, and `result.json`
 are written while the rollout returns a zero-score row.
 
+Fourth run issue and local fix:
+
+- the hardened rollout showed that target responses were empty while
+  `completion_tokens=4096`, indicating that the target model exhausted the
+  completion budget without producing final JSON;
+- the target prompt was too large and noisy because the first local
+  `initial.md` copied the full `grade-homework` workflow skill, including
+  file/CSV/feedback instructions that are irrelevant inside a SkillOpt target
+  rollout;
+- the external SkillOpt `initial.md` was replaced with the shorter tracked seed
+  skill:
+
+```text
+experiments/records/physics-skillopt-deepseek-training-run/skillopt-initial-seed.md
+```
+
+This keeps the target system prompt focused on physics score assignment,
+calculation-process credit, integer scoring, and JSON-only output.
+
+To avoid mixing failed attempts with the next run, the next real training run
+should use a fresh output directory such as:
+
+```text
+Data/physics/benchmark/skillopt/physics-week9-deepseek-training-r1/outputs/physics-week9-deepseek-skillopt-r2-short-seed
+```
+
 ## Actual Training Command
 
 The generated PowerShell command is:
@@ -238,6 +265,7 @@ Completed:
 - local `physics_grading` SkillOpt adapter copied and registered,
 - local Windows UTF-8 `skill_init` read patch applied to SkillOpt,
 - local `physics_grading` rollout hardened against non-JSON target responses,
+- local `physics_grading` seed skill shortened and tracked in this record,
 - no-model SkillOpt adapter smoke check passed,
 - tests for the package generator.
 

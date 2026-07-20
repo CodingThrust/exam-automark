@@ -156,6 +156,27 @@ This is a local source-checkout patch in
 `D:\AI-Grading-Platform\SkillOpt\skillopt\engine\trainer.py`, not a change to
 the upstream Microsoft SkillOpt repository.
 
+Third run issue and local fix:
+
+- after entering the baseline rollout on the selection set, the target model
+  returned a non-JSON response and the local `physics_grading` adapter raised
+  `ValueError: model response did not contain a JSON object`;
+- the root cause was adapter fragility: the model response was parsed before
+  saving `conversation.json`, and a single malformed target response aborted the
+  whole SkillOpt run;
+- the local `physics_grading` rollout now:
+  - wraps the dynamic skill inside a stable rollout system prompt;
+  - states that the user-provided `output_schema` is authoritative;
+  - saves `target_system_prompt.txt`, `target_user_prompt.txt`,
+    `raw_response.txt`, `conversation.json`, and `result.json` before or during
+    evaluation;
+  - records JSON parse failures as `hard=0`, `soft=0`, and `fail_reason`
+    instead of raising and stopping training.
+
+No-model verification for this local patch simulated a non-JSON target response
+and confirmed that `raw_response.txt`, `conversation.json`, and `result.json`
+are written while the rollout returns a zero-score row.
+
 ## Actual Training Command
 
 The generated PowerShell command is:
@@ -216,6 +237,7 @@ Completed:
 - external SkillOpt checkout cloned from Microsoft SkillOpt `main`,
 - local `physics_grading` SkillOpt adapter copied and registered,
 - local Windows UTF-8 `skill_init` read patch applied to SkillOpt,
+- local `physics_grading` rollout hardened against non-JSON target responses,
 - no-model SkillOpt adapter smoke check passed,
 - tests for the package generator.
 

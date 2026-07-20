@@ -39,6 +39,11 @@ from .skillopt import (
     write_skillopt_pilot_markdown,
 )
 from .skillopt_adapter import build_skillopt_split, validate_skillopt_split
+from .skillopt_training import (
+    DEFAULT_DEEPSEEK_BASE_URL,
+    DEFAULT_DEEPSEEK_MODEL,
+    build_deepseek_training_package,
+)
 from .validation import validate_benchmark_workspace
 
 
@@ -189,6 +194,21 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     skillopt_smoke_parser.add_argument("--split-dir", type=Path, required=True)
     skillopt_smoke_parser.add_argument("--output", type=Path)
+
+    skillopt_deepseek_parser = subparsers.add_parser(
+        "skillopt-deepseek-package",
+        help="write no-secret DeepSeek run files for an external SkillOpt checkout",
+    )
+    skillopt_deepseek_parser.add_argument("--split-dir", type=Path, required=True)
+    skillopt_deepseek_parser.add_argument("--output-dir", type=Path, required=True)
+    skillopt_deepseek_parser.add_argument("--exam-automark-root", type=Path, required=True)
+    skillopt_deepseek_parser.add_argument("--skillopt-root", type=Path, required=True)
+    skillopt_deepseek_parser.add_argument("--model", default=DEFAULT_DEEPSEEK_MODEL)
+    skillopt_deepseek_parser.add_argument("--base-url", default=DEFAULT_DEEPSEEK_BASE_URL)
+    skillopt_deepseek_parser.add_argument(
+        "--run-name",
+        default="physics-week9-deepseek-skillopt-r1",
+    )
     return parser
 
 
@@ -295,6 +315,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             print(json.dumps(result, sort_keys=True))
             return 0 if result["status"] == "ready" else 1
+        elif args.command == "skillopt-deepseek-package":
+            result = build_deepseek_training_package(
+                split_dir=args.split_dir,
+                output_dir=args.output_dir,
+                exam_automark_root=args.exam_automark_root,
+                skillopt_root=args.skillopt_root,
+                model=args.model,
+                base_url=args.base_url,
+                run_name=args.run_name,
+            )
+            print(json.dumps(result, sort_keys=True))
         return 0
     except SystemExit as error:
         return int(error.code)

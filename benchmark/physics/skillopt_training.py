@@ -6,6 +6,8 @@ from typing import Any
 
 DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 DEFAULT_DEEPSEEK_MODEL = "deepseek-v4-pro"
+DEFAULT_TARGET_MAX_TOKENS = 12000
+DEFAULT_TARGET_TIMEOUT_SECONDS = 240
 
 
 def build_deepseek_training_package(
@@ -17,6 +19,8 @@ def build_deepseek_training_package(
     model: str = DEFAULT_DEEPSEEK_MODEL,
     base_url: str = DEFAULT_DEEPSEEK_BASE_URL,
     run_name: str = "physics-week9-deepseek-skillopt-r1",
+    target_max_tokens: int = DEFAULT_TARGET_MAX_TOKENS,
+    target_timeout_seconds: int = DEFAULT_TARGET_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
     """Write a no-secret DeepSeek SkillOpt training package."""
     split_dir = _absolute_path(split_dir)
@@ -34,15 +38,29 @@ def build_deepseek_training_package(
             model=model,
             base_url=base_url,
             run_name=run_name,
+            target_max_tokens=target_max_tokens,
+            target_timeout_seconds=target_timeout_seconds,
         ),
-        "env.deepseek.ps1": _powershell_env(base_url=base_url, model=model),
-        "env.deepseek.sh": _shell_env(base_url=base_url, model=model),
+        "env.deepseek.ps1": _powershell_env(
+            base_url=base_url,
+            model=model,
+            target_max_tokens=target_max_tokens,
+            target_timeout_seconds=target_timeout_seconds,
+        ),
+        "env.deepseek.sh": _shell_env(
+            base_url=base_url,
+            model=model,
+            target_max_tokens=target_max_tokens,
+            target_timeout_seconds=target_timeout_seconds,
+        ),
         "commands.ps1": _powershell_commands(
             skillopt_root=skillopt_root,
             output_dir=output_dir,
             config_path=config_path,
             run_name=run_name,
             model=model,
+            target_max_tokens=target_max_tokens,
+            target_timeout_seconds=target_timeout_seconds,
         ),
         "commands.sh": _shell_commands(
             skillopt_root=skillopt_root,
@@ -50,6 +68,8 @@ def build_deepseek_training_package(
             config_path=config_path,
             run_name=run_name,
             model=model,
+            target_max_tokens=target_max_tokens,
+            target_timeout_seconds=target_timeout_seconds,
         ),
         "expected-return-files.md": _expected_return_files(run_name=run_name),
         "configs/_base_/default.yaml": _skillopt_base_yaml(skillopt_root=skillopt_root),
@@ -65,6 +85,8 @@ def build_deepseek_training_package(
             split_dir=split_dir,
             skillopt_root=skillopt_root,
             model=model,
+            target_max_tokens=target_max_tokens,
+            target_timeout_seconds=target_timeout_seconds,
         ),
         encoding="utf-8",
         newline="\n",
@@ -73,7 +95,7 @@ def build_deepseek_training_package(
         path.relative_to(output_dir).as_posix()
         for path in output_dir.rglob("*")
         if path.is_file()
-        and path.relative_to(output_dir).parts[0] != "outputs"
+        and path.relative_to(output_dir).parts[0] not in {"outputs", "preflight"}
     )
     if "manifest.json" not in generated_files:
         generated_files.append("manifest.json")
@@ -89,13 +111,22 @@ def build_deepseek_training_package(
         "skillopt_root": str(skillopt_root),
         "contains_api_key": False,
         "training_invokes_model_api": True,
+        "target_max_tokens": target_max_tokens,
+        "target_timeout_seconds": target_timeout_seconds,
         "generated_files": sorted(generated_files),
     }
     _write_json(output_dir / "manifest.json", manifest)
     return manifest
 
 
-def _deepseek_yaml(*, split_dir: Path, skillopt_root: Path, model: str) -> str:
+def _deepseek_yaml(
+    *,
+    split_dir: Path,
+    skillopt_root: Path,
+    model: str,
+    target_max_tokens: int,
+    target_timeout_seconds: int,
+) -> str:
     initial_skill = skillopt_root / "skillopt" / "envs" / "physics_grading" / "skills" / "initial.md"
     return f"""_base_: ../_base_/default.yaml
 
@@ -130,7 +161,8 @@ env:
   split_mode: split_dir
   split_dir: {split_dir.as_posix()}
   workers: 1
-  max_completion_tokens: 4096
+  max_completion_tokens: {target_max_tokens}
+  exec_timeout: {target_timeout_seconds}
   limit: 0
 """
 
@@ -242,7 +274,13 @@ env:
 """
 
 
-def _powershell_env(*, base_url: str, model: str) -> str:
+def _powershell_env(
+    *,
+    base_url: str,
+    model: str,
+    target_max_tokens: int,
+    target_timeout_seconds: int,
+) -> str:
     return f"""# Load DeepSeek credentials for SkillOpt OpenAI-compatible backend.
 # This file intentionally does not store your API key.
 $secure = Read-Host "DeepSeek API key" -AsSecureString
@@ -256,13 +294,19 @@ try {{
 $env:OPENAI_COMPATIBLE_BASE_URL = "{base_url}"
 $env:OPENAI_COMPATIBLE_MODEL = "{model}"
 $env:OPENAI_COMPATIBLE_TEMPERATURE = "0"
-$env:OPENAI_COMPATIBLE_MAX_TOKENS = "4096"
-$env:OPENAI_COMPATIBLE_TIMEOUT_SECONDS = "120"
+$env:OPENAI_COMPATIBLE_MAX_TOKENS = "{target_max_tokens}"
+$env:OPENAI_COMPATIBLE_TIMEOUT_SECONDS = "{target_timeout_seconds}"
 $env:PYTHONUTF8 = "1"
 """
 
 
-def _shell_env(*, base_url: str, model: str) -> str:
+def _shell_env(
+    *,
+    base_url: str,
+    model: str,
+    target_max_tokens: int,
+    target_timeout_seconds: int,
+) -> str:
     return f"""#!/usr/bin/env bash
 set -euo pipefail
 
@@ -272,8 +316,8 @@ export OPENAI_COMPATIBLE_API_KEY
 export OPENAI_COMPATIBLE_BASE_URL="{base_url}"
 export OPENAI_COMPATIBLE_MODEL="{model}"
 export OPENAI_COMPATIBLE_TEMPERATURE="0"
-export OPENAI_COMPATIBLE_MAX_TOKENS="4096"
-export OPENAI_COMPATIBLE_TIMEOUT_SECONDS="120"
+export OPENAI_COMPATIBLE_MAX_TOKENS="{target_max_tokens}"
+export OPENAI_COMPATIBLE_TIMEOUT_SECONDS="{target_timeout_seconds}"
 export PYTHONUTF8="1"
 """
 
@@ -285,6 +329,8 @@ def _powershell_commands(
     config_path: Path,
     run_name: str,
     model: str,
+    target_max_tokens: int,
+    target_timeout_seconds: int,
 ) -> str:
     out_root = output_dir / "outputs" / run_name
     return f"""Set-Location "{skillopt_root}"
@@ -302,7 +348,9 @@ python scripts/train.py `
   model.optimizer_backend=openai_compatible `
   model.target_backend=openai_compatible `
   model.optimizer={model} `
-  model.target={model}
+  model.target={model} `
+  env.max_completion_tokens={target_max_tokens} `
+  env.exec_timeout={target_timeout_seconds}
 
 $exit = $LASTEXITCODE
 Remove-Item Env:OPENAI_COMPATIBLE_API_KEY -ErrorAction SilentlyContinue
@@ -319,6 +367,8 @@ def _shell_commands(
     config_path: Path,
     run_name: str,
     model: str,
+    target_max_tokens: int,
+    target_timeout_seconds: int,
 ) -> str:
     out_root = output_dir / "outputs" / run_name
     return f"""#!/usr/bin/env bash
@@ -339,7 +389,9 @@ python scripts/train.py \\
   model.optimizer_backend=openai_compatible \\
   model.target_backend=openai_compatible \\
   model.optimizer={model} \\
-  model.target={model}
+  model.target={model} \\
+  env.max_completion_tokens={target_max_tokens} \\
+  env.exec_timeout={target_timeout_seconds}
 
 status=$?
 unset OPENAI_COMPATIBLE_API_KEY
@@ -358,6 +410,8 @@ def _readme(
     model: str,
     base_url: str,
     run_name: str,
+    target_max_tokens: int,
+    target_timeout_seconds: int,
 ) -> str:
     return f"""# Physics SkillOpt DeepSeek Training Package
 
@@ -374,6 +428,8 @@ roles, with DeepSeek as the provider.
 - Split directory: `{split_dir}`
 - Model: `{model}`
 - Base URL: `{base_url}`
+- Target max tokens: `{target_max_tokens}`
+- Target timeout seconds: `{target_timeout_seconds}`
 
 ## Run
 

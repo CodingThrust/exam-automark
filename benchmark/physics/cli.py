@@ -43,6 +43,8 @@ from .skillopt_preflight import run_target_preflight
 from .skillopt_training import (
     DEFAULT_DEEPSEEK_BASE_URL,
     DEFAULT_DEEPSEEK_MODEL,
+    DEFAULT_TARGET_MAX_TOKENS,
+    DEFAULT_TARGET_TIMEOUT_SECONDS,
     build_deepseek_training_package,
 )
 from .validation import validate_benchmark_workspace
@@ -207,6 +209,16 @@ def _build_parser() -> argparse.ArgumentParser:
     skillopt_deepseek_parser.add_argument("--model", default=DEFAULT_DEEPSEEK_MODEL)
     skillopt_deepseek_parser.add_argument("--base-url", default=DEFAULT_DEEPSEEK_BASE_URL)
     skillopt_deepseek_parser.add_argument(
+        "--target-max-tokens",
+        type=int,
+        default=DEFAULT_TARGET_MAX_TOKENS,
+    )
+    skillopt_deepseek_parser.add_argument(
+        "--target-timeout-seconds",
+        type=int,
+        default=DEFAULT_TARGET_TIMEOUT_SECONDS,
+    )
+    skillopt_deepseek_parser.add_argument(
         "--run-name",
         default="physics-week9-deepseek-skillopt-r1",
     )
@@ -336,6 +348,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 model=args.model,
                 base_url=args.base_url,
                 run_name=args.run_name,
+                target_max_tokens=args.target_max_tokens,
+                target_timeout_seconds=args.target_timeout_seconds,
             )
             print(json.dumps(result, sort_keys=True))
         elif args.command == "skillopt-target-preflight":

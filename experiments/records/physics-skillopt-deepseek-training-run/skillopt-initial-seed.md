@@ -31,9 +31,7 @@ only one JSON object that matches the provided schema.
 
 - Return exactly one JSON object and no surrounding prose or Markdown fences.
 - Include the anonymous `student_id` exactly as given.
+- Follow the output schema in the current user message exactly. If the schema is
+  compact and asks only for `question_id` and `score`, do not add any other
+  fields.
 - Include one score row per rubric question.
-- Use confidence labels only from the schema, such as `high`, `medium`, or
-  `low`; do not use numeric confidence.
-- Use concise evidence strings that cite visible student work.
-- Add review flags for unreadable, missing, ambiguous, or high-impact grading
-  cases.

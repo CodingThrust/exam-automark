@@ -16,6 +16,11 @@ class SkillOptDeepSeekTrainingPackageTests(unittest.TestCase):
             split_dir = root / "skillopt_split"
             split_dir.mkdir()
             output_dir = root / "deepseek_package"
+            (output_dir / "outputs" / "old-run").mkdir(parents=True)
+            (output_dir / "outputs" / "old-run" / "result.json").write_text(
+                "{}",
+                encoding="utf-8",
+            )
 
             manifest = build_deepseek_training_package(
                 split_dir=split_dir,
@@ -41,9 +46,11 @@ class SkillOptDeepSeekTrainingPackageTests(unittest.TestCase):
             self.assertTrue((output_dir / "commands.sh").exists())
             generated = set(manifest["generated_files"])
             self.assertIn("configs/_base_/default.yaml", generated)
+            self.assertNotIn("outputs/old-run/result.json", generated)
             text = "\n".join(path.read_text(encoding="utf-8") for path in output_dir.rglob("*") if path.is_file())
             self.assertIn("Read-Host \"DeepSeek API key\"", text)
             self.assertIn("OPENAI_COMPATIBLE_BASE_URL", text)
+            self.assertIn("PYTHONUTF8", text)
             self.assertIn("model.optimizer_backend=openai_compatible", text)
             self.assertNotIn("sk-", text)
 

@@ -73,6 +73,7 @@ def build_deepseek_training_package(
         path.relative_to(output_dir).as_posix()
         for path in output_dir.rglob("*")
         if path.is_file()
+        and path.relative_to(output_dir).parts[0] != "outputs"
     )
     if "manifest.json" not in generated_files:
         generated_files.append("manifest.json")
@@ -257,6 +258,7 @@ $env:OPENAI_COMPATIBLE_MODEL = "{model}"
 $env:OPENAI_COMPATIBLE_TEMPERATURE = "0"
 $env:OPENAI_COMPATIBLE_MAX_TOKENS = "4096"
 $env:OPENAI_COMPATIBLE_TIMEOUT_SECONDS = "120"
+$env:PYTHONUTF8 = "1"
 """
 
 
@@ -272,6 +274,7 @@ export OPENAI_COMPATIBLE_MODEL="{model}"
 export OPENAI_COMPATIBLE_TEMPERATURE="0"
 export OPENAI_COMPATIBLE_MAX_TOKENS="4096"
 export OPENAI_COMPATIBLE_TIMEOUT_SECONDS="120"
+export PYTHONUTF8="1"
 """
 
 
@@ -303,6 +306,7 @@ python scripts/train.py `
 
 $exit = $LASTEXITCODE
 Remove-Item Env:OPENAI_COMPATIBLE_API_KEY -ErrorAction SilentlyContinue
+Remove-Item Env:PYTHONUTF8 -ErrorAction SilentlyContinue
 "SkillOpt DeepSeek training exit=$exit"
 exit $exit
 """
@@ -339,6 +343,7 @@ python scripts/train.py \\
 
 status=$?
 unset OPENAI_COMPATIBLE_API_KEY
+unset PYTHONUTF8
 echo "SkillOpt DeepSeek training exit=$status"
 exit "$status"
 """

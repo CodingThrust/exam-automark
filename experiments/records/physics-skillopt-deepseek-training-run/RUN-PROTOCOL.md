@@ -204,6 +204,49 @@ should use a fresh output directory such as:
 Data/physics/benchmark/skillopt/physics-week9-deepseek-training-r1/outputs/physics-week9-deepseek-skillopt-r2-short-seed
 ```
 
+Fifth run issue and local fix:
+
+- the `r2-short-seed` run progressed through rollout, reflection, and aggregate,
+  then failed while writing `merged_patch.json` because Python defaulted to the
+  Windows `gbk` codec:
+
+```text
+UnicodeEncodeError: 'gbk' codec can't encode character ...
+```
+
+- the generated DeepSeek environment files now set `PYTHONUTF8=1` before
+  launching SkillOpt, and remove it after the command exits;
+- the local `physics_grading` rollout also became resume-aware: if
+  `predictions/<id>/result.json` already exists, it can reuse that result instead
+  of calling the target model again;
+- inspection of `r2-short-seed` showed another target-output issue: the original
+  output schema asked for long evidence strings, confidence, and flags for all
+  12 physics subquestions. DeepSeek often used the full completion budget and
+  produced truncated JSON;
+- the local `physics_grading` rollout now asks the target model for compact
+  SkillOpt scoring JSON only:
+
+```json
+{
+  "student_id": "S016",
+  "scores": [
+    {"question_id": "Q1a", "score": 2.0}
+  ],
+  "total": 30.0
+}
+```
+
+The compact schema is for SkillOpt reward calculation only. It does not replace
+the full reproducible grading output schema used by the main exam-automark
+benchmark runs.
+
+Because the prompt contract changed from verbose grading JSON to compact scoring
+JSON, the next real training run should use a fresh output directory:
+
+```text
+Data/physics/benchmark/skillopt/physics-week9-deepseek-training-r1/outputs/physics-week9-deepseek-skillopt-r3-compact-utf8
+```
+
 ## Actual Training Command
 
 The generated PowerShell command is:
@@ -266,6 +309,9 @@ Completed:
 - local Windows UTF-8 `skill_init` read patch applied to SkillOpt,
 - local `physics_grading` rollout hardened against non-JSON target responses,
 - local `physics_grading` seed skill shortened and tracked in this record,
+- generated DeepSeek command sets `PYTHONUTF8=1`,
+- generated package manifest excludes ignored `outputs/` run artifacts,
+- local `physics_grading` rollout uses compact score-only JSON for SkillOpt reward,
 - no-model SkillOpt adapter smoke check passed,
 - tests for the package generator.
 

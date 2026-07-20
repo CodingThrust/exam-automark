@@ -33,6 +33,11 @@ from .runner import (
     run_student_with_retries,
 )
 from .schema import ProviderResult, ScoreRecord
+from .skillopt import (
+    build_skillopt_pilot_summary,
+    write_skillopt_pilot_json,
+    write_skillopt_pilot_markdown,
+)
 from .validation import validate_benchmark_workspace
 
 
@@ -155,6 +160,17 @@ def _build_parser() -> argparse.ArgumentParser:
     metrics_parser.add_argument("--output-md", type=Path)
     metrics_parser.add_argument("--bootstrap-seed", type=int, default=20260701)
     metrics_parser.add_argument("--bootstrap-samples", type=int, default=10_000)
+
+    skillopt_parser = subparsers.add_parser(
+        "skillopt-pilot",
+        help="summarize development runs as a privacy-safe SkillOpt pilot anchor",
+    )
+    skillopt_parser.add_argument("--root", type=Path, required=True)
+    skillopt_parser.add_argument("--baseline-run", type=Path, required=True)
+    skillopt_parser.add_argument("--candidate-run", type=Path, required=True)
+    skillopt_parser.add_argument("--output-json", type=Path, required=True)
+    skillopt_parser.add_argument("--output-md", type=Path)
+    skillopt_parser.add_argument("--train-fraction", type=float, default=0.5)
     return parser
 
 
@@ -230,6 +246,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                 write_metrics_json(args.output_json, result)
             if args.output_md:
                 write_metrics_markdown(args.output_md, result)
+            print(json.dumps(result, sort_keys=True))
+        elif args.command == "skillopt-pilot":
+            result = build_skillopt_pilot_summary(
+                args.root,
+                args.baseline_run,
+                args.candidate_run,
+                train_fraction=args.train_fraction,
+            )
+            write_skillopt_pilot_json(args.output_json, result)
+            if args.output_md:
+                write_skillopt_pilot_markdown(args.output_md, result)
             print(json.dumps(result, sort_keys=True))
         return 0
     except SystemExit as error:

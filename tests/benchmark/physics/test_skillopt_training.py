@@ -21,6 +21,11 @@ class SkillOptDeepSeekTrainingPackageTests(unittest.TestCase):
                 "{}",
                 encoding="utf-8",
             )
+            (output_dir / "preflight" / "old-run").mkdir(parents=True)
+            (output_dir / "preflight" / "old-run" / "raw_response.txt").write_text(
+                "private model output",
+                encoding="utf-8",
+            )
 
             manifest = build_deepseek_training_package(
                 split_dir=split_dir,
@@ -36,6 +41,8 @@ class SkillOptDeepSeekTrainingPackageTests(unittest.TestCase):
                 "physics_skillopt_deepseek_training_package",
             )
             self.assertEqual(manifest["model"], "deepseek-v4-pro")
+            self.assertEqual(manifest["target_max_tokens"], 12000)
+            self.assertEqual(manifest["target_timeout_seconds"], 240)
             self.assertIn("manifest.json", manifest["generated_files"])
             self.assertTrue((output_dir / "README.md").exists())
             self.assertTrue((output_dir / "env.deepseek.ps1").exists())
@@ -47,9 +54,15 @@ class SkillOptDeepSeekTrainingPackageTests(unittest.TestCase):
             generated = set(manifest["generated_files"])
             self.assertIn("configs/_base_/default.yaml", generated)
             self.assertNotIn("outputs/old-run/result.json", generated)
+            self.assertNotIn("preflight/old-run/raw_response.txt", generated)
             text = "\n".join(path.read_text(encoding="utf-8") for path in output_dir.rglob("*") if path.is_file())
             self.assertIn("Read-Host \"DeepSeek API key\"", text)
             self.assertIn("OPENAI_COMPATIBLE_BASE_URL", text)
+            self.assertIn('OPENAI_COMPATIBLE_MAX_TOKENS = "12000"', text)
+            self.assertIn('OPENAI_COMPATIBLE_TIMEOUT_SECONDS = "240"', text)
+            self.assertIn("env.max_completion_tokens=12000", text)
+            self.assertIn("env.exec_timeout=240", text)
+            self.assertIn("max_completion_tokens: 12000", text)
             self.assertIn("PYTHONUTF8", text)
             self.assertIn("model.optimizer_backend=openai_compatible", text)
             self.assertNotIn("sk-", text)

@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://exam-automark.local/schemas/autoresearch-experiment-record.schema.json",
+  "title": "AI Grading Autoresearch Experiment Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_type",
+    "record_id",
+    "generated_at",
+    "mode",
+    "git",
+    "scope",
+    "candidate",
+    "prompt_packets",
+    "metrics",
+    "gates",
+    "orchestration",
+    "decision",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "record_type": {
+      "type": "string",
+      "const": "ai_grading_autoresearch_experiment"
+    },
+    "record_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["dry-run", "execute"]
+    },
+    "git": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["branch", "commit", "dirty", "status_summary"],
+      "properties": {
+        "branch": {
+          "type": ["string", "null"]
+        },
+        "commit": {
+          "type": ["string", "null"]
+        },
+        "dirty": {
+          "type": "boolean"
+        },
+        "status_summary": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "course_id",
+        "assessment_id",
+        "course_spec_path",
+        "data_inventory_path",
+        "data_snapshot_hash",
+        "raw_data_policy"
+      ],
+      "properties": {
+        "course_id": {
+          "type": "string"
+        },
+        "assessment_id": {
+          "type": "string"
+        },
+        "course_spec_path": {
+          "type": "string"
+        },
+        "data_inventory_path": {
+          "type": "string"
+        },
+        "data_snapshot_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "raw_data_policy": {
+          "type": "string"
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_id",
+        "baseline_skill",
+        "candidate_skill",
+        "editable_surface",
+        "generation_status"
+      ],
+      "properties": {
+        "candidate_id": {
+          "type": "string"
+        },
+        "baseline_skill": {
+          "$ref": "#/$defs/skillSnapshot"
+        },
+        "candidate_skill": {
+          "$ref": "#/$defs/skillSnapshot"
+        },
+        "editable_surface": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "generation_status": {
+          "type": "string"
+        }
+      }
+    },
+    "prompt_packets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "development", "heldout"],
+      "properties": {
+        "policy": {
+          "type": "string"
+        },
+        "development": {
+          "$ref": "#/$defs/packetSet"
+        },
+        "heldout": {
+          "$ref": "#/$defs/packetSet"
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "guardrails"],
+      "properties": {
+        "primary": {
+          "type": "string"
+        },
+        "guardrails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["development", "heldout"],
+      "properties": {
+        "development": {
+          "$ref": "#/$defs/gate"
+        },
+        "heldout": {
+          "$ref": "#/$defs/gate"
+        }
+      }
+    },
+    "orchestration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["skillopt", "codex_headless", "claude_headless"],
+      "properties": {
+        "skillopt": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "instructions"],
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "instructions": {
+              "type": "string"
+            }
+          }
+        },
+        "codex_headless": {
+          "$ref": "#/$defs/commandTemplate"
+        },
+        "claude_headless": {
+          "$ref": "#/$defs/commandTemplate"
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason", "rollback_policy"],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "rollback_policy": {
+          "type": "string"
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["program_path", "schema_path", "run_script_path"],
+      "properties": {
+        "program_path": {
+          "type": "string"
+        },
+        "schema_path": {
+          "type": "string"
+        },
+        "run_script_path": {
+          "type": "string"
+        },
+        "output_path": {
+          "type": ["string", "null"]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "skillSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "skill_version_id", "canonical_hash"],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "skill_version_id": {
+          "type": "string"
+        },
+        "canonical_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "packetSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "packet_ids"],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "packet_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "criteria"],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "criteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "commandTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "command"],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "command": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

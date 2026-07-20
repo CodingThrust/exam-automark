@@ -205,7 +205,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "run-model-packet",
         help="run a text-only model provider against a prompt packet",
     )
-    run_model.add_argument("--provider", choices=("deepseek",), required=True)
+    run_model.add_argument("--provider", choices=("deepseek", "kimi"), required=True)
     run_model.add_argument("--model", required=True)
     run_model.add_argument("--input-mode", choices=("text-only",), required=True)
     run_model.add_argument("--packet", type=Path, required=True)
@@ -215,7 +215,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run_model.add_argument("--max-tokens", type=int)
     run_model.add_argument("--max-retries", type=int, default=0)
     run_model.add_argument("--response-format", default="json_object")
-    run_model.add_argument("--endpoint", default="https://api.deepseek.com")
+    run_model.add_argument("--endpoint")
     run_model.add_argument("--run-commit")
     run_model.add_argument(
         "--dry-run",

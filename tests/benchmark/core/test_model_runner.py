@@ -170,6 +170,48 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertIn("raw_text", raw_responses)
         self.assertEqual(len(metadata["text_source_hash"]), 64)
 
+    def test_run_model_packet_supports_kimi_dry_run_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = self._build_grade_packet(root, "transcript.json", b'{"answer":"ok"}')
+            output = root / "runs" / "kimi-baseline-text-G1-dev-r1"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "run-model-packet",
+                        "--provider",
+                        "kimi",
+                        "--model",
+                        "kimi-k2.6",
+                        "--input-mode",
+                        "text-only",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(output),
+                        "--dry-run",
+                    ]
+                )
+
+            result = json.loads(stdout.getvalue())
+            metadata = json.loads((output / "run-metadata.json").read_text(encoding="utf-8"))
+            command = (output / "command.txt").read_text(encoding="utf-8")
+
+        self.assertEqual(code, 0)
+        self.assertEqual(result["provider"], "kimi")
+        self.assertEqual(result["model"], "kimi-k2.6")
+        self.assertEqual(result["validation_status"], "passed")
+        self.assertEqual(metadata["provider"], "kimi")
+        self.assertEqual(metadata["endpoint"], "https://api.moonshot.ai/v1")
+        self.assertEqual(
+            metadata["api_key_source"],
+            "MOONSHOT_API_KEY environment variable",
+        )
+        self.assertNotIn("MOONSHOT_API_KEY=", command)
+        self.assertNotIn("sk-", command)
+
     def test_run_model_packet_rejects_image_inputs_for_text_only_deepseek(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

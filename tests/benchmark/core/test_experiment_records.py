@@ -604,6 +604,47 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("codex-heldout-G1-baseline-vs-candidate.metrics.json", report)
         self.assertIn("Raw student transcripts", report)
 
+    def test_physics_kimi_benchmark_protocol_records_reproducible_commands(self):
+        protocol = Path(
+            "experiments/records/physics-kimi-benchmark-run/RUN-PROTOCOL.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("kimi-k2.6", protocol)
+        self.assertIn("MOONSHOT_API_KEY", protocol)
+        self.assertIn("https://api.moonshot.ai/v1", protocol)
+        self.assertIn("--provider kimi", protocol)
+        self.assertIn("G1-dev-r1", protocol)
+        self.assertIn("G1-test-r1", protocol)
+        self.assertIn("kimi-heldout-G1-baseline-vs-candidate.metrics.json", protocol)
+        self.assertIn("Windows PowerShell", protocol)
+        self.assertIn("macOS/Linux", protocol)
+        self.assertIn("Raw student transcripts", protocol)
+        self.assertNotIn("MOONSHOT_API_KEY=sk-", protocol)
+
+    def test_github_pages_ai_grading_handoff_is_actionable(self):
+        index = Path("docs/index.md").read_text(encoding="utf-8")
+        handoff = Path("docs/ai-grading-test-handoff.md").read_text(encoding="utf-8")
+
+        self.assertIn("AI Grading Test Handoff", index)
+        self.assertIn("AI Grading Test Handoff", handoff)
+        self.assertIn("Kimi Route", handoff)
+        self.assertIn("Claude Code Route", handoff)
+        self.assertIn("Private Data Handoff", handoff)
+        self.assertIn("Kimi Auth Preflight", handoff)
+        self.assertIn("Kimi Held-Out Run", handoff)
+        self.assertIn("Claude Code Held-Out Run", handoff)
+        self.assertIn("physics-week9-baseline-text-strict-schema/G1-dev-r1", handoff)
+        self.assertIn("physics-week9-candidate-v2-text-strict-schema/G1-test-r1", handoff)
+        self.assertIn("private HKUST-GZ GitLab", handoff)
+        self.assertIn("Test-Path Data\\physics\\benchmark\\text_packets", handoff)
+        self.assertIn("MOONSHOT_API_KEY", handoff)
+        self.assertIn("claude -p", handoff)
+        self.assertIn("Required Per-Student Output Shape", handoff)
+        self.assertIn("\"confidence\": \"high\"", handoff)
+        self.assertIn("Return This Summary To YY", handoff)
+        self.assertIn("Do not commit", handoff)
+        self.assertNotIn("MOONSHOT_API_KEY=sk-", handoff)
+
     def test_dsaa3071_w2_w6_source_inventory_records_private_pdf_pairs(self):
         record_dir = Path("experiments/records/DSAA3071-w2-w6-source-inventory")
         inventory = json.loads(

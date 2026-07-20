@@ -52,6 +52,47 @@ The runner intentionally refuses to overwrite an existing output directory. If a
 listed output directory already exists, append a suffix such as `-r2`,
 `-authfix`, or `-cn-authfix` and report the actual path used.
 
+## Private Data Handoff
+
+The reviewer must have a private copy of the `Data/` directory before any model
+run can start. This GitHub Pages site is only the public instruction layer; it
+does not contain private student data.
+
+Place the private data at the repository root:
+
+```text
+exam-automark/
+  Data/
+    physics/
+      benchmark/
+        text_packets/
+        runs/
+        gold/
+```
+
+Minimum data needed for this Physics Week 9 benchmark:
+
+- `Data/physics/benchmark/text_packets/physics-week9-baseline-text-strict-schema/G1-dev-r1`
+- `Data/physics/benchmark/text_packets/physics-week9-candidate-v2-text-strict-schema/G1-dev-r1`
+- `Data/physics/benchmark/text_packets/physics-week9-baseline-text-strict-schema/G1-test-r1`
+- `Data/physics/benchmark/text_packets/physics-week9-candidate-v2-text-strict-schema/G1-test-r1`
+- the Physics benchmark gold-score files under `Data/physics/benchmark`
+
+Share `Data/` only through the private HKUST-GZ GitLab repository or another
+advisor-approved private channel. Do not put `Data/` in the public GitHub repo
+or GitHub Pages.
+
+Before running models, verify the packets exist:
+
+```powershell
+Test-Path Data\physics\benchmark\text_packets\physics-week9-baseline-text-strict-schema\G1-dev-r1
+Test-Path Data\physics\benchmark\text_packets\physics-week9-candidate-v2-text-strict-schema\G1-dev-r1
+Test-Path Data\physics\benchmark\text_packets\physics-week9-baseline-text-strict-schema\G1-test-r1
+Test-Path Data\physics\benchmark\text_packets\physics-week9-candidate-v2-text-strict-schema\G1-test-r1
+```
+
+All four checks should return `True`.
+
 ## Required Per-Student Output Shape
 
 Every model-produced student file must be a JSON object matching this contract:

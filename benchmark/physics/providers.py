@@ -142,6 +142,21 @@ class DeepSeekProvider:
             usage=_usage_to_dict(getattr(response, "usage", None)),
         )
 
+    def complete_chat(self, system: str, user: str) -> ProviderResult:
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            response_format={"type": "json_object"},
+        )
+        return ProviderResult(
+            raw_text=response.choices[0].message.content,
+            model=response.model,
+            usage=_usage_to_dict(getattr(response, "usage", None)),
+        )
+
 
 def _openai_result(response: Any) -> ProviderResult:
     return ProviderResult(

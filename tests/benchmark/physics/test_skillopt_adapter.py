@@ -7,7 +7,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 from benchmark.physics.cli import main
-from benchmark.physics.skillopt_adapter import build_skillopt_split
+from benchmark.physics.skillopt_adapter import build_skillopt_split, validate_skillopt_split
 
 
 class SkillOptAdapterExportTests(unittest.TestCase):
@@ -68,6 +68,58 @@ class SkillOptAdapterExportTests(unittest.TestCase):
             result = json.loads(stdout.getvalue())
             self.assertEqual(result["record_type"], "physics_skillopt_split_export")
             self.assertTrue((output_dir / "val" / "items.json").exists())
+
+    def test_smoke_validation_accepts_exported_split(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, dev_packet, test_packet = self._fixture(Path(tmp))
+            output_dir = root / "skillopt_split"
+            build_skillopt_split(root, dev_packet, test_packet, output_dir)
+
+            report = validate_skillopt_split(output_dir)
+
+            self.assertEqual(report["record_type"], "physics_skillopt_split_smoke_check")
+            self.assertEqual(report["status"], "ready")
+            self.assertEqual(report["failed_checks"], [])
+            self.assertEqual(report["split_counts"], {"test": 2, "train": 2, "val": 2})
+
+    def test_smoke_validation_rejects_duplicate_item_ids(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, dev_packet, test_packet = self._fixture(Path(tmp))
+            output_dir = root / "skillopt_split"
+            build_skillopt_split(root, dev_packet, test_packet, output_dir)
+            train_path = output_dir / "train" / "items.json"
+            train_items = self._read_items(train_path)
+            train_items[1]["id"] = train_items[0]["id"]
+            self._write_json(train_path, train_items)
+
+            report = validate_skillopt_split(output_dir)
+
+            self.assertEqual(report["status"], "not_ready")
+            self.assertIn("duplicate_item_ids", report["failed_checks"])
+
+    def test_cli_smoke_validates_exported_split(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root, dev_packet, test_packet = self._fixture(Path(tmp))
+            output_dir = root / "skillopt_split"
+            build_skillopt_split(root, dev_packet, test_packet, output_dir)
+            output_json = root / "smoke.json"
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                code = main(
+                    [
+                        "skillopt-smoke",
+                        "--split-dir",
+                        str(output_dir),
+                        "--output",
+                        str(output_json),
+                    ]
+                )
+
+            self.assertEqual(code, 0)
+            result = json.loads(stdout.getvalue())
+            self.assertEqual(result["status"], "ready")
+            self.assertTrue(output_json.exists())
 
     def _fixture(self, root_parent: Path) -> tuple[Path, Path, Path]:
         root = root_parent / "benchmark"

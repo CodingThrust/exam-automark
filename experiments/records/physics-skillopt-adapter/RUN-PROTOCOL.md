@@ -58,6 +58,40 @@ Data/physics/benchmark/skillopt/physics-week9-text-split-v1/
 The generated split contains anonymous transcripts and gold scores. It must stay
 under `Data/` and must not be committed to GitHub.
 
+## Smoke Check Command
+
+The smoke check validates the generated SkillOpt split without calling any model:
+
+PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m benchmark.physics.cli skillopt-smoke `
+  --split-dir Data\physics\benchmark\skillopt\physics-week9-text-split-v1 `
+  --output Data\physics\benchmark\skillopt\physics-week9-text-split-v1\smoke-check.json
+```
+
+macOS/Linux:
+
+```bash
+python -m benchmark.physics.cli skillopt-smoke \
+  --split-dir Data/physics/benchmark/skillopt/physics-week9-text-split-v1 \
+  --output Data/physics/benchmark/skillopt/physics-week9-text-split-v1/smoke-check.json
+```
+
+Expected status:
+
+```json
+{
+  "failed_checks": [],
+  "split_counts": {
+    "test": 18,
+    "train": 4,
+    "val": 4
+  },
+  "status": "ready"
+}
+```
+
 ## Split Contract
 
 - `train`: first half of the development packet by sorted anonymous student ID.

@@ -65,6 +65,72 @@ def build_skillopt_split(
     return manifest
 
 
+def validate_skillopt_split(split_dir: Path) -> dict[str, Any]:
+    """Run a local no-model smoke check for a SkillOpt split directory."""
+    checks = []
+    split_counts: dict[str, int] = {}
+    all_ids: list[str] = []
+    item_summaries = []
+    for split_name in ("train", "val", "test"):
+        path = split_dir / split_name / "items.json"
+        if not path.exists():
+            checks.append(f"missing_{split_name}_items")
+            split_counts[split_name] = 0
+            continue
+        try:
+            items = _read_json(path)
+        except json.JSONDecodeError:
+            checks.append(f"invalid_{split_name}_json")
+            split_counts[split_name] = 0
+            continue
+        if not isinstance(items, list) or not items:
+            checks.append(f"empty_or_nonlist_{split_name}_items")
+            split_counts[split_name] = 0
+            continue
+        split_counts[split_name] = len(items)
+        for item in items:
+            item_checks = _validate_item(item, split_name)
+            checks.extend(item_checks)
+            if isinstance(item, dict) and isinstance(item.get("id"), str):
+                all_ids.append(item["id"])
+                item_summaries.append(
+                    {
+                        "id": item["id"],
+                        "split": split_name,
+                        "student_id": item.get("student_id"),
+                        "source_split": item.get("source_split"),
+                    }
+                )
+    duplicate_ids = sorted({item_id for item_id in all_ids if all_ids.count(item_id) > 1})
+    if duplicate_ids:
+        checks.append("duplicate_item_ids")
+
+    manifest_path = split_dir / "manifest.json"
+    if not manifest_path.exists():
+        checks.append("missing_manifest")
+    else:
+        manifest = _read_json(manifest_path)
+        if manifest.get("heldout_policy") is None:
+            checks.append("missing_heldout_policy")
+        privacy = manifest.get("privacy_scope", {})
+        if privacy.get("contains_real_student_identities") is not False:
+            checks.append("real_identity_policy_not_false")
+        if privacy.get("must_remain_under_data_dir") is not True:
+            checks.append("data_dir_policy_not_true")
+
+    failed_checks = sorted(set(checks))
+    return {
+        "record_type": "physics_skillopt_split_smoke_check",
+        "generated_at": _utc_now(),
+        "split_dir": str(split_dir),
+        "status": "ready" if not failed_checks else "not_ready",
+        "failed_checks": failed_checks,
+        "split_counts": split_counts,
+        "item_count": len(all_ids),
+        "item_summaries": sorted(item_summaries, key=lambda row: row["id"]),
+    }
+
+
 def _load_packet_items(
     packet: Path,
     gold_scores: dict[ScoreKey, float],
@@ -130,6 +196,41 @@ def _load_packet_items(
     return items
 
 
+def _validate_item(item: Any, split_name: str) -> list[str]:
+    if not isinstance(item, dict):
+        return [f"{split_name}_item_not_object"]
+    checks = []
+    required_fields = (
+        "id",
+        "task_type",
+        "student_id",
+        "input_mode",
+        "course",
+        "rubric",
+        "output_schema",
+        "transcript",
+        "gold_scores",
+        "gold_total",
+        "prompt_packet",
+    )
+    missing = [field for field in required_fields if field not in item]
+    if missing:
+        checks.append(f"{split_name}_item_missing_required_fields")
+    if not _is_anonymous_student_id(item.get("student_id")):
+        checks.append(f"{split_name}_nonanonymous_student_id")
+    if item.get("input_mode") != "text-only":
+        checks.append(f"{split_name}_not_text_only")
+    if not isinstance(item.get("gold_scores"), list) or not item.get("gold_scores"):
+        checks.append(f"{split_name}_missing_gold_scores")
+    if not isinstance(item.get("transcript"), dict):
+        checks.append(f"{split_name}_missing_transcript")
+    if split_name == "test" and item.get("source_split") != "held_out":
+        checks.append("test_source_split_not_held_out")
+    if split_name in {"train", "val"} and item.get("source_split") != "development":
+        checks.append(f"{split_name}_source_split_not_development")
+    return checks
+
+
 def _gold_rows_for_student(
     gold_scores: dict[ScoreKey, float],
     student_id: str,
@@ -176,6 +277,10 @@ def _packet_summary(packet: Path) -> dict[str, Any]:
         "rubric_hash": manifest.get("rubric_hash"),
         "output_schema_hash": manifest.get("output_schema_hash"),
     }
+
+
+def _is_anonymous_student_id(value: Any) -> bool:
+    return isinstance(value, str) and len(value) == 4 and value.startswith("S") and value[1:].isdigit()
 
 
 def _directory_hash(path: Path) -> str:

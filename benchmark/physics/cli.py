@@ -38,7 +38,7 @@ from .skillopt import (
     write_skillopt_pilot_json,
     write_skillopt_pilot_markdown,
 )
-from .skillopt_adapter import build_skillopt_split
+from .skillopt_adapter import build_skillopt_split, validate_skillopt_split
 from .validation import validate_benchmark_workspace
 
 
@@ -182,6 +182,13 @@ def _build_parser() -> argparse.ArgumentParser:
     skillopt_export_parser.add_argument("--test-packet", type=Path, required=True)
     skillopt_export_parser.add_argument("--output-dir", type=Path, required=True)
     skillopt_export_parser.add_argument("--train-fraction", type=float, default=0.5)
+
+    skillopt_smoke_parser = subparsers.add_parser(
+        "skillopt-smoke",
+        help="validate a generated SkillOpt split without calling a model",
+    )
+    skillopt_smoke_parser.add_argument("--split-dir", type=Path, required=True)
+    skillopt_smoke_parser.add_argument("--output", type=Path)
     return parser
 
 
@@ -278,6 +285,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                 train_fraction=args.train_fraction,
             )
             print(json.dumps(result, sort_keys=True))
+        elif args.command == "skillopt-smoke":
+            result = validate_skillopt_split(args.split_dir)
+            if args.output:
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                args.output.write_text(
+                    json.dumps(result, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+            print(json.dumps(result, sort_keys=True))
+            return 0 if result["status"] == "ready" else 1
         return 0
     except SystemExit as error:
         return int(error.code)

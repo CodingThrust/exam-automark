@@ -38,6 +38,7 @@ from .skillopt import (
     write_skillopt_pilot_json,
     write_skillopt_pilot_markdown,
 )
+from .skillopt_adapter import build_skillopt_split
 from .validation import validate_benchmark_workspace
 
 
@@ -171,6 +172,16 @@ def _build_parser() -> argparse.ArgumentParser:
     skillopt_parser.add_argument("--output-json", type=Path, required=True)
     skillopt_parser.add_argument("--output-md", type=Path)
     skillopt_parser.add_argument("--train-fraction", type=float, default=0.5)
+
+    skillopt_export_parser = subparsers.add_parser(
+        "skillopt-export",
+        help="export text-only physics packets as a SkillOpt split directory",
+    )
+    skillopt_export_parser.add_argument("--root", type=Path, required=True)
+    skillopt_export_parser.add_argument("--dev-packet", type=Path, required=True)
+    skillopt_export_parser.add_argument("--test-packet", type=Path, required=True)
+    skillopt_export_parser.add_argument("--output-dir", type=Path, required=True)
+    skillopt_export_parser.add_argument("--train-fraction", type=float, default=0.5)
     return parser
 
 
@@ -257,6 +268,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             write_skillopt_pilot_json(args.output_json, result)
             if args.output_md:
                 write_skillopt_pilot_markdown(args.output_md, result)
+            print(json.dumps(result, sort_keys=True))
+        elif args.command == "skillopt-export":
+            result = build_skillopt_split(
+                args.root,
+                args.dev_packet,
+                args.test_packet,
+                args.output_dir,
+                train_fraction=args.train_fraction,
+            )
             print(json.dumps(result, sort_keys=True))
         return 0
     except SystemExit as error:

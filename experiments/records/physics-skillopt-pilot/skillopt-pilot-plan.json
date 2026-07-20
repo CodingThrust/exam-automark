@@ -1,0 +1,22 @@
+{
+  "acceptance_gate": {
+    "exact_agreement_improves": true,
+    "macro_accuracy_improves": true,
+    "severe_error_rate_not_worse": true,
+    "total_score_mae_not_worse": true
+  },
+  "data_policy": {
+    "commit_data_outputs": false,
+    "heldout_for_selection": false,
+    "raw_student_answers_in_anchor": false
+  },
+  "official_skillopt_adapter_requirements": [
+    "SplitDataLoader subclass",
+    "rollout helper with persisted conversations",
+    "EnvAdapter subclass",
+    "YAML config"
+  ],
+  "pilot_command": "python -m benchmark.physics.cli skillopt-pilot --root Data/physics/benchmark --baseline-run Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-baseline-text-G1-dev-r1-strict-schema --candidate-run Data/physics/benchmark/runs/physics-week9-baseline-candidate-v2/deepseek-candidate-text-G1-dev-r1-strict-schema --output-json Data/physics/benchmark/runs/physics-week9-skillopt-pilot/pre-skillopt-dev-anchor.json --output-md Data/physics/benchmark/runs/physics-week9-skillopt-pilot/pre-skillopt-dev-anchor.md",
+  "record_type": "physics_skillopt_pilot_plan",
+  "status": "pre_adapter_anchor"
+}

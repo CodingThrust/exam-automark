@@ -52,6 +52,7 @@ def build_deepseek_training_package(
             model=model,
         ),
         "expected-return-files.md": _expected_return_files(run_name=run_name),
+        "configs/_base_/default.yaml": _skillopt_base_yaml(skillopt_root=skillopt_root),
     }
     for relative, text in files.items():
         path = output_dir / relative
@@ -69,7 +70,7 @@ def build_deepseek_training_package(
         newline="\n",
     )
     generated_files = sorted(
-        str(path.relative_to(output_dir))
+        path.relative_to(output_dir).as_posix()
         for path in output_dir.rglob("*")
         if path.is_file()
     )
@@ -130,6 +131,113 @@ env:
   workers: 1
   max_completion_tokens: 4096
   limit: 0
+"""
+
+
+def _skillopt_base_yaml(*, skillopt_root: Path) -> str:
+    source = skillopt_root / "configs" / "_base_" / "default.yaml"
+    if source.exists():
+        return source.read_text(encoding="utf-8")
+    return """# SkillOpt default configuration - base for all environments.
+
+model:
+  backend: azure_openai
+  optimizer: gpt-5.5
+  target: gpt-5.5
+  optimizer_backend: openai_chat
+  target_backend: openai_chat
+  reasoning_effort: medium
+  rewrite_reasoning_effort: ""
+  rewrite_max_completion_tokens: 64000
+  codex_exec_path: codex
+  codex_exec_sandbox: workspace-write
+  codex_exec_profile: ""
+  codex_exec_full_auto: false
+  codex_exec_reasoning_effort: none
+  codex_exec_use_sdk: auto
+  codex_exec_network_access: false
+  codex_exec_web_search: false
+  codex_exec_approval_policy: never
+  claude_code_exec_path: claude
+  claude_code_exec_profile: ""
+  claude_code_exec_use_sdk: auto
+  claude_code_exec_effort: medium
+  claude_code_exec_max_thinking_tokens: 16384
+  codex_trace_to_optimizer: true
+  azure_openai_endpoint: ""
+  azure_openai_api_version: "2024-12-01-preview"
+  azure_openai_api_key: ""
+  azure_openai_auth_mode: ""
+  azure_openai_ad_scope: "https://cognitiveservices.azure.com/.default"
+  azure_openai_managed_identity_client_id: ""
+  optimizer_azure_openai_endpoint: ""
+  optimizer_azure_openai_api_version: "2024-12-01-preview"
+  optimizer_azure_openai_api_key: ""
+  optimizer_azure_openai_auth_mode: ""
+  optimizer_azure_openai_ad_scope: "https://cognitiveservices.azure.com/.default"
+  optimizer_azure_openai_managed_identity_client_id: ""
+  target_azure_openai_endpoint: ""
+  target_azure_openai_api_version: "2024-12-01-preview"
+  target_azure_openai_api_key: ""
+  target_azure_openai_auth_mode: ""
+  target_azure_openai_ad_scope: "https://cognitiveservices.azure.com/.default"
+  target_azure_openai_managed_identity_client_id: ""
+  minimax_base_url: ""
+  minimax_api_key: ""
+  minimax_model: "MiniMax-M2.7"
+  minimax_temperature: "0.7"
+  minimax_max_tokens: "8000"
+  minimax_enable_thinking: "false"
+  optimizer_minimax_base_url: ""
+  target_minimax_base_url: ""
+  optimizer_minimax_api_key: ""
+  target_minimax_api_key: ""
+
+train:
+  num_epochs: 4
+  train_size: 0
+  batch_size: 40
+  accumulation: 1
+  seed: 42
+
+gradient:
+  minibatch_size: 8
+  merge_batch_size: 8
+  analyst_workers: 16
+  max_analyst_rounds: 3
+  failure_only: false
+
+optimizer:
+  learning_rate: 4
+  min_learning_rate: 2
+  lr_scheduler: cosine
+  lr_control_mode: fixed
+  skill_update_mode: patch
+  use_slow_update: true
+  slow_update_samples: 20
+  slow_update_gate_with_selection: false
+  longitudinal_pair_policy: mixed
+  use_meta_skill: true
+  use_skill_aware_reflection: false
+  skill_aware_appendix_source: both
+  skill_aware_consolidate_threshold: 0
+
+evaluation:
+  use_gate: true
+  sel_env_num: 0
+  test_env_num: 0
+  eval_test: true
+
+env:
+  name: ""
+  skill_init: ""
+  split_mode: ratio
+  split_seed: 42
+  split_dir: ""
+  data_path: ""
+  split_output_dir: ""
+  exec_timeout: 120
+  out_root: ""
 """
 
 

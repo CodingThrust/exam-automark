@@ -49,9 +49,10 @@ Data/physics/benchmark/skillopt/physics-week9-deepseek-training-r1/
   README.md
   commands.ps1
   commands.sh
+  configs/_base_/default.yaml
+  configs/physics_grading/deepseek.yaml
   env.deepseek.ps1
   env.deepseek.sh
-  configs/physics_grading/deepseek.yaml
   expected-return-files.md
   manifest.json
 ```
@@ -110,6 +111,34 @@ Observed result:
 }
 ```
 
+Training package config smoke check:
+
+```powershell
+Set-Location D:\AI-Grading-Platform\SkillOpt
+
+python -c "import json; from pathlib import Path; from skillopt.config import load_config, flatten_config; from scripts.train import get_adapter; cfg=flatten_config(load_config(r'D:\AI-Grading-Platform\exam-automark-multicourse\Data\physics\benchmark\skillopt\physics-week9-deepseek-training-r1\configs\physics_grading\deepseek.yaml')); adapter=get_adapter(cfg); adapter.setup(cfg); loader=adapter.get_dataloader(); summary={'env':cfg.get('env'), 'train':len(loader.train_items), 'val':len(loader.val_items), 'test':len(loader.test_items), 'skill_init_exists':Path(cfg.get('skill_init')).exists()}; print(json.dumps(summary, indent=2, sort_keys=True))"
+```
+
+Observed result:
+
+```json
+{
+  "env": "physics_grading",
+  "skill_init_exists": true,
+  "test": 18,
+  "train": 4,
+  "val": 4
+}
+```
+
+First run issue and fix:
+
+- initial `commands.ps1` failed before any model call because the generated
+  package config referenced `../_base_/default.yaml` but did not include
+  `configs/_base_/default.yaml`;
+- the package generator now copies or embeds the SkillOpt base config, and the
+  regenerated ignored Data package passes the config smoke check above.
+
 ## Actual Training Command
 
 The generated PowerShell command is:
@@ -166,6 +195,7 @@ Completed:
 
 - no-secret DeepSeek training package generator,
 - generated local package under ignored `Data/`,
+- generated package includes `configs/_base_/default.yaml`,
 - external SkillOpt checkout cloned from Microsoft SkillOpt `main`,
 - local `physics_grading` SkillOpt adapter copied and registered,
 - no-model SkillOpt adapter smoke check passed,

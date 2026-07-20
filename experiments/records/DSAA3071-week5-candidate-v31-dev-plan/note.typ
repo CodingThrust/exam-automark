@@ -43,6 +43,53 @@ This note covers `DSAA3071` / `week5_test` on branch `codex/dsaa3071-week5-dev-t
   [Text source hash], [`9f9be72bf088...`],
 )
 
+#pagebreak()
+
+== Prompt And Skill Evolution
+
+#card(soft)[#strong[Why this matters.] The DSAA3071 experiment is not only a model benchmark. It is a grading-skill development experiment for concept-heavy short-answer and proof questions. The conditions below show how the prompt/skill moved from standard-answer matching toward evidence-first, type-aware, and open-ended grading.]
+
+#table(columns: (auto, 1.25fr, 1.65fr, 1.35fr), stroke: line, inset: (x: 5pt, y: 3.7pt),
+  [#strong[Cond.]], [#strong[Prompt / skill package]], [#strong[Main grading behavior]], [#strong[Why it was tested]],
+  [B0], [baseline prompt + `rubric_v0.json`], [Simple frozen-rubric grading from the extracted official solution. It mainly checks whether the answer matches the expected solution and point criteria.], [Reference starting point. Shows how the uncalibrated framework behaves on DSAA3071.],
+  [R1], [same baseline prompt + `rubric_v1.json`], [Keeps the prompt constant but upgrades the rubric into concept/key-term elements, score bands, full-credit rules, and material-error caps.], [Isolates whether a better rubric helps before changing the grading skill.],
+  [C3], [`candidate-v3` prompt + `rubric_v1.json`], [Adds a type-aware grading algorithm: multiple choice, short answer, calculation, algorithm, proof, and essay are scored by different rules. It uses evidence before score and separates key-term, concept, and relation evidence.], [Tests whether the grading skill itself improves over the baseline prompt under the same rubric.],
+  [C31-r2], [`candidate-v3.1` open-ended prompt + `rubric_v1.json`], [Adds open-ended adequacy: the standard answer is an anchor, not an exhaustive whitelist. Valid, relevant, non-contradictory constructions or explanations can receive credit even when phrased differently.], [Addresses over-harsh scoring on open-ended answers, especially Q8 and Q9.],
+  [C32], [`candidate-v3.2` prompt + `rubric_v2.json`], [Adds official-style adequacy and "avoid being overly harsh" rules. It also adds targeted policies for Q7 proof locality, Q8 power-of-two enumerators, and Q9 Church-Turing conceptual evidence.], [Current calibrated package. Tests whether targeted prompt plus targeted rubric reduce aggregate error.],
+)
+
+#v(4pt)
+#grid(columns: (1fr, 1fr), gutter: 8pt,
+  card(white)[#strong[What changed from C3 to C31-r2]
+  C31-r2 keeps the core candidate-v3 algorithm but adds an explicit open-ended adequacy rule. This tells the grader not to reject a valid answer merely because it is not listed in the official solution.],
+  card(white)[#strong[What changed from C31-r2 to C32]
+  C32 adds official-style tolerance plus question-specific policies. It is less ideal-answer-completeness driven, but still requires the answer to satisfy the actual task and avoids giving credit for material contradictions.],
+)
+
+#card(white)[#strong[Important experimental interpretation.] R1 is close to a rubric-only comparison against B0. C3 is closer to a skill-prompt comparison against R1. C32 is a calibrated package-level comparison because both the prompt and rubric changed. Therefore C32 should be read as the best current grading package on dev, not as a pure one-factor ablation.]
+
+#pagebreak()
+
+== Rubric Evolution
+
+#table(columns: (auto, 1.25fr, 1.65fr, 1.35fr), stroke: line, inset: (x: 5pt, y: 3.7pt),
+  [#strong[Rubric]], [#strong[Used by]], [#strong[Design]], [#strong[Main limitation / improvement]],
+  [`rubric_v0`], [B0], [Draft rubric extracted from the solution PDF. Most questions are represented as point criteria tied closely to the expected answer.], [Good enough to start the benchmark, but weak for concept answers because it gives little guidance about semantic equivalents, partial understanding, or local mistakes.],
+  [`rubric_v1`], [R1, C3, C31-r2], [Concept/key-term rubric. Adds scoring elements, evidence levels, score bands, full-credit rules, and material-error caps. It distinguishes absent, mentioned-only, partial understanding, demonstrated, and misused evidence.], [Improves structure and partial-credit behavior, but Q8/Q9 still showed over-harsh or unstable behavior in dev.],
+  [`rubric_v2`], [C32], [Targeted calibration from C31-r2 error diagnosis. Adds official-style tolerance and specific rules for Q7 proof locality, Q8 `0^(2^n)` enumerator behavior, and Q9 broad Church-Turing evidence.], [Best aggregate dev MAE so far, but Q8 remains unresolved and Q6 worsens versus R1.],
+)
+
+#v(4pt)
+#table(columns: (1fr, 1fr, 1fr), stroke: line, inset: (x: 5pt, y: 3.7pt),
+  [#strong[Q7 proof locality]], [#strong[Q8 enumerator policy]], [#strong[Q9 conceptual essay policy]],
+  [Preserve credit for each correctly demonstrated proof direction. A local nonmembership/rejection mistake should not erase unrelated construction credit.],
+  [The target language is `0^(2^n)`. Distinguish powers of two from linear even lengths `2n`, invalid extra outputs, wrong base cases, and vague loop mechanisms.],
+  [Accept broad valid evidence for the Church-Turing thesis when it supports effective computability. Do not require exact labels such as lambda calculus if the explanation is equivalent and non-contradictory.],
+)
+
+#card(soft)[#strong[Data discipline.] These rubric changes were calibrated from aggregate development errors and official solutions. The report does not copy raw student answer text, and official scores provide per-question gold scores but not detailed official rationales.]
+
+#pagebreak()
 == Key Findings With Visual Evidence
 
 #grid(columns: 4, gutter: 8pt,

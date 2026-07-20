@@ -139,6 +139,23 @@ First run issue and fix:
 - the package generator now copies or embeds the SkillOpt base config, and the
   regenerated ignored Data package passes the config smoke check above.
 
+Second run issue and local fix:
+
+- after config loading succeeded, SkillOpt failed on Windows while reading
+  `skillopt/envs/physics_grading/skills/initial.md` with the platform default
+  `gbk` codec;
+- the local external SkillOpt checkout was patched to read `skill_init` with
+  explicit UTF-8:
+
+```python
+with open(skill_init_path, encoding="utf-8") as f:
+    skill_init = f.read()
+```
+
+This is a local source-checkout patch in
+`D:\AI-Grading-Platform\SkillOpt\skillopt\engine\trainer.py`, not a change to
+the upstream Microsoft SkillOpt repository.
+
 ## Actual Training Command
 
 The generated PowerShell command is:
@@ -198,6 +215,7 @@ Completed:
 - generated package includes `configs/_base_/default.yaml`,
 - external SkillOpt checkout cloned from Microsoft SkillOpt `main`,
 - local `physics_grading` SkillOpt adapter copied and registered,
+- local Windows UTF-8 `skill_init` read patch applied to SkillOpt,
 - no-model SkillOpt adapter smoke check passed,
 - tests for the package generator.
 

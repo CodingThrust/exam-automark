@@ -11,6 +11,7 @@
     "generated_at",
     "mode",
     "git",
+    "single_prompt",
     "scope",
     "candidate",
     "prompt_packets",
@@ -60,6 +61,23 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "single_prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "purpose"],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "purpose": {
+          "type": "string"
         }
       }
     },
@@ -209,6 +227,21 @@
         "reason": {
           "type": "string"
         },
+        "primary_metric": {
+          "type": "string"
+        },
+        "baseline_metric": {
+          "type": "number"
+        },
+        "candidate_metric": {
+          "type": "number"
+        },
+        "delta": {
+          "type": "number"
+        },
+        "lower_is_better": {
+          "type": "boolean"
+        },
         "rollback_policy": {
           "type": "string"
         }
@@ -226,6 +259,9 @@
           "type": "string"
         },
         "run_script_path": {
+          "type": "string"
+        },
+        "single_prompt_path": {
           "type": "string"
         },
         "output_path": {

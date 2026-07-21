@@ -23,7 +23,7 @@ files under `Data/` are committed in this integration record.
 | Codex CLI headless and Claude headless reproduction | Done | Headless prompt, Python runner, and Claude Code reproduction guide are committed. |
 | DSAA3071 W2/W3/W4/W6 source organization | Done as inventory | Source PDFs are organized and fingerprinted; anonymization/model runs are not started. |
 | Physics multi-model benchmark | Partially done | DeepSeek and Codex CLI are reported; Kimi/Claude remain external/advisor-run or future runs. |
-| autoresearch workflow design | Done as design scaffold | A conservative one-prompt research-loop design is committed; no model calls were made. |
+| autoresearch workflow design | MVP dry-run scaffold | A conservative one-prompt research-loop design and deterministic dry-run are committed; no model calls were made. |
 
 ## TODO 1: quantum.harness / beginner-training
 
@@ -310,15 +310,23 @@ Artifacts:
 
 Current claim:
 
-A conservative autoresearch design scaffold is committed. It adapts the
-single-prompt autoresearch idea to grading-skill experiments by keeping the
-editable surface narrow, evaluating candidates against fixed dev metrics, and
-locking held-out tests behind a gate.
+A conservative autoresearch design scaffold and minimal executable dry-run are
+committed. It adapts the single-prompt autoresearch idea to grading-skill
+experiments by keeping the editable surface narrow, evaluating candidates
+against fixed dev metrics, and locking held-out tests behind a gate.
+
+MVP dry-run artifacts:
+
+- `experiments/records/autoresearch-design/single-prompt.md`
+- `experiments/records/autoresearch-design/run-dry-run.ps1`
+- `experiments/records/autoresearch-design/dry-run-result.json`
 
 Limitation:
 
-This is a design and dry-run scaffold only. It is not yet wired to run full
-model experiments end to end, and it made no model calls.
+This is still not the full advisor-requested autoresearch system. It can run a
+deterministic control-loop dry-run from one prompt, but it is not yet wired to
+generate candidate skills with a live model, run full model experiments end to
+end, or update reports automatically.
 
 Recommended next step:
 
@@ -368,7 +376,7 @@ Safe advisor-facing summary:
 4. DSAA3071 is being scaled up carefully: Week 5 has development experiments,
    while W2/W3/W4/W6 are currently source-inventory-ready only.
 5. sci-brain and autoresearch outputs are now available as research-background
-   and workflow-design artifacts, not as direct grading conclusions.
+   and workflow-design/MVP dry-run artifacts, not as direct grading conclusions.
 
 ## What Remains Before A Strong Final Claim
 

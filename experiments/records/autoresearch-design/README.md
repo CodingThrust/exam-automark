@@ -1,7 +1,22 @@
 # AI Grading Autoresearch Workflow Design
 
-Status: design and dry-run scaffold only. No model calls were made, no prompt
-packets were rebuilt, and no files under `Data/` are touched by this record.
+Status: design plus minimal executable dry-run scaffold. No model calls were
+made, no prompt packets were rebuilt, and no files under `Data/` are touched by
+this record.
+
+## MVP Dry-Run
+
+The directory now includes a single-prompt dry-run entry point:
+
+- `single-prompt.md`: human-readable one-prompt instruction for an AI runner.
+- `run-dry-run.ps1`: Windows PowerShell command wrapper.
+- `run_experiment.py`: deterministic dry-run record builder.
+- `dry-run-result.json`: committed sample output from the dry-run loop.
+
+This MVP demonstrates the autoresearch control shape: read tracked inputs,
+compare a baseline metric with a candidate metric, accept or reject the
+candidate, and write a structured experiment record. It is not yet a full
+model-driven autoresearch run.
 
 ## Purpose
 

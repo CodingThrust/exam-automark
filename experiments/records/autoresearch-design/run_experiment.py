@@ -8,6 +8,7 @@ metadata so the real orchestrator has a stable target shape.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -67,6 +68,27 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--baseline-skill", type=Path, required=True)
     parser.add_argument("--candidate-skill", type=Path, required=True)
     parser.add_argument(
+        "--prompt",
+        type=Path,
+        default=Path("experiments/records/autoresearch-design/single-prompt.md"),
+        help="Tracked single-prompt instruction file for this dry-run loop.",
+    )
+    parser.add_argument(
+        "--primary-metric",
+        default="total_score_mae",
+        help="Primary metric name. Lower is better in this MVP dry-run.",
+    )
+    parser.add_argument(
+        "--baseline-metric",
+        type=float,
+        help="Optional baseline metric value for deterministic accept/reject dry-run.",
+    )
+    parser.add_argument(
+        "--candidate-metric",
+        type=float,
+        help="Optional candidate metric value for deterministic accept/reject dry-run.",
+    )
+    parser.add_argument(
         "--generated-at",
         help="ISO-8601 UTC timestamp. Defaults to current time.",
     )
@@ -79,6 +101,7 @@ def build_record(args: argparse.Namespace, repo_root: Path) -> dict[str, Any]:
     inventory = read_json(resolve(repo_root, args.data_inventory))
     baseline_skill = read_json(resolve(repo_root, args.baseline_skill))
     candidate_skill = read_json(resolve(repo_root, args.candidate_skill))
+    prompt_path = resolve(repo_root, args.prompt)
 
     generated_at = args.generated_at or utc_now()
     git = git_state(repo_root)
@@ -89,6 +112,7 @@ def build_record(args: argparse.Namespace, repo_root: Path) -> dict[str, Any]:
         "generated_at": generated_at,
         "mode": args.mode,
         "git": git,
+        "single_prompt": prompt_summary(args.prompt, prompt_path),
         "scope": {
             "course_id": course["course_id"],
             "assessment_id": course["assessment_id"],
@@ -122,7 +146,7 @@ def build_record(args: argparse.Namespace, repo_root: Path) -> dict[str, Any]:
             },
         },
         "metrics": {
-            "primary": "total_score_mae",
+            "primary": args.primary_metric,
             "guardrails": [
                 "subquestion_mae",
                 "exact_agreement",
@@ -179,17 +203,53 @@ def build_record(args: argparse.Namespace, repo_root: Path) -> dict[str, Any]:
                 ],
             },
         },
-        "decision": {
-            "status": "not_evaluated",
-            "reason": "dry-run scaffold only; no model outputs or metrics were produced",
-            "rollback_policy": "Rejected real candidates must keep an experiment record, preserve audit outputs, and restore the last accepted candidate.",
-        },
+        "decision": build_decision(args),
         "artifacts": {
             "program_path": "experiments/records/autoresearch-design/program.md",
             "schema_path": "experiments/records/autoresearch-design/schema.json",
             "run_script_path": "experiments/records/autoresearch-design/run_experiment.py",
+            "single_prompt_path": relative_or_posix(args.prompt),
             "output_path": relative_or_posix(args.output) if args.output else None,
         },
+    }
+
+
+def prompt_summary(prompt_arg: Path, prompt_path: Path) -> dict[str, str]:
+    prompt_text = prompt_path.read_text(encoding="utf-8")
+    return {
+        "path": relative_or_posix(prompt_arg),
+        "sha256": hashlib.sha256(prompt_text.encode("utf-8")).hexdigest(),
+        "purpose": "One human-readable prompt that tells an AI runner how to execute this dry-run autoresearch loop.",
+    }
+
+
+def build_decision(args: argparse.Namespace) -> dict[str, Any]:
+    rollback_policy = (
+        "Rejected real candidates must keep an experiment record, preserve audit "
+        "outputs, and restore the last accepted candidate."
+    )
+    if args.baseline_metric is None or args.candidate_metric is None:
+        return {
+            "status": "not_evaluated",
+            "reason": "dry-run scaffold only; no baseline/candidate metric values were provided",
+            "rollback_policy": rollback_policy,
+        }
+
+    delta = args.candidate_metric - args.baseline_metric
+    improved = delta < 0
+    return {
+        "status": "accept" if improved else "reject",
+        "reason": (
+            f"candidate {args.primary_metric} improved in dry-run"
+            if improved
+            else f"candidate {args.primary_metric} did not improve in dry-run"
+        ),
+        "primary_metric": args.primary_metric,
+        "baseline_metric": args.baseline_metric,
+        "candidate_metric": args.candidate_metric,
+        "delta": delta,
+        "lower_is_better": True,
+        "rollback_policy": rollback_policy,
     }
 
 

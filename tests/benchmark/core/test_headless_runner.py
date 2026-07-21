@@ -133,6 +133,148 @@ class HeadlessRunnerCliTests(unittest.TestCase):
             "{\"student_id\":\"S001\",\"scores\":[]}",
         )
 
+    def test_kimi_headless_dry_run_records_stream_json_command(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = _write_text_grading_packet(root)
+            output = root / "runs" / "kimi-synthetic-G1-dev-r1"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "run-headless-packet",
+                        "--engine",
+                        "kimi",
+                        "--model",
+                        "kimi-code/kimi-for-coding",
+                        "--input-mode",
+                        "text-only",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(output),
+                        "--dry-run",
+                        "--run-commit",
+                        "abc1234",
+                    ]
+                )
+            result = json.loads(stdout.getvalue())
+            metadata = json.loads((output / "run-metadata.json").read_text())
+            validation = json.loads((output / "validation.json").read_text())
+            command = (output / "command.txt").read_text(encoding="utf-8")
+
+        self.assertEqual(code, 0)
+        self.assertEqual(result["provider"], "kimi_cli")
+        self.assertEqual(result["validation_status"], "passed")
+        self.assertEqual(metadata["provider"], "kimi_cli")
+        self.assertEqual(metadata["engine"], "kimi")
+        self.assertEqual(metadata["engine_binary"], "kimi")
+        self.assertEqual(metadata["api_key_source"], "kimi_cli_external_auth")
+        self.assertEqual(validation["students_passed"], 1)
+        self.assertIn("kimi --model kimi-code/kimi-for-coding", command)
+        self.assertIn("--output-format stream-json", command)
+        self.assertIn("--prompt '<prompt>'", command)
+        self.assertNotIn("MOONSHOT_API_KEY", command)
+
+    def test_kimi_stream_json_output_uses_last_assistant_message(self):
+        stdout = "\n".join(
+            [
+                json.dumps({"role": "assistant", "content": "draft"}),
+                json.dumps(
+                    {
+                        "role": "assistant",
+                        "content": "{\"student_id\":\"S001\",\"scores\":[]}",
+                    }
+                ),
+                json.dumps(
+                    {
+                        "role": "meta",
+                        "type": "session.resume_hint",
+                        "content": "To resume this session: ...",
+                    }
+                ),
+            ]
+        )
+
+        self.assertEqual(
+            _extract_headless_cli_raw_text("kimi", stdout, Path("missing.txt")),
+            "{\"student_id\":\"S001\",\"scores\":[]}",
+        )
+
+    def test_kimi_stream_json_output_requires_an_assistant_message(self):
+        stdout = json.dumps({"role": "meta", "type": "session.resume_hint"})
+
+        with self.assertRaisesRegex(ValueError, "no assistant message"):
+            _extract_headless_cli_raw_text("kimi", stdout, Path("missing.txt"))
+
+    def test_kimi_headless_multimodal_dry_run_references_image_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = _write_image_grading_packet(root, "page-001.jpg", b"fake image")
+            output = root / "runs" / "kimi-multimodal-G1-dev-r1"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "run-headless-packet",
+                        "--engine",
+                        "kimi",
+                        "--model",
+                        "kimi-code/k3",
+                        "--input-mode",
+                        "multimodal",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(output),
+                        "--dry-run",
+                        "--run-commit",
+                        "abc1234",
+                    ]
+                )
+            result = json.loads(stdout.getvalue())
+            metadata = json.loads((output / "run-metadata.json").read_text())
+            prompt = (output / "headless-prompts" / "S001.prompt.txt").read_text(
+                encoding="utf-8"
+            )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(result["provider"], "kimi_cli")
+        self.assertEqual(result["validation_status"], "passed")
+        self.assertEqual(metadata["input_mode"], "multimodal")
+        self.assertIn("Blind headless grading run (multimodal)", prompt)
+        self.assertIn("inputs/S001/page-001.jpg", prompt)
+        self.assertNotIn("fake image", prompt)
+
+    def test_headless_multimodal_rejects_pdf_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = _write_image_grading_packet(root, "paper.pdf", b"fake pdf")
+            stderr = io.StringIO()
+
+            with contextlib.redirect_stderr(stderr):
+                code = main(
+                    [
+                        "run-headless-packet",
+                        "--engine",
+                        "kimi",
+                        "--model",
+                        "kimi-code/k3",
+                        "--input-mode",
+                        "multimodal",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(root / "runs" / "pdf-run"),
+                        "--dry-run",
+                    ]
+                )
+
+        self.assertNotEqual(code, 0)
+        self.assertIn("multimodal runner expects page images, not PDF", stderr.getvalue())
+
     def test_reproducing_script_help_runs_from_repo_root(self):
         completed = subprocess.run(
             [sys.executable, "scripts/run_headless_packet.py", "--help"],
@@ -210,6 +352,41 @@ def _write_text_grading_packet(root: Path) -> Path:
         )
     if code != 0:
         raise AssertionError("failed to build synthetic text grading packet")
+    return packet_root / "G1-dev-r1"
+
+
+def _write_image_grading_packet(root: Path, input_name: str, input_bytes: bytes) -> Path:
+    input_root = root / "inputs"
+    student_dir = input_root / "S001"
+    student_dir.mkdir(parents=True)
+    (student_dir / input_name).write_bytes(input_bytes)
+    packet_root = root / "packets"
+    with contextlib.redirect_stdout(io.StringIO()):
+        code = main(
+            [
+                "build-packet",
+                "--course",
+                str(FIXTURES / "course_dsaa3073_hw1.json"),
+                "--packet-id",
+                "G1-dev-r1",
+                "--condition",
+                "G1",
+                "--task",
+                "grade",
+                "--prompt",
+                str(FIXTURES / "grade_prompt.txt"),
+                "--rubric",
+                str(FIXTURES / "rubric_dsaa3073_hw1.json"),
+                "--student-id",
+                "S001",
+                "--input-root",
+                str(input_root),
+                "--output-root",
+                str(packet_root),
+            ]
+        )
+    if code != 0:
+        raise AssertionError("failed to build synthetic image grading packet")
     return packet_root / "G1-dev-r1"
 
 

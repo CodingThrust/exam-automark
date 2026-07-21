@@ -7,11 +7,13 @@ from pathlib import Path
 from typing import Any
 
 from .model_runner import (
+    INPUT_MODES,
     DryRunTextProvider,
     ModelProviderResult,
     _append_jsonl,
     _compose_student_prompt,
     _git_commit,
+    _list_image_inputs,
     _load_text_inputs,
     _merge_usage,
     _parse_json_result,
@@ -24,13 +26,28 @@ from .run_metadata import validate_run_metadata
 from .schema import CourseSpec
 
 
-SUPPORTED_HEADLESS_ENGINES = {"codex", "claude"}
+SUPPORTED_HEADLESS_ENGINES = {"codex", "claude", "kimi"}
 
 HEADLESS_GRADING_WRAPPER = """# Blind headless grading run
 
 You are grading one anonymous student's answer in a reproducible headless run.
 Use only the packet context included below. Do not inspect parent directories,
 gold scores, previous run outputs, reports, or any file outside the packet.
+
+Return exactly one JSON object matching the supplied output schema. Do not wrap
+the JSON in Markdown. Preserve the anonymous student_id exactly.
+"""
+
+HEADLESS_MULTIMODAL_WRAPPER = """# Blind headless grading run (multimodal)
+
+You are grading one anonymous student's scanned paper in a reproducible
+headless run. Your working directory is the prompt packet.
+
+The student's scanned paper pages are image files listed under input_images in
+the packet context below, with paths relative to your working directory. Read
+every listed image file with your file-reading tools and grade directly from
+the page images. Do not inspect parent directories, gold scores, previous run
+outputs, reports, or any other files.
 
 Return exactly one JSON object matching the supplied output schema. Do not wrap
 the JSON in Markdown. Preserve the anonymous student_id exactly.
@@ -54,8 +71,8 @@ class HeadlessPacketRunConfig:
 def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
     if config.engine not in SUPPORTED_HEADLESS_ENGINES:
         raise ValueError(f"unsupported headless engine: {config.engine}")
-    if config.input_mode != "text-only":
-        raise ValueError("headless packet runner currently supports text-only packets")
+    if config.input_mode not in INPUT_MODES:
+        raise ValueError(f"--input-mode must be one of {', '.join(INPUT_MODES)}")
     if config.max_retries < 0:
         raise ValueError("--max-retries must be non-negative")
     if config.output.exists():
@@ -71,7 +88,12 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
     if not student_ids:
         raise ValueError("packet manifest has no student_ids")
 
-    text_inputs = _load_text_inputs(config.packet, student_ids)
+    image_inputs: dict[str, list[str]] = {}
+    text_inputs: dict[str, list[dict[str, str]]] = {}
+    if config.input_mode == "multimodal":
+        image_inputs = _list_image_inputs(config.packet, student_ids)
+    else:
+        text_inputs = _load_text_inputs(config.packet, student_ids)
     config.output.mkdir(parents=True)
     for child in ("outputs", "headless-prompts", "last-messages", "cli-logs"):
         (config.output / child).mkdir()
@@ -91,13 +113,22 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
     validation_rows: list[dict[str, Any]] = []
     usage: dict[str, int | float] = {}
     for student_id in student_ids:
-        prompt = _compose_headless_prompt(
-            prompt_text,
-            student_id,
-            course,
-            rubric,
-            text_inputs[student_id],
-        )
+        if config.input_mode == "multimodal":
+            prompt = _compose_headless_multimodal_prompt(
+                prompt_text,
+                student_id,
+                course,
+                rubric,
+                image_inputs[student_id],
+            )
+        else:
+            prompt = _compose_headless_prompt(
+                prompt_text,
+                student_id,
+                course,
+                rubric,
+                text_inputs[student_id],
+            )
         (config.output / "headless-prompts" / f"{student_id}.prompt.txt").write_text(
             prompt,
             encoding="utf-8",
@@ -151,6 +182,29 @@ def _compose_headless_prompt(
         HEADLESS_GRADING_WRAPPER.rstrip()
         + "\n\n## Packet grading prompt\n\n"
         + _compose_student_prompt(prompt_text, student_id, course, rubric, inputs)
+    )
+
+
+def _compose_headless_multimodal_prompt(
+    prompt_text: str,
+    student_id: str,
+    course: CourseSpec,
+    rubric: dict[str, Any],
+    image_paths: list[str],
+) -> str:
+    context = {
+        "student_id": student_id,
+        "course": course.to_dict(),
+        "rubric": rubric,
+        "input_images": [f"inputs/{student_id}/{path}" for path in image_paths],
+    }
+    return (
+        HEADLESS_MULTIMODAL_WRAPPER.rstrip()
+        + "\n\n## Packet grading prompt\n\n"
+        + prompt_text.rstrip()
+        + f"\n\nOutput student_id must be {student_id}."
+        + "\nPacket context:\n"
+        + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
 
 
@@ -258,15 +312,19 @@ def _complete_with_headless_cli(
     last_message = (
         config.output / "last-messages" / f"{student_id}-a{attempt}.txt"
     ).resolve()
-    argv = _student_command_argv(config, last_message)
-    completed = subprocess.run(
-        argv,
-        input=prompt,
-        cwd=config.packet.resolve(),
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-    )
+    argv = _student_command_argv(config, last_message, prompt=prompt)
+    run_kwargs: dict[str, Any] = {
+        "cwd": config.packet.resolve(),
+        "capture_output": True,
+        "text": True,
+        "encoding": "utf-8",
+    }
+    if config.engine == "kimi":
+        # kimi takes the prompt as a --prompt argument; keep stdin closed.
+        run_kwargs["stdin"] = subprocess.DEVNULL
+    else:
+        run_kwargs["input"] = prompt
+    completed = subprocess.run(argv, **run_kwargs)
     (config.output / "cli-logs" / f"{student_id}-a{attempt}.stdout").write_text(
         completed.stdout,
         encoding="utf-8",
@@ -324,6 +382,7 @@ def _student_command_argv(
     config: HeadlessPacketRunConfig,
     last_message: Path,
     *,
+    prompt: str | None = None,
     resolve_paths: bool = True,
 ) -> list[str]:
     packet = config.packet.resolve() if resolve_paths else config.packet
@@ -351,6 +410,19 @@ def _student_command_argv(
             argv.extend(["--model", config.model])
         argv.append("-")
         return argv
+    if config.engine == "kimi":
+        argv = [config.engine_bin or "kimi"]
+        if config.model:
+            argv.extend(["--model", config.model])
+        argv.extend(
+            [
+                "--output-format",
+                "stream-json",
+                "--prompt",
+                prompt if prompt is not None else "<prompt>",
+            ]
+        )
+        return argv
     return [
         config.engine_bin or "claude",
         "-p",
@@ -374,6 +446,32 @@ def _extract_headless_cli_raw_text(
             if last_message.exists()
             else stdout
         )
+    if engine == "kimi":
+        texts: list[str] = []
+        for line in stdout.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(event, dict) or event.get("role") != "assistant":
+                continue
+            content = event.get("content")
+            if isinstance(content, str) and content.strip():
+                texts.append(content)
+            elif isinstance(content, list):
+                joined = "".join(
+                    part.get("text", "")
+                    for part in content
+                    if isinstance(part, dict) and part.get("type") == "text"
+                ).strip()
+                if joined:
+                    texts.append(joined)
+        if not texts:
+            raise ValueError("Kimi CLI stream-json output had no assistant message")
+        return texts[-1]
 
     payload = json.loads(stdout)
     if not isinstance(payload, dict):
@@ -432,9 +530,7 @@ def _metadata(
         "student_ids": list(manifest.get("student_ids", ())),
         "run_commit": config.run_commit or _git_commit(),
         "api_key_source": f"{config.engine}_cli_external_auth",
-        "engine_binary": config.engine_bin or (
-            _default_codex_binary() if config.engine == "codex" else "claude"
-        ),
+        "engine_binary": config.engine_bin or _default_engine_binary(config.engine),
         "engine_version": None if config.dry_run else _engine_version(config),
         "cost_estimate": {
             "estimated": True,
@@ -447,7 +543,7 @@ def _metadata(
 
 
 def _engine_version(config: HeadlessPacketRunConfig) -> str | None:
-    binary = config.engine_bin or (_default_codex_binary() if config.engine == "codex" else "claude")
+    binary = config.engine_bin or _default_engine_binary(config.engine)
     try:
         completed = subprocess.run(
             [binary, "--version"],
@@ -464,6 +560,14 @@ def _engine_version(config: HeadlessPacketRunConfig) -> str | None:
 
 def _provider_name(engine: str) -> str:
     return f"{engine}_cli"
+
+
+def _default_engine_binary(engine: str) -> str:
+    if engine == "codex":
+        return _default_codex_binary()
+    if engine == "kimi":
+        return "kimi"
+    return "claude"
 
 
 def _default_codex_binary() -> str:

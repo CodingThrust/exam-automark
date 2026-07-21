@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import shlex
@@ -23,6 +24,18 @@ IMAGE_OR_DOCUMENT_SUFFIXES = {
     ".tiff",
     ".webp",
 }
+IMAGE_SUFFIXES = IMAGE_OR_DOCUMENT_SUFFIXES - {".pdf"}
+IMAGE_MIME_TYPES = {
+    ".bmp": "image/bmp",
+    ".gif": "image/gif",
+    ".jpeg": "image/jpeg",
+    ".jpg": "image/jpeg",
+    ".png": "image/png",
+    ".tif": "image/tiff",
+    ".tiff": "image/tiff",
+    ".webp": "image/webp",
+}
+INPUT_MODES = ("text-only", "multimodal")
 TEXT_SUFFIXES = {".csv", ".json", ".md", ".text", ".txt"}
 OPENAI_COMPATIBLE_PROVIDERS = {
     "deepseek": {
@@ -75,6 +88,18 @@ class TextModelProvider(Protocol):
         ...
 
 
+class MultimodalModelProvider(Protocol):
+    def complete_images(
+        self,
+        prompt: str,
+        images: list[dict[str, Any]],
+        *,
+        student_id: str,
+        course: CourseSpec,
+    ) -> ModelProviderResult:
+        ...
+
+
 def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
     packet = config.packet
     output = config.output
@@ -82,8 +107,10 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
         raise FileExistsError(f"run output already exists: {output}")
     if config.provider not in OPENAI_COMPATIBLE_PROVIDERS:
         raise ValueError(f"unsupported provider: {config.provider}")
-    if config.input_mode != "text-only":
-        raise ValueError("only --input-mode text-only is supported for model packet runs")
+    if config.input_mode not in INPUT_MODES:
+        raise ValueError(
+            f"--input-mode must be one of {', '.join(INPUT_MODES)}"
+        )
     if config.max_retries < 0:
         raise ValueError("--max-retries must be non-negative")
 
@@ -97,7 +124,12 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
     if not student_ids:
         raise ValueError("packet manifest has no student_ids")
 
-    text_inputs = _load_text_inputs(packet, student_ids)
+    text_inputs: dict[str, list[dict[str, str]]] = {}
+    image_inputs: dict[str, list[dict[str, Any]]] = {}
+    if config.input_mode == "multimodal":
+        image_inputs = _load_image_inputs(packet, student_ids)
+    else:
+        text_inputs = _load_text_inputs(packet, student_ids)
     provider = _provider_from_config(config)
     output.mkdir(parents=True)
     (output / "outputs").mkdir()
@@ -117,12 +149,22 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
     _write_json(output / "run-metadata.json", metadata)
 
     for student_id in student_ids:
-        prompt = _compose_student_prompt(prompt_text, student_id, course, rubric, text_inputs[student_id])
+        images = None
+        if config.input_mode == "multimodal":
+            images = image_inputs[student_id]
+            prompt = _compose_multimodal_prompt(
+                prompt_text, student_id, course, rubric, images
+            )
+        else:
+            prompt = _compose_student_prompt(
+                prompt_text, student_id, course, rubric, text_inputs[student_id]
+            )
         success = _run_student(
             provider=provider,
             course=course,
             prompt=prompt,
             student_id=student_id,
+            images=images,
             output=output,
             raw_responses=raw_responses,
             failures=failures,
@@ -157,7 +199,9 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
     }
 
 
-def _provider_from_config(config: ModelPacketRunConfig) -> TextModelProvider:
+def _provider_from_config(
+    config: ModelPacketRunConfig,
+) -> TextModelProvider | MultimodalModelProvider:
     if config.dry_run:
         return DryRunTextProvider(config.model)
     settings = _provider_settings(config.provider)
@@ -204,6 +248,19 @@ class DryRunTextProvider:
             model=self.model,
             usage={"dry_run_prompt_chars": len(prompt)},
         )
+
+    def complete_images(
+        self,
+        prompt: str,
+        images: list[dict[str, Any]],
+        *,
+        student_id: str,
+        course: CourseSpec,
+    ) -> ModelProviderResult:
+        result = self.complete_text(prompt, student_id=student_id, course=course)
+        result.usage["dry_run_image_count"] = len(images)
+        result.usage["dry_run_image_bytes"] = sum(len(image["data"]) for image in images)
+        return result
 
 
 class OpenAICompatibleTextProvider:
@@ -262,6 +319,50 @@ class OpenAICompatibleTextProvider:
             usage=_usage_to_dict(getattr(response, "usage", None)),
         )
 
+    def complete_images(
+        self,
+        prompt: str,
+        images: list[dict[str, Any]],
+        *,
+        student_id: str,
+        course: CourseSpec,
+    ) -> ModelProviderResult:
+        api_key = os.environ.get(self.api_key_env)
+        if not api_key:
+            raise ValueError(
+                f"{self.api_key_env} is required for non-dry {self.display_name} runs"
+            )
+        from openai import OpenAI
+
+        client = OpenAI(api_key=api_key, base_url=self.endpoint)
+        content: list[dict[str, Any]] = [{"type": "text", "text": prompt}]
+        for image in images:
+            encoded = base64.b64encode(image["data"]).decode("ascii")
+            content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{image['mime']};base64,{encoded}"},
+                }
+            )
+        request: dict[str, Any] = {
+            "model": self.model,
+            "messages": [{"role": "user", "content": content}],
+            "response_format": {"type": self.response_format},
+        }
+        if self.temperature is not None:
+            request["temperature"] = self.temperature
+        if self.top_p is not None:
+            request["top_p"] = self.top_p
+        if self.max_tokens is not None:
+            request["max_tokens"] = self.max_tokens
+        response = client.chat.completions.create(**request)
+        message = response.choices[0].message.content
+        return ModelProviderResult(
+            raw_text=message or "",
+            model=getattr(response, "model", self.model),
+            usage=_usage_to_dict(getattr(response, "usage", None)),
+        )
+
 
 def _load_text_inputs(packet: Path, student_ids: tuple[str, ...]) -> dict[str, list[dict[str, str]]]:
     result: dict[str, list[dict[str, str]]] = {}
@@ -302,6 +403,81 @@ def _load_text_inputs(packet: Path, student_ids: tuple[str, ...]) -> dict[str, l
     return result
 
 
+def _list_image_inputs(packet: Path, student_ids: tuple[str, ...]) -> dict[str, list[str]]:
+    """Return sorted packet-relative image paths per student, validating types."""
+    result: dict[str, list[str]] = {}
+    for student_id in student_ids:
+        input_dir = packet / "inputs" / student_id
+        if not input_dir.is_dir():
+            raise FileNotFoundError(f"input directory missing for: {student_id}")
+        files = sorted(path for path in input_dir.rglob("*") if path.is_file())
+        if not files:
+            raise FileNotFoundError(f"no input files for: {student_id}")
+        pdfs = [
+            path.relative_to(input_dir).as_posix()
+            for path in files
+            if path.suffix.lower() == ".pdf"
+        ]
+        if pdfs:
+            raise ValueError(
+                "multimodal runner expects page images, not PDF, for "
+                f"{student_id}: {', '.join(pdfs)}; convert each PDF page to an image first"
+            )
+        unsupported = [
+            path.relative_to(input_dir).as_posix()
+            for path in files
+            if path.suffix.lower() not in IMAGE_SUFFIXES
+        ]
+        if unsupported:
+            raise ValueError(
+                "multimodal runner found non-image input files for "
+                f"{student_id}: {', '.join(unsupported)}"
+            )
+        result[student_id] = [path.relative_to(input_dir).as_posix() for path in files]
+    return result
+
+
+def _load_image_inputs(
+    packet: Path, student_ids: tuple[str, ...]
+) -> dict[str, list[dict[str, Any]]]:
+    image_paths = _list_image_inputs(packet, student_ids)
+    result: dict[str, list[dict[str, Any]]] = {}
+    for student_id, paths in image_paths.items():
+        input_dir = packet / "inputs" / student_id
+        result[student_id] = [
+            {
+                "path": relative,
+                "mime": IMAGE_MIME_TYPES[(input_dir / relative).suffix.lower()],
+                "data": (input_dir / relative).read_bytes(),
+            }
+            for relative in paths
+        ]
+    return result
+
+
+def _compose_multimodal_prompt(
+    prompt_text: str,
+    student_id: str,
+    course: CourseSpec,
+    rubric: dict[str, Any],
+    images: list[dict[str, Any]],
+) -> str:
+    context = {
+        "student_id": student_id,
+        "course": course.to_dict(),
+        "rubric": rubric,
+        "input_images": [image["path"] for image in images],
+    }
+    return (
+        prompt_text.rstrip()
+        + f"\n\nOutput student_id must be {student_id}."
+        + "\nThe student's scanned paper pages are attached as images in the "
+        "order listed under input_images. Grade from these images directly."
+        + "\nPacket context:\n"
+        + json.dumps(context, ensure_ascii=True, sort_keys=True)
+    )
+
+
 def _compose_student_prompt(
     prompt_text: str,
     student_id: str,
@@ -325,10 +501,11 @@ def _compose_student_prompt(
 
 def _run_student(
     *,
-    provider: TextModelProvider,
+    provider: TextModelProvider | MultimodalModelProvider,
     course: CourseSpec,
     prompt: str,
     student_id: str,
+    images: list[dict[str, Any]] | None,
     output: Path,
     raw_responses: Path,
     failures: Path,
@@ -345,11 +522,19 @@ def _run_student(
                     "\nThe previous response failed validation. Return one corrected "
                     "JSON object only, following the required schema exactly."
                 )
-            result = provider.complete_text(
-                attempt_prompt,
-                student_id=student_id,
-                course=course,
-            )
+            if images is None:
+                result = provider.complete_text(
+                    attempt_prompt,
+                    student_id=student_id,
+                    course=course,
+                )
+            else:
+                result = provider.complete_images(
+                    attempt_prompt,
+                    images,
+                    student_id=student_id,
+                    course=course,
+                )
             payload = _parse_json_result(result.raw_text)
             _validate_grade_payload(payload, student_id, course)
             _write_json(output / "outputs" / f"{student_id}.json", payload)

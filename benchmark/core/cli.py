@@ -8,7 +8,7 @@ from typing import Any
 from .gold import validate_gold_table, write_gold_report
 from .headless_runner import HeadlessPacketRunConfig, run_headless_packet
 from .inventory import write_data_inventory
-from .model_runner import ModelPacketRunConfig, run_model_packet
+from .model_runner import INPUT_MODES, ModelPacketRunConfig, run_model_packet
 from .comparisons import (
     check_three_condition_ablation,
     write_three_condition_ablation_json,
@@ -203,11 +203,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
     run_model = subparsers.add_parser(
         "run-model-packet",
-        help="run a text-only model provider against a prompt packet",
+        help="run a model provider against a prompt packet",
     )
     run_model.add_argument("--provider", choices=("deepseek", "kimi"), required=True)
     run_model.add_argument("--model", required=True)
-    run_model.add_argument("--input-mode", choices=("text-only",), required=True)
+    run_model.add_argument("--input-mode", choices=INPUT_MODES, required=True)
     run_model.add_argument("--packet", type=Path, required=True)
     run_model.add_argument("--output", type=Path, required=True)
     run_model.add_argument("--temperature", type=float)
@@ -225,11 +225,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
     headless = subparsers.add_parser(
         "run-headless-packet",
-        help="run a text-only grading packet through a headless CLI",
+        help="run a grading packet through a headless CLI",
     )
-    headless.add_argument("--engine", choices=("codex", "claude"), required=True)
+    headless.add_argument("--engine", choices=("codex", "claude", "kimi"), required=True)
     headless.add_argument("--model", required=True)
-    headless.add_argument("--input-mode", choices=("text-only",), required=True)
+    headless.add_argument("--input-mode", choices=INPUT_MODES, required=True)
     headless.add_argument("--packet", type=Path, required=True)
     headless.add_argument("--output", type=Path, required=True)
     headless.add_argument("--engine-bin")

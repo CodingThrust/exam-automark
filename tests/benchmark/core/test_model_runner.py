@@ -239,6 +239,98 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertNotEqual(code, 0)
         self.assertIn("text-only runner cannot use image/PDF inputs", stderr.getvalue())
 
+    def test_run_model_packet_multimodal_dry_run_with_image_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = self._build_grade_packet(root, "page-001.jpg", b"fake image")
+            output = root / "runs" / "kimi-multimodal-G1-dev-r1"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "run-model-packet",
+                        "--provider",
+                        "kimi",
+                        "--model",
+                        "kimi-k3",
+                        "--input-mode",
+                        "multimodal",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(output),
+                        "--dry-run",
+                    ]
+                )
+
+            result = json.loads(stdout.getvalue())
+            metadata = json.loads((output / "run-metadata.json").read_text(encoding="utf-8"))
+            usage = json.loads((output / "usage.json").read_text(encoding="utf-8"))
+            response = json.loads((output / "outputs" / "S001.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(code, 0)
+        self.assertEqual(result["validation_status"], "passed")
+        self.assertEqual(result["model"], "kimi-k3")
+        self.assertEqual(metadata["input_mode"], "multimodal")
+        self.assertEqual(usage["dry_run_image_count"], 1)
+        self.assertEqual(usage["dry_run_image_bytes"], len(b"fake image"))
+        self.assertEqual(response["student_id"], "S001")
+
+    def test_run_model_packet_multimodal_rejects_pdf_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = self._build_grade_packet(root, "paper.pdf", b"fake pdf")
+            stderr = io.StringIO()
+
+            with contextlib.redirect_stderr(stderr):
+                code = main(
+                    [
+                        "run-model-packet",
+                        "--provider",
+                        "kimi",
+                        "--model",
+                        "kimi-k3",
+                        "--input-mode",
+                        "multimodal",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(root / "runs" / "pdf-run"),
+                        "--dry-run",
+                    ]
+                )
+
+        self.assertNotEqual(code, 0)
+        self.assertIn("multimodal runner expects page images, not PDF", stderr.getvalue())
+
+    def test_run_model_packet_multimodal_rejects_text_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = self._build_grade_packet(root, "transcript.json", b'{"answer":"ok"}')
+            stderr = io.StringIO()
+
+            with contextlib.redirect_stderr(stderr):
+                code = main(
+                    [
+                        "run-model-packet",
+                        "--provider",
+                        "kimi",
+                        "--model",
+                        "kimi-k3",
+                        "--input-mode",
+                        "multimodal",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(root / "runs" / "text-run"),
+                        "--dry-run",
+                    ]
+                )
+
+        self.assertNotEqual(code, 0)
+        self.assertIn("multimodal runner found non-image input files", stderr.getvalue())
+
     def _build_grade_packet(self, root: Path, input_name: str, input_bytes: bytes) -> Path:
         input_root = root / "inputs"
         student_dir = input_root / "S001"

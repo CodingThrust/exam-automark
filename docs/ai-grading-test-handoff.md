@@ -357,9 +357,9 @@ Use this route when the reviewer has a Moonshot/Kimi API key such as
 `sk-kimi-...`.
 
 If you are Kimi Code, use yourself as the shell executor and run the same Kimi
-API commands below. Do not treat Kimi Code chat output as the benchmark result
-unless a separate Kimi Code headless JSON mode is explicitly documented and
-recorded.
+API commands below. Do not treat Kimi Code chat output as the benchmark result;
+use the documented Kimi Code headless JSON mode instead (see "Kimi Code
+Headless Route" below).
 
 ### Kimi Auth Preflight
 
@@ -514,6 +514,137 @@ python -m benchmark.physics.cli metrics `
   --output-md Data\physics\benchmark\runs\physics-week9-kimi-benchmark\kimi-heldout-G1-baseline-vs-candidate.metrics.md
 ```
 
+### Kimi Code Headless Route
+
+Use this route when the reviewer has Kimi Code installed and logged in with a
+Kimi membership subscription, and no Moonshot Open Platform API key is
+available. It runs `kimi --output-format stream-json --prompt` non-interactively
+per student; usage counts against the subscription's weekly quota and 5-hour
+rate window.
+
+Preflight:
+
+```bash
+kimi --version
+kimi -p "Return exactly the word OK." --output-format stream-json
+```
+
+Development run (bash shown; use equivalent PowerShell paths on Windows).
+`--model` takes a Kimi Code model alias such as `kimi-code/k3`:
+
+```bash
+runCommit="$(git rev-parse --short HEAD)"
+model="kimi-code/k3"
+
+python scripts/run_headless_packet.py \
+  --engine kimi \
+  --model "$model" \
+  --input-mode text-only \
+  --packet Data/physics/benchmark/text_packets/physics-week9-baseline-text-strict-schema/G1-dev-r1 \
+  --output Data/physics/benchmark/runs/physics-week9-headless-kimi/kimi-baseline-text-G1-dev-r1 \
+  --max-retries 2 \
+  --run-commit "$runCommit"
+
+python scripts/run_headless_packet.py \
+  --engine kimi \
+  --model "$model" \
+  --input-mode text-only \
+  --packet Data/physics/benchmark/text_packets/physics-week9-candidate-v2-text-strict-schema/G1-dev-r1 \
+  --output Data/physics/benchmark/runs/physics-week9-headless-kimi/kimi-candidate-text-G1-dev-r1 \
+  --max-retries 2 \
+  --run-commit "$runCommit"
+```
+
+After both dev arms pass, compute metrics with `python -m benchmark.physics.cli
+metrics` pointing `--baseline-run` and `--candidate-run` at the two output
+directories above. Run the held-out split the same way, only after both
+development arms pass. Run-directory contents match the Claude Code route
+(`headless-prompts/`, `cli-logs/`, `raw-responses.jsonl`, and so on), with
+`provider: kimi_cli` in `run-metadata.json`.
+
+## Kimi K3 Multimodal Route (Paper Images)
+
+Use this route to grade directly from scanned paper-page images with the
+multimodal `kimi-k3` model, instead of grading from transcripts. The per-student
+output contract, validation, run-directory layout, and metrics commands are
+identical to the text-only Kimi route above; only the packet inputs and
+`--input-mode` differ.
+
+Packet input rules for multimodal runs:
+
+- `inputs/<student_id>/` must contain page images only (`.jpg`, `.jpeg`,
+  `.png`, `.bmp`, `.gif`, `.tif`, `.tiff`, `.webp`), sorted so page order is
+  correct (for example `page-001.jpg`, `page-002.jpg`).
+- PDFs are rejected: convert each PDF page to an image first.
+- Text files (transcripts) are rejected in multimodal packets.
+
+Build multimodal packets with the generic `build-packet` command, pointing
+`--input-root` at the anonymized page-image directory (`course.json`,
+`prompt.txt`, and `rubric.json` can be reused from the corresponding text
+packet):
+
+```bash
+SRC=Data/physics/benchmark/text_packets/physics-week9-baseline-text-strict-schema/G1-dev-r1
+python -m benchmark.core.cli build-packet \
+  --course "$SRC/course.json" \
+  --packet-id G1-dev-r1 \
+  --condition G1 \
+  --task grade \
+  --prompt "$SRC/prompt.txt" \
+  --rubric "$SRC/rubric.json" \
+  --student-id S001 --student-id S002 --student-id S003 --student-id S004 \
+  --student-id S005 --student-id S006 --student-id S007 --student-id S008 \
+  --input-root Data/physics/benchmark/anonymized \
+  --output-root Data/physics/benchmark/image_packets/physics-week9-baseline-image \
+  --metadata split=development
+```
+
+There are two ways to run a multimodal packet:
+
+1. **API route** (`run-model-packet --provider kimi --input-mode multimodal`):
+   the runner embeds the page images as base64 `image_url` parts in one chat
+   completion per student. Requires a Moonshot Open Platform API key.
+2. **Headless route** (`run-headless-packet --engine kimi --input-mode
+   multimodal`): the Kimi Code agent reads the page-image files from the
+   packet with its own file tools and grades them. Runs under the reviewer's
+   Kimi membership subscription; no platform API key needed. Recorded as
+   `provider: kimi_cli` with `input_mode: multimodal` in `run-metadata.json`.
+
+API route (same auth preflight and endpoint choice as the text-only Kimi
+route; `--max-retries 2` recommended):
+
+```bash
+export MOONSHOT_API_KEY=...   # advisor-owned Kimi key, unset after the run
+python -m benchmark.core.cli run-model-packet \
+  --provider kimi \
+  --model kimi-k3 \
+  --endpoint https://api.moonshot.cn/v1 \
+  --input-mode multimodal \
+  --packet Data/physics/benchmark/image_packets/physics-week9-baseline-image/G1-dev-r1 \
+  --output Data/physics/benchmark/runs/physics-week9-kimi-k3-multimodal/kimi-k3-baseline-image-G1-dev-r1 \
+  --max-retries 2 \
+  --run-commit "$(git rev-parse --short HEAD)"
+```
+
+Headless route:
+
+```bash
+python scripts/run_headless_packet.py \
+  --engine kimi \
+  --model kimi-code/k3 \
+  --input-mode multimodal \
+  --packet Data/physics/benchmark/image_packets/physics-week9-baseline-image/G1-dev-r1 \
+  --output Data/physics/benchmark/runs/physics-week9-headless-kimi-multimodal/kimi-k3-baseline-image-G1-dev-r1 \
+  --max-retries 2 \
+  --run-commit "$(git rev-parse --short HEAD)"
+```
+
+Add `--dry-run` to smoke-test packet IO and validation without an API key.
+Run the development split first; run held-out only after both development arms
+pass, exactly as in the text-only route. Compare arms with the same
+`python -m benchmark.physics.cli metrics` command, pointing `--baseline-run`
+and `--candidate-run` at the multimodal run directories.
+
 ## Claude Code Route
 
 Use this route when Claude Code is installed and authenticated on the reviewer's
@@ -626,7 +757,7 @@ Each successful run directory should contain:
 - `failures.jsonl`
 - `outputs/<student_id>.json`
 
-Claude Code runs also contain:
+Headless engine runs (Claude Code, Kimi Code) also contain:
 
 - `headless-prompts/<student_id>.prompt.txt`
 - `cli-logs/<student_id>-a<attempt>.stdout`

@@ -26,6 +26,11 @@ _site/
 local/
 */learn-log.md
 
+# sci-brain knowledge base cache
+.knowledge/.raw/
+.knowledge/.figures/
+.knowledge/*_*.md
+
 # Brainstorming spec drafts (kept local; not part of the course harness)
 docs/superpowers/
 

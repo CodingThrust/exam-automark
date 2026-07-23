@@ -1,15 +1,16 @@
 # Advisor experiment config contract
 
-Generate the normal Physics Week 9 development config with
-`advisor_experiment.py init`. Edit only when the experiment differs from that
-preset.
+Generate separate Physics Week 9 development and test configs with
+`advisor_experiment.py init --split development` and
+`advisor_experiment.py init --split test`. Edit only when the experiment
+differs from those presets.
 
 ## Top-level fields
 
 - `schema_version`: currently `1`.
 - `experiment_id`: unique kebab-case identity.
-- `split`: `development` by default; `heldout` or `test` requires explicit
-  approval at run time.
+- `split`: `development` by default. The generated `test` preset uses the
+  frozen 18-student test packet and requires `--approve-heldout` at run time.
 - `benchmark_root`: ignored root containing gold scores and packets.
 - `state_path`: ignored JSON run state; the helper derives a sibling
   `*-model-probes.json` zero-data receipt from it.
@@ -92,3 +93,12 @@ and append `-r2`, `-r3`, and so on to:
 - the affected run `id` and `output` when only one immutable arm is retried.
 
 Keep the original failure record available for the final retrospective.
+
+## Development-to-test rule
+
+Use distinct experiment IDs, output roots, state files, record directories,
+branches, and PRs for development and test. Run all eight development arms
+over the frozen eight-student development packet first. Only after they pass,
+freeze the workflow and run all eight test arms over the frozen 18-student test
+packet. Report the splits separately, and never tune the candidate from test
+errors before rerunning the same sealed test.

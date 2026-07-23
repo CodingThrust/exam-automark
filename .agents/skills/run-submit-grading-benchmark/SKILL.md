@@ -1,6 +1,6 @@
 ---
 name: run-submit-grading-benchmark
-description: Configure an advisor's machine, prepare matched private grading packets, run reproducible Kimi Code and Claude Code benchmarks in both frozen transcript-first and direct-multimodal modes, validate and summarize successes or failures, and submit only privacy-safe aggregate results through a draft GitHub pull request. Use for the AI Grading Test Handoff, repeated external benchmark runs, environment setup, model/input-mode comparisons, or requests to return experiment results by PR.
+description: Configure an advisor's machine, prepare matched private grading packets, run reproducible Kimi Code and Claude Code development-then-test benchmarks in both frozen transcript-first and direct-multimodal modes, validate and summarize successes or failures, and submit only privacy-safe aggregate results through draft GitHub pull requests. Use for the AI Grading Test Handoff, repeated external benchmark runs, environment setup, sealed test execution, model/input-mode comparisons, or requests to return experiment results by PR.
 ---
 
 # Run and Submit a Grading Benchmark
@@ -24,7 +24,9 @@ configuration.
 
 ## Non-negotiable defaults
 
-- Run the development split before held-out.
+- Run the development split before the sealed test split. A normal complete
+  campaign has eight matched development arms and eight matched test arms; do
+  not call the campaign complete after only the eight development students.
 - Treat `kimi` and `claude` as required engines unless the user explicitly
   narrows the experiment.
 - Treat `text-only` and `multimodal` as separate required arms. Never silently
@@ -40,8 +42,9 @@ configuration.
   technical failure types only.
 - A failed experiment is still an experiment result: package the failure cause
   and submit it instead of reporting only that nothing was produced.
-- Never inspect held-out errors or run held-out without explicit user approval
-  after the matched development arms pass.
+- Never inspect test errors, change the frozen workflow based on test results,
+  or run test without explicit user approval after the matched development
+  arms pass. Treat test as one-shot acceptance evidence.
 
 ## 1. Locate the repository and establish scope
 
@@ -56,22 +59,27 @@ python scripts/advisor_experiment.py --help
 
 Preserve unrelated local changes. Never add `Data/`, `.private-data/`,
 `HANDOFF.md`, credentials, or files outside the generated experiment record.
-If the user supplied a config, use it. Otherwise create a private local config:
+If the user supplied configs, use them. Otherwise create separate private
+development and test configs for one campaign:
 
 ```text
-python scripts/advisor_experiment.py init --preset physics-week9 --output local/advisor-experiment.json
+python scripts/advisor_experiment.py init --preset physics-week9 --split development --experiment-id <campaign>-development --output local/advisor-development.json
+python scripts/advisor_experiment.py init --preset physics-week9 --split test --experiment-id <campaign>-test --output local/advisor-test.json
 ```
 
 The preset generates matched Kimi/Claude × text/multimodal ×
-baseline/candidate development arms. Inspect the generated config and adapt
-model aliases or packet paths only when local evidence requires it.
+baseline/candidate arms for the selected split. The development config uses all
+eight frozen development students; the test config uses all 18 frozen test
+students. Inspect the generated configs and adapt model aliases or packet paths
+only when local evidence requires it.
 
 ## 2. Proactively configure the environment
 
 Run:
 
 ```text
-python scripts/advisor_experiment.py doctor --config local/advisor-experiment.json
+python scripts/advisor_experiment.py doctor --config local/advisor-development.json
+python scripts/advisor_experiment.py doctor --config local/advisor-test.json
 ```
 
 Explain each blocking check in plain language. For anything missing:
@@ -97,7 +105,8 @@ Before sending student data, ask permission because model probes may consume
 subscription quota. After approval, run:
 
 ```text
-python scripts/advisor_experiment.py probe --config local/advisor-experiment.json --approve-model-probes
+python scripts/advisor_experiment.py probe --config local/advisor-development.json --approve-model-probes
+python scripts/advisor_experiment.py probe --config local/advisor-test.json --approve-model-probes
 ```
 
 The real run is blocked until every configured engine/model has a passing
@@ -109,7 +118,8 @@ login or capability probe.
 Run:
 
 ```text
-python scripts/advisor_experiment.py plan --config local/advisor-experiment.json
+python scripts/advisor_experiment.py plan --config local/advisor-development.json
+python scripts/advisor_experiment.py plan --config local/advisor-test.json
 ```
 
 Verify that every required engine has both modes and both conditions, and that
@@ -132,7 +142,7 @@ run commit. State the decision to the user:
 Run:
 
 ```text
-python scripts/advisor_experiment.py prepare --config local/advisor-experiment.json
+python scripts/advisor_experiment.py prepare --config local/advisor-development.json
 ```
 
 The helper derives student IDs, course, prompt, rubric, condition, and split
@@ -149,14 +159,14 @@ output root; never overwrite benchmark evidence.
 First smoke-test packet IO without model calls:
 
 ```text
-python scripts/advisor_experiment.py run --config local/advisor-experiment.json --dry-run
+python scripts/advisor_experiment.py run --config local/advisor-development.json --dry-run
 ```
 
 Use a fresh experiment ID or output root for the real run because outputs are
 immutable. Then run:
 
 ```text
-python scripts/advisor_experiment.py run --config local/advisor-experiment.json
+python scripts/advisor_experiment.py run --config local/advisor-development.json
 ```
 
 The helper runs every independent arm through `scripts/run_headless_packet.py`,
@@ -172,12 +182,27 @@ Classify failures as environment/authentication, CLI/runtime, packet/input,
 output-JSON/schema, quota/timeout, or scoring/accuracy. Do not mislabel a
 technical failure as an accuracy result.
 
+After all eight development arms pass, freeze the code, prompts, models,
+packets, retry policy, and timeout policy. If the original request explicitly
+authorized both development and test, that is sufficient approval; otherwise
+ask once at this boundary. Then prepare and run the 18-student test split:
+
+```text
+python scripts/advisor_experiment.py prepare --config local/advisor-test.json
+python scripts/advisor_experiment.py run --config local/advisor-test.json --dry-run --approve-heldout
+python scripts/advisor_experiment.py run --config local/advisor-test.json --approve-heldout
+```
+
+Do not revise the candidate from test-set findings and rerun against the same
+test set. Report development and test metrics separately.
+
 ## 6. Package every outcome
 
 Run:
 
 ```text
-python scripts/advisor_experiment.py package --config local/advisor-experiment.json
+python scripts/advisor_experiment.py package --config local/advisor-development.json
+python scripts/advisor_experiment.py package --config local/advisor-test.json
 ```
 
 The generated record under `experiments/records/` must answer:
@@ -200,13 +225,16 @@ artifact is produced.
 Preview the safety gate:
 
 ```text
-python scripts/advisor_experiment.py submit --config local/advisor-experiment.json --dry-run
+python scripts/advisor_experiment.py submit --config local/advisor-development.json --dry-run
+python scripts/advisor_experiment.py submit --config local/advisor-test.json --dry-run
 ```
 
 Then submit:
 
 ```text
-python scripts/advisor_experiment.py submit --config local/advisor-experiment.json
+python scripts/advisor_experiment.py submit --config local/advisor-development.json
+git switch main
+python scripts/advisor_experiment.py submit --config local/advisor-test.json
 ```
 
 The helper must:
@@ -225,6 +253,7 @@ may create the PR after the same privacy checks and push. Otherwise configure
 `gh` rather than falling back to a private chat. A compare URL is an emergency
 fallback, not successful completion.
 
-Leave the result PR as draft until YY reviews the aggregate record. Finish with
-the PR URL, branch, commit, experiment status, completed arms,
-blocked or failed arms, and the single most important next action.
+Leave both result PRs as drafts until YY reviews the aggregate records. Finish
+with the development and test PR URLs, branches, commits, split-specific
+student counts and metrics, completed arms, blocked or failed arms, and the
+single most important next action.

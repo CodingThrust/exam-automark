@@ -40,6 +40,10 @@ class RunSubmitGradingBenchmarkSkillTests(unittest.TestCase):
             "draft github pull request",
             "explicit user approval",
             "approve-model-probes",
+            "--split development",
+            "--split test",
+            "all 18 frozen test students",
+            "do not revise the candidate from test-set findings",
         ):
             self.assertIn(phrase, normalized)
 
@@ -62,6 +66,8 @@ class RunSubmitGradingBenchmarkSkillTests(unittest.TestCase):
         handoff = Path("docs/ai-grading-test-handoff.md").read_text(encoding="utf-8")
         self.assertIn("## Preferred Agent Workflow", handoff)
         self.assertIn("run-submit-grading-benchmark", handoff)
+        self.assertIn("all 18 test students", handoff)
+        self.assertIn("--split test", handoff)
         self.assertIn("Kimi/Claude × text/multimodal × baseline/candidate", handoff)
         self.assertIn("GitHub PR URL", handoff)
         self.assertIn("does not require a", handoff)

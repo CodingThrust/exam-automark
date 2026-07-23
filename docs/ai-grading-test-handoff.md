@@ -7,9 +7,10 @@ title: AI Grading Test Handoff
 This page is for an external reviewer and their local AI coding assistant. The
 preferred route is the repository skill below: the assistant checks and helps
 configure the environment, extracts the fixed inputs, runs Kimi Code and Claude
-Code in both frozen transcript-first and direct-multimodal modes, validates the
-result, and opens a privacy-safe draft GitHub pull request. The detailed manual
-sections remain as a troubleshooting reference.
+Code in both frozen transcript-first and direct-multimodal modes over
+development and sealed test splits, validates the results, and opens
+privacy-safe draft GitHub pull requests. The detailed manual sections remain as
+a troubleshooting reference.
 
 Do not upload raw student transcripts, raw model responses, per-student outputs,
 or private PDFs to GitHub Pages.
@@ -23,12 +24,14 @@ Open this repository in Claude Code, Codex, or OpenCode and send:
 ```text
 Use the run-submit-grading-benchmark skill. Inspect this checkout, proactively
 help me configure every missing dependency or login, prepare the matched Physics
-Week 9 development inputs, run Kimi Code and Claude Code with both the frozen
-transcript-first packets and direct multimodal page images, validate and package
-successes or failures, then submit the privacy-safe aggregate result as a
-draft GitHub pull request. Ask me only for installation/login permission, private-data
-access I must authorize, or a genuinely consequential experiment decision.
-Do not run held-out without asking me after development passes.
+Week 9 development and sealed test inputs, run Kimi Code and Claude Code with
+both the frozen transcript-first packets and direct multimodal page images,
+validate and package successes or failures, then submit privacy-safe aggregate
+development and test results as draft GitHub pull requests. I authorize the
+sealed test run only after every matched development arm passes; do not tune
+from test errors or rerun the same test after changing the candidate. Ask me
+only for installation/login permission, private-data access I must authorize,
+or a genuinely consequential experiment decision.
 ```
 
 Skill locations:
@@ -43,7 +46,7 @@ three agents.
 The assistant should own this sequence:
 
 ```text
-doctor → ask once → zero-data probe → plan → prepare → dry-run → real run → package → draft PR
+doctor -> ask once -> zero-data probe -> development -> freeze -> test -> two draft PRs
 ```
 
 The stable helper entry point is:
@@ -52,13 +55,21 @@ The stable helper entry point is:
 python scripts/advisor_experiment.py --help
 ```
 
-If a local config does not exist, the assistant creates one under ignored
-`local/` with:
+If local configs do not exist, the assistant creates separate development and
+test configs under ignored `local/`:
 
 ```text
 python scripts/advisor_experiment.py init \
   --preset physics-week9 \
-  --output local/advisor-experiment.json
+  --split development \
+  --experiment-id <campaign>-development \
+  --output local/advisor-development.json
+
+python scripts/advisor_experiment.py init \
+  --preset physics-week9 \
+  --split test \
+  --experiment-id <campaign>-test \
+  --output local/advisor-test.json
 ```
 
 Before any student packet is sent to a model, the assistant asks once for
@@ -66,7 +77,11 @@ permission to spend a small amount of subscription quota and runs:
 
 ```text
 python scripts/advisor_experiment.py probe \
-  --config local/advisor-experiment.json \
+  --config local/advisor-development.json \
+  --approve-model-probes
+
+python scripts/advisor_experiment.py probe \
+  --config local/advisor-test.json \
   --approve-model-probes
 ```
 
@@ -75,19 +90,22 @@ engine/model on the current commit.
 
 The generated development plan contains eight immutable grading arms:
 Kimi/Claude × text/multimodal × baseline/candidate. It also configures paired
-baseline/candidate, input-mode, and cross-engine aggregate comparisons. Kimi
-uses the advisor's Kimi Code login; this route does not require a
-`MOONSHOT_API_KEY`.
+baseline/candidate, input-mode, and cross-engine aggregate comparisons over all
+eight development students. After those pass, the frozen test plan repeats the
+same eight arms over all 18 test students. Kimi uses the advisor's Kimi Code
+login; this route does not require a `MOONSHOT_API_KEY`.
 
-The workflow is complete only when it returns a draft GitHub PR URL. A failed model
-or CLI run must still produce a PR containing the validation counts and
-aggregated technical failure type; it must not disappear into a private chat.
+The workflow is complete only when it returns separate draft GitHub PR URLs for
+development and test. A failed model or CLI run must still produce a PR
+containing the validation counts and aggregated technical failure type; it
+must not disappear into a private chat.
 
 ## One-Sentence Goal
 
-Run the fixed Physics Week 9 development benchmark through Kimi Code and Claude
-Code using both frozen transcript-first packets and direct page images, then return
-privacy-safe validation and aggregate comparisons through a draft GitHub PR.
+Run the fixed Physics Week 9 development benchmark and then its sealed test
+benchmark through Kimi Code and Claude Code using both frozen transcript-first
+packets and direct page images, then return split-specific privacy-safe
+validation and aggregate comparisons through draft GitHub PRs.
 
 The current Physics text packets record `transcripts/automatic` provenance.
 They must be labeled `automatic-transcript`, not human-reviewed. This makes the

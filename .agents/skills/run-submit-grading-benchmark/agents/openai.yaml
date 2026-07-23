@@ -1,4 +1,4 @@
 interface:
   display_name: "Run and Submit Grading Benchmark"
   short_description: "Run Kimi and Claude grading, then submit a safe PR"
-  default_prompt: "Use $run-submit-grading-benchmark to configure my environment, run both text and multimodal grading experiments, validate the results, and submit a privacy-safe draft GitHub PR."
+  default_prompt: "Use $run-submit-grading-benchmark to configure my environment, run the matched development and sealed test text-plus-multimodal grading campaign, validate each split, and submit privacy-safe draft GitHub PRs."

@@ -13,8 +13,8 @@ when the evidence already determines the answer.
 | Text and image packets contain different student IDs | Repair packet pairing before model calls | Comparing unmatched aggregates |
 | Kimi Code is available but `MOONSHOT_API_KEY` is absent | Continue with the Kimi CLI route after Kimi Code auth | Requesting a platform API key |
 | CLI is installed but login is unknown | Ask permission for a zero-data probe, then run it | Discovering auth with student data |
-| Development arms have not all passed | Stay on development and package failures | Unlocking held-out |
-| Development arms pass and user explicitly approves held-out | Freeze config/commit, then run held-out | Changing prompt, rubric, model, or skill mid-test |
+| Development arms have not all passed | Stay on development and package failures | Unlocking test |
+| Development arms pass and the user already authorized the full campaign or explicitly approves test | Freeze config/commit, then run all 18 test students | Changing prompt, rubric, model, or skill mid-test |
 | Existing run directory has passed matching metadata | Resume by reusing it | Paying to rerun it |
 | Existing run directory is failed, incomplete, or mismatched | Preserve it and create a new `-rN` run/output | Deleting or overwriting evidence |
 | CLI exits before valid output | Record a technical failure | Reporting zero accuracy |
@@ -45,6 +45,8 @@ Report a comparison as unmatched if an invariant cannot be established.
 5. Baseline/candidate metrics within each engine and mode.
 6. Text/multimodal comparisons within each engine.
 7. Kimi/Claude comparisons within each mode.
+8. After development passes, repeat steps 1-7 on the sealed test split without
+   changing the frozen workflow.
 
 The order gives an early Kimi result, exercises both routes before the second
 engine, and still produces useful partial evidence if a later subscription or

@@ -77,6 +77,29 @@ class AdvisorWorkflowTests(unittest.TestCase):
         self.assertTrue(config["submission"]["branch"].startswith("advisor-results/"))
         self.assertNotIn("MOONSHOT_API_KEY", json.dumps(config))
 
+    def test_test_preset_uses_frozen_test_packets(self):
+        config = build_preset_config(
+            experiment_id="physics-week9-advisor-heldout-test",
+            kimi_model="kimi-code/k3",
+            claude_model="sonnet",
+            split="test",
+        )
+
+        self.assertEqual(config["split"], "test")
+        self.assertEqual(len(config["runs"]), 8)
+        self.assertTrue(
+            all(run["packet"].endswith("G1-test-r1") for run in config["runs"])
+        )
+        self.assertTrue(
+            all(build["id"].endswith("-test") for build in config["packet_builds"])
+        )
+        self.assertTrue(
+            all(
+                build["source_text_packet"].endswith("G1-test-r1")
+                for build in config["packet_builds"]
+            )
+        )
+
     def test_config_rejects_secret_like_fields(self):
         config = build_preset_config(
             experiment_id="physics-week9-advisor-test",

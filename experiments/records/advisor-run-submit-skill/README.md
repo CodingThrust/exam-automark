@@ -16,8 +16,10 @@ failed attempts easy to lose.
 - One cross-agent skill, mirrored for Codex/OpenCode and Claude Code.
 - A stable `scripts/advisor_experiment.py` entry point with `init`, `doctor`,
   `probe`, `plan`, `prepare`, `run`, `package`, and `submit` commands.
-- A generated eight-arm development preset:
+- Generated eight-arm development and sealed-test presets:
   Kimi/Claude × frozen transcript-first/direct multimodal × baseline/candidate.
+  They cover all eight frozen development students first and then all 18 test
+  students without changing the workflow.
 - Deterministic decision gates for transcript provenance, image privacy approval,
   matched student sets, development-before-held-out, immutable retries, and
   technical-failure classification.
@@ -43,7 +45,8 @@ Moonshot Platform API key.
 - Text-only packets must record source kind, source path, and source run ID.
   Automatic transcripts are allowed but are labeled separately from
   human-reviewed transcripts.
-- Held-out execution requires a separate explicit approval.
+- Test execution requires development to pass and an explicit full-campaign or
+  test approval. Test findings may not be used to tune and rerun the same test.
 - Real student-data runs require a user-approved, zero-data engine/model probe
   receipt for the current commit.
 - Claude text runs have no tools; Claude multimodal runs expose only `Read` and
@@ -63,7 +66,7 @@ Moonshot Platform API key.
 
 - `skill-creator` validation passed for both repository skill copies.
 - The two skill directories are byte-for-byte identical.
-- `203` core benchmark tests passed.
+- `204` core benchmark tests passed.
 - `85` physics benchmark tests passed.
 - An independent clean-context forward test followed the skill through
   `doctor`, `plan`, `prepare`, and dry-run without hidden instructions. Its
@@ -74,6 +77,9 @@ Moonshot Platform API key.
   dry-run outputs.
 - Repeating the same smoke run reused all eight matching passed arms without
   overwriting them.
+- A separate sealed-test smoke run exercised eight arms over all 18 test
+  students: all `144/144` dry-run outputs validated, and all eight arms reused
+  the same `144/144` outputs on rerun.
 - The final fresh-config smoke test also exposed and fixed two automation
   defects: child-run JSON polluted the top-level machine-readable output, and
   the conceptual baseline/candidate label was not persisted for safe reuse.
@@ -96,6 +102,6 @@ GitHub CLI is now installed and authenticated on the development machine, and
 the implementation was returned as draft PR `#29`. This machine still does not
 have authenticated Kimi Code or Claude Code, so the remaining acceptance test
 is deliberately on the advisor machine: invoke the skill, approve
-environment/login setup, run the development matrix with the real CLIs, and
-return the automatically created draft result PR URL. A live held-out run
-remains locked until the development results are reviewed.
+environment/login setup, run the development matrix with the real CLIs, freeze
+the workflow, then run the 18-student test matrix and return both automatically
+created draft result PR URLs.

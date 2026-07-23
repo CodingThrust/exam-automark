@@ -312,34 +312,38 @@ def build_preset_config(
     experiment_id: str,
     kimi_model: str,
     claude_model: str,
+    split: str = "development",
 ) -> dict[str, Any]:
     if not ID_PATTERN.fullmatch(experiment_id):
         raise WorkflowError("generated experiment_id is invalid")
+    if split not in {"development", "test"}:
+        raise WorkflowError("generated preset split must be development or test")
     benchmark_root = "Data/physics/benchmark"
+    packet_id = "G1-dev-r1" if split == "development" else "G1-test-r1"
     baseline_text = (
         f"{benchmark_root}/text_packets/"
-        "physics-week9-baseline-text-strict-schema/G1-dev-r1"
+        f"physics-week9-baseline-text-strict-schema/{packet_id}"
     )
     candidate_text = (
         f"{benchmark_root}/text_packets/"
-        "physics-week9-candidate-v2-text-strict-schema/G1-dev-r1"
+        f"physics-week9-candidate-v2-text-strict-schema/{packet_id}"
     )
     image_root = f"{benchmark_root}/image_packets/{experiment_id}"
-    baseline_image = f"{image_root}/baseline/G1-dev-r1"
-    candidate_image = f"{image_root}/candidate/G1-dev-r1"
+    baseline_image = f"{image_root}/baseline/{packet_id}"
+    candidate_image = f"{image_root}/candidate/{packet_id}"
     run_root = f"{benchmark_root}/runs/{experiment_id}"
     metrics_root = f"{run_root}/metrics"
 
     packet_builds = [
         {
-            "id": "baseline-image-development",
+            "id": f"baseline-image-{split}",
             "source_text_packet": baseline_text,
             "input_root": f"{benchmark_root}/anonymized",
             "privacy_review": f"{benchmark_root}/manifest/privacy_review.csv",
             "output_root": f"{image_root}/baseline",
         },
         {
-            "id": "candidate-image-development",
+            "id": f"candidate-image-{split}",
             "source_text_packet": candidate_text,
             "input_root": f"{benchmark_root}/anonymized",
             "privacy_review": f"{benchmark_root}/manifest/privacy_review.csv",
@@ -427,7 +431,7 @@ def build_preset_config(
     return {
         "schema_version": SCHEMA_VERSION,
         "experiment_id": experiment_id,
-        "split": "development",
+        "split": split,
         "benchmark_root": benchmark_root,
         "state_path": f"{run_root}/advisor-state.json",
         "record_dir": f"experiments/records/{experiment_id}",
@@ -454,6 +458,7 @@ def init_config(
     experiment_id: str | None,
     kimi_model: str,
     claude_model: str,
+    split: str = "development",
 ) -> dict[str, Any]:
     if preset != "physics-week9":
         raise WorkflowError(f"unsupported preset: {preset}")
@@ -463,11 +468,16 @@ def init_config(
         raise WorkflowError("generated configs must stay under ignored local/ or Data/")
     if resolved.exists():
         raise WorkflowError(f"refusing to overwrite existing config: {relative}")
-    generated_id = experiment_id or f"physics-week9-advisor-{_slug_timestamp()}"
+    generated_id = experiment_id or (
+        f"physics-week9-advisor-{_slug_timestamp()}"
+        if split == "development"
+        else f"physics-week9-advisor-test-{_slug_timestamp()}"
+    )
     config = build_preset_config(
         experiment_id=generated_id,
         kimi_model=kimi_model,
         claude_model=claude_model,
+        split=split,
     )
     validate_config(config, repo)
     _write_json(resolved, config)
@@ -2466,6 +2476,7 @@ def _build_parser() -> argparse.ArgumentParser:
     init.add_argument("--preset", default="physics-week9", choices=("physics-week9",))
     init.add_argument("--output", type=Path, required=True)
     init.add_argument("--experiment-id")
+    init.add_argument("--split", choices=("development", "test"), default="development")
     init.add_argument("--kimi-model", default="kimi-code/k3")
     init.add_argument("--claude-model", default="sonnet")
 
@@ -2502,6 +2513,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 experiment_id=args.experiment_id,
                 kimi_model=args.kimi_model,
                 claude_model=args.claude_model,
+                split=args.split,
             )
         else:
             repo, config = load_config(args.config, repo)

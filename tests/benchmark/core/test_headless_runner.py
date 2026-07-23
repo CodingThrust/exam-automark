@@ -60,6 +60,8 @@ class HeadlessRunnerCliTests(unittest.TestCase):
         self.assertEqual(metadata["model"], "gpt-5.6-codex")
         self.assertEqual(metadata["run_commit"], "abc1234")
         self.assertEqual(metadata["api_key_source"], "codex_cli_external_auth")
+        self.assertEqual(metadata["source_run_id"], "T1-dev-r1")
+        self.assertEqual(metadata["text_source_kind"], "automatic_transcript")
         self.assertEqual(validation["students_passed"], 1)
         self.assertEqual(payload["student_id"], "S001")
         self.assertTrue(raw_responses_exists)
@@ -338,6 +340,10 @@ def _write_text_grading_packet(root: Path) -> Path:
                 "S001",
                 "--transcript-source",
                 str(transcripts),
+                "--source-run-id",
+                "T1-dev-r1",
+                "--text-source-kind",
+                "automatic_transcript",
                 "--output-root",
                 str(packet_root),
                 "--metadata",

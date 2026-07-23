@@ -14,9 +14,10 @@ AI grading experiments without exposing private student data.
 The handoff page is written so an external AI assistant, Kimi Code, or Claude
 Code can read it and immediately understand:
 
+- how to invoke the cross-agent `run-submit-grading-benchmark` repository skill;
+- how the agent proactively diagnoses and helps configure missing environment pieces;
 - how the invited advisor-owned GitLab account can restore the private `Data/` folder from YY's HKUST-GZ GitLab repo;
-- which local inputs to use;
-- which commands to run;
-- what output files must be produced;
-- what JSON summary to report back;
+- how to run matched Kimi/Claude text-only and multimodal arms;
+- how successes and failures are validated and packaged;
+- how a focused GitHub pull request is opened automatically;
 - what privacy boundaries must not be crossed.

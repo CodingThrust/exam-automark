@@ -4,18 +4,83 @@ title: AI Grading Test Handoff
 
 # AI Grading Test Handoff
 
-This page is for an external reviewer or an AI coding assistant. Read this page,
-then run the grading benchmark from a local checkout. If `Data/` is missing,
-restore it from the private HKUST-GZ GitLab repository documented below before
-running models.
+This page is for an external reviewer and their local AI coding assistant. The
+preferred route is the repository skill below: the assistant checks and helps
+configure the environment, extracts the fixed inputs, runs Kimi Code and Claude
+Code in both frozen transcript-first and direct-multimodal modes, validates the
+result, and opens a privacy-safe GitHub pull request. The detailed manual
+sections remain as a troubleshooting reference.
 
 Do not upload raw student transcripts, raw model responses, per-student outputs,
 or private PDFs to GitHub Pages.
+If `Data/` is absent, the agent restores it from the private HKUST-GZ GitLab
+using only the advisor's own authorized account.
+
+## Preferred Agent Workflow
+
+Open this repository in Claude Code, Codex, or OpenCode and send:
+
+```text
+Use the run-submit-grading-benchmark skill. Inspect this checkout, proactively
+help me configure every missing dependency or login, prepare the matched Physics
+Week 9 development inputs, run Kimi Code and Claude Code with both the frozen
+transcript-first packets and direct multimodal page images, validate and package
+successes or failures, then submit the privacy-safe aggregate result as a
+GitHub pull request. Ask me only for installation/login permission, private-data
+access I must authorize, or a genuinely consequential experiment decision.
+Do not run held-out without asking me after development passes.
+```
+
+Skill locations:
+
+- Codex and OpenCode: `.agents/skills/run-submit-grading-benchmark/SKILL.md`
+- Claude Code: `.claude/skills/run-submit-grading-benchmark/SKILL.md`
+
+OpenCode can discover the `.agents/skills` copy directly. Both repository
+copies are kept identical so the same workflow and decision gates apply to all
+three agents.
+
+The assistant should own this sequence:
+
+```text
+doctor → plan → prepare → dry-run → real run → package → submit PR
+```
+
+The stable helper entry point is:
+
+```text
+python scripts/advisor_experiment.py --help
+```
+
+If a local config does not exist, the assistant creates one under ignored
+`local/` with:
+
+```text
+python scripts/advisor_experiment.py init \
+  --preset physics-week9 \
+  --output local/advisor-experiment.json
+```
+
+The generated development plan contains eight immutable grading arms:
+Kimi/Claude × text/multimodal × baseline/candidate. It also configures paired
+baseline/candidate, input-mode, and cross-engine aggregate comparisons. Kimi
+uses the advisor's Kimi Code login; this route does not require a
+`MOONSHOT_API_KEY`.
+
+The workflow is complete only when it returns a GitHub PR URL. A failed model
+or CLI run must still produce a PR containing the validation counts and
+aggregated technical failure type; it must not disappear into a private chat.
 
 ## One-Sentence Goal
 
-Run the Physics Week 9 text-only grading benchmark on fixed prompt packets, then
-return validation status and aggregate metrics for baseline vs candidate-v2.
+Run the fixed Physics Week 9 development benchmark through Kimi Code and Claude
+Code using both frozen transcript-first packets and direct page images, then return
+privacy-safe validation and aggregate comparisons through a GitHub PR.
+
+The current Physics text packets record `transcripts/automatic` provenance.
+They must be labeled `automatic-transcript`, not human-reviewed. This makes the
+comparison useful for separating transcription-pipeline errors from direct
+multimodal grading errors.
 
 ## Local Repository Root
 
@@ -767,9 +832,12 @@ These files stay local under ignored `Data/`.
 
 ## Return This Summary To YY
 
-After running, return this JSON summary in chat. Include how `Data/` was
-restored, but do not paste raw student answers, raw model responses, tokens,
-or private GitLab URLs containing credentials.
+This is the legacy manual fallback schema. The preferred skill generates the
+same safe information in `summary.json` and `RUN-REPORT.md`, then opens a
+GitHub PR. Do not stop at a private chat when PR authentication can be
+configured. Include how `Data/` was restored, but do not paste raw student
+answers, raw model responses, tokens, or private GitLab URLs containing
+credentials.
 
 ```json
 {
@@ -815,6 +883,10 @@ Stop and report a blocker if:
 - output JSON fails validation for every student;
 - one arm passes and the other arm fails for an infrastructure reason;
 - any command would commit or upload raw private data.
+
+In the preferred skill workflow, "report a blocker" means package the safe
+validation counts and aggregated failure category and submit that record by PR
+when possible. It does not mean silently abandon the run.
 
 ## Git Policy
 

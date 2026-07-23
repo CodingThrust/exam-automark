@@ -342,6 +342,51 @@ class HeadlessRunnerCliTests(unittest.TestCase):
         self.assertIn("inputs/S001/page-001.jpg", prompt)
         self.assertNotIn("fake image", prompt)
 
+    def test_headless_transcription_dry_run_writes_strict_transcript(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = _write_transcription_packet(root)
+            output = root / "runs" / "kimi-transcription"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "run-headless-packet",
+                        "--engine",
+                        "kimi",
+                        "--model",
+                        "kimi-code/k3",
+                        "--input-mode",
+                        "multimodal",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(output),
+                        "--dry-run",
+                        "--run-commit",
+                        "abc1234",
+                        "--experiment-condition",
+                        "transcription",
+                    ]
+                )
+            payload = json.loads((output / "outputs" / "S001.json").read_text())
+            metadata = json.loads((output / "run-metadata.json").read_text())
+            prompt = (output / "headless-prompts" / "S001.prompt.txt").read_text(
+                encoding="utf-8"
+            )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(metadata["task"], "transcribe")
+        self.assertEqual(metadata["rubric_hash"], None)
+        self.assertEqual(
+            [answer["question_id"] for answer in payload["answers"]],
+            ["Q1", "Q2a", "Q2b"],
+        )
+        self.assertTrue(all(answer["unclear"] is False for answer in payload["answers"]))
+        self.assertIn("Blind headless transcription run", prompt)
+        self.assertIn("Do not grade", prompt)
+
     def test_headless_multimodal_rejects_pdf_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -486,6 +531,39 @@ def _write_image_grading_packet(root: Path, input_name: str, input_bytes: bytes)
     if code != 0:
         raise AssertionError("failed to build synthetic image grading packet")
     return packet_root / "G1-dev-r1"
+
+
+def _write_transcription_packet(root: Path) -> Path:
+    input_root = root / "transcription-inputs"
+    student_dir = input_root / "S001"
+    student_dir.mkdir(parents=True)
+    (student_dir / "page-001.jpg").write_bytes(b"fake image")
+    packet_root = root / "transcription-packets"
+    with contextlib.redirect_stdout(io.StringIO()):
+        code = main(
+            [
+                "build-packet",
+                "--course",
+                str(FIXTURES / "course_dsaa3073_hw1.json"),
+                "--packet-id",
+                "T1-dev-r1",
+                "--condition",
+                "T1",
+                "--task",
+                "transcribe",
+                "--prompt",
+                str(FIXTURES / "transcribe_prompt.txt"),
+                "--student-id",
+                "S001",
+                "--input-root",
+                str(input_root),
+                "--output-root",
+                str(packet_root),
+            ]
+        )
+    if code != 0:
+        raise AssertionError("failed to build synthetic transcription packet")
+    return packet_root / "T1-dev-r1"
 
 
 if __name__ == "__main__":

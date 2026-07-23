@@ -9,6 +9,7 @@ from benchmark.core.advisor_workflow import (
     WorkflowError,
     _approved_images,
     _comparison_contract,
+    _cross_provider_comparison,
     _create_pr_with_token,
     _github_repo_slug,
     _private_roots_ignored,
@@ -27,6 +28,31 @@ from benchmark.core.advisor_workflow import (
 
 
 class AdvisorWorkflowTests(unittest.TestCase):
+    def test_cross_provider_comparison_loads_committed_deepseek_and_codex(self):
+        repo = Path(__file__).parents[3]
+        config = build_preset_config(
+            experiment_id="physics-week9-history-visibility-test",
+            kimi_model="kimi-code/k3",
+            claude_model="sonnet",
+            split="test",
+        )
+
+        comparison = _cross_provider_comparison(repo, config)
+
+        historical = [
+            row
+            for row in comparison["rows"]
+            if row["input_route"] == "historical-frozen-automatic-transcript"
+        ]
+        self.assertEqual(
+            {row["provider"] for row in historical},
+            {"DeepSeek public API", "Codex CLI"},
+        )
+        self.assertTrue(
+            all(row["metrics"].get("exact_agreement") for row in historical)
+        )
+        self.assertEqual(len(comparison["rows"]), 6)
+
     def test_private_roots_check_requires_both_ignore_rules(self):
         calls = []
 
@@ -72,6 +98,24 @@ class AdvisorWorkflowTests(unittest.TestCase):
             },
         )
         self.assertEqual(len(config["comparisons"]), 8)
+        self.assertEqual(len(config["transcription_runs"]), 2)
+        self.assertEqual(len(config["transcript_packet_builds"]), 4)
+        self.assertTrue(
+            all(
+                run["packet"].endswith("T1-dev-r1")
+                for run in config["transcription_runs"]
+            )
+        )
+        self.assertTrue(
+            all(
+                "physics-week9-advisor-test" in run["packet"]
+                for run in config["runs"]
+                if run["input_mode"] == "text-only"
+            )
+        )
+        self.assertTrue(
+            config["prior_results"].endswith("model-benchmark-summary.json")
+        )
         self.assertEqual(config["split"], "development")
         self.assertTrue(all(run["timeout_seconds"] == 600 for run in config["runs"]))
         self.assertTrue(config["submission"]["branch"].startswith("advisor-results/"))
@@ -97,6 +141,12 @@ class AdvisorWorkflowTests(unittest.TestCase):
             all(
                 build["source_text_packet"].endswith("G1-test-r1")
                 for build in config["packet_builds"]
+            )
+        )
+        self.assertTrue(
+            all(
+                run["packet"].endswith("T1-test-r1")
+                for run in config["transcription_runs"]
             )
         )
 

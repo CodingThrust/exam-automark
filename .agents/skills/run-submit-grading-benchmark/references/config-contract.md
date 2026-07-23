@@ -19,10 +19,15 @@ differs from those presets.
 - `required_engines`: normally `["kimi", "claude"]`.
 - `required_input_modes`: normally `["text-only", "multimodal"]`.
 - `packet_builds`: recipes that reuse the frozen prompt/rubric/student set from
-  transcript packets while taking actual inputs from approved anonymized image
-  roots.
+  templates while taking actual inputs from approved anonymized image roots;
+  includes the canonical transcription image packet.
+- `transcription_runs`: one strict image-to-transcript run per required engine.
+- `transcript_packet_builds`: recipes that bind one engine's transcript outputs
+  to baseline/candidate grading prompts without mixing engines.
 - `runs`: immutable headless run arms.
 - `comparisons`: paired aggregate metric jobs referencing run IDs.
+- `prior_results`: committed aggregate DeepSeek/Codex evidence used to generate
+  the cross-provider context table.
 - `submission`: base branch, `advisor-results/...` branch, title, commit
   message, and an automatically opened draft pull request.
 

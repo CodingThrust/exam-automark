@@ -32,9 +32,10 @@ class RunSubmitGradingBenchmarkSkillTests(unittest.TestCase):
             "python scripts/advisor_experiment.py package",
             "python scripts/advisor_experiment.py submit",
             "kimi code membership is not a moonshot platform api key",
-            "automatic-transcript",
-            "human-reviewed-transcript",
-            "human-approved anonymized page images",
+            "fresh per-engine transcription then grading",
+            "direct multimodal grading",
+            "approved anonymous page images",
+            "committed deepseek/codex",
             "failed experiment is still an experiment result",
             "github pull request",
             "draft github pull request",
@@ -52,8 +53,8 @@ class RunSubmitGradingBenchmarkSkillTests(unittest.TestCase):
             encoding="utf-8"
         ).lower()
         for phrase in (
-            "run matched `text-only` and `multimodal` development arms",
-            "mark text arm blocked",
+            "make each engine transcribe t1",
+            "block that engine's transcript-derived grading arms",
             "mark multimodal arm blocked",
             "stay on development and package failures",
             "technical failure",
@@ -68,7 +69,11 @@ class RunSubmitGradingBenchmarkSkillTests(unittest.TestCase):
         self.assertIn("run-submit-grading-benchmark", handoff)
         self.assertIn("all 18 test students", handoff)
         self.assertIn("--split test", handoff)
-        self.assertIn("Kimi/Claude × text/multimodal × baseline/candidate", handoff)
+        self.assertIn(
+            "Kimi/Claude ×\nfresh-transcript/direct-multimodal × baseline/candidate",
+            handoff,
+        )
+        self.assertIn("committed DeepSeek/Codex evidence", handoff)
         self.assertIn("GitHub PR URL", handoff)
         self.assertIn("does not require a", handoff)
         self.assertIn("`MOONSHOT_API_KEY`", handoff)

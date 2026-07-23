@@ -5,9 +5,9 @@ when the evidence already determines the answer.
 
 | Situation | Required action | Forbidden shortcut |
 | --- | --- | --- |
-| Frozen transcript packet with source provenance and approved anonymous images both exist | Run matched `text-only` and `multimodal` development arms | Picking only the cheaper route |
-| Transcript source is automatic/OCR and provenance is complete | Run it as `automatic-transcript`; separate transcription errors from grading errors | Calling it human-reviewed |
-| Transcript exists but source kind/path/run ID is absent | Mark text arm blocked; repair provenance | Guessing whether it was automatic or reviewed |
+| Canonical T1 packet and approved anonymous images exist | Make each engine transcribe T1, build text packets from that engine's output, and also run matched direct `multimodal` arms | Reusing historical transcripts as the new engine's transcription |
+| One engine's fresh transcription passes strict validation | Build only that engine's immutable text packets with source run/hash provenance | Sharing another engine's transcript |
+| One engine's fresh transcription fails | Block that engine's transcript-derived grading arms and retain the technical failure | Falling back silently to frozen transcripts |
 | Images exist but privacy review is absent, false, or incomplete | Mark multimodal arm blocked; request privacy review | Inferring anonymity from `Sxxx` filenames |
 | One input route is ready and the other is blocked | The ready route may run as partial evidence; package the blocked gate | Calling it a two-route comparison |
 | Text and image packets contain different student IDs | Repair packet pairing before model calls | Comparing unmatched aggregates |
@@ -38,13 +38,14 @@ Report a comparison as unmatched if an invariant cannot be established.
 
 ## Default run order
 
-1. Kimi text baseline/candidate.
-2. Kimi multimodal baseline/candidate.
-3. Claude text baseline/candidate.
-4. Claude multimodal baseline/candidate.
-5. Baseline/candidate metrics within each engine and mode.
-6. Text/multimodal comparisons within each engine.
-7. Kimi/Claude comparisons within each mode.
+1. Kimi and Claude fresh transcription.
+2. Validate both strict transcript outputs.
+3. Build Kimi/Claude text packets from their respective transcripts.
+4. Kimi transcript-derived and direct-multimodal baseline/candidate.
+5. Claude transcript-derived and direct-multimodal baseline/candidate.
+6. Baseline/candidate metrics within each engine and mode.
+7. Text/multimodal and Kimi/Claude comparisons, plus the committed
+   DeepSeek/Codex context table.
 8. After development passes, repeat steps 1-7 on the sealed test split without
    changing the frozen workflow.
 

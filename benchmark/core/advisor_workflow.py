@@ -244,6 +244,49 @@ def validate_config(config: dict[str, Any], repo: Path) -> None:
         output_paths.add(output)
         coverage.add((engine, mode, condition))
 
+    transcription_ids: set[str] = set()
+    for index, run in enumerate(config.get("transcription_runs", [])):
+        if not isinstance(run, dict):
+            raise WorkflowError(f"transcription_runs[{index}] must be an object")
+        run_id = run.get("id")
+        if not isinstance(run_id, str) or not ID_PATTERN.fullmatch(run_id):
+            raise WorkflowError(
+                f"transcription_runs[{index}].id must be lowercase kebab-case"
+            )
+        if run_id in transcription_ids or run_id in run_ids:
+            raise WorkflowError(f"duplicate run id: {run_id}")
+        transcription_ids.add(run_id)
+        if run.get("engine") not in SUPPORTED_ENGINES:
+            raise WorkflowError(f"unsupported transcription engine in {run_id}")
+        if not isinstance(run.get("model"), str) or not run["model"].strip():
+            raise WorkflowError(f"missing model in {run_id}")
+        if run.get("input_mode") != "multimodal":
+            raise WorkflowError(f"{run_id} must use multimodal input")
+        if run.get("condition") != "transcription":
+            raise WorkflowError(f"{run_id} condition must be transcription")
+        packet = _repo_path(repo, run.get("packet", ""), label=f"{run_id}.packet")
+        output = _repo_path(repo, run.get("output", ""), label=f"{run_id}.output")
+        privacy_review = _repo_path(
+            repo,
+            run.get("privacy_review", ""),
+            label=f"{run_id}.privacy_review",
+        )
+        for label, path in (
+            ("packet", packet),
+            ("output", output),
+            ("privacy_review", privacy_review),
+        ):
+            _assert_below(repo, path, "Data", label=f"{run_id}.{label}")
+        if output in output_paths:
+            raise WorkflowError(f"duplicate output path: {_relative(repo, output)}")
+        output_paths.add(output)
+        max_retries = run.get("max_retries", 2)
+        timeout_seconds = run.get("timeout_seconds", 600)
+        if not isinstance(max_retries, int) or max_retries < 0:
+            raise WorkflowError(f"max_retries must be non-negative in {run_id}")
+        if not isinstance(timeout_seconds, int) or timeout_seconds <= 0:
+            raise WorkflowError(f"timeout_seconds must be positive in {run_id}")
+
     missing_coverage = sorted(
         (engine, mode, condition)
         for engine in required_engines
@@ -268,6 +311,39 @@ def validate_config(config: dict[str, Any], repo: Path) -> None:
             raise WorkflowError(f"duplicate packet build id: {build_id}")
         build_ids.add(build_id)
         for field in ("source_text_packet", "input_root", "privacy_review", "output_root"):
+            path = _repo_path(repo, build.get(field, ""), label=f"{build_id}.{field}")
+            _assert_below(repo, path, "Data", label=f"{build_id}.{field}")
+        if build.get("prompt_packet") is not None:
+            prompt_packet = _repo_path(
+                repo,
+                build.get("prompt_packet", ""),
+                label=f"{build_id}.prompt_packet",
+            )
+            _assert_below(
+                repo, prompt_packet, "Data", label=f"{build_id}.prompt_packet"
+            )
+        if build.get("task", "grade") not in {"grade", "transcribe"}:
+            raise WorkflowError(f"{build_id}.task must be grade or transcribe")
+
+    transcript_build_ids: set[str] = set()
+    for index, build in enumerate(config.get("transcript_packet_builds", [])):
+        if not isinstance(build, dict):
+            raise WorkflowError(
+                f"transcript_packet_builds[{index}] must be an object"
+            )
+        build_id = build.get("id")
+        if not isinstance(build_id, str) or not ID_PATTERN.fullmatch(build_id):
+            raise WorkflowError(
+                f"transcript_packet_builds[{index}].id must be kebab-case"
+            )
+        if build_id in build_ids or build_id in transcript_build_ids:
+            raise WorkflowError(f"duplicate packet build id: {build_id}")
+        transcript_build_ids.add(build_id)
+        if build.get("transcription_run") not in transcription_ids:
+            raise WorkflowError(
+                f"{build_id}.transcription_run references unknown transcription run"
+            )
+        for field in ("source_text_packet", "output_root"):
             path = _repo_path(repo, build.get(field, ""), label=f"{build_id}.{field}")
             _assert_below(repo, path, "Data", label=f"{build_id}.{field}")
 
@@ -306,6 +382,19 @@ def validate_config(config: dict[str, Any], repo: Path) -> None:
         if not isinstance(submission.get(field), str) or not submission[field].strip():
             raise WorkflowError(f"submission.{field} is required")
 
+    if config.get("prior_results") is not None:
+        prior_results = _repo_path(
+            repo,
+            config.get("prior_results", ""),
+            label="prior_results",
+        )
+        _assert_below(
+            repo,
+            prior_results,
+            "experiments/records",
+            label="prior_results",
+        )
+
 
 def build_preset_config(
     *,
@@ -320,11 +409,11 @@ def build_preset_config(
         raise WorkflowError("generated preset split must be development or test")
     benchmark_root = "Data/physics/benchmark"
     packet_id = "G1-dev-r1" if split == "development" else "G1-test-r1"
-    baseline_text = (
+    baseline_template = (
         f"{benchmark_root}/text_packets/"
         f"physics-week9-baseline-text-strict-schema/{packet_id}"
     )
-    candidate_text = (
+    candidate_template = (
         f"{benchmark_root}/text_packets/"
         f"physics-week9-candidate-v2-text-strict-schema/{packet_id}"
     )
@@ -337,23 +426,85 @@ def build_preset_config(
     packet_builds = [
         {
             "id": f"baseline-image-{split}",
-            "source_text_packet": baseline_text,
+            "source_text_packet": baseline_template,
             "input_root": f"{benchmark_root}/anonymized",
             "privacy_review": f"{benchmark_root}/manifest/privacy_review.csv",
             "output_root": f"{image_root}/baseline",
         },
         {
             "id": f"candidate-image-{split}",
-            "source_text_packet": candidate_text,
+            "source_text_packet": candidate_template,
             "input_root": f"{benchmark_root}/anonymized",
             "privacy_review": f"{benchmark_root}/manifest/privacy_review.csv",
             "output_root": f"{image_root}/candidate",
         },
     ]
+    transcription_packet_id = "T1-dev-r1" if split == "development" else "T1-test-r1"
+    legacy_transcription_packet = (
+        f"{benchmark_root}/blind_packets/{transcription_packet_id}"
+    )
+    transcription_packet = (
+        f"{image_root}/transcription/{transcription_packet_id}"
+    )
+    packet_builds.append(
+        {
+            "id": f"transcription-image-{split}",
+            "source_text_packet": baseline_template,
+            "prompt_packet": legacy_transcription_packet,
+            "packet_id": transcription_packet_id,
+            "condition": "T1",
+            "task": "transcribe",
+            "input_root": f"{benchmark_root}/anonymized",
+            "privacy_review": f"{benchmark_root}/manifest/privacy_review.csv",
+            "output_root": f"{image_root}/transcription",
+        }
+    )
+    transcription_runs = []
+    transcript_packet_builds = []
+    generated_text_packets: dict[tuple[str, str], str] = {}
+    for engine, model in (("kimi", kimi_model), ("claude", claude_model)):
+        transcription_id = f"{engine}-transcription"
+        transcription_runs.append(
+            {
+                "id": transcription_id,
+                "engine": engine,
+                "model": model,
+                "input_mode": "multimodal",
+                "condition": "transcription",
+                "packet": transcription_packet,
+                "output": f"{run_root}/{transcription_id}",
+                "privacy_review": f"{benchmark_root}/manifest/privacy_review.csv",
+                "max_retries": 2,
+                "timeout_seconds": 600,
+            }
+        )
+        for condition, template in (
+            ("baseline", baseline_template),
+            ("candidate", candidate_template),
+        ):
+            output_root = (
+                f"{benchmark_root}/text_packets/{experiment_id}/{engine}/{condition}"
+            )
+            generated_text_packets[(engine, condition)] = (
+                f"{output_root}/{packet_id}"
+            )
+            transcript_packet_builds.append(
+                {
+                    "id": f"{engine}-{condition}-fresh-transcript",
+                    "transcription_run": transcription_id,
+                    "source_text_packet": template,
+                    "output_root": output_root,
+                    "text_source_kind": f"{engine}_fresh_automatic_transcript",
+                }
+            )
     runs: list[dict[str, Any]] = []
     for engine, model in (("kimi", kimi_model), ("claude", claude_model)):
         for mode, baseline_packet, candidate_packet in (
-            ("text-only", baseline_text, candidate_text),
+            (
+                "text-only",
+                generated_text_packets[(engine, "baseline")],
+                generated_text_packets[(engine, "candidate")],
+            ),
             ("multimodal", baseline_image, candidate_image),
         ):
             short_mode = "text" if mode == "text-only" else "image"
@@ -439,8 +590,14 @@ def build_preset_config(
         "required_input_modes": ["text-only", "multimodal"],
         "required_conditions": ["baseline", "candidate"],
         "packet_builds": packet_builds,
+        "transcription_runs": transcription_runs,
+        "transcript_packet_builds": transcript_packet_builds,
         "runs": runs,
         "comparisons": comparisons,
+        "prior_results": (
+            "experiments/records/physics-codex-benchmark-report/"
+            "model-benchmark-summary.json"
+        ),
         "submission": {
             "base": "main",
             "branch": f"advisor-results/{experiment_id}",
@@ -525,7 +682,7 @@ def _required_engine_models(
 ) -> list[tuple[str, str, str]]:
     required = {
         (str(run["engine"]), str(run["model"]), _engine_binary(run))
-        for run in config["runs"]
+        for run in [*config["runs"], *config.get("transcription_runs", [])]
     }
     return sorted(required)
 
@@ -764,6 +921,13 @@ def _packet_manifest(packet: Path) -> dict[str, Any]:
     return manifest
 
 
+def _packet_task(packet: Path, manifest: dict[str, Any]) -> str | None:
+    task = manifest.get("task")
+    if task is None and not (packet / "rubric.json").exists():
+        return "transcribe"
+    return str(task) if task is not None else None
+
+
 def _text_provenance(manifest: dict[str, Any]) -> tuple[str, list[str]]:
     metadata = manifest.get("metadata", {})
     if not isinstance(metadata, dict):
@@ -949,7 +1113,7 @@ def doctor(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
         )
 
     binaries: dict[str, str] = {}
-    for run in config["runs"]:
+    for run in [*config["runs"], *config.get("transcription_runs", [])]:
         binaries.setdefault(run["engine"], _engine_binary(run))
     for engine, binary in sorted(binaries.items()):
         version = _command_version(binary, repo)
@@ -989,19 +1153,80 @@ def doctor(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
         )
     )
 
-    build_targets = _build_target_paths(repo, config)
+    build_target_map = _build_target_map(repo, config)
+    build_targets = set(build_target_map)
+    for run in config.get("transcription_runs", []):
+        packet = _repo_path(repo, run["packet"], label=f"{run['id']}.packet")
+        if not packet.is_dir() and packet in build_targets:
+            checks.append(
+                _check(
+                    f"packet-{run['id']}",
+                    "action_required",
+                    f"missing packet: {_relative(repo, packet)}",
+                    scope="prepare",
+                    remediation="Run the prepare command.",
+                )
+            )
+            continue
+        findings = (
+            _packet_mode_findings(packet, "multimodal")
+            if packet.is_dir()
+            else [f"missing packet: {_relative(repo, packet)}"]
+        )
+        if packet.is_dir():
+            try:
+                approvals = _privacy_approvals(
+                    _repo_path(
+                        repo,
+                        run["privacy_review"],
+                        label=f"{run['id']}.privacy_review",
+                    )
+                )
+                manifest = _packet_manifest(packet)
+                _approved_images(packet / "inputs", manifest["student_ids"], approvals)
+                if _packet_task(packet, manifest) != "transcribe":
+                    findings.append("packet task must be transcribe")
+            except WorkflowError as error:
+                findings.append(str(error))
+        checks.append(
+            _check(
+                f"packet-{run['id']}",
+                "passed" if not findings else "failed",
+                "approved anonymous transcription images are ready"
+                if not findings
+                else "; ".join(findings[:4]),
+                scope="run",
+                remediation="Restore the frozen T1 transcription packet and privacy review.",
+            )
+        )
     for run in config["runs"]:
         packet = _repo_path(repo, run["packet"], label=f"{run['id']}.packet")
         if not packet.is_dir():
-            status = "action_required" if packet in build_targets else "failed"
+            build = build_target_map.get(packet)
+            auto_transcript = bool(build and build.get("transcription_run"))
+            status = (
+                "passed"
+                if auto_transcript
+                else "action_required"
+                if packet in build_targets
+                else "failed"
+            )
             checks.append(
                 _check(
                     f"packet-{run['id']}",
                     status,
-                    f"missing packet: {_relative(repo, packet)}",
+                    (
+                        "will be built automatically from this engine's fresh "
+                        "transcription during run"
+                        if auto_transcript
+                        else f"missing packet: {_relative(repo, packet)}"
+                    ),
                     scope="prepare" if status == "action_required" else "run",
                     remediation=(
-                        "Run the prepare command."
+                        "Run the normal run command; it transcribes first and then "
+                        "builds this immutable text packet."
+                        if auto_transcript
+                        else "Run the prepare command."
                         if status == "action_required"
                         else "Restore or generate the required private packet."
                     ),
@@ -1113,6 +1338,17 @@ def _build_target_map(
 ) -> dict[Path, dict[str, Any]]:
     targets: dict[Path, dict[str, Any]] = {}
     for build in config.get("packet_builds", []):
+        source = _repo_path(
+            repo, build["source_text_packet"], label=f"{build['id']}.source"
+        )
+        packet_id = str(build.get("packet_id") or source.name)
+        if not build.get("packet_id") and (source / "manifest.json").exists():
+            packet_id = str(_packet_manifest(source).get("packet_id", packet_id))
+        output_root = _repo_path(
+            repo, build["output_root"], label=f"{build['id']}.output_root"
+        )
+        targets[_logical_absolute(output_root / packet_id)] = build
+    for build in config.get("transcript_packet_builds", []):
         source = _repo_path(
             repo, build["source_text_packet"], label=f"{build['id']}.source"
         )
@@ -1336,6 +1572,14 @@ def prepare(
             repo, build["source_text_packet"], label=f"{build['id']}.source"
         )
         manifest = _packet_manifest(source)
+        prompt_packet = _repo_path(
+            repo,
+            build.get("prompt_packet", build["source_text_packet"]),
+            label=f"{build['id']}.prompt_packet",
+        )
+        task = str(build.get("task", "grade"))
+        packet_id = str(build.get("packet_id", manifest["packet_id"]))
+        condition = str(build.get("condition", manifest["condition"]))
         input_root = _repo_path(
             repo, build["input_root"], label=f"{build['id']}.input_root"
         )
@@ -1347,13 +1591,14 @@ def prepare(
         output_root = _repo_path(
             repo, build["output_root"], label=f"{build['id']}.output_root"
         )
-        target = output_root / str(manifest["packet_id"])
+        target = output_root / packet_id
 
         if target.exists():
             target_manifest = _packet_manifest(target)
             if (
                 target_manifest["student_ids"] != manifest["student_ids"]
-                or target_manifest.get("condition") != manifest.get("condition")
+                or target_manifest.get("condition") != condition
+                or _packet_task(target, target_manifest) != task
                 or target_manifest.get("metadata", {}).get("input_mode")
                 != "multimodal"
             ):
@@ -1393,20 +1638,20 @@ def prepare(
             "--course",
             str(source / "course.json"),
             "--packet-id",
-            str(manifest["packet_id"]),
+            packet_id,
             "--condition",
-            str(manifest["condition"]),
+            condition,
             "--task",
-            "grade",
+            task,
             "--prompt",
-            str(source / "prompt.txt"),
-            "--rubric",
-            str(source / "rubric.json"),
+            str(prompt_packet / "prompt.txt"),
             "--input-root",
             str(input_root),
             "--output-root",
             str(output_root),
         ]
+        if task == "grade":
+            argv.extend(["--rubric", str(source / "rubric.json")])
         for student_id in manifest["student_ids"]:
             argv.extend(["--student-id", str(student_id)])
         metadata = manifest.get("metadata", {})
@@ -1425,7 +1670,7 @@ def prepare(
                 "--metadata",
                 "image_source_kind=approved_anonymized_pages",
                 "--metadata",
-                f"source_prompt_packet={_relative(repo, source)}",
+                f"source_prompt_packet={_relative(repo, prompt_packet)}",
             ]
         )
         if dry_run:
@@ -1473,6 +1718,152 @@ def prepare(
         "packet_builds": results,
     }
 
+def _transcript_packet_target(
+    repo: Path,
+    build: dict[str, Any],
+    *,
+    dry_run: bool,
+) -> Path:
+    source = _repo_path(
+        repo,
+        build["source_text_packet"],
+        label=f"{build['id']}.source_text_packet",
+    )
+    packet_id = str(_packet_manifest(source).get("packet_id", source.name))
+    if dry_run:
+        packet_id += "-dry-run"
+    output_root = _repo_path(
+        repo,
+        build["output_root"],
+        label=f"{build['id']}.output_root",
+    )
+    return output_root / packet_id
+
+
+def _prepare_transcript_packets(
+    repo: Path,
+    config: dict[str, Any],
+    *,
+    dry_run: bool,
+) -> list[dict[str, Any]]:
+    transcription_runs = {
+        run["id"]: run for run in config.get("transcription_runs", [])
+    }
+    results: list[dict[str, Any]] = []
+    for build in config.get("transcript_packet_builds", []):
+        source = _repo_path(
+            repo,
+            build["source_text_packet"],
+            label=f"{build['id']}.source_text_packet",
+        )
+        source_manifest = _packet_manifest(source)
+        transcription = transcription_runs[build["transcription_run"]]
+        transcription_output = _run_output(repo, transcription, dry_run)
+        try:
+            validation = _read_json(transcription_output / "validation.json")
+        except WorkflowError:
+            validation = {}
+        if validation.get("status") != "passed":
+            results.append(
+                {
+                    "id": build["id"],
+                    "status": "blocked",
+                    "failure_category": "packet/input",
+                    "detail": (
+                        f"fresh transcription did not pass: "
+                        f"{build['transcription_run']}"
+                    ),
+                }
+            )
+            continue
+        transcript_source = transcription_output / "outputs"
+        target = _transcript_packet_target(repo, build, dry_run=dry_run)
+        if target.exists():
+            target_manifest = _packet_manifest(target)
+            metadata = target_manifest.get("metadata", {})
+            if (
+                target_manifest.get("student_ids") != source_manifest.get("student_ids")
+                or target_manifest.get("condition") != source_manifest.get("condition")
+                or not isinstance(metadata, dict)
+                or metadata.get("source_run_id") != transcription["id"]
+                or metadata.get("source_transcription_packet_hash")
+                != _read_json(transcription_output / "run-metadata.json").get(
+                    "packet_hash"
+                )
+            ):
+                raise WorkflowError(
+                    f"existing fresh-transcript packet differs: "
+                    f"{_relative(repo, target)}"
+                )
+            results.append(
+                {
+                    "id": build["id"],
+                    "status": "reused",
+                    "packet": _relative(repo, target),
+                }
+            )
+            continue
+
+        packet_id = target.name
+        argv = [
+            sys.executable,
+            "-m",
+            "benchmark.core.cli",
+            "build-text-grading-packet",
+            "--course",
+            str(source / "course.json"),
+            "--packet-id",
+            packet_id,
+            "--condition",
+            str(source_manifest["condition"]),
+            "--prompt",
+            str(source / "prompt.txt"),
+            "--rubric",
+            str(source / "rubric.json"),
+            "--transcript-source",
+            str(transcript_source),
+            "--output-root",
+            str(target.parent),
+            "--text-source-kind",
+            str(build.get("text_source_kind", "fresh_automatic_transcript")),
+            "--source-run-id",
+            str(transcription["id"]),
+        ]
+        for student_id in source_manifest["student_ids"]:
+            argv.extend(["--student-id", str(student_id)])
+        metadata = source_manifest.get("metadata", {})
+        if isinstance(metadata, dict):
+            for key, value in sorted(metadata.items()):
+                if (
+                    key in {"input_mode", "source_run_id"}
+                    or key.startswith("text_source")
+                ):
+                    continue
+                if isinstance(value, (str, int, float, bool)):
+                    argv.extend(["--metadata", f"{key}={value}"])
+        transcription_metadata = _read_json(
+            transcription_output / "run-metadata.json"
+        )
+        for key, value in (
+            ("transcription_engine", transcription["engine"]),
+            ("transcription_model", transcription["model"]),
+            (
+                "source_transcription_packet_hash",
+                transcription_metadata.get("packet_hash"),
+            ),
+        ):
+            if value is not None:
+                argv.extend(["--metadata", f"{key}={value}"])
+        _run(argv, cwd=repo, capture=True, check=True)
+        results.append(
+            {
+                "id": build["id"],
+                "status": "built",
+                "packet": _relative(repo, target),
+            }
+        )
+    return results
+
 
 def _run_metadata_matches(
     repo: Path,
@@ -1480,6 +1871,7 @@ def _run_metadata_matches(
     output: Path,
     *,
     run_commit: str,
+    packet: Path | None = None,
 ) -> bool:
     try:
         validation = _read_json(output / "validation.json")
@@ -1488,7 +1880,9 @@ def _run_metadata_matches(
         return False
     if validation.get("status") != "passed":
         return False
-    packet = _repo_path(repo, run["packet"], label=f"{run['id']}.packet")
+    packet = packet or _repo_path(
+        repo, run["packet"], label=f"{run['id']}.packet"
+    )
     metadata_packet = Path(str(metadata.get("packet", "")))
     if not metadata_packet.is_absolute():
         metadata_packet = repo / metadata_packet
@@ -1517,6 +1911,97 @@ def _run_output(repo: Path, run: dict[str, Any], dry_run: bool) -> Path:
     return output.with_name(output.name + "-dry-run") if dry_run else output
 
 
+def _run_packet(
+    repo: Path,
+    config: dict[str, Any],
+    run: dict[str, Any],
+    *,
+    dry_run: bool,
+) -> Path:
+    packet = _repo_path(repo, run["packet"], label=f"{run['id']}.packet")
+    if not dry_run:
+        return packet
+    build = _build_target_map(repo, config).get(_logical_absolute(packet))
+    if build and build.get("transcription_run"):
+        return _transcript_packet_target(repo, build, dry_run=True)
+    return packet
+
+
+def _execute_headless_run(
+    repo: Path,
+    run: dict[str, Any],
+    *,
+    packet: Path,
+    dry_run: bool,
+    run_commit: str,
+) -> dict[str, Any]:
+    output = _run_output(repo, run, dry_run)
+    if output.exists():
+        if _run_metadata_matches(
+            repo,
+            run,
+            output,
+            run_commit=run_commit,
+            packet=packet,
+        ):
+            validation = _read_json(output / "validation.json")
+            return {
+                "status": "reused",
+                "validation_status": "passed",
+                "students_expected": validation.get("students_expected"),
+                "students_passed": validation.get("students_passed"),
+                "technical_failure_types": {},
+                "output": _relative(repo, output),
+            }
+        return {
+            "status": "failed",
+            "validation_status": "mismatched",
+            "failure_category": "output_collision",
+            "detail": "existing output is failed, incomplete, or mismatched",
+            "output": _relative(repo, output),
+        }
+
+    argv = [
+        sys.executable,
+        str(repo / "scripts" / "run_headless_packet.py"),
+        "--engine",
+        run["engine"],
+        "--model",
+        run["model"],
+        "--input-mode",
+        run["input_mode"],
+        "--packet",
+        str(packet),
+        "--output",
+        str(output),
+        "--max-retries",
+        str(run.get("max_retries", 2)),
+        "--timeout-seconds",
+        str(run.get("timeout_seconds", 600)),
+        "--run-commit",
+        run_commit,
+        "--experiment-condition",
+        run["condition"],
+    ]
+    if run.get("engine_bin"):
+        argv.extend(["--engine-bin", str(run["engine_bin"])])
+    if dry_run:
+        argv.append("--dry-run")
+    completed = _run(argv, cwd=repo, capture=True)
+    validation: dict[str, Any] = {}
+    if (output / "validation.json").exists():
+        validation = _read_json(output / "validation.json")
+    passed = completed.returncode == 0 and validation.get("status") == "passed"
+    return {
+        "status": "passed" if passed else "failed",
+        "validation_status": validation.get("status", "missing"),
+        "students_expected": validation.get("students_expected"),
+        "students_passed": validation.get("students_passed"),
+        "technical_failure_types": _technical_failure_counts(validation),
+        "output": _relative(repo, output),
+    }
+
+
 def _technical_failure_counts(validation: dict[str, Any]) -> dict[str, int]:
     counts = Counter(
         str(
@@ -1543,9 +2028,47 @@ def run_experiment(
             "development arms pass"
         )
     blockers: list[dict[str, str]] = []
+    for run in config.get("transcription_runs", []):
+        packet = _repo_path(repo, run["packet"], label=f"{run['id']}.packet")
+        if not packet.is_dir():
+            blockers.append(
+                {
+                    "gate": f"packet-{run['id']}",
+                    "category": "packet/input",
+                    "reason": "missing-transcription-packet",
+                }
+            )
+            continue
+        findings = _packet_mode_findings(packet, "multimodal")
+        manifest = _packet_manifest(packet)
+        if _packet_task(packet, manifest) != "transcribe":
+            findings.append("packet task must be transcribe")
+        try:
+            approvals = _privacy_approvals(
+                _repo_path(
+                    repo,
+                    run["privacy_review"],
+                    label=f"{run['id']}.privacy_review",
+                )
+            )
+            _approved_images(packet / "inputs", manifest["student_ids"], approvals)
+        except WorkflowError as error:
+            findings.append(str(error))
+        if findings:
+            blockers.append(
+                {
+                    "gate": f"packet-{run['id']}",
+                    "category": "packet/input",
+                    "reason": "transcription-packet-validation-failed",
+                }
+            )
+    generated_targets = _build_target_map(repo, config)
     for run in config["runs"]:
         packet = _repo_path(repo, run["packet"], label=f"{run['id']}.packet")
         if not packet.is_dir():
+            build = generated_targets.get(_logical_absolute(packet))
+            if build and build.get("transcription_run"):
+                continue
             blockers.append(
                 {
                     "gate": f"packet-{run['id']}",
@@ -1601,7 +2124,7 @@ def run_experiment(
                 }
             )
         binaries: dict[str, str] = {}
-        for run in config["runs"]:
+        for run in [*config["runs"], *config.get("transcription_runs", [])]:
             binaries.setdefault(run["engine"], _engine_binary(run))
         for engine, binary in sorted(binaries.items()):
             if _command_version(binary, repo) is None:
@@ -1643,6 +2166,8 @@ def run_experiment(
         "run_commit": run_commit,
         "started_at": _utc_now(),
         "status": "running",
+        "transcriptions": {},
+        "transcript_packet_builds": [],
         "runs": {},
         "comparisons": {},
     }
@@ -1660,79 +2185,86 @@ def run_experiment(
     _write_json(state_path, state)
 
     all_runs_passed = True
+    for run in config.get("transcription_runs", []):
+        packet = _repo_path(repo, run["packet"], label=f"{run['id']}.packet")
+        result = _execute_headless_run(
+            repo,
+            run,
+            packet=packet,
+            dry_run=dry_run,
+            run_commit=run_commit,
+        )
+        state["transcriptions"][run["id"]] = result
+        if result.get("validation_status") != "passed":
+            all_runs_passed = False
+        _write_json(state_path, state)
+
+    try:
+        state["transcript_packet_builds"] = _prepare_transcript_packets(
+            repo,
+            config,
+            dry_run=dry_run,
+        )
+    except WorkflowError as error:
+        state["transcript_packet_builds"] = [
+            {
+                "status": "failed",
+                "failure_category": "packet/input",
+                "detail": str(error),
+            }
+        ]
+        all_runs_passed = False
+    if any(
+        item.get("status") in {"blocked", "failed"}
+        for item in state["transcript_packet_builds"]
+    ):
+        all_runs_passed = False
+    post_build_plan = plan(repo, config)
+    comparison_blockers = post_build_plan.get("blocking_mismatches", [])
+    grading_contract_ready = not comparison_blockers
+    if comparison_blockers:
+        state["blockers"] = [
+            {
+                "gate": "post-transcription-comparison-contract",
+                "category": "packet/input",
+                "reason": "comparison-contract-mismatch",
+            }
+        ]
+        all_runs_passed = False
+    _write_json(state_path, state)
+
     for run in config["runs"]:
         run_id = run["id"]
-        output = _run_output(repo, run, dry_run)
-        packet = _repo_path(repo, run["packet"], label=f"{run_id}.packet")
-        if output.exists():
-            if _run_metadata_matches(
-                repo,
-                run,
-                output,
-                run_commit=run_commit,
-            ):
-                validation = _read_json(output / "validation.json")
-                state["runs"][run_id] = {
-                    "status": "reused",
-                    "validation_status": "passed",
-                    "students_expected": validation.get("students_expected"),
-                    "students_passed": validation.get("students_passed"),
-                    "output": _relative(repo, output),
-                }
-                _write_json(state_path, state)
-                continue
+        packet = _run_packet(repo, config, run, dry_run=dry_run)
+        findings = (
+            _packet_mode_findings(packet, run["input_mode"])
+            if packet.is_dir()
+            else ["missing packet"]
+        )
+        if not grading_contract_ready or findings:
             state["runs"][run_id] = {
-                "status": "failed",
-                "failure_category": "output_collision",
-                "detail": "existing output is failed, incomplete, or mismatched",
-                "output": _relative(repo, output),
+                "status": "blocked",
+                "validation_status": "missing",
+                "failure_category": "packet/input",
+                "detail": (
+                    "comparison contract did not pass"
+                    if not grading_contract_ready
+                    else "; ".join(findings[:4])
+                ),
             }
             all_runs_passed = False
             _write_json(state_path, state)
             continue
-
-        argv = [
-            sys.executable,
-            str(repo / "scripts" / "run_headless_packet.py"),
-            "--engine",
-            run["engine"],
-            "--model",
-            run["model"],
-            "--input-mode",
-            run["input_mode"],
-            "--packet",
-            str(packet),
-            "--output",
-            str(output),
-            "--max-retries",
-            str(run.get("max_retries", 2)),
-            "--timeout-seconds",
-            str(run.get("timeout_seconds", 600)),
-            "--run-commit",
-            run_commit,
-            "--experiment-condition",
-            run["condition"],
-        ]
-        if run.get("engine_bin"):
-            argv.extend(["--engine-bin", str(run["engine_bin"])])
-        if dry_run:
-            argv.append("--dry-run")
-
-        completed = _run(argv, cwd=repo, capture=True)
-        validation: dict[str, Any] = {}
-        if (output / "validation.json").exists():
-            validation = _read_json(output / "validation.json")
-        passed = completed.returncode == 0 and validation.get("status") == "passed"
-        state["runs"][run_id] = {
-            "status": "passed" if passed else "failed",
-            "validation_status": validation.get("status", "missing"),
-            "students_expected": validation.get("students_expected"),
-            "students_passed": validation.get("students_passed"),
-            "technical_failure_types": _technical_failure_counts(validation),
-            "output": _relative(repo, output),
-        }
+        result = _execute_headless_run(
+            repo,
+            run,
+            packet=packet,
+            dry_run=dry_run,
+            run_commit=run_commit,
+        )
+        state["runs"][run_id] = result
         _write_json(state_path, state)
-        if not passed:
+        if result.get("validation_status") != "passed":
             all_runs_passed = False
 
     runs_by_id = {run["id"]: run for run in config["runs"]}
@@ -1980,6 +2512,153 @@ def _render_public_metric_markdown(
     lines.append("")
     return "\n".join(lines)
 
+def _cross_provider_comparison(
+    repo: Path,
+    config: dict[str, Any],
+) -> dict[str, Any]:
+    split = _normalize_split(config["split"])
+    historical_suffix = "dev" if split == "development" else "held_out"
+    rows: list[dict[str, Any]] = []
+    prior_path_raw = config.get("prior_results")
+    if prior_path_raw:
+        prior_path = _repo_path(repo, prior_path_raw, label="prior_results")
+        if prior_path.is_file():
+            prior = _read_json(prior_path)
+            evidence = prior.get("evidence", {})
+            if not isinstance(evidence, dict):
+                raise WorkflowError("prior_results.evidence must be an object")
+            for provider, key in (
+                ("DeepSeek public API", f"deepseek_public_api_{historical_suffix}"),
+                ("Codex CLI", f"codex_cli_{historical_suffix}"),
+            ):
+                item = evidence.get(key, {})
+                if not isinstance(item, dict):
+                    continue
+                rows.append(
+                    {
+                        "provider": provider,
+                        "model": item.get("model"),
+                        "split": item.get("split"),
+                        "input_route": "historical-frozen-automatic-transcript",
+                        "condition": "candidate_v2",
+                        "validation_status": item.get(
+                            "validation_status", "unknown"
+                        ),
+                        "students": item.get("students"),
+                        "metrics": item.get("candidate_v2", {}),
+                        "source": _relative(repo, prior_path),
+                    }
+                )
+
+    comparisons = {item["id"]: item for item in config["comparisons"]}
+    for engine, label in (("kimi", "Kimi Code"), ("claude", "Claude Code")):
+        for short_mode, route in (
+            ("text", "fresh-engine-transcript-then-grade"),
+            ("image", "direct-multimodal"),
+        ):
+            comparison_id = f"{engine}-{short_mode}-baseline-vs-candidate"
+            comparison = comparisons.get(comparison_id)
+            metric: dict[str, Any] = {}
+            status = "not_run"
+            students = None
+            if comparison:
+                metric_path = _repo_path(
+                    repo,
+                    comparison["output_json"],
+                    label=f"{comparison_id}.output_json",
+                )
+                if metric_path.is_file():
+                    metric = _public_metric_payload(_read_json(metric_path))
+                    status = "passed"
+                    students = metric.get("student_count")
+            model = next(
+                (
+                    run["model"]
+                    for run in config["runs"]
+                    if run["engine"] == engine
+                ),
+                None,
+            )
+            rows.append(
+                {
+                    "provider": label,
+                    "model": model,
+                    "split": config["split"],
+                    "input_route": route,
+                    "condition": "candidate_v2",
+                    "validation_status": status,
+                    "students": students,
+                    "metrics": metric.get("candidate", {}),
+                    "source": (
+                        f"metrics/{comparison_id}.json"
+                        if status == "passed"
+                        else None
+                    ),
+                }
+            )
+    return {
+        "report_type": "cross_provider_grading_comparison",
+        "schema_version": SCHEMA_VERSION,
+        "generated_at": _utc_now(),
+        "experiment_id": config["experiment_id"],
+        "split": config["split"],
+        "rows": rows,
+        "interpretation_rule": (
+            "Compare rows on the same split and condition. Input routes remain "
+            "separate: historical frozen transcripts, fresh per-engine "
+            "transcription then grading, and direct multimodal grading."
+        ),
+        "limitations": [
+            (
+                "Historical DeepSeek/Codex runs used frozen automatic transcripts; "
+                "they are context, not a controlled causal comparison with fresh "
+                "transcription or direct multimodal routes."
+            ),
+            (
+                "Provider account routing and hidden system behavior may differ "
+                "even when repository prompts and rubrics are frozen."
+            ),
+        ],
+    }
+
+
+def _render_cross_provider_comparison(comparison: dict[str, Any]) -> str:
+    lines = [
+        "# Cross-provider candidate-v2 comparison",
+        "",
+        f"Split: `{comparison['split']}`",
+        "",
+        "| Provider | Model | Input route | Validation | Students | Exact | "
+        "Subquestion MAE | Total MAE | Within 1 | Severe error |",
+        "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for row in comparison["rows"]:
+        metrics = row.get("metrics", {})
+        lines.append(
+            f"| {row['provider']} | `{row.get('model') or 'unknown'}` "
+            f"| `{row['input_route']}` | `{row['validation_status']}` "
+            f"| {row.get('students') if row.get('students') is not None else 'N/A'} "
+            f"| {_format_metric(metrics.get('exact_agreement'))} "
+            f"| {_format_metric(metrics.get('subquestion_mae'))} "
+            f"| {_format_metric(metrics.get('total_score_mae'))} "
+            f"| {_format_metric(metrics.get('within_1_point_rate'))} "
+            f"| {_format_metric(metrics.get('severe_error_rate'))} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## How to read this",
+            "",
+            comparison["interpretation_rule"],
+            "",
+            "## Limitations",
+            "",
+        ]
+    )
+    lines.extend(f"- {item}" for item in comparison["limitations"])
+    lines.append("")
+    return "\n".join(lines)
+
 
 def package_results(
     repo: Path,
@@ -2008,10 +2687,17 @@ def package_results(
                 }
             )
 
+    transcription_summaries = {
+        run["id"]: _safe_run_summary(repo, run)
+        for run in config.get("transcription_runs", [])
+    }
     run_summaries = {
         run["id"]: _safe_run_summary(repo, run) for run in config["runs"]
     }
-    statuses = [summary["status"] for summary in run_summaries.values()]
+    statuses = [
+        summary["status"]
+        for summary in [*transcription_summaries.values(), *run_summaries.values()]
+    ]
     if workflow_blockers:
         experiment_status = "blocked"
     elif statuses and all(status == "passed" for status in statuses):
@@ -2064,6 +2750,8 @@ def package_results(
                 "reason": "aggregate metrics were not produced",
             }
 
+    cross_provider = _cross_provider_comparison(repo, config)
+    _scan_public_json(cross_provider, label="cross-provider comparison")
     summary = {
         "report_type": "advisor_grading_benchmark",
         "schema_version": SCHEMA_VERSION,
@@ -2071,8 +2759,13 @@ def package_results(
         "experiment_id": config["experiment_id"],
         "status": experiment_status,
         "split": config["split"],
+        "transcriptions": transcription_summaries,
         "runs": run_summaries,
         "comparisons": comparison_summaries,
+        "cross_provider_comparison": {
+            "json": "cross-provider-comparison.json",
+            "markdown": "CROSS-PROVIDER-COMPARISON.md",
+        },
         "workflow_blockers": workflow_blockers,
         "failure_policy": (
             "technical failures are reported separately from scoring accuracy"
@@ -2105,6 +2798,12 @@ def package_results(
     record_dir.mkdir(parents=True)
     _write_json(record_dir / "summary.json", summary)
     _write_json(record_dir / "config.snapshot.json", snapshot)
+    _write_json(record_dir / "cross-provider-comparison.json", cross_provider)
+    (record_dir / "CROSS-PROVIDER-COMPARISON.md").write_text(
+        _render_cross_provider_comparison(cross_provider),
+        encoding="utf-8",
+        newline="\n",
+    )
     (record_dir / "RUN-REPORT.md").write_text(
         markdown, encoding="utf-8", newline="\n"
     )
@@ -2135,8 +2834,8 @@ def _render_report(summary: dict[str, Any]) -> str:
         "## What this run did",
         "",
         "This experiment used the repository's headless packet runner to compare "
-        "Kimi Code and Claude Code across frozen transcript-first and direct-image "
-        f"grading on the `{summary['split']}` split.",
+        "Kimi Code and Claude Code across fresh per-engine transcription-then-"
+        f"grading and direct-image grading on the `{summary['split']}` split.",
         "",
     ]
     blockers = summary.get("workflow_blockers", [])
@@ -2154,6 +2853,31 @@ def _render_report(summary: dict[str, Any]) -> str:
                 f"| `{blocker.get('gate', 'unknown')}` "
                 f"| `{blocker.get('category', 'unknown')}` "
                 f"| `{blocker.get('reason', 'unknown')}` |"
+            )
+        lines.append("")
+    if summary.get("transcriptions"):
+        lines.extend(
+            [
+                "## Fresh transcription validation",
+                "",
+                "| Run | Engine | Model | Status | Students | Technical failures |",
+                "| --- | --- | --- | --- | ---: | --- |",
+            ]
+        )
+        for run_id, run in summary["transcriptions"].items():
+            students = (
+                f"{run.get('students_passed')}/{run.get('students_expected')}"
+                if run.get("students_passed") is not None
+                and run.get("students_expected") is not None
+                else "not available"
+            )
+            failures = ", ".join(
+                f"{key}: {value}"
+                for key, value in run.get("technical_failure_types", {}).items()
+            ) or "none"
+            lines.append(
+                f"| `{run_id}` | `{run['engine']}` | `{run['model']}` "
+                f"| `{run['status']}` | {students} | {failures} |"
             )
         lines.append("")
     lines.extend(
@@ -2200,6 +2924,17 @@ def _render_report(summary: dict[str, Any]) -> str:
             f"{_format_metric(metrics.get('total_score_mae'))} |"
         )
 
+    lines.extend(
+        [
+            "",
+            "## Previous and new model results",
+            "",
+            "The generated `CROSS-PROVIDER-COMPARISON.md` places the committed "
+            "DeepSeek/Codex CLI results beside the new Kimi/Claude results. It "
+            "keeps historical frozen-transcript, fresh-transcription, and direct-"
+            "multimodal routes visibly separate.",
+        ]
+    )
     next_action = (
         "Review the matched aggregate effects, then explicitly approve a frozen "
         "held-out run if the development evidence is adequate."
@@ -2213,7 +2948,9 @@ def _render_report(summary: dict[str, Any]) -> str:
             "## How this improves the project",
             "",
             "- Replaces private-chat handoff with a reproducible pull request.",
-            "- Keeps text and multimodal evidence separate and matched.",
+            "- Makes each engine transcribe images itself before its text grading arm.",
+            "- Keeps fresh-transcript and direct-multimodal evidence separate and matched.",
+            "- Automatically places new results beside committed DeepSeek/Codex evidence.",
             "- Separates technical failures from scoring/accuracy differences.",
             "- Preserves aggregate confidence-accuracy fields when the metric "
             "runner provides them.",
@@ -2235,7 +2972,7 @@ def _render_report(summary: dict[str, Any]) -> str:
 
 
 def _format_metric(value: Any) -> str:
-    return f"{value:.4f}" if isinstance(value, (int, float)) else "—"
+    return f"{value:.4f}" if isinstance(value, (int, float)) else "N/A"
 
 
 def privacy_scan_record(repo: Path, record_dir: Path) -> dict[str, Any]:
@@ -2467,7 +3204,7 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="advisor-experiment",
         description=(
             "Configure, run, package, and submit a matched Kimi/Claude "
-            "text-plus-multimodal grading benchmark."
+            "fresh-transcription-plus-multimodal grading benchmark."
         ),
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -2484,9 +3221,9 @@ def _build_parser() -> argparse.ArgumentParser:
         ("doctor", "check environment, packets, privacy, and PR authentication"),
         ("probe", "run approved zero-data engine/model authentication probes"),
         ("plan", "show the frozen run and comparison matrix"),
-        ("prepare", "build missing approved multimodal packets"),
-        ("run", "execute headless runs and paired metrics"),
-        ("package", "create a privacy-safe public experiment record"),
+        ("prepare", "build approved transcription and direct-image packets"),
+        ("run", "transcribe, grade both routes, and calculate paired metrics"),
+        ("package", "create a safe record with historical model comparison"),
         ("submit", "commit, push, and open the result PR"),
     ):
         command = subparsers.add_parser(name, help=help_text)

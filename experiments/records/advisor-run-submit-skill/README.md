@@ -16,10 +16,11 @@ failed attempts easy to lose.
 - One cross-agent skill, mirrored for Codex/OpenCode and Claude Code.
 - A stable `scripts/advisor_experiment.py` entry point with `init`, `doctor`,
   `probe`, `plan`, `prepare`, `run`, `package`, and `submit` commands.
-- Generated eight-arm development and sealed-test presets:
-  Kimi/Claude × frozen transcript-first/direct multimodal × baseline/candidate.
-  They cover all eight frozen development students first and then all 18 test
-  students without changing the workflow.
+- Generated two-stage development and sealed-test presets: Kimi and Claude each
+  transcribe the approved anonymous images, their strict outputs generate
+  engine-specific baseline/candidate text packets, and both engines also run
+  direct multimodal baseline/candidate grading. The workflow covers all eight
+  development students first and then all 18 test students.
 - Deterministic decision gates for transcript provenance, image privacy approval,
   matched student sets, development-before-held-out, immutable retries, and
   technical-failure classification.
@@ -27,6 +28,10 @@ failed attempts easy to lose.
   branch/commit/push/draft-PR submission through authenticated `gh`. An
   environment-only `GITHUB_TOKEN` is limited to PR API creation after Git
   transport is separately authenticated.
+- Automatic `CROSS-PROVIDER-COMPARISON.md` and JSON generation that places new
+  Kimi/Claude candidate-v2 metrics beside the already committed DeepSeek/Codex
+  evidence while keeping historical frozen-transcript, fresh-transcript, and
+  direct-multimodal routes visibly distinct.
 - A privacy gate that rejects `Data/`, `.private-data/`, unsupported public file
   types, anonymous student IDs, per-student JSON keys, and common secret
   patterns.
@@ -42,9 +47,10 @@ Moonshot Platform API key.
   blocked, but it may not be silently replaced by the other.
 - Multimodal packets are generated only from pages listed as approved in the
   privacy review.
-- Text-only packets must record source kind, source path, and source run ID.
-  Automatic transcripts are allowed but are labeled separately from
-  human-reviewed transcripts.
+- Text-only packets must be generated from the same engine's fresh
+  transcription output and record source kind, source path, source run ID, and
+  transcription packet hash. Historical transcripts are comparison context,
+  not a substitute for the new transcription stage.
 - Test execution requires development to pass and an explicit full-campaign or
   test approval. Test findings may not be used to tune and rerun the same test.
 - Real student-data runs require a user-approved, zero-data engine/model probe
@@ -66,20 +72,22 @@ Moonshot Platform API key.
 
 - `skill-creator` validation passed for both repository skill copies.
 - The two skill directories are byte-for-byte identical.
-- `204` core benchmark tests passed.
+- Core benchmark tests cover strict headless transcription, fresh transcript
+  packet generation, and committed historical-result loading.
 - `85` physics benchmark tests passed.
 - An independent clean-context forward test followed the skill through
   `doctor`, `plan`, `prepare`, and dry-run without hidden instructions. Its
   finding that `.private-data/` was not independently checked was fixed and
   covered by a regression test.
-- An offline end-to-end smoke run built two privacy-approved image packets and
-  exercised all eight generated arms. Every arm produced `8/8` schema-valid
-  dry-run outputs.
+- An offline end-to-end smoke run built baseline, candidate, and canonical T1
+  privacy-approved image packets; produced Kimi and Claude transcriptions at
+  `8/8` each; generated four engine-specific text packets; and exercised all
+  eight grading arms at `8/8`.
 - Repeating the same smoke run reused all eight matching passed arms without
   overwriting them.
-- A separate sealed-test smoke run exercised eight arms over all 18 test
-  students: all `144/144` dry-run outputs validated, and all eight arms reused
-  the same `144/144` outputs on rerun.
+- A separate sealed-test smoke run produced two `18/18` strict transcript runs,
+  four engine-specific text packets, and eight `18/18` grading arms. All
+  `180/180` dry-run outputs validated without external model calls.
 - The final fresh-config smoke test also exposed and fixed two automation
   defects: child-run JSON polluted the top-level machine-readable output, and
   the conceptual baseline/candidate label was not persisted for safe reuse.
@@ -92,9 +100,10 @@ The advisor can now give one intent-level prompt and let the local agent perform
 preflight, setup assistance, input preparation, both grading modes, validation,
 safe reporting, and PR submission. The same path also captures negative and
 technical results, so iteration history is less biased toward successful runs.
-The current Physics preset explicitly reports `automatic-transcript`
-provenance, preventing OCR/transcription errors from being silently attributed
-to the grading model.
+The current Physics preset now measures each engine's transcription stage
+explicitly, preventing a new model's grading result from being attributed to a
+historical transcript it never produced. The result PR also gives the advisor a
+single table containing prior DeepSeek/Codex and new Kimi/Claude evidence.
 
 ## Remaining acceptance test
 

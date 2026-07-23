@@ -15,15 +15,16 @@ failed attempts easy to lose.
 
 - One cross-agent skill, mirrored for Codex/OpenCode and Claude Code.
 - A stable `scripts/advisor_experiment.py` entry point with `init`, `doctor`,
-  `plan`, `prepare`, `run`, `package`, and `submit` commands.
+  `probe`, `plan`, `prepare`, `run`, `package`, and `submit` commands.
 - A generated eight-arm development preset:
   Kimi/Claude × frozen transcript-first/direct multimodal × baseline/candidate.
 - Deterministic decision gates for transcript provenance, image privacy approval,
   matched student sets, development-before-held-out, immutable retries, and
   technical-failure classification.
-- Automatic aggregate metrics packaging and focused Git branch/commit/push/PR
-  submission through authenticated `gh` or an environment-only
-  `GITHUB_TOKEN`.
+- Automatic aggregate metrics packaging and focused Git
+  branch/commit/push/draft-PR submission through authenticated `gh`. An
+  environment-only `GITHUB_TOKEN` is limited to PR API creation after Git
+  transport is separately authenticated.
 - A privacy gate that rejects `Data/`, `.private-data/`, unsupported public file
   types, anonymous student IDs, per-student JSON keys, and common secret
   patterns.
@@ -43,22 +44,39 @@ Moonshot Platform API key.
   Automatic transcripts are allowed but are labeled separately from
   human-reviewed transcripts.
 - Held-out execution requires a separate explicit approval.
+- Real student-data runs require a user-approved, zero-data engine/model probe
+  receipt for the current commit.
+- Claude text runs have no tools; Claude multimodal runs expose only `Read` and
+  allow enough turns to read the page images. Every student CLI call has a
+  finite timeout, and systemic authentication/quota failures stop the arm
+  early.
 - Existing passed matching runs may be resumed; failed, incomplete, or
   mismatched directories are preserved and retried under a new identity.
+  Reuse also requires the same commit, retry policy, timeout, model, mode, and
+  packet.
 - A technical failure is not an accuracy score. It is aggregated, packaged,
   and submitted as failure evidence.
+- Public metric artifacts are rebuilt from an aggregate allowlist so local
+  absolute paths and JSON-key student identifiers cannot leak into the PR.
 
 ## Verification
 
 - `skill-creator` validation passed for both repository skill copies.
 - The two skill directories are byte-for-byte identical.
-- `190` core benchmark tests passed.
+- `203` core benchmark tests passed.
 - `85` physics benchmark tests passed.
+- An independent clean-context forward test followed the skill through
+  `doctor`, `plan`, `prepare`, and dry-run without hidden instructions. Its
+  finding that `.private-data/` was not independently checked was fixed and
+  covered by a regression test.
 - An offline end-to-end smoke run built two privacy-approved image packets and
   exercised all eight generated arms. Every arm produced `8/8` schema-valid
   dry-run outputs.
 - Repeating the same smoke run reused all eight matching passed arms without
   overwriting them.
+- The final fresh-config smoke test also exposed and fixed two automation
+  defects: child-run JSON polluted the top-level machine-readable output, and
+  the conceptual baseline/candidate label was not persisted for safe reuse.
 - The smoke used the deterministic dry provider and made no Kimi, Claude, or
   other external model calls.
 
@@ -74,8 +92,10 @@ to the grading model.
 
 ## Remaining acceptance test
 
-The current development machine does not have authenticated Kimi Code, Claude
-Code, or GitHub CLI available. After merge, the advisor should invoke the skill
-on the advisor machine, approve environment/login setup, run the development
-matrix with real CLIs, and return the automatically created PR URL. A live
-held-out run remains locked until the development results are reviewed.
+GitHub CLI is now installed and authenticated on the development machine, and
+the implementation was returned as draft PR `#29`. This machine still does not
+have authenticated Kimi Code or Claude Code, so the remaining acceptance test
+is deliberately on the advisor machine: invoke the skill, approve
+environment/login setup, run the development matrix with the real CLIs, and
+return the automatically created draft result PR URL. A live held-out run
+remains locked until the development results are reviewed.

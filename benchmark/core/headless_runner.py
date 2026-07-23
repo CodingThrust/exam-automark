@@ -54,6 +54,21 @@ the JSON in Markdown. Preserve the anonymous student_id exactly.
 """
 
 
+class HeadlessCLIError(RuntimeError):
+    """A local-only CLI failure carrying a privacy-safe aggregate category."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        category: str,
+        retryable: bool,
+    ) -> None:
+        super().__init__(message)
+        self.category = category
+        self.retryable = retryable
+
+
 @dataclass(frozen=True)
 class HeadlessPacketRunConfig:
     engine: str
@@ -63,9 +78,11 @@ class HeadlessPacketRunConfig:
     output: Path
     engine_bin: str | None = None
     max_retries: int = 0
+    timeout_seconds: int = 600
     dry_run: bool = False
     command_argv: tuple[str, ...] = ()
     run_commit: str | None = None
+    experiment_condition: str | None = None
 
 
 def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
@@ -75,6 +92,8 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
         raise ValueError(f"--input-mode must be one of {', '.join(INPUT_MODES)}")
     if config.max_retries < 0:
         raise ValueError("--max-retries must be non-negative")
+    if config.timeout_seconds <= 0:
+        raise ValueError("--timeout-seconds must be positive")
     if config.output.exists():
         raise FileExistsError(f"run output already exists: {config.output}")
 
@@ -112,7 +131,7 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
     successful = 0
     validation_rows: list[dict[str, Any]] = []
     usage: dict[str, int | float] = {}
-    for student_id in student_ids:
+    for index, student_id in enumerate(student_ids):
         if config.input_mode == "multimodal":
             prompt = _compose_headless_multimodal_prompt(
                 prompt_text,
@@ -146,6 +165,18 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
         if result["status"] == "passed":
             successful += 1
         validation_rows.append(result)
+        if result.get("fatal"):
+            for skipped_id in student_ids[index + 1 :]:
+                validation_rows.append(
+                    {
+                        "student_id": skipped_id,
+                        "status": "blocked",
+                        "attempts": 0,
+                        "error_type": "SkippedAfterSystemicCLIError",
+                        "error_category": result["error_category"],
+                    }
+                )
+            break
 
     validation = {
         "status": "passed" if successful == len(student_ids) else "failed",
@@ -265,7 +296,13 @@ def _run_student(
             return {"student_id": student_id, "status": "passed", "attempts": attempt}
         except Exception as error:
             last_error = error
-            status = "retry" if attempt <= config.max_retries else "failed"
+            nonretryable = isinstance(error, HeadlessCLIError) and not error.retryable
+            status = (
+                "failed"
+                if nonretryable or attempt > config.max_retries
+                else "retry"
+            )
+            error_category = _failure_category(error)
             _append_jsonl(
                 raw_responses,
                 {
@@ -277,9 +314,12 @@ def _run_student(
                     "model": config.model,
                     "raw_text": raw_text,
                     "error_type": type(error).__name__,
+                    "error_category": error_category,
                     "error": str(error),
                 },
             )
+            if nonretryable:
+                break
 
     assert last_error is not None
     _append_jsonl(
@@ -287,18 +327,21 @@ def _run_student(
         {
             "student_id": student_id,
             "status": "failed",
-            "attempts": config.max_retries + 1,
+            "attempts": attempt,
             "timestamp": _utc_now(),
             "error_type": type(last_error).__name__,
+            "error_category": _failure_category(last_error),
             "error": str(last_error),
         },
     )
     return {
         "student_id": student_id,
         "status": "failed",
-        "attempts": config.max_retries + 1,
+        "attempts": attempt,
         "error_type": type(last_error).__name__,
+        "error_category": _failure_category(last_error),
         "error": str(last_error),
+        "fatal": isinstance(last_error, HeadlessCLIError),
     }
 
 
@@ -318,6 +361,7 @@ def _complete_with_headless_cli(
         "capture_output": True,
         "text": True,
         "encoding": "utf-8",
+        "timeout": config.timeout_seconds,
     }
     if config.engine == "kimi":
         # kimi takes the prompt as a --prompt argument; keep stdin closed.
@@ -336,8 +380,12 @@ def _complete_with_headless_cli(
         newline="\n",
     )
     if completed.returncode != 0:
-        raise RuntimeError(
-            f"{config.engine} headless command failed with exit {completed.returncode}"
+        detail = "\n".join((completed.stderr, completed.stdout))
+        category = _cli_failure_category(detail)
+        raise HeadlessCLIError(
+            f"{config.engine} headless command failed with exit {completed.returncode}",
+            category=category,
+            retryable=category == "cli/runtime",
         )
     raw_text = _extract_headless_cli_raw_text(
         config.engine,
@@ -423,16 +471,66 @@ def _student_command_argv(
             ]
         )
         return argv
+    max_turns = "12" if config.input_mode == "multimodal" else "1"
+    tools = "Read" if config.input_mode == "multimodal" else ""
     return [
         config.engine_bin or "claude",
         "-p",
         "--output-format",
         "json",
         "--max-turns",
-        "1",
+        max_turns,
+        "--tools",
+        tools,
+        "--strict-mcp-config",
         "--model",
         config.model,
     ]
+
+
+def _cli_failure_category(detail: str) -> str:
+    lowered = detail.lower()
+    if any(
+        marker in lowered
+        for marker in (
+            "401",
+            "403",
+            "auth",
+            "credential",
+            "forbidden",
+            "login",
+            "not logged in",
+            "permission denied",
+            "unauthorized",
+        )
+    ):
+        return "environment/authentication"
+    if any(
+        marker in lowered
+        for marker in (
+            "429",
+            "quota",
+            "rate limit",
+            "rate-limit",
+            "timed out",
+            "timeout",
+        )
+    ):
+        return "quota/timeout"
+    return "cli/runtime"
+
+
+def _failure_category(error: Exception) -> str:
+    category = getattr(error, "category", None)
+    if isinstance(category, str) and category:
+        return category
+    if isinstance(error, (json.JSONDecodeError, ValueError, TypeError, KeyError)):
+        return "output-json/schema"
+    if isinstance(error, (FileNotFoundError, IsADirectoryError, NotADirectoryError)):
+        return "packet/input"
+    if isinstance(error, subprocess.TimeoutExpired):
+        return "quota/timeout"
+    return "cli/runtime"
 
 
 def _extract_headless_cli_raw_text(
@@ -507,6 +605,7 @@ def _metadata(
         "max_tokens": None,
         "response_format": "json_object",
         "max_retries": config.max_retries,
+        "timeout_seconds": config.timeout_seconds,
         "retry_policy": (
             "append JSON repair instruction after validation or CLI failure"
             if config.max_retries
@@ -517,6 +616,7 @@ def _metadata(
         "assessment_id": manifest.get("assessment_id"),
         "packet_id": manifest.get("packet_id"),
         "condition": manifest.get("condition"),
+        "experiment_condition": config.experiment_condition,
         "task": manifest.get("task"),
         "split": manifest_metadata.get("split"),
         "skill_version_id": manifest_metadata.get("skill_version_id"),

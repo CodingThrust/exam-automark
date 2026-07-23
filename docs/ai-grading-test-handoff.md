@@ -8,7 +8,7 @@ This page is for an external reviewer and their local AI coding assistant. The
 preferred route is the repository skill below: the assistant checks and helps
 configure the environment, extracts the fixed inputs, runs Kimi Code and Claude
 Code in both frozen transcript-first and direct-multimodal modes, validates the
-result, and opens a privacy-safe GitHub pull request. The detailed manual
+result, and opens a privacy-safe draft GitHub pull request. The detailed manual
 sections remain as a troubleshooting reference.
 
 Do not upload raw student transcripts, raw model responses, per-student outputs,
@@ -26,7 +26,7 @@ help me configure every missing dependency or login, prepare the matched Physics
 Week 9 development inputs, run Kimi Code and Claude Code with both the frozen
 transcript-first packets and direct multimodal page images, validate and package
 successes or failures, then submit the privacy-safe aggregate result as a
-GitHub pull request. Ask me only for installation/login permission, private-data
+draft GitHub pull request. Ask me only for installation/login permission, private-data
 access I must authorize, or a genuinely consequential experiment decision.
 Do not run held-out without asking me after development passes.
 ```
@@ -43,7 +43,7 @@ three agents.
 The assistant should own this sequence:
 
 ```text
-doctor → plan → prepare → dry-run → real run → package → submit PR
+doctor → ask once → zero-data probe → plan → prepare → dry-run → real run → package → draft PR
 ```
 
 The stable helper entry point is:
@@ -61,13 +61,25 @@ python scripts/advisor_experiment.py init \
   --output local/advisor-experiment.json
 ```
 
+Before any student packet is sent to a model, the assistant asks once for
+permission to spend a small amount of subscription quota and runs:
+
+```text
+python scripts/advisor_experiment.py probe \
+  --config local/advisor-experiment.json \
+  --approve-model-probes
+```
+
+This probe contains no student answer and must pass for each configured
+engine/model on the current commit.
+
 The generated development plan contains eight immutable grading arms:
 Kimi/Claude × text/multimodal × baseline/candidate. It also configures paired
 baseline/candidate, input-mode, and cross-engine aggregate comparisons. Kimi
 uses the advisor's Kimi Code login; this route does not require a
 `MOONSHOT_API_KEY`.
 
-The workflow is complete only when it returns a GitHub PR URL. A failed model
+The workflow is complete only when it returns a draft GitHub PR URL. A failed model
 or CLI run must still produce a PR containing the validation counts and
 aggregated technical failure type; it must not disappear into a private chat.
 
@@ -75,7 +87,7 @@ aggregated technical failure type; it must not disappear into a private chat.
 
 Run the fixed Physics Week 9 development benchmark through Kimi Code and Claude
 Code using both frozen transcript-first packets and direct page images, then return
-privacy-safe validation and aggregate comparisons through a GitHub PR.
+privacy-safe validation and aggregate comparisons through a draft GitHub PR.
 
 The current Physics text packets record `transcripts/automatic` provenance.
 They must be labeled `automatic-transcript`, not human-reviewed. This makes the
@@ -372,7 +384,7 @@ Windows PowerShell:
 ```powershell
 git status --short -- Data .private-data
 git check-ignore -q Data/physics/benchmark; $LASTEXITCODE
-git check-ignore -q .private-data; $LASTEXITCODE
+git check-ignore --no-index -q .private-data/; $LASTEXITCODE
 ```
 
 macOS/Linux:
@@ -380,7 +392,7 @@ macOS/Linux:
 ```bash
 git status --short -- Data .private-data
 git check-ignore -q Data/physics/benchmark; echo $?
-git check-ignore -q .private-data; echo $?
+git check-ignore --no-index -q .private-data/; echo $?
 ```
 
 `git status --short -- Data .private-data` should print nothing. Both
@@ -416,7 +428,13 @@ Rules:
 - `total` must equal the sum of all question scores.
 - Output one JSON object only. Do not include Markdown around JSON.
 
-## Kimi Route
+## Optional Kimi Route: Moonshot API Fallback
+
+This section is a legacy/manual fallback only. For the requested advisor
+workflow, use the preferred Kimi Code headless route and the advisor's Kimi
+Code login; do not ask for `MOONSHOT_API_KEY`. Use the API fallback below only
+when the reviewer explicitly chooses a separate pay-as-you-go Moonshot Platform
+experiment.
 
 Use this route when the reviewer has a Moonshot/Kimi API key such as
 `sk-kimi-...`.

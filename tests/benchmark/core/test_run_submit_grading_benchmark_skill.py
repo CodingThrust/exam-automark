@@ -25,6 +25,7 @@ class RunSubmitGradingBenchmarkSkillTests(unittest.TestCase):
         normalized = " ".join(text.split())
         for phrase in (
             "python scripts/advisor_experiment.py doctor",
+            "python scripts/advisor_experiment.py probe",
             "python scripts/advisor_experiment.py plan",
             "python scripts/advisor_experiment.py prepare",
             "python scripts/advisor_experiment.py run",
@@ -36,7 +37,9 @@ class RunSubmitGradingBenchmarkSkillTests(unittest.TestCase):
             "human-approved anonymized page images",
             "failed experiment is still an experiment result",
             "github pull request",
+            "draft github pull request",
             "explicit user approval",
+            "approve-model-probes",
         ):
             self.assertIn(phrase, normalized)
 

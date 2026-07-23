@@ -35,9 +35,12 @@ SAFE_RECORD_SUFFIXES = {".json", ".md"}
 SECRET_KEY_PARTS = ("api_key", "apikey", "password", "secret", "token")
 SECRET_PATTERNS = (
     re.compile(r"\bsk-[A-Za-z0-9_-]{12,}\b"),
-    re.compile(r"\bghp_[A-Za-z0-9]{12,}\b"),
+    re.compile(r"\bgh[opusr]_[A-Za-z0-9]{12,}\b"),
     re.compile(r"\bgithub_pat_[A-Za-z0-9_]{12,}\b"),
     re.compile(r"\bglpat-[A-Za-z0-9_-]{12,}\b"),
+    re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{12,}\b"),
+    re.compile(r"\bAKIA[0-9A-Z]{16}\b"),
+    re.compile(r"-----BEGIN (?:[A-Z0-9 ]+ )?PRIVATE KEY-----"),
 )
 ANONYMOUS_STUDENT_ID = re.compile(r"\bS\d{3,}\b")
 ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]{2,95}$")
@@ -228,6 +231,9 @@ def validate_config(config: dict[str, Any], repo: Path) -> None:
         max_retries = run.get("max_retries", 2)
         if not isinstance(max_retries, int) or max_retries < 0:
             raise WorkflowError(f"max_retries must be non-negative in {run_id}")
+        timeout_seconds = run.get("timeout_seconds", 600)
+        if not isinstance(timeout_seconds, int) or timeout_seconds <= 0:
+            raise WorkflowError(f"timeout_seconds must be positive in {run_id}")
 
         packet = _repo_path(repo, run.get("packet", ""), label=f"{run_id}.packet")
         output = _repo_path(repo, run.get("output", ""), label=f"{run_id}.output")
@@ -362,6 +368,7 @@ def build_preset_config(
                         "packet": packet,
                         "output": f"{run_root}/{run_id}",
                         "max_retries": 2,
+                        "timeout_seconds": 600,
                     }
                 )
 
@@ -503,6 +510,216 @@ def _command_version(binary: str, repo: Path) -> str | None:
     return output or resolved
 
 
+def _required_engine_models(
+    config: dict[str, Any],
+) -> list[tuple[str, str, str]]:
+    required = {
+        (str(run["engine"]), str(run["model"]), _engine_binary(run))
+        for run in config["runs"]
+    }
+    return sorted(required)
+
+
+def _probe_state_path(repo: Path, config: dict[str, Any]) -> Path:
+    state = _repo_path(repo, config["state_path"], label="state_path")
+    return state.with_name(state.stem + "-model-probes" + state.suffix)
+
+
+def _probe_output_is_ok(engine: str, stdout: str) -> bool:
+    try:
+        if engine == "kimi":
+            from .headless_runner import _extract_headless_cli_raw_text
+
+            text = _extract_headless_cli_raw_text(
+                "kimi",
+                stdout,
+                Path("<zero-data-probe>"),
+            )
+            return text.strip() == "OK"
+        if engine == "claude":
+            payload = json.loads(stdout)
+            return bool(
+                isinstance(payload, dict)
+                and payload.get("is_error") is not True
+                and str(payload.get("result", "")).strip() == "OK"
+            )
+        return bool(stdout.strip())
+    except (OSError, ValueError, json.JSONDecodeError):
+        return False
+
+
+def _probe_receipt_matches(
+    repo: Path,
+    config: dict[str, Any],
+    *,
+    run_commit: str,
+) -> bool:
+    path = _probe_state_path(repo, config)
+    if not path.is_file():
+        return False
+    try:
+        receipt = _read_json(path)
+    except WorkflowError:
+        return False
+    if receipt.get("status") != "passed" or receipt.get("run_commit") != run_commit:
+        return False
+    actual = {
+        (
+            str(item.get("engine")),
+            str(item.get("model")),
+            str(item.get("engine_binary")),
+        )
+        for item in receipt.get("probes", [])
+        if isinstance(item, dict) and item.get("status") == "passed"
+    }
+    return set(_required_engine_models(config)) <= actual
+
+
+def probe_models(
+    repo: Path,
+    config: dict[str, Any],
+    *,
+    approved: bool = False,
+) -> dict[str, Any]:
+    if not approved:
+        raise WorkflowError(
+            "zero-data model probes may consume subscription quota; rerun with "
+            "--approve-model-probes after the user approves"
+        )
+    prompt = (
+        "This is a zero-data authentication and capability probe. "
+        "Return exactly the word OK. Do not inspect any files or use tools."
+    )
+    run_commit = _git(repo, "rev-parse", "--short", "HEAD", check=True).stdout.strip()
+    probes: list[dict[str, Any]] = []
+    for engine, model, binary in _required_engine_models(config):
+        resolved = shutil.which(binary)
+        if not resolved and Path(binary).is_file():
+            resolved = str(Path(binary))
+        if not resolved:
+            probes.append(
+                {
+                    "engine": engine,
+                    "model": model,
+                    "engine_binary": binary,
+                    "status": "failed",
+                    "failure_category": "environment/authentication",
+                    "reason": "engine-cli-unavailable",
+                }
+            )
+            continue
+        input_text: str | None = None
+        if engine == "kimi":
+            argv = [
+                resolved,
+                "--model",
+                model,
+                "--output-format",
+                "stream-json",
+                "--prompt",
+                prompt,
+            ]
+        elif engine == "claude":
+            argv = [
+                resolved,
+                "-p",
+                "--output-format",
+                "json",
+                "--max-turns",
+                "1",
+                "--tools",
+                "",
+                "--strict-mcp-config",
+                "--model",
+                model,
+            ]
+            input_text = prompt
+        else:
+            argv = [
+                resolved,
+                "exec",
+                "--json",
+                "--sandbox",
+                "read-only",
+                "--model",
+                model,
+                "-",
+            ]
+            input_text = prompt
+        try:
+            completed = subprocess.run(
+                argv,
+                cwd=repo,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                input=input_text,
+                timeout=120,
+            )
+        except subprocess.TimeoutExpired:
+            probes.append(
+                {
+                    "engine": engine,
+                    "model": model,
+                    "engine_binary": binary,
+                    "status": "failed",
+                    "failure_category": "quota/timeout",
+                    "reason": "probe-timeout",
+                }
+            )
+            continue
+        if completed.returncode == 0 and _probe_output_is_ok(
+            engine,
+            completed.stdout,
+        ):
+            probes.append(
+                {
+                    "engine": engine,
+                    "model": model,
+                    "engine_binary": binary,
+                    "status": "passed",
+                }
+            )
+        else:
+            from .headless_runner import _cli_failure_category
+
+            detail = "\n".join((completed.stderr, completed.stdout))
+            category = (
+                _cli_failure_category(detail)
+                if completed.returncode != 0
+                else "output-json/schema"
+            )
+            probes.append(
+                {
+                    "engine": engine,
+                    "model": model,
+                    "engine_binary": binary,
+                    "status": "failed",
+                    "failure_category": category,
+                    "reason": (
+                        "zero-data-probe-failed"
+                        if completed.returncode != 0
+                        else "zero-data-probe-output-invalid"
+                    ),
+                }
+            )
+    receipt = {
+        "report_type": "advisor_zero_data_model_probes",
+        "generated_at": _utc_now(),
+        "experiment_id": config["experiment_id"],
+        "run_commit": run_commit,
+        "status": (
+            "passed"
+            if probes and all(item["status"] == "passed" for item in probes)
+            else "failed"
+        ),
+        "student_data_sent": False,
+        "probes": probes,
+    }
+    _write_json(_probe_state_path(repo, config), receipt)
+    return receipt
+
+
 def _git(repo: Path, *args: str, check: bool = False) -> subprocess.CompletedProcess[str]:
     return _run(
         ["git", "-c", f"safe.directory={repo.as_posix()}", *args],
@@ -510,6 +727,23 @@ def _git(repo: Path, *args: str, check: bool = False) -> subprocess.CompletedPro
         capture=True,
         check=check,
     )
+
+
+def _reproducibility_dirty_paths(repo: Path) -> list[str]:
+    completed = _git(
+        repo,
+        "status",
+        "--porcelain",
+        "--",
+        "benchmark",
+        "scripts",
+        ".agents/skills/grade-homework",
+        ".claude/skills/grade-homework",
+        "experiments/prompt_templates",
+    )
+    if completed.returncode != 0:
+        return ["git-status-unavailable"]
+    return [line.strip() for line in completed.stdout.splitlines() if line.strip()]
 
 
 def _packet_manifest(packet: Path) -> dict[str, Any]:
@@ -589,15 +823,44 @@ def _packet_mode_findings(packet: Path, mode: str) -> list[str]:
     return findings
 
 
+def _find_gh() -> str | None:
+    resolved = shutil.which("gh") or shutil.which("gh.exe")
+    if resolved:
+        return resolved
+    if os.name != "nt":
+        return None
+    candidates = []
+    for variable in ("ProgramFiles", "LOCALAPPDATA"):
+        root = os.environ.get(variable)
+        if root:
+            candidates.append(Path(root) / "GitHub CLI" / "gh.exe")
+            candidates.append(Path(root) / "Programs" / "GitHub CLI" / "gh.exe")
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
 def _pr_method(repo: Path) -> tuple[str | None, str]:
-    gh = shutil.which("gh")
+    gh = _find_gh()
     if gh:
         auth = _run([gh, "auth", "status"], cwd=repo, capture=True)
         if auth.returncode == 0:
             return "gh", "authenticated GitHub CLI"
     if os.environ.get("GITHUB_TOKEN"):
-        return "token", "environment-only GITHUB_TOKEN"
+        return (
+            "token",
+            "environment-only GITHUB_TOKEN for the PR API; git push must already "
+            "be authenticated",
+        )
     return None, "no authenticated gh CLI or environment-only GITHUB_TOKEN"
+
+
+def _private_roots_ignored(repo: Path) -> bool:
+    return all(
+        _git(repo, "check-ignore", "--no-index", "--quiet", "--", root).returncode == 0
+        for root in ("Data/", ".private-data/")
+    )
 
 
 def doctor(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
@@ -622,12 +885,16 @@ def doctor(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
         )
     )
     if git_version:
-        ignored = _git(repo, "check-ignore", "--quiet", "Data")
+        private_roots_ignored = _private_roots_ignored(repo)
         checks.append(
             _check(
                 "private-data-ignored",
-                "passed" if ignored.returncode == 0 else "failed",
-                "Data/ is ignored" if ignored.returncode == 0 else "Data/ is not ignored",
+                "passed" if private_roots_ignored else "failed",
+                (
+                    "Data/ and .private-data/ are ignored"
+                    if private_roots_ignored
+                    else "Data/ or .private-data/ is not ignored"
+                ),
                 scope="core",
                 remediation="Restore the repository .gitignore before using private data.",
             )
@@ -655,6 +922,21 @@ def doctor(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
                 remediation="Configure the intended GitHub repository as origin.",
             )
         )
+        dirty_paths = _reproducibility_dirty_paths(repo)
+        checks.append(
+            _check(
+                "reproducibility-code-clean",
+                "passed" if not dirty_paths else "failed",
+                "benchmark code and grading prompts match HEAD"
+                if not dirty_paths
+                else f"uncommitted reproducibility paths: {len(dirty_paths)}",
+                scope="run",
+                remediation=(
+                    "Commit or intentionally stash benchmark, runner, and grading "
+                    "prompt changes before the real model run."
+                ),
+            )
+        )
 
     binaries: dict[str, str] = {}
     for run in config["runs"]:
@@ -672,6 +954,30 @@ def doctor(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
                 ),
             )
         )
+    head = _git(repo, "rev-parse", "--short", "HEAD")
+    probe_ready = bool(
+        head.returncode == 0
+        and head.stdout.strip()
+        and _probe_receipt_matches(
+            repo,
+            config,
+            run_commit=head.stdout.strip(),
+        )
+    )
+    checks.append(
+        _check(
+            "zero-data-model-probes",
+            "passed" if probe_ready else "action_required",
+            "all configured engine/model probes passed for this commit"
+            if probe_ready
+            else "zero-data engine/model probes have not passed for this commit",
+            scope="run",
+            remediation=(
+                "Ask once for permission because probes may consume quota, then run "
+                "`advisor_experiment.py probe --approve-model-probes`."
+            ),
+        )
+    )
 
     build_targets = _build_target_paths(repo, config)
     for run in config["runs"]:
@@ -734,8 +1040,9 @@ def doctor(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
             detail,
             scope="submit",
             remediation=(
-                "Ask permission to install/login with gh, or set GITHUB_TOKEN only "
-                "in the current environment."
+                "Ask permission to install/login with gh (preferred), or combine "
+                "separately authenticated Git transport with an environment-only "
+                "GITHUB_TOKEN for PR creation."
             ),
         )
     )
@@ -883,6 +1190,7 @@ def _comparison_contract(
 
 def plan(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
     run_rows = []
+    missing_packets: list[str] = []
     manifest_cache: dict[Path, dict[str, Any]] = {}
     for run in config["runs"]:
         packet = _repo_path(repo, run["packet"], label=f"{run['id']}.packet")
@@ -912,6 +1220,8 @@ def plan(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
                 "input_provenance": provenance,
             }
         )
+        if manifest is None:
+            missing_packets.append(run["id"])
 
     runs_by_id = {run["id"]: run for run in config["runs"]}
     comparison_rows = []
@@ -953,7 +1263,14 @@ def plan(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
         "generated_at": _utc_now(),
         "experiment_id": config["experiment_id"],
         "split": config["split"],
-        "status": "blocked" if blocking else "planned",
+        "status": (
+            "blocked"
+            if blocking
+            else "action_required"
+            if missing_packets
+            else "planned"
+        ),
+        "missing_packets": missing_packets,
         "blocking_mismatches": blocking,
         "run_order": run_rows,
         "comparisons": comparison_rows,
@@ -1151,6 +1468,8 @@ def _run_metadata_matches(
     repo: Path,
     run: dict[str, Any],
     output: Path,
+    *,
+    run_commit: str,
 ) -> bool:
     try:
         validation = _read_json(output / "validation.json")
@@ -1167,6 +1486,10 @@ def _run_metadata_matches(
         metadata.get("engine") == run["engine"]
         and metadata.get("model") == run["model"]
         and metadata.get("input_mode") == run["input_mode"]
+        and metadata.get("experiment_condition") == run["condition"]
+        and metadata.get("max_retries") == run.get("max_retries", 2)
+        and metadata.get("timeout_seconds") == run.get("timeout_seconds", 600)
+        and metadata.get("run_commit") == run_commit
         and os.path.normcase(str(_logical_absolute(metadata_packet)))
         == os.path.normcase(str(_logical_absolute(packet)))
     )
@@ -1186,7 +1509,11 @@ def _run_output(repo: Path, run: dict[str, Any], dry_run: bool) -> Path:
 
 def _technical_failure_counts(validation: dict[str, Any]) -> dict[str, int]:
     counts = Counter(
-        str(row.get("error_type", "UnknownError"))
+        str(
+            row.get("error_category")
+            or row.get("error_type")
+            or "unknown-technical-failure"
+        )
         for row in validation.get("rows", [])
         if isinstance(row, dict) and row.get("status") == "failed"
     )
@@ -1205,12 +1532,18 @@ def run_experiment(
             "held-out/test execution requires explicit --approve-heldout after "
             "development arms pass"
         )
+    blockers: list[dict[str, str]] = []
     for run in config["runs"]:
         packet = _repo_path(repo, run["packet"], label=f"{run['id']}.packet")
         if not packet.is_dir():
-            raise WorkflowError(
-                f"packet missing for {run['id']}; run prepare and doctor first"
+            blockers.append(
+                {
+                    "gate": f"packet-{run['id']}",
+                    "category": "packet/input",
+                    "reason": "missing-packet",
+                }
             )
+            continue
         findings = _packet_mode_findings(packet, run["input_mode"])
         if run["input_mode"] == "multimodal":
             findings.extend(
@@ -1219,19 +1552,78 @@ def run_experiment(
                 )
             )
         if findings:
-            raise WorkflowError(f"packet gate failed for {run['id']}: {findings}")
+            blockers.append(
+                {
+                    "gate": f"packet-{run['id']}",
+                    "category": "packet/input",
+                    "reason": "packet-validation-failed",
+                }
+            )
     frozen_plan = plan(repo, config)
-    if frozen_plan["status"] == "blocked":
-        raise WorkflowError(
-            "comparison contract failed: "
-            + "; ".join(frozen_plan["blocking_mismatches"])
-        )
+    for comparison in frozen_plan["comparisons"]:
+        if not comparison["matched"] and comparison["reason"] != "packet not prepared":
+            blockers.append(
+                {
+                    "gate": f"comparison-{comparison['id']}",
+                    "category": "packet/input",
+                    "reason": "comparison-contract-mismatch",
+                }
+            )
 
     tracked = _git(repo, "ls-files", "--", "Data", ".private-data")
     if tracked.returncode != 0 or tracked.stdout.strip():
-        raise WorkflowError("private Data/ or .private-data/ paths are tracked")
+        blockers.append(
+            {
+                "gate": "private-data-index",
+                "category": "environment/authentication",
+                "reason": "private-data-tracked",
+            }
+        )
 
     run_commit = _git(repo, "rev-parse", "--short", "HEAD", check=True).stdout.strip()
+    if not dry_run:
+        if _reproducibility_dirty_paths(repo):
+            blockers.append(
+                {
+                    "gate": "reproducibility-code-clean",
+                    "category": "environment/authentication",
+                    "reason": "uncommitted-run-code",
+                }
+            )
+        binaries: dict[str, str] = {}
+        for run in config["runs"]:
+            binaries.setdefault(run["engine"], _engine_binary(run))
+        for engine, binary in sorted(binaries.items()):
+            if _command_version(binary, repo) is None:
+                blockers.append(
+                    {
+                        "gate": f"{engine}-cli",
+                        "category": "environment/authentication",
+                        "reason": "engine-cli-unavailable",
+                    }
+                )
+        method, _ = _pr_method(repo)
+        if method is None:
+            blockers.append(
+                {
+                    "gate": "github-pr-auth",
+                    "category": "environment/authentication",
+                    "reason": "github-pr-auth-unavailable",
+                }
+            )
+        if not _probe_receipt_matches(
+            repo,
+            config,
+            run_commit=run_commit,
+        ):
+            blockers.append(
+                {
+                    "gate": "zero-data-model-probes",
+                    "category": "environment/authentication",
+                    "reason": "model-probes-not-passed",
+                }
+            )
+
     state_path = _state_path(repo, config, dry_run)
     state: dict[str, Any] = {
         "report_type": "advisor_experiment_state",
@@ -1244,6 +1636,17 @@ def run_experiment(
         "runs": {},
         "comparisons": {},
     }
+    if blockers:
+        state["status"] = "blocked"
+        state["blockers"] = list(
+            {
+                (item["gate"], item["category"], item["reason"]): item
+                for item in blockers
+            }.values()
+        )
+        state["ended_at"] = _utc_now()
+        _write_json(state_path, state)
+        return state
     _write_json(state_path, state)
 
     all_runs_passed = True
@@ -1252,7 +1655,12 @@ def run_experiment(
         output = _run_output(repo, run, dry_run)
         packet = _repo_path(repo, run["packet"], label=f"{run_id}.packet")
         if output.exists():
-            if _run_metadata_matches(repo, run, output):
+            if _run_metadata_matches(
+                repo,
+                run,
+                output,
+                run_commit=run_commit,
+            ):
                 validation = _read_json(output / "validation.json")
                 state["runs"][run_id] = {
                     "status": "reused",
@@ -1271,7 +1679,7 @@ def run_experiment(
             }
             all_runs_passed = False
             _write_json(state_path, state)
-            break
+            continue
 
         argv = [
             sys.executable,
@@ -1288,15 +1696,19 @@ def run_experiment(
             str(output),
             "--max-retries",
             str(run.get("max_retries", 2)),
+            "--timeout-seconds",
+            str(run.get("timeout_seconds", 600)),
             "--run-commit",
             run_commit,
+            "--experiment-condition",
+            run["condition"],
         ]
         if run.get("engine_bin"):
             argv.extend(["--engine-bin", str(run["engine_bin"])])
         if dry_run:
             argv.append("--dry-run")
 
-        completed = _run(argv, cwd=repo, capture=False)
+        completed = _run(argv, cwd=repo, capture=True)
         validation: dict[str, Any] = {}
         if (output / "validation.json").exists():
             validation = _read_json(output / "validation.json")
@@ -1312,7 +1724,6 @@ def run_experiment(
         _write_json(state_path, state)
         if not passed:
             all_runs_passed = False
-            break
 
     runs_by_id = {run["id"]: run for run in config["runs"]}
     if not dry_run:
@@ -1454,8 +1865,19 @@ def _scan_public_json(value: Any, *, label: str, location: str = "$") -> None:
     }
     if isinstance(value, dict):
         for key, child in value.items():
-            if str(key).lower() in forbidden_keys:
+            key_text = str(key)
+            lowered_key = key_text.lower()
+            if lowered_key in forbidden_keys:
                 raise WorkflowError(f"private key {key!r} detected in {label} at {location}")
+            if any(part in lowered_key for part in SECRET_KEY_PARTS):
+                raise WorkflowError(
+                    f"secret-like key {key!r} detected in {label} at {location}"
+                )
+            _scan_secret_text(key_text, label=label)
+            if ANONYMOUS_STUDENT_ID.search(key_text):
+                raise WorkflowError(
+                    f"anonymous student ID detected in public {label} key"
+                )
             _scan_public_json(child, label=label, location=f"{location}.{key}")
     elif isinstance(value, list):
         for index, child in enumerate(value):
@@ -1464,6 +1886,89 @@ def _scan_public_json(value: Any, *, label: str, location: str = "$") -> None:
         _scan_secret_text(value, label=label)
         if ANONYMOUS_STUDENT_ID.search(value):
             raise WorkflowError(f"anonymous student ID detected in public {label}")
+
+
+def _public_metric_payload(metric: dict[str, Any]) -> dict[str, Any]:
+    run_fields = {
+        "provider",
+        "model",
+        "input_mode",
+        "validation_status",
+        "packet_hash",
+        "prompt_hash",
+        "rubric_hash",
+        "run_commit",
+        "validation",
+    }
+
+    def safe_run(value: Any) -> dict[str, Any]:
+        if not isinstance(value, dict):
+            return {}
+        return {key: value[key] for key in sorted(run_fields) if key in value}
+
+    return {
+        "record_type": metric.get("record_type"),
+        "generated_at": metric.get("generated_at"),
+        "student_count": metric.get("student_count"),
+        "score_count": metric.get("score_count"),
+        "baseline_run": safe_run(metric.get("baseline_run")),
+        "candidate_run": safe_run(metric.get("candidate_run")),
+        "bootstrap": metric.get("bootstrap", {}),
+        "baseline": metric.get("baseline", {}),
+        "candidate": metric.get("candidate", {}),
+        "candidate_minus_baseline": metric.get("candidate_minus_baseline", {}),
+    }
+
+
+def _render_public_metric_markdown(
+    comparison_id: str,
+    metric: dict[str, Any],
+) -> str:
+    baseline = metric.get("baseline", {})
+    candidate = metric.get("candidate", {})
+    deltas = metric.get("candidate_minus_baseline", {})
+    metric_names = sorted(
+        key
+        for key in set(baseline) & set(candidate) & set(deltas)
+        if all(
+            isinstance(values.get(key), (int, float))
+            for values in (baseline, candidate, deltas)
+        )
+    )
+    lines = [
+        f"# Aggregate comparison: {comparison_id}",
+        "",
+        f"- Students: `{metric.get('student_count', 'not available')}`",
+        f"- Score rows: `{metric.get('score_count', 'not available')}`",
+        "",
+        "| Metric | Left | Right | Right - Left |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for name in metric_names:
+        lines.append(
+            f"| `{name}` | {baseline[name]:.4f} | {candidate[name]:.4f} "
+            f"| {deltas[name]:.4f} |"
+        )
+    interval = (
+        metric.get("bootstrap", {})
+        .get("exact_agreement_candidate_minus_baseline", {})
+    )
+    if isinstance(interval, dict) and all(
+        isinstance(interval.get(key), (int, float))
+        for key in ("mean_difference", "lower", "upper")
+    ):
+        lines.extend(
+            [
+                "",
+                "## Paired bootstrap",
+                "",
+                f"- Mean difference: `{interval['mean_difference']:.4f}`",
+                f"- 95% interval: `[{interval['lower']:.4f}, "
+                f"{interval['upper']:.4f}]`",
+            ]
+        )
+    lines.append("")
+    return "\n".join(lines)
 
 
 def package_results(
@@ -1478,11 +1983,28 @@ def package_results(
             f"immutable record already exists: {_relative(repo, record_dir)}; "
             "use a new experiment_id"
         )
+    workflow_blockers: list[dict[str, str]] = []
+    state_path = _state_path(repo, config, False)
+    if state_path.is_file():
+        state = _read_json(state_path)
+        for blocker in state.get("blockers", []):
+            if not isinstance(blocker, dict):
+                continue
+            workflow_blockers.append(
+                {
+                    key: str(blocker[key])
+                    for key in ("gate", "category", "reason")
+                    if blocker.get(key) is not None
+                }
+            )
+
     run_summaries = {
         run["id"]: _safe_run_summary(repo, run) for run in config["runs"]
     }
     statuses = [summary["status"] for summary in run_summaries.values()]
-    if statuses and all(status == "passed" for status in statuses):
+    if workflow_blockers:
+        experiment_status = "blocked"
+    elif statuses and all(status == "passed" for status in statuses):
         experiment_status = "completed"
     elif any(status == "failed" for status in statuses):
         experiment_status = "failed"
@@ -1490,20 +2012,15 @@ def package_results(
         experiment_status = "blocked"
 
     comparison_summaries: dict[str, Any] = {}
-    metric_files: list[tuple[Path, str]] = []
+    metric_artifacts: list[tuple[str, str]] = []
     for comparison in config["comparisons"]:
         json_path = _repo_path(
             repo,
             comparison["output_json"],
             label=f"{comparison['id']}.output_json",
         )
-        md_path = _repo_path(
-            repo,
-            comparison["output_md"],
-            label=f"{comparison['id']}.output_md",
-        )
         if json_path.is_file():
-            metric = _read_json(json_path)
+            metric = _public_metric_payload(_read_json(json_path))
             _scan_public_json(metric, label=comparison["id"])
             comparison_summaries[comparison["id"]] = {
                 "status": "passed",
@@ -1511,17 +2028,26 @@ def package_results(
                 "student_count": metric.get("student_count"),
                 "score_count": metric.get("score_count"),
                 "json": f"metrics/{comparison['id']}.json",
-                "markdown": f"metrics/{comparison['id']}.md" if md_path.is_file() else None,
+                "markdown": f"metrics/{comparison['id']}.md",
             }
-            metric_files.append((json_path, f"metrics/{comparison['id']}.json"))
-            if md_path.is_file():
-                text = md_path.read_text(encoding="utf-8")
-                _scan_secret_text(text, label=comparison["id"])
-                if ANONYMOUS_STUDENT_ID.search(text):
-                    raise WorkflowError(
-                        f"anonymous student ID detected in {comparison['id']} markdown"
+            metric_artifacts.append(
+                (
+                    f"metrics/{comparison['id']}.json",
+                    json.dumps(
+                        metric,
+                        indent=2,
+                        ensure_ascii=False,
+                        sort_keys=True,
                     )
-                metric_files.append((md_path, f"metrics/{comparison['id']}.md"))
+                    + "\n",
+                )
+            )
+            metric_artifacts.append(
+                (
+                    f"metrics/{comparison['id']}.md",
+                    _render_public_metric_markdown(comparison["id"], metric),
+                )
+            )
         else:
             comparison_summaries[comparison["id"]] = {
                 "status": "blocked",
@@ -1537,6 +2063,7 @@ def package_results(
         "split": config["split"],
         "runs": run_summaries,
         "comparisons": comparison_summaries,
+        "workflow_blockers": workflow_blockers,
         "failure_policy": (
             "technical failures are reported separately from scoring accuracy"
         ),
@@ -1562,7 +2089,7 @@ def package_results(
             "experiment_id": config["experiment_id"],
             "status": experiment_status,
             "record_dir": _relative(repo, record_dir),
-            "metric_files": [target for _, target in metric_files],
+            "metric_files": [target for target, _ in metric_artifacts],
         }
 
     record_dir.mkdir(parents=True)
@@ -1571,10 +2098,10 @@ def package_results(
     (record_dir / "RUN-REPORT.md").write_text(
         markdown, encoding="utf-8", newline="\n"
     )
-    for source, target in metric_files:
+    for target, content in metric_artifacts:
         destination = record_dir / target
         destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, destination)
+        destination.write_text(content, encoding="utf-8", newline="\n")
     privacy_scan_record(repo, record_dir)
     return {
         "report_type": "advisor_result_package",
@@ -1598,14 +2125,35 @@ def _render_report(summary: dict[str, Any]) -> str:
         "## What this run did",
         "",
         "This experiment used the repository's headless packet runner to compare "
-        "Kimi Code and Claude Code across reviewed-transcript and direct-image "
+        "Kimi Code and Claude Code across frozen transcript-first and direct-image "
         f"grading on the `{summary['split']}` split.",
         "",
+    ]
+    blockers = summary.get("workflow_blockers", [])
+    if blockers:
+        lines.extend(
+            [
+                "## Blocked gates",
+                "",
+                "| Gate | Category | Reason |",
+                "| --- | --- | --- |",
+            ]
+        )
+        for blocker in blockers:
+            lines.append(
+                f"| `{blocker.get('gate', 'unknown')}` "
+                f"| `{blocker.get('category', 'unknown')}` "
+                f"| `{blocker.get('reason', 'unknown')}` |"
+            )
+        lines.append("")
+    lines.extend(
+        [
         "## Run validation",
         "",
         "| Run | Engine | Mode | Condition | Status | Students | Technical failures |",
         "| --- | --- | --- | --- | --- | ---: | --- |",
-    ]
+        ]
+    )
     for run_id, run in summary["runs"].items():
         passed = run.get("students_passed")
         expected = run.get("students_expected")
@@ -1739,7 +2287,13 @@ def _create_pr_with_token(
         raise WorkflowError("GITHUB_TOKEN is missing from the current environment")
     url = f"https://api.github.com/repos/{owner}/{repo_name}/pulls"
     payload = json.dumps(
-        {"title": title, "head": branch, "base": base, "body": body}
+        {
+            "title": title,
+            "head": branch,
+            "base": base,
+            "body": body,
+            "draft": True,
+        }
     ).encode("utf-8")
     request = urllib.request.Request(
         url,
@@ -1801,12 +2355,23 @@ def submit_results(
     if dry_run:
         return preview
 
+    _git(repo, "fetch", "origin", base, check=True)
     if current == base:
         exists = _git(repo, "show-ref", "--verify", "--quiet", f"refs/heads/{branch}")
         if exists.returncode == 0:
             _git(repo, "switch", branch, check=True)
         else:
-            _git(repo, "switch", "-c", branch, check=True)
+            remote_exists = _git(
+                repo,
+                "show-ref",
+                "--verify",
+                "--quiet",
+                f"refs/remotes/origin/{branch}",
+            )
+            if remote_exists.returncode == 0:
+                _git(repo, "switch", "--track", f"origin/{branch}", check=True)
+            else:
+                _git(repo, "switch", "-c", branch, f"origin/{base}", check=True)
 
     _git(repo, "add", "--", _relative(repo, record_dir), check=True)
     staged = _git(
@@ -1833,7 +2398,7 @@ def submit_results(
     body_file = record_dir / "RUN-REPORT.md"
     body = body_file.read_text(encoding="utf-8")
     if method == "gh":
-        gh = shutil.which("gh")
+        gh = _find_gh()
         assert gh is not None
         completed = _run(
             [
@@ -1848,6 +2413,7 @@ def submit_results(
                 submission["title"],
                 "--body-file",
                 str(body_file),
+                "--draft",
             ],
             cwd=repo,
             capture=True,
@@ -1905,6 +2471,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     for name, help_text in (
         ("doctor", "check environment, packets, privacy, and PR authentication"),
+        ("probe", "run approved zero-data engine/model authentication probes"),
         ("plan", "show the frozen run and comparison matrix"),
         ("prepare", "build missing approved multimodal packets"),
         ("run", "execute headless runs and paired metrics"),
@@ -1913,6 +2480,8 @@ def _build_parser() -> argparse.ArgumentParser:
     ):
         command = subparsers.add_parser(name, help=help_text)
         command.add_argument("--config", type=Path, required=True)
+        if name == "probe":
+            command.add_argument("--approve-model-probes", action="store_true")
         if name in {"prepare", "package", "submit"}:
             command.add_argument("--dry-run", action="store_true")
         if name == "run":
@@ -1938,6 +2507,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             repo, config = load_config(args.config, repo)
             if args.command == "doctor":
                 result = doctor(repo, config)
+            elif args.command == "probe":
+                result = probe_models(
+                    repo,
+                    config,
+                    approved=args.approve_model_probes,
+                )
             elif args.command == "plan":
                 result = plan(repo, config)
             elif args.command == "prepare":
@@ -1958,6 +2533,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(json.dumps(result, indent=2, ensure_ascii=False, sort_keys=True))
         if args.command == "doctor":
             return 0 if result["status"] == "ready" else 1
+        if args.command == "probe":
+            return 0 if result["status"] == "passed" else 1
         if args.command in {"plan", "run"}:
             return 0 if result["status"] in {"planned", "passed"} else 1
         return 0

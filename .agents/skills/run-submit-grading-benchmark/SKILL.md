@@ -1,6 +1,6 @@
 ---
 name: run-submit-grading-benchmark
-description: Configure an advisor's machine, prepare matched private grading packets, run reproducible Kimi Code and Claude Code benchmarks in both frozen transcript-first and direct-multimodal modes, validate and summarize successes or failures, and submit only privacy-safe aggregate results through a GitHub pull request. Use for the AI Grading Test Handoff, repeated external benchmark runs, environment setup, model/input-mode comparisons, or requests to return experiment results by PR.
+description: Configure an advisor's machine, prepare matched private grading packets, run reproducible Kimi Code and Claude Code benchmarks in both frozen transcript-first and direct-multimodal modes, validate and summarize successes or failures, and submit only privacy-safe aggregate results through a draft GitHub pull request. Use for the AI Grading Test Handoff, repeated external benchmark runs, environment setup, model/input-mode comparisons, or requests to return experiment results by PR.
 ---
 
 # Run and Submit a Grading Benchmark
@@ -85,17 +85,24 @@ Explain each blocking check in plain language. For anything missing:
 4. Use the advisor's own Kimi Code and Claude Code login. Kimi Code membership
    is not a Moonshot Platform API key; do not request `MOONSHOT_API_KEY` for
    this workflow.
-5. Prefer an authenticated GitHub CLI for automatic PR creation. An
-   environment-only `GITHUB_TOKEN` is the fallback. Never write or echo a
-   token.
+5. Prefer an authenticated GitHub CLI for automatic push and PR creation. An
+   environment-only `GITHUB_TOKEN` may be used for the PR API only when the
+   Git remote can already push through a credential helper or SSH. Never write,
+   echo, or inject a token into Git command arguments.
 6. If `Data/` is missing, follow the repository's private-data handoff using
    the advisor's account. Confirm that `Data/` and `.private-data/` are ignored
    before continuing.
 
-Before sending student data, use a zero-data authentication probe for each
-engine if authentication has not already been proven. Ask permission because
-it may consume subscription quota. Never include a student answer in a login
-or capability probe.
+Before sending student data, ask permission because model probes may consume
+subscription quota. After approval, run:
+
+```text
+python scripts/advisor_experiment.py probe --config local/advisor-experiment.json --approve-model-probes
+```
+
+The real run is blocked until every configured engine/model has a passing
+zero-data receipt for the current commit. Never include a student answer in a
+login or capability probe.
 
 ## 3. Freeze the decision and packet plan
 
@@ -152,9 +159,11 @@ immutable. Then run:
 python scripts/advisor_experiment.py run --config local/advisor-experiment.json
 ```
 
-The helper runs each arm through `scripts/run_headless_packet.py`, checks
-`validation.json`, resumes only already-passed matching arms, and calculates
-configured paired metrics. Never delete or overwrite a failed run. For a
+The helper runs every independent arm through `scripts/run_headless_packet.py`,
+checks `validation.json`, resumes only already-passed arms whose packet, engine,
+model, mode, and run commit still match, and calculates configured paired
+metrics. One failed arm must not prevent the other engine from producing
+evidence. Never delete or overwrite a failed run. For a
 retry, copy the config, give the run and output a new `-rN` identity, and retain
 the failed attempt.
 
@@ -186,7 +195,7 @@ per-student examples to the PR. Case-level Sxxx/Qx diagnosis stays in the
 private analysis workflow unless a separately approved anonymized aggregate
 artifact is produced.
 
-## 7. Submit a focused GitHub PR
+## 7. Submit a focused draft GitHub PR
 
 Preview the safety gate:
 
@@ -207,12 +216,15 @@ The helper must:
 - scan for anonymous student IDs and common secret patterns;
 - create or reuse only the configured `advisor-results/...` branch;
 - stage only the configured record directory;
-- commit, push, and open a PR with `gh` or an environment-only GitHub token.
+- commit, push, and open a draft PR with `gh`; an environment-only GitHub token
+  may create the PR only after separately authenticated Git transport pushes
+  the branch.
 
 If the current agent exposes a trusted GitHub connector with PR creation, it
 may create the PR after the same privacy checks and push. Otherwise configure
 `gh` rather than falling back to a private chat. A compare URL is an emergency
 fallback, not successful completion.
 
-Finish with the PR URL, branch, commit, experiment status, completed arms,
+Leave the result PR as draft until YY reviews the aggregate record. Finish with
+the PR URL, branch, commit, experiment status, completed arms,
 blocked or failed arms, and the single most important next action.

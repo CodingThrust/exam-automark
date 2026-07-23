@@ -11,7 +11,8 @@ preset.
 - `split`: `development` by default; `heldout` or `test` requires explicit
   approval at run time.
 - `benchmark_root`: ignored root containing gold scores and packets.
-- `state_path`: ignored JSON run state.
+- `state_path`: ignored JSON run state; the helper derives a sibling
+  `*-model-probes.json` zero-data receipt from it.
 - `record_dir`: the only public directory that `package` and `submit` may
   create or stage; it must be below `experiments/records/`.
 - `required_engines`: normally `["kimi", "claude"]`.
@@ -21,8 +22,8 @@ preset.
   roots.
 - `runs`: immutable headless run arms.
 - `comparisons`: paired aggregate metric jobs referencing run IDs.
-- `submission`: base branch, `advisor-results/...` branch, title, and commit
-  message.
+- `submission`: base branch, `advisor-results/...` branch, title, commit
+  message, and an automatically opened draft pull request.
 
 ## Run arm
 
@@ -37,13 +38,15 @@ Each run needs:
   "condition": "baseline",
   "packet": "Data/.../G1-dev-r1",
   "output": "Data/.../kimi-text-baseline",
-  "max_retries": 2
+  "max_retries": 2,
+  "timeout_seconds": 600
 }
 ```
 
 Run IDs, packet paths, and output paths must be unique. Outputs must stay under
-`Data/`. Do not put API keys, tokens, passwords, or raw prompt text in this
-file.
+`Data/`. `timeout_seconds` is a positive per-student CLI deadline; keep the
+default unless the frozen task is known to require longer. Do not put API keys,
+tokens, passwords, or raw prompt text in this file.
 
 ## Packet build
 

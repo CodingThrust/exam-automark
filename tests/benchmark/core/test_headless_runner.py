@@ -6,9 +6,16 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from benchmark.core.cli import main
-from benchmark.core.headless_runner import _extract_headless_cli_raw_text
+from benchmark.core.headless_runner import (
+    HeadlessCLIError,
+    HeadlessPacketRunConfig,
+    _cli_failure_category,
+    _extract_headless_cli_raw_text,
+    _student_command_argv,
+)
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
@@ -39,6 +46,8 @@ class HeadlessRunnerCliTests(unittest.TestCase):
                         "--dry-run",
                         "--run-commit",
                         "abc1234",
+                        "--experiment-condition",
+                        "baseline",
                     ]
                 )
             result = json.loads(stdout.getvalue())
@@ -59,6 +68,8 @@ class HeadlessRunnerCliTests(unittest.TestCase):
         self.assertEqual(metadata["engine"], "codex")
         self.assertEqual(metadata["model"], "gpt-5.6-codex")
         self.assertEqual(metadata["run_commit"], "abc1234")
+        self.assertEqual(metadata["experiment_condition"], "baseline")
+        self.assertEqual(metadata["timeout_seconds"], 600)
         self.assertEqual(metadata["api_key_source"], "codex_cli_external_auth")
         self.assertEqual(metadata["source_run_id"], "T1-dev-r1")
         self.assertEqual(metadata["text_source_kind"], "automatic_transcript")
@@ -114,10 +125,91 @@ class HeadlessRunnerCliTests(unittest.TestCase):
         self.assertIn("claude -p", command)
         self.assertIn("--output-format json", command)
         self.assertIn("--max-turns 1", command)
+        self.assertIn("--tools ''", command)
+        self.assertIn("--strict-mcp-config", command)
         self.assertIn("--model claude-sonnet-4-20250514", command)
         self.assertNotIn("--output-schema", command)
         self.assertNotIn("codex.cmd exec", command)
         self.assertNotIn("DEEPSEEK_API_KEY", command)
+
+    def test_claude_multimodal_command_allows_read_and_multiple_turns(self):
+        config = HeadlessPacketRunConfig(
+            engine="claude",
+            model="sonnet",
+            input_mode="multimodal",
+            packet=Path("packet"),
+            output=Path("output"),
+        )
+
+        argv = _student_command_argv(
+            config,
+            Path("last-message.txt"),
+            resolve_paths=False,
+        )
+
+        self.assertEqual(argv[argv.index("--max-turns") + 1], "12")
+        self.assertEqual(argv[argv.index("--tools") + 1], "Read")
+        self.assertIn("--strict-mcp-config", argv)
+
+    def test_cli_failure_category_separates_auth_quota_and_runtime(self):
+        self.assertEqual(
+            _cli_failure_category("HTTP 401: please login"),
+            "environment/authentication",
+        )
+        self.assertEqual(
+            _cli_failure_category("429 rate limit exceeded"),
+            "quota/timeout",
+        )
+        self.assertEqual(
+            _cli_failure_category("unexpected process exit"),
+            "cli/runtime",
+        )
+
+    def test_nonretryable_auth_failure_stops_after_one_attempt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = _write_text_grading_packet(root)
+            output = root / "runs" / "kimi-auth-failure"
+            stdout = io.StringIO()
+            error = HeadlessCLIError(
+                "kimi headless command failed with exit 1",
+                category="environment/authentication",
+                retryable=False,
+            )
+
+            with (
+                patch(
+                    "benchmark.core.headless_runner._complete_with_headless_cli",
+                    side_effect=error,
+                ) as complete,
+                contextlib.redirect_stdout(stdout),
+            ):
+                code = main(
+                    [
+                        "run-headless-packet",
+                        "--engine",
+                        "kimi",
+                        "--model",
+                        "kimi-code/k3",
+                        "--input-mode",
+                        "text-only",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(output),
+                        "--max-retries",
+                        "2",
+                    ]
+                )
+            validation = json.loads((output / "validation.json").read_text())
+
+        self.assertEqual(code, 1)
+        self.assertEqual(complete.call_count, 1)
+        self.assertEqual(validation["rows"][0]["attempts"], 1)
+        self.assertEqual(
+            validation["rows"][0]["error_category"],
+            "environment/authentication",
+        )
 
     def test_claude_json_print_output_uses_result_field_as_model_text(self):
         stdout = json.dumps(

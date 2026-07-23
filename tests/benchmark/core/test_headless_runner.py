@@ -6,9 +6,16 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from benchmark.core.cli import main
-from benchmark.core.headless_runner import _extract_headless_cli_raw_text
+from benchmark.core.headless_runner import (
+    HeadlessCLIError,
+    HeadlessPacketRunConfig,
+    _cli_failure_category,
+    _extract_headless_cli_raw_text,
+    _student_command_argv,
+)
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
@@ -39,6 +46,8 @@ class HeadlessRunnerCliTests(unittest.TestCase):
                         "--dry-run",
                         "--run-commit",
                         "abc1234",
+                        "--experiment-condition",
+                        "baseline",
                     ]
                 )
             result = json.loads(stdout.getvalue())
@@ -59,7 +68,11 @@ class HeadlessRunnerCliTests(unittest.TestCase):
         self.assertEqual(metadata["engine"], "codex")
         self.assertEqual(metadata["model"], "gpt-5.6-codex")
         self.assertEqual(metadata["run_commit"], "abc1234")
+        self.assertEqual(metadata["experiment_condition"], "baseline")
+        self.assertEqual(metadata["timeout_seconds"], 600)
         self.assertEqual(metadata["api_key_source"], "codex_cli_external_auth")
+        self.assertEqual(metadata["source_run_id"], "T1-dev-r1")
+        self.assertEqual(metadata["text_source_kind"], "automatic_transcript")
         self.assertEqual(validation["students_passed"], 1)
         self.assertEqual(payload["student_id"], "S001")
         self.assertTrue(raw_responses_exists)
@@ -112,10 +125,91 @@ class HeadlessRunnerCliTests(unittest.TestCase):
         self.assertIn("claude -p", command)
         self.assertIn("--output-format json", command)
         self.assertIn("--max-turns 1", command)
+        self.assertIn("--tools ''", command)
+        self.assertIn("--strict-mcp-config", command)
         self.assertIn("--model claude-sonnet-4-20250514", command)
         self.assertNotIn("--output-schema", command)
         self.assertNotIn("codex.cmd exec", command)
         self.assertNotIn("DEEPSEEK_API_KEY", command)
+
+    def test_claude_multimodal_command_allows_read_and_multiple_turns(self):
+        config = HeadlessPacketRunConfig(
+            engine="claude",
+            model="sonnet",
+            input_mode="multimodal",
+            packet=Path("packet"),
+            output=Path("output"),
+        )
+
+        argv = _student_command_argv(
+            config,
+            Path("last-message.txt"),
+            resolve_paths=False,
+        )
+
+        self.assertEqual(argv[argv.index("--max-turns") + 1], "12")
+        self.assertEqual(argv[argv.index("--tools") + 1], "Read")
+        self.assertIn("--strict-mcp-config", argv)
+
+    def test_cli_failure_category_separates_auth_quota_and_runtime(self):
+        self.assertEqual(
+            _cli_failure_category("HTTP 401: please login"),
+            "environment/authentication",
+        )
+        self.assertEqual(
+            _cli_failure_category("429 rate limit exceeded"),
+            "quota/timeout",
+        )
+        self.assertEqual(
+            _cli_failure_category("unexpected process exit"),
+            "cli/runtime",
+        )
+
+    def test_nonretryable_auth_failure_stops_after_one_attempt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = _write_text_grading_packet(root)
+            output = root / "runs" / "kimi-auth-failure"
+            stdout = io.StringIO()
+            error = HeadlessCLIError(
+                "kimi headless command failed with exit 1",
+                category="environment/authentication",
+                retryable=False,
+            )
+
+            with (
+                patch(
+                    "benchmark.core.headless_runner._complete_with_headless_cli",
+                    side_effect=error,
+                ) as complete,
+                contextlib.redirect_stdout(stdout),
+            ):
+                code = main(
+                    [
+                        "run-headless-packet",
+                        "--engine",
+                        "kimi",
+                        "--model",
+                        "kimi-code/k3",
+                        "--input-mode",
+                        "text-only",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(output),
+                        "--max-retries",
+                        "2",
+                    ]
+                )
+            validation = json.loads((output / "validation.json").read_text())
+
+        self.assertEqual(code, 1)
+        self.assertEqual(complete.call_count, 1)
+        self.assertEqual(validation["rows"][0]["attempts"], 1)
+        self.assertEqual(
+            validation["rows"][0]["error_category"],
+            "environment/authentication",
+        )
 
     def test_claude_json_print_output_uses_result_field_as_model_text(self):
         stdout = json.dumps(
@@ -248,6 +342,51 @@ class HeadlessRunnerCliTests(unittest.TestCase):
         self.assertIn("inputs/S001/page-001.jpg", prompt)
         self.assertNotIn("fake image", prompt)
 
+    def test_headless_transcription_dry_run_writes_strict_transcript(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = _write_transcription_packet(root)
+            output = root / "runs" / "kimi-transcription"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "run-headless-packet",
+                        "--engine",
+                        "kimi",
+                        "--model",
+                        "kimi-code/k3",
+                        "--input-mode",
+                        "multimodal",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(output),
+                        "--dry-run",
+                        "--run-commit",
+                        "abc1234",
+                        "--experiment-condition",
+                        "transcription",
+                    ]
+                )
+            payload = json.loads((output / "outputs" / "S001.json").read_text())
+            metadata = json.loads((output / "run-metadata.json").read_text())
+            prompt = (output / "headless-prompts" / "S001.prompt.txt").read_text(
+                encoding="utf-8"
+            )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(metadata["task"], "transcribe")
+        self.assertEqual(metadata["rubric_hash"], None)
+        self.assertEqual(
+            [answer["question_id"] for answer in payload["answers"]],
+            ["Q1", "Q2a", "Q2b"],
+        )
+        self.assertTrue(all(answer["unclear"] is False for answer in payload["answers"]))
+        self.assertIn("Blind headless transcription run", prompt)
+        self.assertIn("Do not grade", prompt)
+
     def test_headless_multimodal_rejects_pdf_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -338,6 +477,10 @@ def _write_text_grading_packet(root: Path) -> Path:
                 "S001",
                 "--transcript-source",
                 str(transcripts),
+                "--source-run-id",
+                "T1-dev-r1",
+                "--text-source-kind",
+                "automatic_transcript",
                 "--output-root",
                 str(packet_root),
                 "--metadata",
@@ -388,6 +531,39 @@ def _write_image_grading_packet(root: Path, input_name: str, input_bytes: bytes)
     if code != 0:
         raise AssertionError("failed to build synthetic image grading packet")
     return packet_root / "G1-dev-r1"
+
+
+def _write_transcription_packet(root: Path) -> Path:
+    input_root = root / "transcription-inputs"
+    student_dir = input_root / "S001"
+    student_dir.mkdir(parents=True)
+    (student_dir / "page-001.jpg").write_bytes(b"fake image")
+    packet_root = root / "transcription-packets"
+    with contextlib.redirect_stdout(io.StringIO()):
+        code = main(
+            [
+                "build-packet",
+                "--course",
+                str(FIXTURES / "course_dsaa3073_hw1.json"),
+                "--packet-id",
+                "T1-dev-r1",
+                "--condition",
+                "T1",
+                "--task",
+                "transcribe",
+                "--prompt",
+                str(FIXTURES / "transcribe_prompt.txt"),
+                "--student-id",
+                "S001",
+                "--input-root",
+                str(input_root),
+                "--output-root",
+                str(packet_root),
+            ]
+        )
+    if code != 0:
+        raise AssertionError("failed to build synthetic transcription packet")
+    return packet_root / "T1-dev-r1"
 
 
 if __name__ == "__main__":

@@ -234,7 +234,9 @@ def _build_parser() -> argparse.ArgumentParser:
     headless.add_argument("--output", type=Path, required=True)
     headless.add_argument("--engine-bin")
     headless.add_argument("--max-retries", type=int, default=0)
+    headless.add_argument("--timeout-seconds", type=int, default=600)
     headless.add_argument("--run-commit")
+    headless.add_argument("--experiment-condition")
     headless.add_argument(
         "--dry-run",
         action="store_true",
@@ -519,9 +521,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                     output=args.output,
                     engine_bin=args.engine_bin,
                     max_retries=args.max_retries,
+                    timeout_seconds=args.timeout_seconds,
                     dry_run=args.dry_run,
                     command_argv=raw_argv,
                     run_commit=args.run_commit,
+                    experiment_condition=args.experiment_condition,
                 )
             )
             print(json.dumps(result, sort_keys=True))

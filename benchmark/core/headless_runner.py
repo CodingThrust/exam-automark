@@ -53,6 +53,38 @@ Return exactly one JSON object matching the supplied output schema. Do not wrap
 the JSON in Markdown. Preserve the anonymous student_id exactly.
 """
 
+HEADLESS_TRANSCRIPTION_WRAPPER = """# Blind headless transcription run
+
+You are transcribing one anonymous student's scanned paper in a reproducible
+headless run. Your working directory is the prompt packet.
+
+The student's scanned paper pages are image files listed under input_images in
+the packet context below, with paths relative to your working directory. Read
+every listed image file with your file-reading tools. Transcribe the student's
+answer for every required question. Do not grade, correct, or infer an answer
+that is not visible. Set unclear=true whenever the handwriting is uncertain.
+Do not inspect parent directories, gold scores, previous run outputs, reports,
+or any other files.
+
+Return exactly one JSON object matching the supplied output schema. Do not wrap
+the JSON in Markdown. Preserve the anonymous student_id exactly.
+"""
+
+
+class HeadlessCLIError(RuntimeError):
+    """A local-only CLI failure carrying a privacy-safe aggregate category."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        category: str,
+        retryable: bool,
+    ) -> None:
+        super().__init__(message)
+        self.category = category
+        self.retryable = retryable
+
 
 @dataclass(frozen=True)
 class HeadlessPacketRunConfig:
@@ -63,9 +95,11 @@ class HeadlessPacketRunConfig:
     output: Path
     engine_bin: str | None = None
     max_retries: int = 0
+    timeout_seconds: int = 600
     dry_run: bool = False
     command_argv: tuple[str, ...] = ()
     run_commit: str | None = None
+    experiment_condition: str | None = None
 
 
 def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
@@ -75,15 +109,28 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
         raise ValueError(f"--input-mode must be one of {', '.join(INPUT_MODES)}")
     if config.max_retries < 0:
         raise ValueError("--max-retries must be non-negative")
+    if config.timeout_seconds <= 0:
+        raise ValueError("--timeout-seconds must be positive")
     if config.output.exists():
         raise FileExistsError(f"run output already exists: {config.output}")
 
     manifest = _read_json(config.packet / "manifest.json")
-    if manifest.get("task") != "grade":
-        raise ValueError("run-headless-packet currently supports grade packets only")
+    task = manifest.get("task")
+    if task is None and not (config.packet / "rubric.json").exists():
+        # Physics T1 packets predate the task field but use the same strict
+        # transcription schema and intentionally contain no grading rubric.
+        task = "transcribe"
+    if task not in {"grade", "transcribe"}:
+        raise ValueError("run-headless-packet supports grade or transcribe packets")
+    if task == "transcribe" and config.input_mode != "multimodal":
+        raise ValueError("transcription packets require --input-mode multimodal")
     course = CourseSpec.from_dict(_read_json(config.packet / "course.json"))
     prompt_text = (config.packet / "prompt.txt").read_text(encoding="utf-8")
-    rubric = _read_json(config.packet / "rubric.json")
+    rubric = (
+        _read_json(config.packet / "rubric.json")
+        if task == "grade"
+        else None
+    )
     student_ids = tuple(manifest.get("student_ids", ()))
     if not student_ids:
         raise ValueError("packet manifest has no student_ids")
@@ -112,8 +159,16 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
     successful = 0
     validation_rows: list[dict[str, Any]] = []
     usage: dict[str, int | float] = {}
-    for student_id in student_ids:
-        if config.input_mode == "multimodal":
+    for index, student_id in enumerate(student_ids):
+        if task == "transcribe":
+            prompt = _compose_headless_transcription_prompt(
+                prompt_text,
+                student_id,
+                course,
+                image_inputs[student_id],
+            )
+        elif config.input_mode == "multimodal":
+            assert rubric is not None
             prompt = _compose_headless_multimodal_prompt(
                 prompt_text,
                 student_id,
@@ -122,6 +177,7 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
                 image_inputs[student_id],
             )
         else:
+            assert rubric is not None
             prompt = _compose_headless_prompt(
                 prompt_text,
                 student_id,
@@ -142,10 +198,23 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
             raw_responses=raw_responses,
             failures=failures,
             usage=usage,
+            task=str(task),
         )
         if result["status"] == "passed":
             successful += 1
         validation_rows.append(result)
+        if result.get("fatal"):
+            for skipped_id in student_ids[index + 1 :]:
+                validation_rows.append(
+                    {
+                        "student_id": skipped_id,
+                        "status": "blocked",
+                        "attempts": 0,
+                        "error_type": "SkippedAfterSystemicCLIError",
+                        "error_category": result["error_category"],
+                    }
+                )
+            break
 
     validation = {
         "status": "passed" if successful == len(student_ids) else "failed",
@@ -207,6 +276,27 @@ def _compose_headless_multimodal_prompt(
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
 
+def _compose_headless_transcription_prompt(
+    prompt_text: str,
+    student_id: str,
+    course: CourseSpec,
+    image_paths: list[str],
+) -> str:
+    context = {
+        "student_id": student_id,
+        "course": course.to_dict(),
+        "input_images": [f"inputs/{student_id}/{path}" for path in image_paths],
+        "required_question_ids": list(course.question_ids),
+    }
+    return (
+        HEADLESS_TRANSCRIPTION_WRAPPER.rstrip()
+        + "\n\n## Packet transcription prompt\n\n"
+        + prompt_text.rstrip()
+        + f"\n\nOutput student_id must be {student_id}."
+        + "\nPacket context:\n"
+        + json.dumps(context, ensure_ascii=True, sort_keys=True)
+    )
+
 
 def _run_student(
     *,
@@ -217,6 +307,7 @@ def _run_student(
     raw_responses: Path,
     failures: Path,
     usage: dict[str, int | float],
+    task: str = "grade",
 ) -> dict[str, Any]:
     last_error: Exception | None = None
     for attempt in range(1, config.max_retries + 2):
@@ -230,12 +321,31 @@ def _run_student(
                     "JSON object only, following the required schema exactly."
                 )
             if config.dry_run:
-                provider = DryRunTextProvider(config.model)
-                response = provider.complete_text(
-                    attempt_prompt,
-                    student_id=student_id,
-                    course=course,
-                )
+                if task == "transcribe":
+                    response = ModelProviderResult(
+                        raw_text=json.dumps(
+                            {
+                                "student_id": student_id,
+                                "answers": [
+                                    {
+                                        "question_id": question_id,
+                                        "text": "dry-run transcript",
+                                        "unclear": False,
+                                    }
+                                    for question_id in course.question_ids
+                                ],
+                            },
+                            ensure_ascii=False,
+                        ),
+                        model=config.model,
+                    )
+                else:
+                    provider = DryRunTextProvider(config.model)
+                    response = provider.complete_text(
+                        attempt_prompt,
+                        student_id=student_id,
+                        course=course,
+                    )
             else:
                 response = _complete_with_headless_cli(
                     config,
@@ -245,7 +355,10 @@ def _run_student(
                 )
             raw_text = response.raw_text
             payload = _parse_json_result(raw_text)
-            _validate_grade_payload(payload, student_id, course)
+            if task == "transcribe":
+                _validate_transcript_payload(payload, student_id, course)
+            else:
+                _validate_grade_payload(payload, student_id, course)
             _write_json(config.output / "outputs" / f"{student_id}.json", payload)
             _append_jsonl(
                 raw_responses,
@@ -265,7 +378,13 @@ def _run_student(
             return {"student_id": student_id, "status": "passed", "attempts": attempt}
         except Exception as error:
             last_error = error
-            status = "retry" if attempt <= config.max_retries else "failed"
+            nonretryable = isinstance(error, HeadlessCLIError) and not error.retryable
+            status = (
+                "failed"
+                if nonretryable or attempt > config.max_retries
+                else "retry"
+            )
+            error_category = _failure_category(error)
             _append_jsonl(
                 raw_responses,
                 {
@@ -277,9 +396,12 @@ def _run_student(
                     "model": config.model,
                     "raw_text": raw_text,
                     "error_type": type(error).__name__,
+                    "error_category": error_category,
                     "error": str(error),
                 },
             )
+            if nonretryable:
+                break
 
     assert last_error is not None
     _append_jsonl(
@@ -287,19 +409,57 @@ def _run_student(
         {
             "student_id": student_id,
             "status": "failed",
-            "attempts": config.max_retries + 1,
+            "attempts": attempt,
             "timestamp": _utc_now(),
             "error_type": type(last_error).__name__,
+            "error_category": _failure_category(last_error),
             "error": str(last_error),
         },
     )
     return {
         "student_id": student_id,
         "status": "failed",
-        "attempts": config.max_retries + 1,
+        "attempts": attempt,
         "error_type": type(last_error).__name__,
+        "error_category": _failure_category(last_error),
         "error": str(last_error),
+        "fatal": isinstance(last_error, HeadlessCLIError),
     }
+
+def _validate_transcript_payload(
+    payload: dict[str, Any],
+    student_id: str,
+    course: CourseSpec,
+) -> None:
+    if set(payload) != {"student_id", "answers"}:
+        raise ValueError("transcript output must contain only student_id and answers")
+    if payload.get("student_id") != student_id:
+        raise ValueError("student_id does not match the requested anonymous student")
+    answers = payload.get("answers")
+    if not isinstance(answers, list) or len(answers) != len(course.question_ids):
+        raise ValueError("answers must contain exactly one row per required question")
+    seen: list[str] = []
+    for answer in answers:
+        if not isinstance(answer, dict) or set(answer) != {
+            "question_id",
+            "text",
+            "unclear",
+        }:
+            raise ValueError(
+                "each transcript answer requires only question_id, text, and unclear"
+            )
+        question_id = answer.get("question_id")
+        if question_id not in course.question_ids:
+            raise ValueError(f"unknown transcript question_id: {question_id}")
+        if not isinstance(answer.get("text"), str):
+            raise ValueError("transcript text must be a string")
+        if not isinstance(answer.get("unclear"), bool):
+            raise ValueError("transcript unclear must be boolean")
+        seen.append(str(question_id))
+    if seen != list(course.question_ids):
+        raise ValueError(
+            "transcript answers must follow course question order without duplicates"
+        )
 
 
 def _complete_with_headless_cli(
@@ -318,6 +478,7 @@ def _complete_with_headless_cli(
         "capture_output": True,
         "text": True,
         "encoding": "utf-8",
+        "timeout": config.timeout_seconds,
     }
     if config.engine == "kimi":
         # kimi takes the prompt as a --prompt argument; keep stdin closed.
@@ -336,8 +497,12 @@ def _complete_with_headless_cli(
         newline="\n",
     )
     if completed.returncode != 0:
-        raise RuntimeError(
-            f"{config.engine} headless command failed with exit {completed.returncode}"
+        detail = "\n".join((completed.stderr, completed.stdout))
+        category = _cli_failure_category(detail)
+        raise HeadlessCLIError(
+            f"{config.engine} headless command failed with exit {completed.returncode}",
+            category=category,
+            retryable=category == "cli/runtime",
         )
     raw_text = _extract_headless_cli_raw_text(
         config.engine,
@@ -423,16 +588,66 @@ def _student_command_argv(
             ]
         )
         return argv
+    max_turns = "12" if config.input_mode == "multimodal" else "1"
+    tools = "Read" if config.input_mode == "multimodal" else ""
     return [
         config.engine_bin or "claude",
         "-p",
         "--output-format",
         "json",
         "--max-turns",
-        "1",
+        max_turns,
+        "--tools",
+        tools,
+        "--strict-mcp-config",
         "--model",
         config.model,
     ]
+
+
+def _cli_failure_category(detail: str) -> str:
+    lowered = detail.lower()
+    if any(
+        marker in lowered
+        for marker in (
+            "401",
+            "403",
+            "auth",
+            "credential",
+            "forbidden",
+            "login",
+            "not logged in",
+            "permission denied",
+            "unauthorized",
+        )
+    ):
+        return "environment/authentication"
+    if any(
+        marker in lowered
+        for marker in (
+            "429",
+            "quota",
+            "rate limit",
+            "rate-limit",
+            "timed out",
+            "timeout",
+        )
+    ):
+        return "quota/timeout"
+    return "cli/runtime"
+
+
+def _failure_category(error: Exception) -> str:
+    category = getattr(error, "category", None)
+    if isinstance(category, str) and category:
+        return category
+    if isinstance(error, (json.JSONDecodeError, ValueError, TypeError, KeyError)):
+        return "output-json/schema"
+    if isinstance(error, (FileNotFoundError, IsADirectoryError, NotADirectoryError)):
+        return "packet/input"
+    if isinstance(error, subprocess.TimeoutExpired):
+        return "quota/timeout"
+    return "cli/runtime"
 
 
 def _extract_headless_cli_raw_text(
@@ -507,6 +722,7 @@ def _metadata(
         "max_tokens": None,
         "response_format": "json_object",
         "max_retries": config.max_retries,
+        "timeout_seconds": config.timeout_seconds,
         "retry_policy": (
             "append JSON repair instruction after validation or CLI failure"
             if config.max_retries
@@ -517,11 +733,17 @@ def _metadata(
         "assessment_id": manifest.get("assessment_id"),
         "packet_id": manifest.get("packet_id"),
         "condition": manifest.get("condition"),
-        "task": manifest.get("task"),
+        "experiment_condition": config.experiment_condition,
+        "task": manifest.get("task")
+        or ("transcribe" if not (config.packet / "rubric.json").exists() else "grade"),
         "split": manifest_metadata.get("split"),
         "skill_version_id": manifest_metadata.get("skill_version_id"),
         "prompt_template_id": manifest_metadata.get("prompt_template_id"),
         "data_snapshot_hash": manifest_metadata.get("data_snapshot_hash"),
+        "source_run_id": manifest_metadata.get("source_run_id"),
+        "text_source_kind": manifest_metadata.get("text_source_kind"),
+        "image_source_kind": manifest_metadata.get("image_source_kind"),
+        "source_prompt_packet": manifest_metadata.get("source_prompt_packet"),
         "packet": config.packet.as_posix(),
         "packet_hash": directory_digest(config.packet),
         "prompt_hash": manifest["prompt_hash"],

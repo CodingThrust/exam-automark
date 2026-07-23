@@ -12,6 +12,45 @@ claimed now, and separates completed work from follow-up experiments.
 No raw student submissions, identity maps, API keys, raw model responses, or
 files under `Data/` are committed in this integration record.
 
+## Priority Update: 2026-07-23
+
+The advisor-run automation is now the highest priority because it shortens the
+feedback loop for every later Kimi/Claude experiment. The working order is:
+
+1. **P0 — advisor run-and-submit skill:** configure the advisor environment,
+   extract matched inputs, run Kimi Code and Claude Code in both text-only and
+   multimodal modes, validate/package failures as well as successes, and open a
+   GitHub PR automatically.
+2. **P1 — failure retrospectives:** correct the SkillOpt R4 explanation,
+   including why the candidate failed validation and which cases regressed;
+   apply the same template to every failed experiment.
+3. **P2 — automated Codex CLI versus Claude Code multimodal comparison:** use
+   matched packets and the same reporting contract.
+4. **P3 — mainline grading audit:** use the latest model to diagnose current
+   candidate-v3.2 defects at private Sxxx/Qx level, aggregate objective error
+   types, recommend changes, and measure confidence calibration.
+5. **P4 — teach and choose:** explain the quantum.harness/beginner-training and
+   sci-brain survey lessons in accessible detail, then present project changes
+   for user selection.
+6. **P5 — finish autoresearch:** complete the live dev-only loop after the
+   metric, failure, and PR handoff pipeline is stable.
+
+P0 implementation is on branch `feat/advisor-run-submit-skill`:
+
+- `.agents/skills/run-submit-grading-benchmark/`
+- `.claude/skills/run-submit-grading-benchmark/`
+- `scripts/advisor_experiment.py`
+- `benchmark/core/advisor_workflow.py`
+- `experiments/records/advisor-run-submit-skill/README.md`
+
+Current verification: both skill copies validate and match; the full
+Kimi/Claude × text/multimodal × baseline/candidate development matrix completed
+an offline 8-arm smoke run with `8/8` schema-valid outputs in every arm. No
+external model was called. The current text packet provenance is explicitly
+reported as `automatic-transcript`, while the direct-image packets are checked
+against the page-level privacy review. Live advisor credentials and a real
+result PR remain the acceptance test after merge.
+
 ## Executive Status
 
 | Item | Status | Claim |

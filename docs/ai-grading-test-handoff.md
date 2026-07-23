@@ -4,18 +4,136 @@ title: AI Grading Test Handoff
 
 # AI Grading Test Handoff
 
-This page is for an external reviewer or an AI coding assistant. Read this page,
-then run the grading benchmark from a local checkout. If `Data/` is missing,
-restore it from the private HKUST-GZ GitLab repository documented below before
-running models.
+This page is for an external reviewer and their local AI coding assistant. The
+preferred route is the repository skill below: the assistant checks and helps
+configure the environment, restores the approved inputs when needed, makes Kimi
+Code and Claude Code each transcribe the anonymous images before grading those
+fresh transcripts, also runs direct-multimodal grading, compares the new
+results with the committed DeepSeek/Codex evidence, and opens privacy-safe
+draft GitHub pull requests. The detailed manual sections remain as a
+troubleshooting reference.
 
 Do not upload raw student transcripts, raw model responses, per-student outputs,
 or private PDFs to GitHub Pages.
+If `Data/` is absent, the agent restores it from the private HKUST-GZ GitLab
+using only the advisor's own authorized account.
+
+## Preferred Agent Workflow
+
+Open this repository in Claude Code, Codex, or OpenCode and send:
+
+```text
+Use the run-submit-grading-benchmark skill. Inspect this checkout, proactively
+help me configure every missing dependency or login, prepare the matched Physics
+Week 9 development and sealed test inputs, run Kimi Code and Claude Code with
+both fresh image transcription-then-grading and direct multimodal grading,
+validate and package successes or failures, compare the new candidate-v2
+metrics with the committed DeepSeek and Codex CLI metrics, then submit
+privacy-safe aggregate development and test results as draft GitHub pull
+requests. Do not substitute historical transcripts for Kimi's or Claude's own
+transcription stage. I authorize the sealed test run only after every matched
+development arm passes; do not tune from test errors or rerun the same test
+after changing the candidate. Ask me only for installation/login permission,
+private-data access I must authorize, or a genuinely consequential experiment
+decision.
+```
+
+Skill locations:
+
+- Codex and OpenCode: `.agents/skills/run-submit-grading-benchmark/SKILL.md`
+- Claude Code: `.claude/skills/run-submit-grading-benchmark/SKILL.md`
+
+OpenCode can discover the `.agents/skills` copy directly. Both repository
+copies are kept identical so the same workflow and decision gates apply to all
+three agents.
+
+The assistant should own this sequence:
+
+```text
+doctor -> ask once -> zero-data probe -> prepare images -> fresh transcription
+-> text + direct-image grading -> historical comparison -> freeze -> test
+-> two draft PRs
+```
+
+The stable helper entry point is:
+
+```text
+python scripts/advisor_experiment.py --help
+```
+
+If local configs do not exist, the assistant creates separate development and
+test configs under ignored `local/`:
+
+```text
+python scripts/advisor_experiment.py init \
+  --preset physics-week9 \
+  --split development \
+  --experiment-id <campaign>-development \
+  --output local/advisor-development.json
+
+python scripts/advisor_experiment.py init \
+  --preset physics-week9 \
+  --split test \
+  --experiment-id <campaign>-test \
+  --output local/advisor-test.json
+```
+
+Before any student packet is sent to a model, the assistant asks once for
+permission to spend a small amount of subscription quota and runs:
+
+```text
+python scripts/advisor_experiment.py probe \
+  --config local/advisor-development.json \
+  --approve-model-probes
+
+python scripts/advisor_experiment.py probe \
+  --config local/advisor-test.json \
+  --approve-model-probes
+```
+
+This probe contains no student answer and must pass for each configured
+engine/model on the current commit.
+
+The generated development plan contains two immutable transcription runs plus
+eight immutable grading arms: Kimi/Claude ×
+fresh-transcript/direct-multimodal × baseline/candidate. Each text arm is built
+from that same engine's new transcript output. It also configures paired
+baseline/candidate, input-mode, cross-engine, and historical DeepSeek/Codex
+aggregate comparisons over all eight development students. After those pass,
+the frozen test plan repeats the same workflow over all 18 test students. Kimi
+uses the advisor's Kimi Code login; this route does not require a
+`MOONSHOT_API_KEY`.
+
+The workflow is complete only when it returns separate draft GitHub PR URLs for
+development and test. A failed model or CLI run must still produce a PR
+containing the validation counts and aggregated technical failure type; it
+must not disappear into a private chat.
 
 ## One-Sentence Goal
 
-Run the Physics Week 9 text-only grading benchmark on fixed prompt packets, then
-return validation status and aggregate metrics for baseline vs candidate-v2.
+Run the fixed Physics Week 9 development benchmark and then its sealed test
+benchmark through Kimi Code and Claude Code using both fresh per-engine
+transcription-then-grading and direct page images, compare them with the
+committed DeepSeek/Codex evidence, then return split-specific privacy-safe
+validation and aggregate comparisons through draft GitHub PRs.
+
+The historical Physics DeepSeek/Codex results remain visible in
+`experiments/records/physics-codex-benchmark-report/`. They used frozen
+automatic transcripts and are labeled separately from the new fresh
+transcription and direct-multimodal routes.
+
+## Previous Results Already Available
+
+The advisor can inspect the prior benchmark before running anything:
+
+- [Readable DeepSeek versus Codex report](https://github.com/CodingThrust/exam-automark/blob/main/experiments/records/physics-codex-benchmark-report/MODEL-BENCHMARK-REPORT.md)
+- [Structured aggregate metrics](https://github.com/CodingThrust/exam-automark/blob/main/experiments/records/physics-codex-benchmark-report/model-benchmark-summary.json)
+- [Rendered PDF report](https://github.com/CodingThrust/exam-automark/blob/main/experiments/records/physics-codex-benchmark-report/note.pdf)
+
+On the held-out candidate-v2 condition, the committed report records
+DeepSeek exact agreement `0.8426` and total-score MAE `2.0833`, versus Codex
+CLI exact agreement `0.8981` and total-score MAE `1.0833`. These values are
+loaded automatically into each new result PR; no copy/paste is needed.
 
 ## Local Repository Root
 
@@ -307,7 +425,7 @@ Windows PowerShell:
 ```powershell
 git status --short -- Data .private-data
 git check-ignore -q Data/physics/benchmark; $LASTEXITCODE
-git check-ignore -q .private-data; $LASTEXITCODE
+git check-ignore --no-index -q .private-data/; $LASTEXITCODE
 ```
 
 macOS/Linux:
@@ -315,7 +433,7 @@ macOS/Linux:
 ```bash
 git status --short -- Data .private-data
 git check-ignore -q Data/physics/benchmark; echo $?
-git check-ignore -q .private-data; echo $?
+git check-ignore --no-index -q .private-data/; echo $?
 ```
 
 `git status --short -- Data .private-data` should print nothing. Both
@@ -351,7 +469,13 @@ Rules:
 - `total` must equal the sum of all question scores.
 - Output one JSON object only. Do not include Markdown around JSON.
 
-## Kimi Route
+## Optional Kimi Route: Moonshot API Fallback
+
+This section is a legacy/manual fallback only. For the requested advisor
+workflow, use the preferred Kimi Code headless route and the advisor's Kimi
+Code login; do not ask for `MOONSHOT_API_KEY`. Use the API fallback below only
+when the reviewer explicitly chooses a separate pay-as-you-go Moonshot Platform
+experiment.
 
 Use this route when the reviewer has a Moonshot/Kimi API key such as
 `sk-kimi-...`.
@@ -767,9 +891,12 @@ These files stay local under ignored `Data/`.
 
 ## Return This Summary To YY
 
-After running, return this JSON summary in chat. Include how `Data/` was
-restored, but do not paste raw student answers, raw model responses, tokens,
-or private GitLab URLs containing credentials.
+This is the legacy manual fallback schema. The preferred skill generates the
+same safe information in `summary.json` and `RUN-REPORT.md`, then opens a
+GitHub PR. Do not stop at a private chat when PR authentication can be
+configured. Include how `Data/` was restored, but do not paste raw student
+answers, raw model responses, tokens, or private GitLab URLs containing
+credentials.
 
 ```json
 {
@@ -815,6 +942,10 @@ Stop and report a blocker if:
 - output JSON fails validation for every student;
 - one arm passes and the other arm fails for an infrastructure reason;
 - any command would commit or upload raw private data.
+
+In the preferred skill workflow, "report a blocker" means package the safe
+validation counts and aggregated failure category and submit that record by PR
+when possible. It does not mean silently abandon the run.
 
 ## Git Policy
 

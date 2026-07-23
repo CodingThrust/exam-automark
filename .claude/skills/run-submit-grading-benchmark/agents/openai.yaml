@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run and Submit Grading Benchmark"
+  short_description: "Run Kimi and Claude grading, then submit a safe PR"
+  default_prompt: "Use $run-submit-grading-benchmark to configure my environment, restore approved inputs if needed, make Kimi and Claude each run fresh image transcription then grading plus direct multimodal grading on development and sealed test, compare them with committed DeepSeek/Codex results, and submit privacy-safe draft GitHub PRs."

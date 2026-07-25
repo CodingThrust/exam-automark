@@ -1,0 +1,168 @@
+{
+  "report_type": "todo1_meaningful_negative_result_retrospective",
+  "schema_version": 1,
+  "generated_at": "2026-07-25",
+  "scope": {
+    "included": [
+      "A completed experiment that did not improve its target metric.",
+      "A completed experiment whose aggregate improvement hides a material regression or error-cancellation effect.",
+      "A repeated technical failure only when it invalidates the experiment's optimization or evaluation signal."
+    ],
+    "excluded": [
+      "One-off command, path, dependency, authentication, or network errors.",
+      "Experiments that have not run or are waiting for external results.",
+      "A development-only regression that was subsequently resolved by positive held-out evidence."
+    ]
+  },
+  "metric_definitions": {
+    "question_score_mae": "Mean absolute score error over 70 student-question pairs: 7 development students times 10 questions.",
+    "question_exact_agreement": "Fraction of the 70 student-question pairs whose predicted score exactly equals the official score.",
+    "severe_error_rate_abs_ge_5": "Fraction of the 70 student-question pairs with an absolute score error of at least 5 points.",
+    "total_score_mae": "Mean absolute error between predicted and official total score over 7 development students.",
+    "item_absolute_error_points": "Sum of absolute errors over all 70 student-question pairs.",
+    "student_total_absolute_error_points": "Sum of absolute total-score errors over all 7 students.",
+    "within_student_cancellation_gap": "Item absolute error points minus student total absolute error points. A larger gap means over-scores and under-scores cancel more when question scores are summed."
+  },
+  "results": {
+    "physics_skillopt_r4": {
+      "classification": "negative_result",
+      "decision": "candidate_rejected",
+      "public_analysis": "../physics-skillopt-deepseek-r4-run/FAILURE-ANALYSIS.md",
+      "summary": "The optimizer merged an under-score and an over-score into one stricter edit. Validation hard accuracy fell from 0.25 to 0.00 and soft exact-subquestion accuracy fell from 0.7917 to 0.4792. One candidate validation output also failed after consuming the full completion budget."
+    },
+    "dsaa3071_candidate_v3": {
+      "classification": "negative_result",
+      "baseline": "R1",
+      "candidate": "C3",
+      "split": "development",
+      "students": 7,
+      "student_question_pairs": 70,
+      "baseline_metrics": {
+        "question_score_mae": 2.614286,
+        "question_exact_agreement": 0.514286,
+        "severe_error_rate_abs_ge_5": 0.214286,
+        "total_score_mae": 20.142857,
+        "item_absolute_error_points": 183,
+        "student_total_absolute_error_points": 141,
+        "within_student_cancellation_gap": 42
+      },
+      "candidate_metrics": {
+        "question_score_mae": 2.814286,
+        "question_exact_agreement": 0.5,
+        "severe_error_rate_abs_ge_5": 0.242857,
+        "total_score_mae": 20.142857,
+        "item_absolute_error_points": 197,
+        "student_total_absolute_error_points": 141,
+        "within_student_cancellation_gap": 56
+      },
+      "candidate_minus_baseline": {
+        "question_score_mae": 0.2,
+        "exact_pairs": -1,
+        "severe_error_pairs": 2,
+        "item_absolute_error_points": 14,
+        "student_total_absolute_error_points": 0,
+        "within_student_cancellation_gap": 14
+      },
+      "question_absolute_error_point_contributions": {
+        "Q5": 7,
+        "Q6": 1,
+        "Q7": 14,
+        "Q8": -6,
+        "Q9": 0,
+        "Q10": -2
+      }
+    },
+    "dsaa3071_candidate_v31_r2": {
+      "classification": "mixed_result_not_acceptable_as_accuracy_improvement",
+      "baseline": "R1",
+      "candidate": "C31_r2",
+      "split": "development",
+      "students": 7,
+      "student_question_pairs": 70,
+      "candidate_metrics": {
+        "question_score_mae": 2.928571,
+        "question_exact_agreement": 0.528571,
+        "severe_error_rate_abs_ge_5": 0.257143,
+        "total_score_mae": 18.428571,
+        "item_absolute_error_points": 205,
+        "student_total_absolute_error_points": 129,
+        "within_student_cancellation_gap": 76
+      },
+      "candidate_minus_baseline": {
+        "question_score_mae": 0.314285,
+        "exact_pairs": 1,
+        "severe_error_pairs": 3,
+        "item_absolute_error_points": 22,
+        "student_total_absolute_error_points": -12,
+        "within_student_cancellation_gap": 34
+      },
+      "interpretation": "The apparent total-score improvement is entirely explained by increased cancellation between question-level over-scores and under-scores while question-level absolute error worsened."
+    },
+    "dsaa3071_candidate_v32": {
+      "classification": "small_aggregate_improvement_with_material_tradeoffs",
+      "baseline": "R1",
+      "candidate": "C32",
+      "split": "development",
+      "students": 7,
+      "student_question_pairs": 70,
+      "candidate_metrics": {
+        "question_score_mae": 2.557143,
+        "question_exact_agreement": 0.528571,
+        "severe_error_rate_abs_ge_5": 0.228571,
+        "total_score_mae": 14.428571,
+        "item_absolute_error_points": 179,
+        "student_total_absolute_error_points": 101,
+        "within_student_cancellation_gap": 78
+      },
+      "candidate_minus_baseline": {
+        "question_score_mae": -0.057143,
+        "exact_pairs": 1,
+        "severe_error_pairs": 1,
+        "item_absolute_error_points": -4,
+        "student_total_absolute_error_points": -40,
+        "within_student_cancellation_gap": 36
+      },
+      "question_absolute_error_point_contributions": {
+        "Q5": -15,
+        "Q6": 19,
+        "Q7": 0,
+        "Q8": -1,
+        "Q9": -5,
+        "Q10": -2
+      },
+      "total_score_improvement_decomposition": {
+        "total_absolute_error_points_reduced": 40,
+        "question_level_absolute_error_points_reduced": 4,
+        "additional_cancellation_points": 36,
+        "share_from_additional_cancellation": 0.9
+      },
+      "design_confounds": [
+        "C32 changes the rubric, prompt, and skill together.",
+        "Only Q7, Q8, Q9 and the top-level grading policy changed between rubric v1 and rubric v2; Q5 and Q6 rubrics did not change.",
+        "Each condition was evaluated once and the recorded target temperature is null, so target-model variation was not estimated."
+      ]
+    }
+  },
+  "verified_findings": [
+    "C3 is worse than R1 on question MAE, exact agreement, and severe-error rate.",
+    "Q7 contributes all 14 net additional item-level absolute error points in C3 versus R1 before gains and losses on other questions offset one another.",
+    "C31-r2's better total-score MAE coexists with 22 more item-level absolute error points and 34 more cancellation points than R1.",
+    "C32 reduces item-level absolute error by only 4 points while reducing student total absolute error by 40 points; 36 of the 40 points come from additional within-student cancellation.",
+    "C32 adds 19 item-level absolute error points on Q6 while removing 15 on Q5 and 5 on Q9.",
+    "C32 has one more severe-error pair than R1."
+  ],
+  "limitations": [
+    "The split contains only seven development students.",
+    "Official per-question scores are available, but official per-question rationales are not.",
+    "Behavioral explanations based on model evidence and flags are diagnostic hypotheses, not verified explanations of the official scores.",
+    "C32 is a joint package change, not a single-factor ablation.",
+    "No held-out C32 result exists."
+  ],
+  "sources": [
+    "../physics-skillopt-deepseek-r4-run/FAILURE-ANALYSIS.md",
+    "../DSAA3071-week5-candidate-v3-dev-plan/dev-metrics-deepseek-r3.json",
+    "../DSAA3071-week5-candidate-v3-dev-plan/CANDIDATE-V3-R3-DIAGNOSIS.md",
+    "../DSAA3071-week5-candidate-v31-dev-plan/dev-metrics-deepseek-c32.json",
+    "../DSAA3071-week5-candidate-v31-dev-plan/ERROR-DIAGNOSIS-C31-R2.md"
+  ]
+}

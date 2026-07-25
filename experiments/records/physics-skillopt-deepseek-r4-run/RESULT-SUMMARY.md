@@ -39,12 +39,19 @@ Source file, ignored locally:
 Local sanity check:
 
 - `result.json` files found: 48.
-- Failed/error-like `result.json` records found: 0.
+- Parseable prediction records found: 47.
+- Candidate-validation JSON failures found: 1. The failed call consumed the
+  full 12,000 completion-token budget and returned an empty response.
 
-This means R4 largely addressed the R3 engineering blocker around invalid or
-truncated target JSON outputs. However, the selected candidate skill did not
-improve the validation gate, so SkillOpt rejected it. The final reported skill
-remained the initial skill lineage, and the held-out hard score did not improve.
+This means R4 largely, but not completely, addressed the R3 engineering blocker
+around invalid or truncated target JSON outputs. The candidate skill also made
+the paired parseable validation results worse, so SkillOpt rejected it. The
+final reported skill remained the initial skill lineage.
+
+The baseline and final held-out evaluations both used that same initial skill.
+Their hard-score difference is therefore run-to-run target-model variation, not
+the effect of the rejected candidate. See `FAILURE-ANALYSIS.md` for the
+candidate edit, paired validation evidence, and exact gate explanation.
 
 ## Interpretation
 
@@ -56,8 +63,9 @@ epoch with four train items and four validation items appears too weak or too
 noisy to demonstrate the advisor-requested outcome: "On physics dataset, show
 improvement in score accuracy."
 
-The soft score increased slightly, from 0.8380 to 0.8426, but the primary hard
-score decreased from 0.2778 to 0.2222. This is not enough to claim improvement.
+The held-out soft score increased slightly, from 0.8380 to 0.8426, while the
+hard score decreased from 0.2778 to 0.2222. Because both evaluations used the
+same initial skill, neither change demonstrates a SkillOpt improvement.
 
 ## Next Options
 

@@ -429,6 +429,8 @@ class ExperimentRecordFileTests(unittest.TestCase):
         self.assertIn("held-out not run", markdown)
         self.assertIn("not a final accuracy claim", markdown)
         self.assertIn("Q8 remains", markdown)
+        self.assertIn("90%", markdown)
+        self.assertIn("cancellation", markdown)
 
     def test_dsaa3071_candidate_v32_typst_note_records_dev_result(self):
         record_dir = Path("experiments/records/DSAA3071-week5-candidate-v31-dev-plan")
@@ -688,6 +690,75 @@ class ExperimentRecordFileTests(unittest.TestCase):
             )
         )
         self.assertTrue(all(asset["model_run_allowed"] is False for asset in assets))
+
+    def test_todo1_retrospective_keeps_only_decision_relevant_negative_results(self):
+        record_dir = Path("experiments/records/weekly-todo-integration-2026-07")
+        metrics = json.loads(
+            (record_dir / "TODO1-MEANINGFUL-NEGATIVE-RESULTS.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        report = (record_dir / "TODO1-MEANINGFUL-NEGATIVE-RESULTS.md").read_text(
+            encoding="utf-8"
+        )
+        settlement = (record_dir / "TODO1-ZULIP-SETTLEMENT.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertEqual(
+            metrics["report_type"],
+            "todo1_meaningful_negative_result_retrospective",
+        )
+        self.assertTrue(
+            any("command" in item for item in metrics["scope"]["excluded"])
+        )
+        self.assertEqual(
+            metrics["results"]["physics_skillopt_r4"]["classification"],
+            "negative_result",
+        )
+
+        c3 = metrics["results"]["dsaa3071_candidate_v3"]
+        self.assertGreater(
+            c3["candidate_metrics"]["question_score_mae"],
+            c3["baseline_metrics"]["question_score_mae"],
+        )
+        self.assertEqual(
+            sum(c3["question_absolute_error_point_contributions"].values()),
+            c3["candidate_minus_baseline"]["item_absolute_error_points"],
+        )
+
+        c31 = metrics["results"]["dsaa3071_candidate_v31_r2"]
+        self.assertGreater(
+            c31["candidate_minus_baseline"]["item_absolute_error_points"],
+            0,
+        )
+        self.assertLess(
+            c31["candidate_minus_baseline"]["student_total_absolute_error_points"],
+            0,
+        )
+
+        c32 = metrics["results"]["dsaa3071_candidate_v32"]
+        decomposition = c32["total_score_improvement_decomposition"]
+        self.assertEqual(
+            decomposition["question_level_absolute_error_points_reduced"]
+            + decomposition["additional_cancellation_points"],
+            decomposition["total_absolute_error_points_reduced"],
+        )
+        self.assertEqual(decomposition["share_from_additional_cancellation"], 0.9)
+        self.assertEqual(
+            c32["candidate_minus_baseline"]["severe_error_pairs"],
+            1,
+        )
+        self.assertEqual(
+            sum(c32["question_absolute_error_point_contributions"].values()),
+            c32["candidate_minus_baseline"]["item_absolute_error_points"],
+        )
+
+        for public_text in (report, settlement):
+            self.assertNotRegex(public_text, r"\bS[0-9]{3}\b")
+            self.assertNotIn("DEEPSEEK_API_KEY=", public_text)
+        self.assertIn("90%", report)
+        self.assertIn("ordinary command", report.lower())
 
 
 if __name__ == "__main__":

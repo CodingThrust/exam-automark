@@ -8,7 +8,15 @@ This report compares B0, R1, C3, C31-r2, and C32 on the seven-student developmen
 
 C32 is the best development condition so far on aggregate MAE: question MAE improves from `R1=2.614` to `C32=2.557`, and total MAE improves from `R1=20.143` to `C32=14.429`. It also improves over C31-r2 on question MAE, total MAE, and severe-error rate.
 
-The result is still not clean enough to freeze the skill: Q8 remains a major unresolved error source, Q6 worsens versus R1, and C32 severe-error rate remains slightly higher than R1.
+The total-score improvement is much larger than the question-level
+improvement because over-scores and under-scores cancel more strongly under
+C32. Only 4 of the 40 reduced total absolute-error points come from lower
+question-level absolute error; the other 36 points come from additional
+within-student cancellation.
+
+The result is therefore not clean enough to freeze the skill: Q8 remains a
+major unresolved error source, Q6 worsens versus R1, and C32 severe-error rate
+remains slightly higher than R1.
 
 ## Runs
 
@@ -84,19 +92,31 @@ Compared with R1, C32 reduces question-level MAE by `0.057` and total-score MAE 
 
 This is the first candidate in the DSAA3071 development sequence that improves both question-level MAE and total-score MAE versus R1.
 
-### 2. Q9 Improved But Is Still Under-Scored
+### 2. Most Of The Total-Score Gain Is Error Cancellation
+
+Across the 70 student-question pairs, R1 has 183 absolute-error points and C32
+has 179, a four-point improvement. Across the seven student totals, R1 has 141
+absolute-error points and C32 has 101, a 40-point improvement.
+
+The gap between those two error totals grows from 42 under R1 to 78 under C32.
+Therefore 36 of the 40 reduced total-error points, or 90%, come from additional
+within-student cancellation rather than lower question-level absolute error.
+Total-score MAE is useful as a guardrail, but it overstates the strength of the
+C32 improvement when reported without this cancellation diagnostic.
+
+### 3. Q9 Improved But Is Still Under-Scored
 
 Q9 MAE improves from `C31-r2=11.714` to `C32=9.000`, and it is also better than `R1=9.714`. However, several C32 Q9 scores are still substantially below the official score, so the conceptual-answer policy is improved but not solved.
 
-### 3. Q7 Returned To R1-Level MAE
+### 4. Q7 Returned To R1-Level MAE
 
 Q7 MAE improves from `C31-r2=5.000` back to `C32=2.429`, matching R1. This supports the v3.2 decision to preserve construction credit when a local proof mistake is present.
 
-### 4. Q8 Remains The Main Blocker
+### 5. Q8 Remains The Main Blocker
 
 Q8 remains unstable: `C32=5.571` MAE is only slightly better than `R1=5.714` and worse than `B0=3.857`. The v3.2 enumerator policy did not solve Q8 on this development split.
 
-### 5. Severe Errors Still Need Attention
+### 6. Severe Errors Still Need Attention
 
 C32 reduces severe-error rate versus C31-r2, but it is still slightly worse than R1: `C32=0.229` versus `R1=0.214`. This matters because severe errors are more visible to instructors than small total-score improvements.
 

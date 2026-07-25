@@ -21,7 +21,7 @@ responses, credentials, or case-level Sxxx/Qx analysis.
 | Priority | Work item | Status | Current evidence | Next checkpoint | Zulip |
 | ---: | --- | --- | --- | --- | --- |
 | P0 | Advisor run-and-submit skill | `implemented_waiting_external_validation` | PR #29 merged as `0255f5a`; offline development/test dry-runs passed | Review the advisor's real Kimi/Claude result PRs | Pending real-run settlement |
-| P1 | TODO1 failure retrospective, starting with SkillOpt R4 | `running` | R4 failure analysis and Zulip-ready negative-result settlement complete | Audit the remaining failed/negative experiments, then settle TODO1 as a whole | R4 settlement ready to post |
+| P1 | TODO1 meaningful negative-result retrospective | `completed` | SkillOpt R4 plus DSAA3071 candidate-v3/v3.1/v3.2 diagnosis, machine-readable metrics, and scope exclusions | Carry the diagnosed Q6/Q8/Q9 defects into TODO3; do not reopen operational errors as experiment findings | TODO1 settlement ready to post |
 | P2 | quantum.harness / beginner-training explanation | `pending` | Existing methodology review | Explain reused ideas and present selectable project changes | Pending |
 | P3 | sci-brain survey explanation | `pending` | Two committed survey PDFs and knowledge notes | Teach key concepts and present selectable project changes | Pending |
 | P4 | GitHub Actions CI quality gate | `pending` | Local test commands exist; no required test check on `main` | Add core/Physics/skill/privacy checks | Pending |

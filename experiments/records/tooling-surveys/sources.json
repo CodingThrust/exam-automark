@@ -1,0 +1,11 @@
+{
+  "records": [
+    {
+      "checked_date": "2026-07-25",
+      "record_path": "experiments/records/tooling-surveys/quantum-harness-beginner-training.md",
+      "source_commit": "3bed20a166fe0228cf40b82d7d6dbd0a77014df1",
+      "source_repository": "https://github.com/QuantumBFS/quantum.harness"
+    }
+  ],
+  "schema_version": 1
+}

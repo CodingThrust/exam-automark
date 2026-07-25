@@ -691,6 +691,43 @@ class ExperimentRecordFileTests(unittest.TestCase):
         )
         self.assertTrue(all(asset["model_run_allowed"] is False for asset in assets))
 
+    def test_quantum_harness_review_is_readable_and_evidence_mapped(self):
+        report = Path(
+            "experiments/records/tooling-surveys/"
+            "quantum-harness-beginner-training.md"
+        ).read_text(encoding="utf-8")
+        record_dir = Path("experiments/records/weekly-todo-integration-2026-07")
+        settlement = (record_dir / "TASK3-ZULIP-SETTLEMENT.md").read_text(
+            encoding="utf-8"
+        )
+        ledger = (record_dir / "WEEKLY-PROGRESS-2026-07-25.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn(
+            "3bed20a166fe0228cf40b82d7d6dbd0a77014df1",
+            report,
+        )
+        self.assertIn("我们已经实际借鉴的内容", report)
+        self.assertIn("已经实现", report)
+        self.assertIn("部分实现", report)
+        self.assertIn("尚未实现", report)
+        self.assertIn("选项 A", report)
+        self.assertIn("选项 E", report)
+        self.assertIn("不建议直接迁移的内容", report)
+        self.assertIn("## 中文版", settlement)
+        self.assertIn("## English version", settlement)
+        task3_line = next(
+            line for line in ledger.splitlines() if line.startswith("| TASK3 |")
+        )
+        self.assertIn("`running`", task3_line)
+        self.assertIn("Draft PR #31", task3_line)
+        self.assertIn("bilingual draft PR #31 open", task3_line)
+        for text in (report, settlement):
+            self.assertNotRegex(text, r"[鍙鐨鏄]")
+            self.assertNotRegex(text, r"\bS[0-9]{3}\b")
+            self.assertNotIn("API_KEY=", text)
+
     def test_todo1_retrospective_keeps_only_decision_relevant_negative_results(self):
         record_dir = Path("experiments/records/weekly-todo-integration-2026-07")
         physics_record_dir = Path(

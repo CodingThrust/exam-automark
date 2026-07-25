@@ -12,7 +12,34 @@ claimed now, and separates completed work from follow-up experiments.
 No raw student submissions, identity maps, API keys, raw model responses, or
 files under `Data/` are committed in this integration record.
 
-## Priority Update: 2026-07-23
+## Numbering convention: 2026-07-25
+
+`TODO<N>` is reserved for the advisor's numbering for a particular week.
+`TASK<N>` is our implementation order. A TASK may combine, split, or reorder
+advisor TODOs, so the two numbers must not be treated as interchangeable.
+
+The authoritative current order is maintained in
+`WEEKLY-PROGRESS-2026-07-25.md`:
+
+1. **TASK1:** advisor run-and-submit skill.
+2. **TASK2:** meaningful negative-result retrospective.
+3. **TASK3:** quantum.harness / beginner-training explanation.
+4. **TASK4:** sci-brain survey explanation.
+5. **TASK5:** GitHub Actions CI quality gate.
+6. **TASK6:** objective error taxonomy and confidence calibration.
+7. **TASK7:** automated Codex CLI versus Claude Code multimodal comparison.
+8. **TASK8:** mainline candidate-v3.2 defect audit.
+9. **TASK9:** grading-decision skill refinement.
+10. **TASK10:** four-model result integration.
+11. **TASK11:** full live autoresearch loop.
+
+The advisor TODO sections later in this document preserve the previous week's
+original numbering for historical traceability. They are not the current TASK
+order.
+
+## Historical priority update: 2026-07-23
+
+The `P0`-`P5` labels below are superseded by the `TASK<N>` convention above.
 
 The advisor-run automation is now the highest priority because it shortens the
 feedback loop for every later Kimi/Claude experiment. The working order is:
@@ -64,7 +91,7 @@ result PR remain the acceptance test after merge.
 | Physics multi-model benchmark | Partially done | DeepSeek and Codex CLI are reported; Kimi/Claude remain external/advisor-run or future runs. |
 | autoresearch workflow design | MVP dry-run scaffold | A conservative one-prompt research-loop design and deterministic dry-run are committed; no model calls were made. |
 
-## TODO 1: quantum.harness / beginner-training
+## Previous-week advisor TODO 1: quantum.harness / beginner-training
 
 Advisor request:
 
@@ -97,7 +124,7 @@ Limitation:
 This was a tooling/reproducibility review only. We did not run the external
 quantum project, migrate its toolchain, or depend on its quantum-physics code.
 
-## TODO 2: SkillOpt On Physics Dataset
+## Previous-week advisor TODO 2: SkillOpt On Physics Dataset
 
 Advisor request:
 
@@ -195,7 +222,7 @@ For this project:
 - DSAA3071 Week 5 currently has development-style runs only; it should not be
   presented as final cross-course evidence yet.
 
-## TODO 4: sci-brain Survey Reports
+## Previous-week advisor TODO 4: sci-brain Survey Reports
 
 Advisor request:
 
@@ -228,7 +255,7 @@ The sci-brain workflow therefore used WebSearch-style discovery and visible
 arXiv/Semantic Scholar metadata, with unverified historical items marked as
 needing verification.
 
-## TODO 5: Codex CLI Headless Mode And Claude Headless Reproduction
+## Previous-week advisor TODO 5: Codex CLI Headless Mode And Claude Headless Reproduction
 
 Advisor request:
 
@@ -263,7 +290,7 @@ Limitation:
 Claude Code support is documented as reproduction guidance. We have not run a
 local Claude Code benchmark ourselves in this repository.
 
-## TODO 6: DSAA3071 W2/W3/W4/W6 Source PDFs
+## Previous-week advisor TODO 6: DSAA3071 W2/W3/W4/W6 Source PDFs
 
 Advisor request:
 
@@ -295,7 +322,7 @@ Recommended next step:
 Choose one week, anonymize it, manually approve privacy, create rubric/gold
 score files, build prompt packets, and only then run models.
 
-## TODO 7: Scale Up Dataset And Benchmark Models
+## Previous-week advisor TODO 7: Scale Up Dataset And Benchmark Models
 
 Advisor request:
 
@@ -332,7 +359,7 @@ Collect advisor-run Kimi/Claude outputs or run them locally with valid
 credentials, validate outputs against the schema, compute metrics, and update
 the Typst/PDF benchmark report.
 
-## TODO 8: autoresearch Workflow Design
+## Previous-week advisor TODO 8: autoresearch Workflow Design
 
 Advisor request:
 

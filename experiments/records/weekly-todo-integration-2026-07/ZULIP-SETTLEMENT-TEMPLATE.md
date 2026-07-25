@@ -51,3 +51,5 @@ Next action:
 - Negative results remain negative.
 - Technical failure counts are not reported as accuracy.
 - Every claim links to a durable artifact.
+- Failure and meaningful negative-result reports provide complete Chinese and
+  English versions; a bilingual title alone is insufficient.

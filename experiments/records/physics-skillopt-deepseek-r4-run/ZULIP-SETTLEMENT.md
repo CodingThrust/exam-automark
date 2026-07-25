@@ -1,4 +1,70 @@
-# Zulip Settlement: TODO1 SkillOpt R4 Failure Retrospective
+# Zulip 结算：TODO1 SkillOpt R4 失败复盘 / Settlement: Failure Retrospective
+
+## 中文版
+
+```text
+Topic: [exam-automark] TODO1 - SkillOpt R4 负结果结算
+
+状态：
+negative_result
+
+目标：
+解释 Physics Week 9 SkillOpt candidate 为什么未通过、它具体哪里不好，以及再次
+运行前必须修改什么。
+
+完成内容：
+- 审计 seed skill、candidate skill、optimizer patch、gate 实现、validation
+  结果、held-out 结果和 item-level 私有 artifact。
+- 区分 candidate policy 失败、target output 失败、metric 弱点和重复评估波动。
+
+证据：
+- experiments/records/physics-skillopt-deepseek-r4-run/FAILURE-ANALYSIS.md
+- experiments/records/physics-skillopt-deepseek-r4-run/RESULT-SUMMARY.md
+
+关键结果：
+Candidate 增加了一条全局规则，要求每个 criterion-specific step 都必须明确
+可见。它错误地把一个少给分案例和一个多给分案例合并为同一个失败原因。
+Validation 中，hard accuracy 从 1/4 降为 0/4，soft 小题完全一致率从 38/48
+降为 23/48，因此 gate 正确拒绝了它。
+
+失败原因：
+- 把相反方向的训练误差合并成了一条单方向修改。
+- 把局部缺失证据修正过度推广，规则变得过于严格。
+- 一次 candidate validation 调用耗尽 12,000 completion tokens 并返回空响应。
+- 四名学生的“所有题目完全一致”hard accuracy 太粗，而且每个 condition 只有
+  一次 target 调用。
+
+实际改善：
+- R4 完成端到端 SkillOpt 流程；48 条结果中有 47 条可解析，相比 R3 明显提高
+  输出可靠性。
+- Validation gate 阻止有害 candidate 成为选中 skill。
+- 现在已经明确需要 direction-aware reflection、policy-conflict check、配对
+  重复评估和独立 reliability gate。
+
+对项目的帮助：
+避免把结果错误表述为准确率改善，并把模糊的“candidate 没通过”转化为可测试
+的管线修改，从而让 skill optimization 更安全。
+
+限制 / 禁止表述：
+- R4 没有提高评分准确率。
+- Held-out hard delta -0.0556 不是 candidate 效果：candidate 已被拒绝，两次
+  评估使用的是同一个 initial skill。
+- 单次 validation 调用无法隔离一条 prompt 修改的因果效果。
+
+待决策：
+A. 把 R4 结项为负结果并继续其他任务。
+B. R5 前修复 measurement/candidate gate。
+C. 把上述保护措施与窄范围 criterion-level SkillOpt proof of concept 结合。
+建议：现在结项 R4；如果仍要求正向 SkillOpt 结果，则结合 B 和 C。
+
+下一步：
+不要原样重跑 R4。先决定项目是否仍需要 SkillOpt；如果需要，在任何付费模型
+调用前实现 R5 的离线保护措施。
+```
+
+---
+
+## English version
 
 ```text
 Topic: [exam-automark] TODO1 - SkillOpt R4 negative-result settlement

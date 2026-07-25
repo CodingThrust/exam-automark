@@ -693,6 +693,9 @@ class ExperimentRecordFileTests(unittest.TestCase):
 
     def test_todo1_retrospective_keeps_only_decision_relevant_negative_results(self):
         record_dir = Path("experiments/records/weekly-todo-integration-2026-07")
+        physics_record_dir = Path(
+            "experiments/records/physics-skillopt-deepseek-r4-run"
+        )
         metrics = json.loads(
             (record_dir / "TODO1-MEANINGFUL-NEGATIVE-RESULTS.json").read_text(
                 encoding="utf-8"
@@ -702,6 +705,12 @@ class ExperimentRecordFileTests(unittest.TestCase):
             encoding="utf-8"
         )
         settlement = (record_dir / "TODO1-ZULIP-SETTLEMENT.md").read_text(
+            encoding="utf-8"
+        )
+        physics_report = (physics_record_dir / "FAILURE-ANALYSIS.md").read_text(
+            encoding="utf-8"
+        )
+        physics_settlement = (physics_record_dir / "ZULIP-SETTLEMENT.md").read_text(
             encoding="utf-8"
         )
 
@@ -759,6 +768,15 @@ class ExperimentRecordFileTests(unittest.TestCase):
             self.assertNotIn("DEEPSEEK_API_KEY=", public_text)
         self.assertIn("90%", report)
         self.assertIn("ordinary command", report.lower())
+        for bilingual_text in (
+            report,
+            settlement,
+            physics_report,
+            physics_settlement,
+        ):
+            self.assertIn("## 中文版", bilingual_text)
+            self.assertIn("## English version", bilingual_text)
+            self.assertRegex(bilingual_text, r"[\u4e00-\u9fff]")
 
 
 if __name__ == "__main__":

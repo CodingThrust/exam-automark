@@ -1,4 +1,76 @@
-# Zulip Settlement: TODO1 Meaningful Negative Results
+# Zulip 结算：TODO1 有意义的负结果 / Settlement: Meaningful Negative Results
+
+## 中文版
+
+```text
+Topic: [exam-automark] TODO1 - 有意义的负结果复盘
+
+状态：
+completed
+
+目标：
+解释为什么已经完成的评分实验没有改善它们目标中的准确率信号。排除普通的
+命令、认证、依赖、路径和暂时性网络错误。
+
+完成内容：
+- 审计 SkillOpt R4，以及 DSAA3071 candidate-v3、v3.1-r2 和 v3.2 的
+  development 序列。
+- 从私有运行输出重新计算题目层面、severe-error、总分和误差抵消指标。
+- 区分已验证的指标驱动因素、行为诊断假设和未解决原因。
+
+证据：
+- experiments/records/physics-skillopt-deepseek-r4-run/FAILURE-ANALYSIS.md
+- experiments/records/weekly-todo-integration-2026-07/TODO1-MEANINGFUL-NEGATIVE-RESULTS.md
+- experiments/records/weekly-todo-integration-2026-07/TODO1-MEANINGFUL-NEGATIVE-RESULTS.json
+
+关键结果：
+SkillOpt R4 错误合并了相反方向的误差，生成了过于严格的 candidate，因此
+validation accuracy 下降，gate 正确拒绝了它。
+
+DSAA3071 candidate-v3 相比 R1 同样降低了题目层面准确率。Candidate-v3.1-r2
+只有在学生总分 MAE 上看起来更好，原因是题目多给分和少给分之间的抵消变强。
+
+Candidate-v3.2 在题目层面有小幅真实改善，但总分误差减少的 40 分中，只有
+4 分来自题目层面绝对误差降低；其余 36 分，即 90%，来自新增的学生内部误差
+抵消。C32 还增加了一个 severe-error 题目对，其中 Q6 增加了 19 个绝对
+误差分。
+
+负结果原因：
+- SkillOpt 在聚合 candidate 证据时丢失误差方向。
+- Candidate-v3 过度应用 proof-locality、cap 和 wording requirement。
+- Candidate-v3.1 的总分指标隐藏了相互抵消的题目层面误差。
+- Candidate-v3.2 的全局规则在 Q6 多给分，对 Q8 的处理仍不一致。
+- Rubric/prompt/skill 联合修改和单次运行使因果归因无法成立。
+
+实际改善：
+- 现在能区分真实的题目层面改善和总分误差抵消。
+- 负结果筛选已排除没有实验意义的运行事故。
+- Candidate acceptance requirement 现在包括 severe-error guardrail 和
+  cancellation diagnostic。
+
+对项目的帮助：
+避免因为 aggregate 总分看起来更好，就接受一个逐题评分反而更不可靠的
+candidate；也让 candidate-v3.3 聚焦 Q6/Q8，而不是再次宽泛改写。
+
+限制 / 禁止表述：
+- C32 只有 development 证据，不是最终或 held-out 改善。
+- 没有官方逐题评分理由。
+- 行为解释属于诊断假设，不是已验证的人工评分理由。
+- 每个 condition 只有一次运行，不能隔离模型波动。
+
+决策：
+把 C3 和 C31-r2 结项为有信息价值的负结果/混合结果。C32 只保留为
+development candidate。在受控 Q6/Q8 审计和重复匹配 development comparison
+通过前，不冻结它，也不运行 held-out。
+
+下一步：
+对选中的 Q6/Q8/Q9 development 案例启动 TODO3 的最新模型缺陷审计，然后用
+single-factor ablation 和 severe-error 不增加 gate 提出 candidate-v3.3 修改。
+```
+
+---
+
+## English version
 
 ```text
 Topic: [exam-automark] TODO1 - meaningful negative-result retrospective

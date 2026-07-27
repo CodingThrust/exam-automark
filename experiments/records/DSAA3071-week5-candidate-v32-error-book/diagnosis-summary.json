@@ -1,0 +1,259 @@
+{
+  "by_question": [
+    {
+      "error_pairs_reviewed": 5,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 1,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 3,
+          "primary_cause": "rubric_gold_misalignment"
+        },
+        {
+          "error_pairs": 1,
+          "primary_cause": "score_band_calibration"
+        }
+      ],
+      "question_id": "Q5"
+    },
+    {
+      "error_pairs_reviewed": 7,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 2,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 1,
+          "primary_cause": "rubric_gold_misalignment"
+        },
+        {
+          "error_pairs": 4,
+          "primary_cause": "score_band_calibration"
+        }
+      ],
+      "question_id": "Q6"
+    },
+    {
+      "error_pairs_reviewed": 5,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 2,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 3,
+          "primary_cause": "score_band_calibration"
+        }
+      ],
+      "question_id": "Q7"
+    },
+    {
+      "error_pairs_reviewed": 7,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 1,
+          "primary_cause": "input_representation_ambiguity"
+        },
+        {
+          "error_pairs": 3,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 3,
+          "primary_cause": "rubric_gold_misalignment"
+        }
+      ],
+      "question_id": "Q8"
+    },
+    {
+      "error_pairs_reviewed": 6,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 4,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 2,
+          "primary_cause": "score_band_calibration"
+        }
+      ],
+      "question_id": "Q9"
+    },
+    {
+      "error_pairs_reviewed": 3,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 1,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 2,
+          "primary_cause": "rubric_gold_misalignment"
+        }
+      ],
+      "question_id": "Q10"
+    }
+  ],
+  "interpretation_limits": {
+    "en": [
+      "Root-cause labels are auditable development-split judgments by the current model, not final human adjudications.",
+      "Rubric-gold mismatch cases require course-owner adjudication before skill optimization.",
+      "This summary contains no held-out data, student identifiers, answer text, or case-level scores."
+    ],
+    "zh": [
+      "根因标签是当前模型基于开发集证据给出的可审计判断，不是最终人工裁决。",
+      "rubric-gold 不一致的案例必须先由课程负责人裁决，不能直接用于优化 skill。",
+      "该汇总不包含测试集、学生编号、答案文字或逐案分数。"
+    ]
+  },
+  "primary_cause_counts": [
+    {
+      "error_pairs": 1,
+      "primary_cause": "input_representation_ambiguity"
+    },
+    {
+      "error_pairs": 13,
+      "primary_cause": "model_grading_error"
+    },
+    {
+      "error_pairs": 9,
+      "primary_cause": "rubric_gold_misalignment"
+    },
+    {
+      "error_pairs": 10,
+      "primary_cause": "score_band_calibration"
+    }
+  ],
+  "recommended_action_counts": [
+    {
+      "error_pairs": 4,
+      "recommended_action": "calibrate_partial_credit_examples"
+    },
+    {
+      "error_pairs": 2,
+      "recommended_action": "adjudicate_Q8_epsilon_policy"
+    },
+    {
+      "error_pairs": 2,
+      "recommended_action": "align_Q10_gold_with_scoring_grid"
+    },
+    {
+      "error_pairs": 2,
+      "recommended_action": "clarify_official_style_tolerance"
+    },
+    {
+      "error_pairs": 2,
+      "recommended_action": "make_full_credit_rule_override_additive_family_counting"
+    },
+    {
+      "error_pairs": 2,
+      "recommended_action": "retain_as_near_tie_calibration_case"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "accept_cross_question_construction_references"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "accept_valid_indirect_constructions"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "add_Q10_official_style_full_credit_anchor"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "add_low_detail_Q9_anchor"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "add_one_direction_proof_anchor"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "adjudicate_gold_against_rubric_before_skill_tuning"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "align_proof_locality_examples_with_official_scores"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "calibrate_uncertainty_deductions"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "compare_reviewed_text_with_direct_multimodal_input"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "do_not_use_brevity_as_an_automatic_evidence_downgrade"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "encode_official_style_tolerance_for_complete_constructions"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "fix_element_level_classification"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "human_adjudication_required_before_Q8_tuning"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "recognize_semantic_evidence_without_named_examples"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "recognize_semantically_complete_simulated_steps"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "repair_Q6_rubric_before_tuning"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "require_context_check_before_invalid_output_cap"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "require_explicit_evidence_for_each_scoring_element"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "separate_keyword_mention_from_demonstrated_mechanism"
+    }
+  ],
+  "record_type": "grading_error_diagnosis_public_summary",
+  "review": {
+    "all_error_cases_reviewed": true,
+    "case_count": 33,
+    "private_diagnoses_sha256": "85da87265172b3755fb473384cac630e783df00aaa75fee0d1ae0c12b9bdea50",
+    "private_error_book_sha256": "29ffb4bf0f03e135563e1fa0dccb8b8642dd52c8a62478892c058e1ed251fe0e",
+    "review_date": "2026-07-27",
+    "reviewer": "current Codex session",
+    "reviewer_model_id": "not exposed by the client"
+  },
+  "review_confidence_counts": [
+    {
+      "error_pairs": 22,
+      "review_confidence": "high"
+    },
+    {
+      "error_pairs": 11,
+      "review_confidence": "medium"
+    }
+  ],
+  "schema_version": 1,
+  "scope": {
+    "contains_answer_or_evidence_text": false,
+    "contains_student_level_records": false,
+    "split": "development",
+    "taxonomy_status": "provisional_until_TASK6"
+  }
+}

@@ -23,8 +23,8 @@
   case-folded POSIX 相对路径顺序，并增加跨平台回归测试，同时保留历史
   实验记录引用的 canonical hash；
 - 记录公开 CI 与真实私有 sealed test 的数据边界；
-- 计划在本 PR 首次跑出准确 check context 后，把三个检查设为 `main`
-  required status checks，审批人数保持 0。
+- 三个准确 context 已在 Ubuntu runner 通过，并被设为 `main` required
+  status checks；它们绑定 GitHub Actions app，审批人数保持 0。
 
 ### 改善了什么
 
@@ -48,8 +48,7 @@
 
 ### 下一步
 
-让 PR 跑出并通过三个检查，确认 GitHub 显示的准确 context 名，然后把它们
-设为 `main` 的 required status checks。
+合并 PR #35；合并后确认 `main` 的 push run 同样通过三项检查。
 
 ## English
 
@@ -71,8 +70,8 @@ repository owner's ability to merge their own pull requests.
   cross-platform regression test while preserving the canonical hash cited by
   historical experiment records.
 - Documented the boundary between public CI and the real private sealed test.
-- Planned to require the three exact status contexts on `main` after this pull
-  request produces them once; required approvals remain zero.
+- All three exact contexts passed on Ubuntu and are now required on `main`.
+  They are bound to the GitHub Actions app, while required approvals remain zero.
 
 ### What improved
 
@@ -100,5 +99,5 @@ approvals.
 
 ### Next
 
-Run and pass the three checks on the pull request, confirm their exact GitHub
-context names, and then require those contexts on `main`.
+Merge PR #35, then confirm that the post-merge `main` push run also passes all
+three checks.

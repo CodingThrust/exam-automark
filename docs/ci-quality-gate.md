@@ -50,7 +50,7 @@ python -m benchmark.core.research_records --manifest experiments/records/tooling
 python -m benchmark.core.research_records --manifest experiments/records/literature-surveys/sci_brain_run_manifest.json
 ```
 
-### `main` 分支保护目标
+### `main` 分支保护
 
 1. 必须通过 PR 合并；
 2. required approvals 保持为 `0`，因此仓库所有者可以合并自己的 PR；
@@ -59,9 +59,9 @@ python -m benchmark.core.research_records --manifest experiments/records/literat
 5. 禁止 force push 和删除分支；
 6. 对管理员同样生效。
 
-状态检查只有在 workflow 首次运行后才会出现在 GitHub 可选列表中。因此
-流程是：先让本 PR 跑出三个检查名，确认全部通过，再把这三个检查设为
-`main` 的 required status checks。不能用猜测的名字提前配置。
+状态检查只有在 workflow 首次运行后才会出现在 GitHub 可选列表中。
+PR #35 已实际跑出并通过三个准确 context；它们已绑定 GitHub Actions
+app，并被设为 `main` 的 required status checks。
 
 ## English
 
@@ -119,7 +119,7 @@ python -m benchmark.core.research_records --manifest experiments/records/tooling
 python -m benchmark.core.research_records --manifest experiments/records/literature-surveys/sci_brain_run_manifest.json
 ```
 
-### Target `main` protection
+### `main` protection
 
 1. Changes must enter through a pull request.
 2. Required approvals remain `0`, so the owner can merge their own PR.
@@ -129,5 +129,5 @@ python -m benchmark.core.research_records --manifest experiments/records/literat
 6. The rules apply to administrators.
 
 GitHub exposes a check for branch protection only after the workflow has run
-once. This pull request must first produce and pass all three exact check
-names; they can then be required on `main` without guessing their contexts.
+once. PR #35 produced and passed all three exact contexts. They are now bound
+to the GitHub Actions app and required on `main`.

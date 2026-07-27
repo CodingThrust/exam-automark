@@ -1,6 +1,7 @@
 # TASK4 Zulip 结算稿：sci-brain 调研讲解与来源链
 
-> 状态：已准备，尚未实际发送到 Zulip。  
+> 状态：已准备，尚未实际发送到 Zulip。
+>
 > Status: prepared, not yet posted to Zulip.
 
 ## 中文

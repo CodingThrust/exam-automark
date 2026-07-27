@@ -1,0 +1,81 @@
+{
+  "acceptance": {
+    "necessary_not_sufficient": true,
+    "require_all_cases_pass": true,
+    "severe_error_threshold": 5.0
+  },
+  "by_question": [
+    {
+      "question_id": "Q6",
+      "target_cases": 2
+    },
+    {
+      "question_id": "Q9",
+      "target_cases": 4
+    }
+  ],
+  "by_regression_class": [
+    {
+      "regression_class": "negative_credit",
+      "target_cases": 2
+    },
+    {
+      "regression_class": "positive_credit",
+      "target_cases": 4
+    }
+  ],
+  "by_selector": [
+    {
+      "gate_kind": "nonsevere_and_improved",
+      "mechanism_code": "unsupported_evidence_credit",
+      "question_id": "Q6",
+      "regression_class": "negative_credit",
+      "selector_id": "Q6-severe-unsupported-credit",
+      "target_cases": 2
+    },
+    {
+      "gate_kind": "exact_gold",
+      "mechanism_code": "rule_precedence_or_gate_error",
+      "question_id": "Q9",
+      "regression_class": "positive_credit",
+      "selector_id": "Q9-rule-precedence",
+      "target_cases": 4
+    }
+  ],
+  "interpretation_limits": {
+    "en": [
+      "The suite contains known development errors only, never held-out data.",
+      "Passing every target is necessary but not sufficient; aggregate error, severe errors, and new regressions must still be checked on the full development set.",
+      "The public summary contains no student identifiers, answer text, case-level scores, or private paths."
+    ],
+    "zh": [
+      "\u8be5\u5957\u4ef6\u53ea\u5305\u542b\u5f00\u53d1\u96c6\u4e2d\u7684\u5df2\u77e5\u5178\u578b\u9519\u8bef\uff0c\u4e0d\u5305\u542b\u6d4b\u8bd5\u96c6\u3002",
+      "\u901a\u8fc7\u5168\u90e8\u76ee\u6807\u6848\u4f8b\u53ea\u662f\u5019\u9009 skill \u7684\u5fc5\u8981\u6761\u4ef6\uff1b\u4ecd\u987b\u68c0\u67e5\u5168\u4f53\u6837\u672c\u7684\u603b\u4f53\u8bef\u5dee\u3001\u4e25\u91cd\u9519\u8bef\u548c\u65b0 regression\u3002",
+      "\u516c\u5f00\u6458\u8981\u4e0d\u5305\u542b\u5b66\u751f\u7f16\u53f7\u3001\u7b54\u6848\u6587\u5b57\u3001\u9010\u4f8b\u5206\u6570\u6216\u79c1\u6709\u8def\u5f84\u3002"
+    ]
+  },
+  "provenance": {
+    "assessment_id": "week5_test",
+    "course_id": "DSAA3071",
+    "data_snapshot_sha256": "95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37",
+    "gold_sha256": "45d62dfa0411872090c3834a41858c7c91447b9fd510ec08fba446fb411a1b11",
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "policy_sha256": "0ca676ba8e9b117bfcb7393f5d2163d3b1ea6b9ecdf974fa70d722d2ec2bacb4",
+    "provider": "deepseek",
+    "source_diagnoses_sha256": "67e2a7432b018538ea17c944aed7a6a4c10d8fd409f5ad219de8add4b2785db0",
+    "source_private_book_sha256": "0a4cdb54867db055624fe28f37f37e93b4ec2163408f3eca3f8b551241443409",
+    "source_run_id": "deepseek-C33-q9-precedence-text-dev-reviewed-r1",
+    "source_skill_version_id": "skill_candidate_v3_3",
+    "text_source_sha256": "9f9be72bf088f211a3b5fc35db1439b3e965059ff55d5c0563e2880bdc7f4a00"
+  },
+  "record_type": "grading_error_regression_suite_public",
+  "schema_version": 1,
+  "scope": {
+    "contains_answer_or_evidence_text": false,
+    "contains_student_level_records": false,
+    "split": "development"
+  },
+  "suite_id": "DSAA3071-W5-Q6-Q9-C33-error-regressions-v1",
+  "target_case_count": 6
+}

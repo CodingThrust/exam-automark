@@ -1,0 +1,76 @@
+{
+  "by_gate_kind": [
+    {
+      "failed": 4,
+      "gate_kind": "exact_gold",
+      "passed": 0,
+      "target_cases": 4
+    },
+    {
+      "failed": 2,
+      "gate_kind": "nonsevere_and_improved",
+      "passed": 0,
+      "target_cases": 2
+    }
+  ],
+  "by_question": [
+    {
+      "failed": 2,
+      "passed": 0,
+      "question_id": "Q6",
+      "target_cases": 2
+    },
+    {
+      "failed": 4,
+      "passed": 0,
+      "question_id": "Q9",
+      "target_cases": 4
+    }
+  ],
+  "by_regression_class": [
+    {
+      "failed": 2,
+      "passed": 0,
+      "regression_class": "negative_credit",
+      "target_cases": 2
+    },
+    {
+      "failed": 4,
+      "passed": 0,
+      "regression_class": "positive_credit",
+      "target_cases": 4
+    }
+  ],
+  "counts": {
+    "failed": 6,
+    "passed": 0,
+    "target_cases": 6
+  },
+  "interpretation_limits": {
+    "en": [
+      "Failed means at least one known typical error missed its frozen gate.",
+      "Passed does not approve a candidate by itself; the full-development global gate is still required."
+    ],
+    "zh": [
+      "failed \u8868\u793a\u81f3\u5c11\u4e00\u4e2a\u5df2\u77e5\u5178\u578b\u9519\u8bef\u672a\u6ee1\u8db3\u51bb\u7ed3\u95e8\u7981\u3002",
+      "passed \u4e5f\u4e0d\u80fd\u5355\u72ec\u6279\u51c6 candidate\uff1b\u5fc5\u987b\u518d\u8fd0\u884c\u5168\u5f00\u53d1\u96c6\u603b\u4f53\u95e8\u7981\u3002"
+    ]
+  },
+  "provenance": {
+    "current_output_set_sha256": "d8e3d4956b93d3f226bdbd1c72fa25d20e944c8ea580108bbd881a4b658f18a5",
+    "current_run_id": "deepseek-C33-q9-precedence-text-dev-reviewed-r1",
+    "current_skill_version_id": "skill_candidate_v3_3",
+    "source_skill_version_id": "skill_candidate_v3_3",
+    "suite_id": "DSAA3071-W5-Q6-Q9-C33-error-regressions-v1",
+    "suite_sha256": "f74751c08c5cfdeef939d935ebf59b7877f3ac80706582f545c6161677621bb9"
+  },
+  "record_type": "grading_error_regression_evaluation_public",
+  "schema_version": 1,
+  "scope": {
+    "contains_answer_or_evidence_text": false,
+    "contains_student_level_records": false,
+    "split": "development"
+  },
+  "status": "failed",
+  "suite_id": "DSAA3071-W5-Q6-Q9-C33-error-regressions-v1"
+}

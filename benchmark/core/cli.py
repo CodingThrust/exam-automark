@@ -12,6 +12,10 @@ from .error_book_iteration import (
     write_error_book_delta,
     write_private_typical_case_report,
 )
+from .error_regressions import (
+    write_regression_evaluation,
+    write_regression_suite,
+)
 from .gold import validate_gold_table, write_gold_report
 from .headless_runner import HeadlessPacketRunConfig, run_headless_packet
 from .inventory import write_data_inventory
@@ -292,6 +296,31 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     error_registry.add_argument("--registry", type=Path, required=True)
     error_registry.add_argument("--repo-root", type=Path, default=Path("."))
+
+    regression_suite = subparsers.add_parser(
+        "build-error-regression-suite",
+        help="freeze diagnosed development errors as private executable regressions",
+    )
+    regression_suite.add_argument("--private-book", type=Path, required=True)
+    regression_suite.add_argument("--diagnoses", type=Path, required=True)
+    regression_suite.add_argument("--policy", type=Path, required=True)
+    regression_suite.add_argument("--private-output", type=Path, required=True)
+    regression_suite.add_argument("--public-output", type=Path, required=True)
+
+    regression_evaluation = subparsers.add_parser(
+        "evaluate-error-regressions",
+        help="evaluate a candidate private error book against frozen regressions",
+    )
+    regression_evaluation.add_argument("--suite", type=Path, required=True)
+    regression_evaluation.add_argument(
+        "--current-private-book", type=Path, required=True
+    )
+    regression_evaluation.add_argument(
+        "--private-output", type=Path, required=True
+    )
+    regression_evaluation.add_argument(
+        "--public-output", type=Path, required=True
+    )
 
     confidence_audit = subparsers.add_parser(
         "audit-error-confidence",
@@ -686,6 +715,50 @@ def main(argv: Sequence[str] | None = None) -> int:
             }
             print(json.dumps(result, sort_keys=True))
             return 0 if not findings else 1
+        if args.command == "build-error-regression-suite":
+            result = write_regression_suite(
+                private_book_path=args.private_book,
+                diagnoses_path=args.diagnoses,
+                policy_path=args.policy,
+                private_output=args.private_output,
+                public_output=args.public_output,
+            )
+            print(
+                json.dumps(
+                    {
+                        "private_output": str(args.private_output),
+                        "privacy_audit": "passed",
+                        "public_output": str(args.public_output),
+                        "suite_id": result.public_summary["suite_id"],
+                        "target_cases": result.public_summary[
+                            "target_case_count"
+                        ],
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.command == "evaluate-error-regressions":
+            result = write_regression_evaluation(
+                private_suite_path=args.suite,
+                current_private_book_path=args.current_private_book,
+                private_output=args.private_output,
+                public_output=args.public_output,
+            )
+            print(
+                json.dumps(
+                    {
+                        "counts": result.public_summary["counts"],
+                        "privacy_audit": "passed",
+                        "private_output": str(args.private_output),
+                        "public_output": str(args.public_output),
+                        "status": result.public_summary["status"],
+                        "suite_id": result.public_summary["suite_id"],
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0 if result.public_summary["status"] == "passed" else 1
         if args.command == "audit-error-confidence":
             result = write_error_confidence_audit(
                 run_dir=args.run_dir,

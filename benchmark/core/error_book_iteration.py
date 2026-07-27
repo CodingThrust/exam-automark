@@ -255,6 +255,18 @@ def validate_error_book_registry(
         "required_for_every_skill_update"
     ) is not True:
         findings.append("registry must require an error-book update for every skill update")
+    if not isinstance(policy, dict) or policy.get(
+        "required_regressions_for_future_skill_updates"
+    ) is not True:
+        findings.append(
+            "registry must require regression evaluation for future skill updates"
+        )
+
+    required_suite_ids, suite_findings = _validate_regression_suites(
+        repo_root=repo_root,
+        registry=registry,
+    )
+    findings.extend(suite_findings)
 
     entries = registry.get("entries")
     if not isinstance(entries, list) or not entries:
@@ -276,6 +288,7 @@ def validate_error_book_registry(
                 entry=entry,
                 expected_predecessor=(ids[index - 1] if index else None),
                 is_active=entry.get("skill_version_id") == active_id,
+                required_suite_ids=required_suite_ids,
             )
         )
     return sorted(set(findings))
@@ -287,6 +300,7 @@ def _validate_registry_entry(
     entry: dict[str, Any],
     expected_predecessor: str | None,
     is_active: bool,
+    required_suite_ids: tuple[str, ...],
 ) -> list[str]:
     findings: list[str] = []
     skill_id = entry.get("skill_version_id")
@@ -435,7 +449,135 @@ def _validate_registry_entry(
                 findings.append(f"{label}: delta predecessor mismatch")
             if provenance.get("current_skill_version_id") != skill_id:
                 findings.append(f"{label}: delta current skill mismatch")
+        evaluations = entry.get("public_regression_evaluations")
+        if not isinstance(evaluations, dict):
+            evaluations = {}
+            findings.append(f"{label}: missing public regression evaluations")
+        for suite_id in required_suite_ids:
+            evaluation_path = _repo_artifact(
+                repo_root,
+                evaluations.get(suite_id),
+                label=f"{label} regression evaluation {suite_id}",
+            )
+            if evaluation_path is None or not evaluation_path.is_file():
+                findings.append(
+                    f"{label}: missing regression evaluation for {suite_id}"
+                )
+                continue
+            evaluation = _read_json(evaluation_path)
+            findings.extend(
+                f"{label}: unsafe regression evaluation: {finding}"
+                for finding in audit_public_error_summary(evaluation)
+            )
+            if evaluation.get("suite_id") != suite_id:
+                findings.append(f"{label}: regression suite_id mismatch")
+            if evaluation.get("status") != "passed":
+                findings.append(
+                    f"{label}: regression evaluation must pass for {suite_id}"
+                )
+            if evaluation.get("provenance", {}).get(
+                "current_skill_version_id"
+            ) != skill_id:
+                findings.append(
+                    f"{label}: regression evaluation skill mismatch for {suite_id}"
+                )
     return findings
+
+
+def _validate_regression_suites(
+    *,
+    repo_root: Path,
+    registry: dict[str, Any],
+) -> tuple[tuple[str, ...], list[str]]:
+    findings: list[str] = []
+    raw_suites = registry.get("regression_suites")
+    if not isinstance(raw_suites, list) or not raw_suites:
+        return (), ["registry must define at least one regression suite"]
+
+    suite_ids: list[str] = []
+    for descriptor in raw_suites:
+        if not isinstance(descriptor, dict):
+            findings.append("regression suite descriptor must be an object")
+            continue
+        suite_id = descriptor.get("suite_id")
+        if not isinstance(suite_id, str) or not suite_id:
+            findings.append("regression suite descriptor requires suite_id")
+            continue
+        if suite_id in suite_ids:
+            findings.append(f"duplicate regression suite_id: {suite_id}")
+            continue
+        suite_ids.append(suite_id)
+        label = f"regression suite {suite_id}"
+
+        private_hash = descriptor.get("private_suite_sha256")
+        if not isinstance(private_hash, str) or SHA256.fullmatch(private_hash) is None:
+            findings.append(f"{label}: invalid private_suite_sha256")
+        target_count = descriptor.get("target_case_count")
+        if (
+            not isinstance(target_count, int)
+            or isinstance(target_count, bool)
+            or target_count <= 0
+        ):
+            findings.append(f"{label}: invalid target_case_count")
+
+        policy_path = _repo_artifact(
+            repo_root,
+            descriptor.get("policy"),
+            label=f"{label} policy",
+        )
+        summary_path = _repo_artifact(
+            repo_root,
+            descriptor.get("public_suite_summary"),
+            label=f"{label} public suite summary",
+        )
+        negative_path = _repo_artifact(
+            repo_root,
+            descriptor.get("public_negative_control"),
+            label=f"{label} public negative control",
+        )
+        for path, artifact_label in (
+            (policy_path, "policy"),
+            (summary_path, "public suite summary"),
+            (negative_path, "public negative control"),
+        ):
+            if path is None or not path.is_file():
+                findings.append(f"{label}: missing {artifact_label}")
+
+        if policy_path is not None and policy_path.is_file():
+            policy = _read_json(policy_path)
+            if policy.get("suite_id") != suite_id:
+                findings.append(f"{label}: policy suite_id mismatch")
+            if policy.get("split") != "development":
+                findings.append(f"{label}: policy must be development-only")
+        if summary_path is not None and summary_path.is_file():
+            summary = _read_json(summary_path)
+            findings.extend(
+                f"{label}: unsafe public suite summary: {finding}"
+                for finding in audit_public_error_summary(summary)
+            )
+            if summary.get("suite_id") != suite_id:
+                findings.append(f"{label}: public summary suite_id mismatch")
+            if summary.get("target_case_count") != target_count:
+                findings.append(f"{label}: target_case_count mismatch")
+        if negative_path is not None and negative_path.is_file():
+            negative = _read_json(negative_path)
+            findings.extend(
+                f"{label}: unsafe negative control: {finding}"
+                for finding in audit_public_error_summary(negative)
+            )
+            if negative.get("suite_id") != suite_id:
+                findings.append(f"{label}: negative control suite_id mismatch")
+            counts = negative.get("counts", {})
+            if (
+                negative.get("status") != "failed"
+                or counts.get("target_cases") != target_count
+                or counts.get("passed") != 0
+                or counts.get("failed") != target_count
+            ):
+                findings.append(
+                    f"{label}: negative control must reject every target case"
+                )
+    return tuple(suite_ids), findings
 
 
 def _load_reviewed_cases(

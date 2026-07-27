@@ -11,6 +11,7 @@
     "required_public_artifacts": [
       "privacy-safe score summary",
       "privacy-safe diagnosis summary",
+      "confidence, flag, and error-taxonomy audit",
       "version-to-version iteration delta after the baseline"
     ],
     "comparison_classes": [
@@ -30,15 +31,16 @@
       "skill_canonical_hash": "4ea2786fb9cf4cab3b55e9710cd780241886df739c9299029e507d202625c57e",
       "public_error_summary": "experiments/records/DSAA3071-week5-candidate-v32-error-book/public-summary.json",
       "public_diagnosis_summary": "experiments/records/DSAA3071-week5-candidate-v32-error-book/diagnosis-summary.json",
-      "private_typical_report_sha256": "530510d743ce333797a6709c4fc477c9d085fa4062ff4e4eb474f76e4a32ce36",
+      "public_confidence_taxonomy_audit": "experiments/records/DSAA3071-week5-confidence-taxonomy/confidence-taxonomy-summary.json",
+      "private_typical_report_sha256": "fac279fa15fa2766775302ab0d8eb83912587b6e98f0290f4918eff42ad3edbd",
       "private_typical_case_count": 12,
       "private_complete_error_index_count": 33,
       "error_pairs": 33,
       "severe_error_pairs": 16,
       "iteration_delta_status": "baseline_initialized",
       "public_iteration_delta": null,
-      "note_zh": "candidate-v3.2 是错题生命周期基线。私有典型错题册包含 12 个完整案例和全部 33 个差异的索引。",
-      "note_en": "Candidate-v3.2 initializes the error-book lifecycle. Its private typical-case report contains 12 full cases and an index of all 33 discrepancies."
+      "note_zh": "candidate-v3.2 是错题生命周期基线。私有典型错题册包含 12 个完整案例、错误机制和全部 33 个差异的索引。",
+      "note_en": "Candidate-v3.2 initializes the error-book lifecycle. Its private typical-case report contains 12 full cases, error mechanisms, and an index of all 33 discrepancies."
     }
   ]
 }

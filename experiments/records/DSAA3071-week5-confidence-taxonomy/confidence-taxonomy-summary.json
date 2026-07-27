@@ -1,0 +1,627 @@
+{
+  "confidence_audit": {
+    "levels": [
+      {
+        "confidence": "high",
+        "error_pairs": 13,
+        "error_rate": 0.276596,
+        "exact_agreement": 0.723404,
+        "exact_pairs": 34,
+        "flagged_pairs": 5,
+        "pairs": 47,
+        "severe_error_pairs": 5,
+        "severe_error_rate": 0.106383
+      },
+      {
+        "confidence": "medium",
+        "error_pairs": 19,
+        "error_rate": 0.863636,
+        "exact_agreement": 0.136364,
+        "exact_pairs": 3,
+        "flagged_pairs": 13,
+        "pairs": 22,
+        "severe_error_pairs": 10,
+        "severe_error_rate": 0.454545
+      },
+      {
+        "confidence": "low",
+        "error_pairs": 1,
+        "error_rate": 1.0,
+        "exact_agreement": 0.0,
+        "exact_pairs": 0,
+        "flagged_pairs": 1,
+        "pairs": 1,
+        "severe_error_pairs": 1,
+        "severe_error_rate": 1.0
+      }
+    ],
+    "review_policies": [
+      {
+        "error_pairs_captured": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "exact_pairs_reviewed": 0,
+        "missed_error_pairs": 32,
+        "missed_severe_error_pairs": 15,
+        "policy": "low_only",
+        "review_pairs": 1,
+        "review_workload_rate": 0.014286,
+        "severe_error_pairs_captured": 1,
+        "severe_error_recall": 0.0625,
+        "severe_error_yield": 1.0
+      },
+      {
+        "error_pairs_captured": 20,
+        "error_precision": 0.869565,
+        "error_recall": 0.606061,
+        "exact_pairs_reviewed": 3,
+        "missed_error_pairs": 13,
+        "missed_severe_error_pairs": 5,
+        "policy": "medium_or_low",
+        "review_pairs": 23,
+        "review_workload_rate": 0.328571,
+        "severe_error_pairs_captured": 11,
+        "severe_error_recall": 0.6875,
+        "severe_error_yield": 0.478261
+      },
+      {
+        "error_pairs_captured": 14,
+        "error_precision": 0.736842,
+        "error_recall": 0.424242,
+        "exact_pairs_reviewed": 5,
+        "missed_error_pairs": 19,
+        "missed_severe_error_pairs": 10,
+        "policy": "any_flag",
+        "review_pairs": 19,
+        "review_workload_rate": 0.271429,
+        "severe_error_pairs_captured": 6,
+        "severe_error_recall": 0.375,
+        "severe_error_yield": 0.315789
+      },
+      {
+        "error_pairs_captured": 23,
+        "error_precision": 0.821429,
+        "error_recall": 0.69697,
+        "exact_pairs_reviewed": 5,
+        "missed_error_pairs": 10,
+        "missed_severe_error_pairs": 4,
+        "policy": "medium_or_low_or_any_flag",
+        "review_pairs": 28,
+        "review_workload_rate": 0.4,
+        "severe_error_pairs_captured": 12,
+        "severe_error_recall": 0.75,
+        "severe_error_yield": 0.428571
+      },
+      {
+        "error_pairs_captured": 2,
+        "error_precision": 1.0,
+        "error_recall": 0.060606,
+        "exact_pairs_reviewed": 0,
+        "missed_error_pairs": 31,
+        "missed_severe_error_pairs": 15,
+        "policy": "explicit_needs_manual_review",
+        "review_pairs": 2,
+        "review_workload_rate": 0.028571,
+        "severe_error_pairs_captured": 1,
+        "severe_error_recall": 0.0625,
+        "severe_error_yield": 0.5
+      }
+    ],
+    "signal_assessment": {
+      "classification": "directionally_informative_not_probability_calibrated",
+      "error_rate_monotonic_high_to_low": true,
+      "labels_are_numeric_probabilities": false,
+      "low_confidence_sample_size": 1,
+      "severe_error_rate_monotonic_high_to_low": true
+    }
+  },
+  "error_taxonomy": {
+    "layers": [
+      {
+        "cases": 9,
+        "confidence_counts": {
+          "high": 6,
+          "medium": 3
+        },
+        "direction_counts": {
+          "over_score": 2,
+          "under_score": 7
+        },
+        "en": "The rubric and official gold define inconsistent grading contracts.",
+        "error_layer": "benchmark_contract",
+        "flagged_pairs": 3,
+        "mean_absolute_error": 4.888889,
+        "no_flag_pairs": 6,
+        "severe_error_pairs": 4,
+        "zh": "rubric 与官方 gold 的评分合同不一致。"
+      },
+      {
+        "cases": 10,
+        "confidence_counts": {
+          "high": 3,
+          "medium": 7
+        },
+        "direction_counts": {
+          "over_score": 7,
+          "under_score": 3
+        },
+        "en": "Partial-credit band or tolerance-policy differences.",
+        "error_layer": "calibration_policy",
+        "flagged_pairs": 5,
+        "mean_absolute_error": 2.7,
+        "no_flag_pairs": 5,
+        "severe_error_pairs": 2,
+        "zh": "部分分档位或容忍政策差异。"
+      },
+      {
+        "cases": 1,
+        "confidence_counts": {
+          "high": 1
+        },
+        "direction_counts": {
+          "under_score": 1
+        },
+        "en": "Transcription or text-only representation is insufficient.",
+        "error_layer": "input_representation",
+        "flagged_pairs": 0,
+        "mean_absolute_error": 6.0,
+        "no_flag_pairs": 1,
+        "severe_error_pairs": 1,
+        "zh": "转录或 text-only 表示不足。"
+      },
+      {
+        "cases": 13,
+        "confidence_counts": {
+          "high": 3,
+          "low": 1,
+          "medium": 9
+        },
+        "direction_counts": {
+          "over_score": 2,
+          "under_score": 11
+        },
+        "en": "Evidence-recognition or rule-execution errors when input and contract are sufficient.",
+        "error_layer": "model_decision",
+        "flagged_pairs": 6,
+        "mean_absolute_error": 7.846154,
+        "no_flag_pairs": 7,
+        "severe_error_pairs": 9,
+        "zh": "在输入和合同足够时，模型的证据识别或规则执行错误。"
+      }
+    ],
+    "mechanisms": [
+      {
+        "cases": 5,
+        "confidence_counts": {
+          "high": 1,
+          "low": 1,
+          "medium": 3
+        },
+        "direction_counts": {
+          "under_score": 5
+        },
+        "en": "Explicit or verifiable semantic evidence is present, but the model misses or downgrades it.",
+        "error_layer": "model_decision",
+        "flagged_pairs": 2,
+        "mean_absolute_error": 8.8,
+        "mechanism_code": "explicit_evidence_omission",
+        "no_flag_pairs": 3,
+        "objectivity_level": "high",
+        "severe_error_pairs": 4,
+        "skill_update_disposition": "direct_skill_candidate",
+        "zh": "答案中已有明确或可验证的语义证据，但模型未识别或错误降档。"
+      },
+      {
+        "cases": 2,
+        "confidence_counts": {
+          "high": 1,
+          "medium": 1
+        },
+        "direction_counts": {
+          "under_score": 2
+        },
+        "en": "The model's tolerance for omissions, brevity, or official grading style differs from gold.",
+        "error_layer": "model_decision",
+        "flagged_pairs": 1,
+        "mean_absolute_error": 4.5,
+        "mechanism_code": "official_style_tolerance_mismatch",
+        "no_flag_pairs": 1,
+        "objectivity_level": "medium",
+        "severe_error_pairs": 1,
+        "skill_update_disposition": "requires_human_adjudication",
+        "zh": "模型对省略、简洁程度或官方评分风格的容忍度与 gold 不一致。"
+      },
+      {
+        "cases": 9,
+        "confidence_counts": {
+          "high": 6,
+          "medium": 3
+        },
+        "direction_counts": {
+          "over_score": 2,
+          "under_score": 7
+        },
+        "en": "Explicit rubric elements, gates, or arithmetic cannot reproduce official gold.",
+        "error_layer": "benchmark_contract",
+        "flagged_pairs": 3,
+        "mean_absolute_error": 4.888889,
+        "mechanism_code": "rubric_gold_contract_inconsistency",
+        "no_flag_pairs": 6,
+        "objectivity_level": "high",
+        "severe_error_pairs": 4,
+        "skill_update_disposition": "requires_human_adjudication",
+        "zh": "明示 rubric 的要素、门槛或算术无法复现官方 gold。"
+      },
+      {
+        "cases": 4,
+        "confidence_counts": {
+          "medium": 4
+        },
+        "direction_counts": {
+          "under_score": 4
+        },
+        "en": "The model violates an explicit precedence, full-credit override, context check, or score-cap rule.",
+        "error_layer": "model_decision",
+        "flagged_pairs": 3,
+        "mean_absolute_error": 9.0,
+        "mechanism_code": "rule_precedence_or_gate_error",
+        "no_flag_pairs": 1,
+        "objectivity_level": "high",
+        "severe_error_pairs": 3,
+        "skill_update_disposition": "direct_skill_candidate",
+        "zh": "模型没有执行明示的规则优先级、满分覆盖规则、上下文检查或分数上限条件。"
+      },
+      {
+        "cases": 10,
+        "confidence_counts": {
+          "high": 3,
+          "medium": 7
+        },
+        "direction_counts": {
+          "over_score": 7,
+          "under_score": 3
+        },
+        "en": "The conceptual direction broadly agrees, but the score band for partial understanding or completeness differs.",
+        "error_layer": "calibration_policy",
+        "flagged_pairs": 5,
+        "mean_absolute_error": 2.7,
+        "mechanism_code": "score_band_boundary_disagreement",
+        "no_flag_pairs": 5,
+        "objectivity_level": "low",
+        "severe_error_pairs": 2,
+        "skill_update_disposition": "calibration_anchor_only",
+        "zh": "概念方向大体一致，但部分理解或证明完整度对应的分数档位不同。"
+      },
+      {
+        "cases": 1,
+        "confidence_counts": {
+          "high": 1
+        },
+        "direction_counts": {
+          "under_score": 1
+        },
+        "en": "Text input loses or confounds notation, layout, or state that requires the source image.",
+        "error_layer": "input_representation",
+        "flagged_pairs": 0,
+        "mean_absolute_error": 6.0,
+        "mechanism_code": "text_representation_ambiguity",
+        "no_flag_pairs": 1,
+        "objectivity_level": "high",
+        "severe_error_pairs": 1,
+        "skill_update_disposition": "paired_multimodal_required",
+        "zh": "文字输入丢失或混淆了需要原图裁决的记号、布局或状态。"
+      },
+      {
+        "cases": 2,
+        "confidence_counts": {
+          "high": 1,
+          "medium": 1
+        },
+        "direction_counts": {
+          "over_score": 2
+        },
+        "en": "The model credits a keyword, implication, or unstated step as demonstrated evidence.",
+        "error_layer": "model_decision",
+        "flagged_pairs": 0,
+        "mean_absolute_error": 6.5,
+        "mechanism_code": "unsupported_evidence_credit",
+        "no_flag_pairs": 2,
+        "objectivity_level": "high",
+        "severe_error_pairs": 1,
+        "skill_update_disposition": "direct_skill_candidate",
+        "zh": "模型把关键词、暗示或未展示步骤当作已经证明的评分要素。"
+      }
+    ],
+    "objectivity_groups": [
+      {
+        "cases": 21,
+        "objectivity_level": "high"
+      },
+      {
+        "cases": 10,
+        "objectivity_level": "low"
+      },
+      {
+        "cases": 2,
+        "objectivity_level": "medium"
+      }
+    ],
+    "skill_update_dispositions": [
+      {
+        "cases": 10,
+        "skill_update_disposition": "calibration_anchor_only"
+      },
+      {
+        "cases": 11,
+        "skill_update_disposition": "direct_skill_candidate"
+      },
+      {
+        "cases": 1,
+        "skill_update_disposition": "paired_multimodal_required"
+      },
+      {
+        "cases": 11,
+        "skill_update_disposition": "requires_human_adjudication"
+      }
+    ],
+    "technical_failure_count": 0
+  },
+  "flag_audit": {
+    "any_flag": {
+      "error_pairs_captured": 14,
+      "error_precision": 0.736842,
+      "error_recall": 0.424242,
+      "exact_pairs_reviewed": 5,
+      "missed_error_pairs": 19,
+      "missed_severe_error_pairs": 10,
+      "policy": "any_flag",
+      "review_pairs": 19,
+      "review_workload_rate": 0.271429,
+      "severe_error_pairs_captured": 6,
+      "severe_error_recall": 0.375,
+      "severe_error_yield": 0.315789
+    },
+    "explicit_needs_manual_review": {
+      "error_pairs_captured": 2,
+      "error_precision": 1.0,
+      "error_recall": 0.060606,
+      "exact_pairs_reviewed": 0,
+      "missed_error_pairs": 31,
+      "missed_severe_error_pairs": 15,
+      "policy": "explicit_needs_manual_review",
+      "review_pairs": 2,
+      "review_workload_rate": 0.028571,
+      "severe_error_pairs_captured": 1,
+      "severe_error_recall": 0.0625,
+      "severe_error_yield": 0.5
+    },
+    "flag_vocabulary_size": 19,
+    "per_flag": [
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "ambiguous_epsilon_inclusion",
+        "pairs": 1,
+        "severe_error_pairs": 0,
+        "severe_error_recall": 0.0
+      },
+      {
+        "error_pairs": 0,
+        "error_precision": 0.0,
+        "error_recall": 0.0,
+        "flag": "blank_answer",
+        "pairs": 1,
+        "severe_error_pairs": 0,
+        "severe_error_recall": 0.0
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "brief_claims",
+        "pairs": 1,
+        "severe_error_pairs": 1,
+        "severe_error_recall": 0.0625
+      },
+      {
+        "error_pairs": 0,
+        "error_precision": 0.0,
+        "error_recall": 0.0,
+        "flag": "concise_description",
+        "pairs": 1,
+        "severe_error_pairs": 0,
+        "severe_error_recall": 0.0
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "finite_tape_misconception",
+        "pairs": 1,
+        "severe_error_pairs": 0,
+        "severe_error_recall": 0.0
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "high_impact_deduction",
+        "pairs": 1,
+        "severe_error_pairs": 1,
+        "severe_error_recall": 0.0625
+      },
+      {
+        "error_pairs": 0,
+        "error_precision": 0.0,
+        "error_recall": 0.0,
+        "flag": "incorrect_rejection_method",
+        "pairs": 1,
+        "severe_error_pairs": 0,
+        "severe_error_recall": 0.0
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "insufficient_evidence",
+        "pairs": 1,
+        "severe_error_pairs": 1,
+        "severe_error_recall": 0.0625
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "invalid_extra_outputs",
+        "pairs": 1,
+        "severe_error_pairs": 1,
+        "severe_error_recall": 0.0625
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "material_error",
+        "pairs": 1,
+        "severe_error_pairs": 0,
+        "severe_error_recall": 0.0
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "material_error_invalid_outputs",
+        "pairs": 1,
+        "severe_error_pairs": 0,
+        "severe_error_recall": 0.0
+      },
+      {
+        "error_pairs": 2,
+        "error_precision": 1.0,
+        "error_recall": 0.060606,
+        "flag": "missing_detail",
+        "pairs": 2,
+        "severe_error_pairs": 1,
+        "severe_error_recall": 0.0625
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "missing_explicit_acceptance",
+        "pairs": 1,
+        "severe_error_pairs": 0,
+        "severe_error_recall": 0.0
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "missing_nonmembership",
+        "pairs": 1,
+        "severe_error_pairs": 0,
+        "severe_error_recall": 0.0
+      },
+      {
+        "error_pairs": 2,
+        "error_precision": 1.0,
+        "error_recall": 0.060606,
+        "flag": "needs_manual_review",
+        "pairs": 2,
+        "severe_error_pairs": 1,
+        "severe_error_recall": 0.0625
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "no_elaboration",
+        "pairs": 1,
+        "severe_error_pairs": 1,
+        "severe_error_recall": 0.0625
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "rubric_ambiguous",
+        "pairs": 1,
+        "severe_error_pairs": 1,
+        "severe_error_recall": 0.0625
+      },
+      {
+        "error_pairs": 2,
+        "error_precision": 0.5,
+        "error_recall": 0.060606,
+        "flag": "unclear_region",
+        "pairs": 4,
+        "severe_error_pairs": 1,
+        "severe_error_recall": 0.0625
+      },
+      {
+        "error_pairs": 1,
+        "error_precision": 1.0,
+        "error_recall": 0.030303,
+        "flag": "vague_indirect_construction",
+        "pairs": 1,
+        "severe_error_pairs": 1,
+        "severe_error_recall": 0.0625
+      }
+    ],
+    "single_observation_flags": 16
+  },
+  "interpretation_limits": {
+    "en": [
+      "Confidence is an ordinal high/medium/low label, not a numeric probability, so probability calibration error and claims such as 90% reliability are invalid.",
+      "Low confidence contains only one pair and cannot estimate a stable low-confidence error rate.",
+      "Causes and mechanisms come from development case review; rubric-gold conflicts still require course-owner adjudication.",
+      "This audit did not read or run held-out/test data."
+    ],
+    "zh": [
+      "confidence 是 high/medium/low 顺序标签，不是数值概率，因此不能计算概率校准误差或声称 90% 可信。",
+      "low confidence 只有 1 个评分对，不能据此估计稳定的低置信错误率。",
+      "根因与机制来自开发集逐案复核；rubric-gold 冲突仍需课程负责人裁决。",
+      "本审计未读取或运行 held-out/test 数据。"
+    ]
+  },
+  "population": {
+    "error_pairs": 33,
+    "exact_pairs": 37,
+    "severe_error_pairs": 16,
+    "student_question_pairs": 70,
+    "students": 7,
+    "technical_failure_count": 0
+  },
+  "provenance": {
+    "assessment_id": "week5_test",
+    "condition": "C3",
+    "course_id": "DSAA3071",
+    "data_snapshot_sha256": "95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37",
+    "gold_sha256": "45d62dfa0411872090c3834a41858c7c91447b9fd510ec08fba446fb411a1b11",
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "output_set_sha256": "ceb327e8dd8ae8f57e7246f3d0ce9c656741b3b76151528533807376829c45a7",
+    "packet_id": "C32-dev-reviewed-r1",
+    "packet_sha256": "b9146715f6b0dc014f079e07625d98cef62e1954d3e6d0e76bedcc464f4b8439",
+    "private_diagnoses_sha256": "ac27378fe2de907f5be26789241997dcea139044f50f70e1e9ada2359eda846c",
+    "private_error_book_sha256": "29ffb4bf0f03e135563e1fa0dccb8b8642dd52c8a62478892c058e1ed251fe0e",
+    "prompt_sha256": "1dd7d0c211fd1b1414478b275230832ed7f2802617f17f6b715c69a490c04106",
+    "provider": "deepseek",
+    "rubric_sha256": "3678212e27dd4a506c5e8ee581d49ce651ddabd42fe30b4191a5e3f5992e4740",
+    "run_commit": "7f4e06a",
+    "run_id": "deepseek-C32-text-dev-reviewed-r1",
+    "skill_version_id": "skill_candidate_v3_2",
+    "source_public_summary_sha256": "b42691eb0ef8e7746a60c35cbba50bf80a8275dfab0c4d9765493eb47dbc75d9",
+    "text_source_sha256": "9f9be72bf088f211a3b5fc35db1439b3e965059ff55d5c0563e2880bdc7f4a00"
+  },
+  "record_type": "grading_error_confidence_taxonomy_audit_public",
+  "schema_version": 1,
+  "scope": {
+    "contains_answer_or_evidence_text": false,
+    "contains_heldout_or_test_data": false,
+    "contains_student_level_records": false,
+    "split": "development",
+    "technical_failures_are_separate": true
+  }
+}

@@ -12,7 +12,9 @@
 - 从 DSAA3071 Week 5 candidate-v3.2 的 70 个开发集学生-题目对中完整提取 33 个评分差异，没有挑选案例。
 - 私有错题集保留匿名学生编号、题号、gold、预测分数、证据、理由、confidence 和 flags，并存放在 gitignored `Data/`。
 - 当前 Codex 会话逐案复核全部 33 例，并提供完整中英双语诊断；公开仓库只保存脱敏根因计数。
-- 新增公开隐私审计、完整诊断覆盖门、Git ignore 私有输出门以及 15 个相关测试。
+- 生成可直接阅读的私有 `TYPICAL-ERROR-CASES.private.md`：完整展开 12 个典型错题并附全部 33 例索引，而不再只给公开统计。
+- 建立强制错题生命周期和 registry；以后每次评分 skill 更新都必须更新错题册并报告 resolved、persistent 和 regression，否则 CI 失败。
+- 新增公开隐私审计、完整诊断覆盖门、Git ignore 私有输出门以及相关自动化测试。
 
 **改善了什么**
 
@@ -45,9 +47,11 @@
 - `experiments/records/DSAA3071-week5-candidate-v32-error-book/README.md`
 - `experiments/records/DSAA3071-week5-candidate-v32-error-book/ERROR-ANALYSIS.md`
 - `experiments/records/DSAA3071-week5-candidate-v32-error-book/MODIFICATION-SUGGESTIONS.md`
+- `experiments/records/DSAA3071-week5-candidate-v32-error-book/ERROR-BOOK-LIFECYCLE.md`
 - `experiments/records/DSAA3071-week5-candidate-v32-error-book/public-summary.json`
 - `experiments/records/DSAA3071-week5-candidate-v32-error-book/diagnosis-summary.json`
-- 私有：`Data/.../error_book/C32-dev-reviewed-r1/`
+- `experiments/records/grading-skill-error-book-registry.json`
+- 私有可读错题：`Data/.../error_book/C32-dev-reviewed-r1/TYPICAL-ERROR-CASES.private.md`
 
 **下一决策**
 
@@ -63,7 +67,9 @@
 - Exhaustively extracted all 33 score discrepancies from 70 DSAA3071 Week 5 candidate-v3.2 development student-question pairs.
 - Kept anonymous student IDs, question IDs, gold and predicted scores, evidence, rationales, confidence, and flags only in the gitignored private error book.
 - Reviewed all 33 cases in the current Codex session with complete bilingual diagnoses; only privacy-safe cause aggregates are public.
-- Added public privacy auditing, complete-diagnosis coverage gating, private-output Git-ignore gating, and 15 relevant tests.
+- Generated a readable private `TYPICAL-ERROR-CASES.private.md` with 12 full typical cases and an index of all 33 discrepancies instead of exposing only public aggregates.
+- Added a mandatory error-book lifecycle and registry. Every future grading-skill update must refresh the book and report resolved, persistent, and regression cases or CI fails.
+- Added public privacy auditing, complete-diagnosis coverage gating, private-output Git-ignore gating, and automated tests.
 
 **What improved**
 
@@ -78,7 +84,7 @@ All 33 discrepancies must not be used blindly for skill optimization. Q8 contain
 
 **Project value**
 
-The artifacts provide the main accuracy track with a complete error book, case causes, a protected regression zone, and pre-registered candidate-v3.3 gates. They ground TASK6 taxonomy/confidence work, provide difficult Q8 cases for TASK7 transcript/direct-multimodal comparison, and supply automated inputs and acceptance criteria for a future project-owned skill optimization loop.
+The artifacts provide the main accuracy track with a complete error book, readable typical cases, case causes, a protected regression zone, and pre-registered candidate-v3.3 gates. The registry makes this a continuing obligation for each skill version. They ground TASK6 taxonomy/confidence work, provide difficult Q8 cases for TASK7 transcript/direct-multimodal comparison, and supply automated inputs and acceptance criteria for a future project-owned skill optimization loop.
 
 **Failures, limits, and prohibited claims**
 

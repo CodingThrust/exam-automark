@@ -1,4 +1,5 @@
 import contextlib
+import copy
 import io
 import json
 import tempfile
@@ -12,6 +13,11 @@ from benchmark.core.error_book import (
     build_public_diagnosis_summary,
     write_error_book,
 )
+from benchmark.core.error_book_iteration import (
+    compare_error_books,
+    render_private_typical_case_report,
+    validate_error_book_registry,
+)
 from benchmark.core.packets import directory_digest
 
 
@@ -20,6 +26,13 @@ RECORD_ROOT = (
     / "experiments"
     / "records"
     / "DSAA3071-week5-candidate-v32-error-book"
+)
+REPO_ROOT = Path(__file__).parents[3]
+REGISTRY_PATH = (
+    REPO_ROOT
+    / "experiments"
+    / "records"
+    / "grading-skill-error-book-registry.json"
 )
 
 
@@ -456,6 +469,124 @@ class ErrorBookTests(unittest.TestCase):
             self.assertEqual(payload["case_count"], 2)
             self.assertEqual(payload["privacy_audit"], "passed")
 
+    def test_renders_readable_typical_cases_and_complete_error_index(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            run, gold, packet = self._fixture(root)
+            private = root / "private.json"
+            public = root / "public.json"
+            result = write_error_book(
+                run_dir=run,
+                gold_path=gold,
+                packet_dir=packet,
+                private_output=private,
+                public_output=public,
+            )
+            diagnoses = root / "diagnoses.json"
+            self._write_diagnoses(
+                diagnoses,
+                [case["case_id"] for case in result.private_book["cases"]],
+            )
+            diagnosis_payload = json.loads(
+                diagnoses.read_text(encoding="utf-8")
+            )
+            diagnosis_payload["annotations"][0].update(
+                {
+                    "typical_case": True,
+                    "typical_reason_zh": "关键案例",
+                    "typical_reason_en": "key case",
+                }
+            )
+            diagnoses.write_text(
+                json.dumps(diagnosis_payload),
+                encoding="utf-8",
+            )
+
+            report = render_private_typical_case_report(
+                private_book_path=private,
+                diagnoses_path=diagnoses,
+            )
+
+        self.assertIn("S001", report)
+        self.assertIn("secret severe error", report)
+        self.assertIn("关键案例", report)
+        self.assertIn("Complete error index", report)
+        self.assertIn("Required update on every skill change", report)
+
+    def test_compares_resolved_persistent_and_regression_cases(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            run, gold, packet = self._fixture(root)
+            previous = build_error_book(
+                run_dir=run,
+                gold_path=gold,
+                packet_dir=packet,
+            ).private_book
+            current = copy.deepcopy(previous)
+            current["provenance"]["skill_version_id"] = "skill_candidate_v3_3"
+
+            persistent = current["cases"][0]
+            persistent["predicted_score"] = 4.0
+            persistent["signed_error"] = 1.0
+            persistent["absolute_error"] = 1.0
+            current["cases"].pop(1)
+            regression = copy.deepcopy(persistent)
+            regression.update(
+                {
+                    "case_id": "DEV-ERR-NEW",
+                    "anonymous_student_id": "S002",
+                    "question_id": "Q2",
+                    "gold_score": 10.0,
+                    "predicted_score": 8.0,
+                    "signed_error": -2.0,
+                    "absolute_error": 2.0,
+                    "severe_error": False,
+                }
+            )
+            current["cases"].append(regression)
+            previous_path = root / "previous.private.json"
+            current_path = root / "current.private.json"
+            previous_path.write_text(json.dumps(previous), encoding="utf-8")
+            current_path.write_text(json.dumps(current), encoding="utf-8")
+
+            delta = compare_error_books(
+                previous_private_book_path=previous_path,
+                current_private_book_path=current_path,
+            )
+
+        self.assertEqual(delta.public_summary["counts"]["resolved"], 1)
+        self.assertEqual(delta.public_summary["counts"]["regression"], 1)
+        self.assertEqual(
+            delta.public_summary["counts"]["persistent_improved"],
+            1,
+        )
+        serialized = json.dumps(delta.public_summary)
+        self.assertNotIn("S001", serialized)
+        self.assertNotIn("S002", serialized)
+
+    def test_error_book_comparison_rejects_input_mode_drift(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            run, gold, packet = self._fixture(root)
+            previous = build_error_book(
+                run_dir=run,
+                gold_path=gold,
+                packet_dir=packet,
+            ).private_book
+            current = copy.deepcopy(previous)
+            current["provenance"]["skill_version_id"] = "skill_candidate_v3_3"
+            current["provenance"]["input_mode"] = "direct-multimodal"
+            previous_path = root / "previous.private.json"
+            current_path = root / "current.private.json"
+            previous_path.write_text(json.dumps(previous), encoding="utf-8")
+            current_path.write_text(json.dumps(current), encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "input_mode"):
+                compare_error_books(
+                    previous_private_book_path=previous_path,
+                    current_private_book_path=current_path,
+                )
+
 
 class PublicSummaryAuditTests(unittest.TestCase):
     def test_rejects_forbidden_keys_ids_and_absolute_paths(self):
@@ -521,6 +652,49 @@ class CandidateV32ErrorBookRecordTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("## 中文", settlement)
         self.assertIn("## English", settlement)
+
+    def test_registry_covers_active_skill_and_complete_error_book(self):
+        self.assertEqual(
+            validate_error_book_registry(
+                repo_root=REPO_ROOT,
+                registry_path=REGISTRY_PATH,
+            ),
+            [],
+        )
+
+    def test_registry_rejects_skill_hash_without_matching_artifacts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bad_registry = json.loads(
+                REGISTRY_PATH.read_text(encoding="utf-8")
+            )
+            bad_registry["entries"][-1]["skill_canonical_hash"] = "0" * 64
+            path = Path(tmp) / "bad-registry.json"
+            path.write_text(json.dumps(bad_registry), encoding="utf-8")
+
+            findings = validate_error_book_registry(
+                repo_root=REPO_ROOT,
+                registry_path=path,
+            )
+
+        self.assertTrue(
+            any("canonical hash mismatch" in finding for finding in findings)
+        )
+        self.assertTrue(
+            any("changed without an error-book update" in finding
+                for finding in findings)
+        )
+
+    def test_lifecycle_record_is_bilingual_and_mandatory(self):
+        lifecycle = (RECORD_ROOT / "ERROR-BOOK-LIFECYCLE.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("## 中文", lifecycle)
+        self.assertIn("## English", lifecycle)
+        self.assertIn("每次修改主评分 skill 都必须同步更新错题册", lifecycle)
+        self.assertIn("every main grading-skill change", lifecycle)
+        self.assertIn("resolved", lifecycle)
+        self.assertIn("regression", lifecycle)
 
 
 if __name__ == "__main__":

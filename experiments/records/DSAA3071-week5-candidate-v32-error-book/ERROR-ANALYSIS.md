@@ -15,6 +15,12 @@ candidate-v3.2 在本次 7 人开发集上共有 70 个学生-题目对，其中
 
 因此，直接用全部 33 个差异修改 skill 会把 benchmark 的不一致也学进去。下一次改进应优先处理 13 个较可信的模型评分错误，同时先裁决 9 个 rubric-gold 冲突。
 
+### 去哪里看具体典型错题
+
+公开 GitHub 不能展示学生逐题证据。可直接阅读的私有报告是 `Data/DSAA3071/week5-benchmark-redaction-v3/error_book/C32-dev-reviewed-r1/TYPICAL-ERROR-CASES.private.md`。它完整展开 12 个典型案例：匿名学生编号、题号、答案证据、模型评分理由、gold、预测分、根因、入选原因和建议动作；文末还有全部 33 个差异的索引。
+
+典型案例包括 Q6 关键词 “dovetailing” 导致无证据高分、Q6 rubric 内部矛盾、Q7 完整构造被机械扣分、Q8 两个 epsilon 答案对应 0 分与满分的冲突对、Q9 三类语义证据只识别一类，以及 Q10 官方风格容忍度缺失。该文件在 gitignored `Data/` 中，不能提交到公开 GitHub。
+
 ### 错误集中在哪里
 
 整体指标：
@@ -83,6 +89,12 @@ Candidate-v3.2 produced 70 student-question pairs on this seven-student developm
 | `input_representation_ambiguity` | 1 | Text-only input cannot reliably preserve notation or distinguish initialization from output |
 
 Blindly tuning on all 33 discrepancies would teach benchmark inconsistencies to the skill. The next improvement should target the 13 better-supported model errors and adjudicate the nine rubric-gold conflicts first.
+
+### Where to read the concrete typical cases
+
+Public GitHub cannot expose student-level answer evidence. The readable private report is `Data/DSAA3071/week5-benchmark-redaction-v3/error_book/C32-dev-reviewed-r1/TYPICAL-ERROR-CASES.private.md`. It expands 12 cases with anonymous student ID, question, answer evidence, model rationale, gold, prediction, cause, selection reason, and recommended action, followed by an index of all 33 discrepancies.
+
+The selected cases include unsupported Q6 keyword credit for “dovetailing,” an internally contradictory Q6 rubric, mechanical under-scoring of a complete Q7 construction, the conflicting Q8 epsilon pair receiving official zero and full credit, failure to recognize three semantic evidence types in Q9, and missing official-style tolerance in Q10. The file remains in gitignored `Data/` and must not be committed to public GitHub.
 
 ### Error concentration
 

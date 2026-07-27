@@ -194,7 +194,9 @@ def write_error_book(
     private_output: Path,
     public_output: Path,
 ) -> ErrorBookResult:
-    _validate_output_destinations(private_output, public_output)
+    if private_output.resolve() == public_output.resolve():
+        raise ValueError("private and public outputs must use different paths")
+    validate_private_output_path(private_output)
     result = build_error_book(
         run_dir=run_dir,
         gold_path=gold_path,
@@ -902,15 +904,10 @@ def _write_json(path: Path, payload: Any) -> None:
     )
 
 
-def _validate_output_destinations(
-    private_output: Path,
-    public_output: Path,
-) -> None:
-    private_resolved = private_output.resolve()
-    public_resolved = public_output.resolve()
-    if private_resolved == public_resolved:
-        raise ValueError("private and public outputs must use different paths")
+def validate_private_output_path(private_output: Path) -> None:
+    """Reject a private output inside Git unless Git explicitly ignores it."""
 
+    private_resolved = private_output.resolve()
     git_root = _find_git_root(private_resolved.parent)
     if git_root is None:
         return

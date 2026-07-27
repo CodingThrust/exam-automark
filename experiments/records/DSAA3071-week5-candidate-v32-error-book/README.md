@@ -15,6 +15,9 @@
 - `diagnosis-summary.json`：确认 33 个案例均已诊断后生成的脱敏根因汇总。
 - `ERROR-ANALYSIS.md`：中英双语结果解释。
 - `MODIFICATION-SUGGESTIONS.md`：中英双语修改方案与下一次实验门槛。
+- `ERROR-BOOK-LIFECYCLE.md`：规定以后每次 skill 更新都必须重建错题集并与上一版比较。
+- 私有 `TYPICAL-ERROR-CASES.private.md`：展开 12 个典型案例的匿名学生、题号、答案证据、模型理由、gold、预测分、根因和动作，并附全部 33 例索引。
+- `../grading-skill-error-book-registry.json`：把当前 skill hash 与完整错题产物绑定；CI 用它阻止“只改 skill、不更新错题册”。
 
 私有错题集不会被 Git 跟踪。命令还会检查：如果私有输出位于 Git 仓库内但没有被 ignore，则拒绝写入。
 
@@ -32,6 +35,15 @@ python -m benchmark.core.cli summarize-error-book-diagnoses `
   --private-book <gitignored-private-error-book.json> `
   --diagnoses <gitignored-private-diagnoses.json> `
   --public-output experiments/records/DSAA3071-week5-candidate-v32-error-book/diagnosis-summary.json
+
+python -m benchmark.core.cli render-typical-error-cases `
+  --private-book <gitignored-private-error-book.json> `
+  --diagnoses <gitignored-private-diagnoses.json> `
+  --output <gitignored-private-dir>/TYPICAL-ERROR-CASES.private.md
+
+python -m benchmark.core.cli check-error-book-registry `
+  --registry experiments/records/grading-skill-error-book-registry.json `
+  --repo-root .
 ```
 
 安全门：
@@ -42,6 +54,7 @@ python -m benchmark.core.cli summarize-error-book-diagnoses `
 4. 技术运行错误单独计数，不当作评分认知错误。
 5. 逐案诊断未覆盖全部案例时，拒绝生成公开诊断汇总。
 6. 测试集没有读取或运行，本记录不能宣称测试集准确率。
+7. 以后每次评分 skill hash 变化，都必须新增版本错题册、逐案诊断、可阅读典型案例和与上一版的 resolved/persistent/regression 对比；否则 CI 失败。
 
 ## English
 
@@ -58,7 +71,10 @@ Primary outputs:
 - `diagnosis-summary.json`: privacy-safe cause aggregates produced only after all 33 cases are diagnosed.
 - `ERROR-ANALYSIS.md`: bilingual interpretation.
 - `MODIFICATION-SUGGESTIONS.md`: bilingual change options and next-run gates.
+- `ERROR-BOOK-LIFECYCLE.md`: the mandatory refresh-and-compare contract for every later skill update.
+- Private `TYPICAL-ERROR-CASES.private.md`: 12 full cases with anonymous student, question, answer evidence, model rationale, gold, prediction, cause, and action, plus the complete 33-case index.
+- `../grading-skill-error-book-registry.json`: binds the active skill hash to complete error-book artifacts so CI blocks skill-only changes.
 
-The private error book is never tracked by Git. The command also refuses to write a private output inside a Git repository unless that destination is ignored.
+The private error book and readable case report are never tracked by Git. The command also refuses to write a private output inside a Git repository unless that destination is ignored.
 
-The command templates are shown above. Their gates require an explicitly labelled development run and packet, a non-dry-run validation-passed result, matching packet provenance, exact output/gold coverage, complete case selection, separation of technical failures, and complete diagnosis coverage before public aggregation. No held-out data was read or run, so this record makes no held-out accuracy claim.
+The command templates are shown above. Their gates require an explicitly labelled development run and packet, a non-dry-run validation-passed result, matching packet provenance, exact output/gold coverage, complete case selection, separation of technical failures, and complete diagnosis coverage before public aggregation. Every later grading-skill hash must add a new error-book entry and compare resolved, persistent, and regression cases against its predecessor; otherwise CI fails. No held-out data was read or run, so this record makes no held-out accuracy claim.

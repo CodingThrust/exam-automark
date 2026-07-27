@@ -6,6 +6,11 @@ from pathlib import Path
 from typing import Any
 
 from .error_book import write_error_book, write_public_diagnosis_summary
+from .error_book_iteration import (
+    validate_error_book_registry,
+    write_error_book_delta,
+    write_private_typical_case_report,
+)
 from .gold import validate_gold_table, write_gold_report
 from .headless_runner import HeadlessPacketRunConfig, run_headless_packet
 from .inventory import write_data_inventory
@@ -261,6 +266,31 @@ def _build_parser() -> argparse.ArgumentParser:
     diagnosis_summary.add_argument("--private-book", type=Path, required=True)
     diagnosis_summary.add_argument("--diagnoses", type=Path, required=True)
     diagnosis_summary.add_argument("--public-output", type=Path, required=True)
+
+    typical_cases = subparsers.add_parser(
+        "render-typical-error-cases",
+        help="render a private human-readable typical-case error book",
+    )
+    typical_cases.add_argument("--private-book", type=Path, required=True)
+    typical_cases.add_argument("--diagnoses", type=Path, required=True)
+    typical_cases.add_argument("--output", type=Path, required=True)
+    typical_cases.add_argument("--max-cases", type=int, default=12)
+
+    error_delta = subparsers.add_parser(
+        "compare-error-books",
+        help="classify resolved, persistent, and regression cases across skills",
+    )
+    error_delta.add_argument("--previous-private-book", type=Path, required=True)
+    error_delta.add_argument("--current-private-book", type=Path, required=True)
+    error_delta.add_argument("--private-output", type=Path, required=True)
+    error_delta.add_argument("--public-output", type=Path, required=True)
+
+    error_registry = subparsers.add_parser(
+        "check-error-book-registry",
+        help="require complete error-book artifacts for the current grading skill",
+    )
+    error_registry.add_argument("--registry", type=Path, required=True)
+    error_registry.add_argument("--repo-root", type=Path, default=Path("."))
     return parser
 
 
@@ -595,6 +625,53 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             )
             return 0
+        if args.command == "render-typical-error-cases":
+            output = write_private_typical_case_report(
+                private_book_path=args.private_book,
+                diagnoses_path=args.diagnoses,
+                output_path=args.output,
+                max_typical_cases=args.max_cases,
+            )
+            print(
+                json.dumps(
+                    {
+                        "output": str(output),
+                        "privacy": "private_gitignored_output",
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.command == "compare-error-books":
+            result = write_error_book_delta(
+                previous_private_book_path=args.previous_private_book,
+                current_private_book_path=args.current_private_book,
+                private_output=args.private_output,
+                public_output=args.public_output,
+            )
+            print(
+                json.dumps(
+                    {
+                        "counts": result.public_summary["counts"],
+                        "private_output": str(args.private_output),
+                        "privacy_audit": "passed",
+                        "public_output": str(args.public_output),
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.command == "check-error-book-registry":
+            findings = validate_error_book_registry(
+                repo_root=args.repo_root,
+                registry_path=args.registry,
+            )
+            result = {
+                "findings": findings,
+                "status": "passed" if not findings else "failed",
+            }
+            print(json.dumps(result, sort_keys=True))
+            return 0 if not findings else 1
         raise ValueError(f"unsupported command: {args.command}")
     except SystemExit as error:
         return int(error.code)

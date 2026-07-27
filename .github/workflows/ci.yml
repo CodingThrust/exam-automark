@@ -79,6 +79,9 @@ jobs:
           python -m benchmark.core.research_records --manifest experiments/records/tooling-surveys/sources.json
           python -m benchmark.core.research_records --manifest experiments/records/literature-surveys/sci_brain_run_manifest.json
 
+      - name: Require error-book artifacts for the active grading skill
+        run: python -m benchmark.core.cli check-error-book-registry --registry experiments/records/grading-skill-error-book-registry.json --repo-root .
+
       - name: Exercise research-record negative controls
         run: python -m unittest discover -s tests/benchmark/core -p "test_research_records.py" -v
 

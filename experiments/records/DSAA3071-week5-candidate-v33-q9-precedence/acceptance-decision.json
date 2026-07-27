@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "experiment_id": "DSAA3071-week5-candidate-v33-q9-precedence",
+  "decision": "rejected",
+  "all_conditions_required": true,
+  "predecessor_skill_version_id": "skill_candidate_v3_2",
+  "candidate_skill_version_id": "skill_candidate_v3_3",
+  "active_skill_version_after_decision": "skill_candidate_v3_2",
+  "run_id": "deepseek-C33-q9-precedence-text-dev-reviewed-r1",
+  "run_commit": "3f2adce",
+  "conditions": [
+    {
+      "metric": "q9_mae",
+      "operator": "<",
+      "threshold": 9.0,
+      "observed": 7.0,
+      "passed": true
+    },
+    {
+      "metric": "question_mae",
+      "operator": "<",
+      "threshold": 2.557143,
+      "observed": 2.185714,
+      "passed": true
+    },
+    {
+      "metric": "severe_error_pairs",
+      "operator": "<=",
+      "threshold": 16,
+      "observed": 17,
+      "passed": false
+    },
+    {
+      "metric": "q1_q4_error_pairs",
+      "operator": "==",
+      "threshold": 0,
+      "observed": 0,
+      "passed": true
+    },
+    {
+      "metric": "resolved_minus_regression",
+      "operator": ">",
+      "threshold": 0,
+      "observed": 2,
+      "resolved": 3,
+      "regression": 1,
+      "passed": true
+    }
+  ],
+  "rationale_zh": "五项门槛中四项通过，但严重错误从 16 增至 17，违反不得增加的安全门。因此不把 candidate-v3.3 设为 active skill，不进行看结果后的 prompt 修改或追加运行。",
+  "rationale_en": "Four of five gates pass, but severe errors increase from 16 to 17 and violate the non-increase safety gate. Candidate-v3.3 is therefore not activated, and no post-result prompt edit or additional run is allowed.",
+  "heldout_or_test_accessed": false,
+  "post_result_rerun_performed": false
+}

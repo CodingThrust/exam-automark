@@ -212,6 +212,17 @@ def build_error_confidence_audit(
     )
     objectivity_rows = _simple_taxonomy_counts(pairs, "objectivity_level")
     provenance = book["provenance"]
+    low_confidence_pairs = next(
+        (
+            row["pairs"]
+            for row in confidence_rows
+            if row["confidence"] == "low"
+        ),
+        0,
+    )
+    low_confidence_pair_label = (
+        "pair" if low_confidence_pairs == 1 else "pairs"
+    )
     result = {
         "record_type": "grading_error_confidence_taxonomy_audit_public",
         "schema_version": 1,
@@ -291,13 +302,16 @@ def build_error_confidence_audit(
         "interpretation_limits": {
             "zh": [
                 "confidence 是 high/medium/low 顺序标签，不是数值概率，因此不能计算概率校准误差或声称 90% 可信。",
-                "low confidence 只有 1 个评分对，不能据此估计稳定的低置信错误率。",
+                f"low confidence 有 {low_confidence_pairs} 个评分对，"
+                "样本仍不足以估计稳定的低置信错误率。",
                 "根因与机制来自开发集逐案复核；rubric-gold 冲突仍需课程负责人裁决。",
                 "本审计未读取或运行 held-out/test 数据。",
             ],
             "en": [
                 "Confidence is an ordinal high/medium/low label, not a numeric probability, so probability calibration error and claims such as 90% reliability are invalid.",
-                "Low confidence contains only one pair and cannot estimate a stable low-confidence error rate.",
+                f"Low confidence contains {low_confidence_pairs} "
+                f"{low_confidence_pair_label}, which "
+                "is still insufficient to estimate a stable low-confidence error rate.",
                 "Causes and mechanisms come from development case review; rubric-gold conflicts still require course-owner adjudication.",
                 "This audit did not read or run held-out/test data.",
             ],
@@ -343,7 +357,7 @@ def render_error_confidence_markdown(audit: dict[str, Any]) -> str:
     flags = audit["flag_audit"]
     taxonomy = audit["error_taxonomy"]
     lines = [
-        "# TASK6 Confidence 与错误类型审计 / Confidence and Error Taxonomy Audit",
+        "# Confidence 与错误类型审计 / Confidence and Error Taxonomy Audit",
         "",
         "## 中文版",
         "",
@@ -421,9 +435,9 @@ def render_error_confidence_markdown(audit: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "最有意义的下一步不是把 33 个差异全部写进 prompt：",
+            f"最有意义的下一步不是把 {population['error_pairs']} 个差异全部写进 prompt：",
             "",
-            f"- `{dispositions.get('direct_skill_candidate', 0)}` 例高客观性模型错误可直接进入 candidate-v3.3 设计。",
+            f"- `{dispositions.get('direct_skill_candidate', 0)}` 例高客观性模型错误可直接进入下一次 candidate 设计。",
             f"- `{dispositions.get('requires_human_adjudication', 0)}` 例需先由课程负责人裁决 gold/rubric 或官方风格。",
             f"- `{dispositions.get('paired_multimodal_required', 0)}` 例必须做 reviewed-transcript 与 direct-multimodal 配对。",
             f"- `{dispositions.get('calibration_anchor_only', 0)}` 例只适合作为分档校准锚点，不应单独驱动规则重写。",
@@ -432,7 +446,7 @@ def render_error_confidence_markdown(audit: dict[str, Any]) -> str:
             "",
             "1. 不把 high confidence 当作自动放行条件；至少结合题目风险和错题回归集。",
             "2. 将自由文本 flags 收敛为固定枚举，并单独保留 `needs_manual_review`。",
-            "3. candidate-v3.3 先处理明确证据遗漏、无证据给分和规则优先级错误。",
+            "3. 下一次 candidate 只处理明确证据遗漏、无证据给分和规则优先级错误。",
             "4. 每次 skill 更新继续报告同一组 confidence、flag 和 taxonomy 指标。",
             "5. 不使用 held-out/test 数据调参。",
             "",
@@ -490,7 +504,7 @@ def render_error_confidence_markdown(audit: dict[str, Any]) -> str:
             f"`needs_manual_review` marks only "
             f"{flags['explicit_needs_manual_review']['review_pairs']} pairs and "
             f"captures {flags['explicit_needs_manual_review']['severe_error_pairs_captured']} "
-            "severe error. The vocabulary is fragmented: "
+            "severe error(s). The vocabulary is fragmented: "
             f"{flags['single_observation_flags']} of "
             f"{flags['flag_vocabulary_size']} flags occur once.",
             "",
@@ -519,16 +533,16 @@ def render_error_confidence_markdown(audit: dict[str, Any]) -> str:
             "",
             "The actionable split is:",
             "",
-            f"- {dispositions.get('direct_skill_candidate', 0)} high-objectivity model errors can directly inform candidate-v3.3.",
+            f"- {dispositions.get('direct_skill_candidate', 0)} high-objectivity model errors can directly inform the next candidate design.",
             f"- {dispositions.get('requires_human_adjudication', 0)} cases require course-owner adjudication of gold/rubric or official style.",
-            f"- {dispositions.get('paired_multimodal_required', 0)} case requires a reviewed-transcript/direct-multimodal pair.",
+            f"- {dispositions.get('paired_multimodal_required', 0)} case(s) require a reviewed-transcript/direct-multimodal pair.",
             f"- {dispositions.get('calibration_anchor_only', 0)} cases are calibration anchors and should not independently trigger rule rewrites.",
             "",
             "### Recommendations",
             "",
             "1. Do not auto-pass high-confidence output; combine confidence with question risk and the regression error book.",
             "2. Replace free-form flags with a fixed enumeration and retain a distinct `needs_manual_review` signal.",
-            "3. Build candidate-v3.3 first from explicit evidence omissions, unsupported credit, and rule-precedence failures.",
+            "3. Build the next candidate only from explicit evidence omissions, unsupported credit, and rule-precedence failures.",
             "4. Recompute the same confidence, flag, and taxonomy metrics after every skill update.",
             "5. Do not tune on held-out/test data.",
             "",

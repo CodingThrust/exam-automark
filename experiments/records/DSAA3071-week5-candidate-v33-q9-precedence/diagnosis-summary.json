@@ -1,0 +1,263 @@
+{
+  "by_question": [
+    {
+      "error_pairs_reviewed": 4,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 1,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 2,
+          "primary_cause": "rubric_gold_misalignment"
+        },
+        {
+          "error_pairs": 1,
+          "primary_cause": "score_band_calibration"
+        }
+      ],
+      "question_id": "Q5"
+    },
+    {
+      "error_pairs_reviewed": 6,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 2,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 1,
+          "primary_cause": "rubric_gold_misalignment"
+        },
+        {
+          "error_pairs": 3,
+          "primary_cause": "score_band_calibration"
+        }
+      ],
+      "question_id": "Q6"
+    },
+    {
+      "error_pairs_reviewed": 5,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 2,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 3,
+          "primary_cause": "score_band_calibration"
+        }
+      ],
+      "question_id": "Q7"
+    },
+    {
+      "error_pairs_reviewed": 7,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 2,
+          "primary_cause": "input_representation_ambiguity"
+        },
+        {
+          "error_pairs": 1,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 4,
+          "primary_cause": "rubric_gold_misalignment"
+        }
+      ],
+      "question_id": "Q8"
+    },
+    {
+      "error_pairs_reviewed": 6,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 4,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 2,
+          "primary_cause": "score_band_calibration"
+        }
+      ],
+      "question_id": "Q9"
+    },
+    {
+      "error_pairs_reviewed": 3,
+      "primary_cause_counts": [
+        {
+          "error_pairs": 1,
+          "primary_cause": "model_grading_error"
+        },
+        {
+          "error_pairs": 2,
+          "primary_cause": "rubric_gold_misalignment"
+        }
+      ],
+      "question_id": "Q10"
+    }
+  ],
+  "interpretation_limits": {
+    "en": [
+      "Root-cause labels are auditable development-split judgments by the current model, not final human adjudications.",
+      "Rubric-gold mismatch cases require course-owner adjudication before skill optimization.",
+      "This summary contains no held-out data, student identifiers, answer text, or case-level scores."
+    ],
+    "zh": [
+      "根因标签是当前模型基于开发集证据给出的可审计判断，不是最终人工裁决。",
+      "rubric-gold 不一致的案例必须先由课程负责人裁决，不能直接用于优化 skill。",
+      "该汇总不包含测试集、学生编号、答案文字或逐案分数。"
+    ]
+  },
+  "primary_cause_counts": [
+    {
+      "error_pairs": 2,
+      "primary_cause": "input_representation_ambiguity"
+    },
+    {
+      "error_pairs": 11,
+      "primary_cause": "model_grading_error"
+    },
+    {
+      "error_pairs": 9,
+      "primary_cause": "rubric_gold_misalignment"
+    },
+    {
+      "error_pairs": 9,
+      "primary_cause": "score_band_calibration"
+    }
+  ],
+  "recommended_action_counts": [
+    {
+      "error_pairs": 3,
+      "recommended_action": "adjudicate_Q8_epsilon_policy"
+    },
+    {
+      "error_pairs": 2,
+      "recommended_action": "repair_Q10_official_score_mapping"
+    },
+    {
+      "error_pairs": 2,
+      "recommended_action": "retain_as_Q6_calibration_anchor"
+    },
+    {
+      "error_pairs": 2,
+      "recommended_action": "retain_as_Q7_partial_proof_anchor"
+    },
+    {
+      "error_pairs": 2,
+      "recommended_action": "run_paired_Q8_direct_multimodal_review"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "accept_complete_Q7_constructions_without_redundant_nonmembership_text"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "accept_correct_Q10_conclusions_with_local_briefness"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "accept_cross_question_Q8_construction_reference"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "adjudicate_Q5_full_credit_gate"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "adjudicate_Q5_official_tolerance"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "adjudicate_Q8_gold_against_reviewed_transcript"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "enforce_no_brevity_downgrade_for_valid_Q9_claims"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "forbid_implicit_Q6_acceptance_and_overhead_credit"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "make_full_credit_rule_override_element_sum"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "make_holistic_full_credit_override_operational"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "preserve_minimum_credit_for_two_attempted_Q7_directions"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "recognize_semantically_complete_simulated_steps"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "repair_Q6_rubric_gold_contract"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "require_explicit_Q6_mechanism_evidence"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "retain_as_Q5_calibration_anchor"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "retain_as_Q6_cap_anchor"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "retain_as_Q7_local_error_anchor"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "retain_as_Q9_single_family_anchor"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "retain_as_Q9_sparse_answer_anchor"
+    },
+    {
+      "error_pairs": 1,
+      "recommended_action": "strengthen_holistic_sufficiency_execution"
+    }
+  ],
+  "record_type": "grading_error_diagnosis_public_summary",
+  "review": {
+    "all_error_cases_reviewed": true,
+    "case_count": 31,
+    "private_diagnoses_sha256": "67e2a7432b018538ea17c944aed7a6a4c10d8fd409f5ad219de8add4b2785db0",
+    "private_error_book_sha256": "0a4cdb54867db055624fe28f37f37e93b4ec2163408f3eca3f8b551241443409",
+    "review_date": "2026-07-27",
+    "reviewer": "current Codex session",
+    "reviewer_model_id": "not exposed by the client"
+  },
+  "review_confidence_counts": [
+    {
+      "error_pairs": 18,
+      "review_confidence": "high"
+    },
+    {
+      "error_pairs": 2,
+      "review_confidence": "low"
+    },
+    {
+      "error_pairs": 11,
+      "review_confidence": "medium"
+    }
+  ],
+  "schema_version": 1,
+  "scope": {
+    "contains_answer_or_evidence_text": false,
+    "contains_student_level_records": false,
+    "split": "development",
+    "taxonomy_status": "reviewed_for_TASK9"
+  }
+}

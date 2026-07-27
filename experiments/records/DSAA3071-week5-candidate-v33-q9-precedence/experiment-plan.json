@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "experiment_id": "DSAA3071-week5-candidate-v33-q9-precedence",
+  "course_id": "DSAA3071",
+  "assessment_id": "week5_test",
+  "split": "development",
+  "student_count": 7,
+  "student_list_source": "experiments/records/DSAA3071-week5-test-plan/students-development.txt",
+  "predecessor": {
+    "skill_version_id": "skill_candidate_v3_2",
+    "skill_hash": "4ea2786fb9cf4cab3b55e9710cd780241886df739c9299029e507d202625c57e",
+    "packet_id": "C32-dev-reviewed-r1",
+    "packet_hash": "b9146715f6b0dc014f079e07625d98cef62e1954d3e6d0e76bedcc464f4b8439",
+    "public_error_summary": "experiments/records/DSAA3071-week5-candidate-v32-error-book/public-summary.json"
+  },
+  "candidate": {
+    "skill_version_id": "skill_candidate_v3_3",
+    "skill_hash": "b9ebf4a30bb8ebbc2881b0d2382bac277f48fae2ae23fd7f2099bae67bf717f8",
+    "skill_snapshot": "experiments/skill_versions/skill_candidate_v3_3.json",
+    "prompt_path": "experiments/records/DSAA3071-week5-candidate-v33-q9-precedence/prompts/grade_candidate_v3_3_strict_schema.txt",
+    "prompt_hash": "0ab1a20202ba6f2c9a18a644db97f1fdd6084a7199fff5e487cdeb44fb632ef6",
+    "rubric_path": "experiments/records/DSAA3071-week5-prep/rubric_v2.json",
+    "rubric_hash": "3678212e27dd4a506c5e8ee581d49ce651ddabd42fe30b4191a5e3f5992e4740",
+    "packet_id": "C33-dev-reviewed-r1",
+    "packet_path": "Data/DSAA3071/week5-benchmark-redaction-v3/text_grading_packets/DSAA3071-week5-C33-v2-reviewed-dev/C33-dev-reviewed-r1",
+    "packet_hash": "ce62c1db757b5e1dacacf5466b43fbf4a480865322aa3df024a7f281b00c887e"
+  },
+  "controlled_comparison": {
+    "provider": "deepseek",
+    "model": "deepseek-v4-pro",
+    "input_mode": "text-only",
+    "repetitions": 1,
+    "data_snapshot_hash": "95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37",
+    "text_source_hash": "9f9be72bf088f211a3b5fc35db1439b3e965059ff55d5c0563e2880bdc7f4a00",
+    "output_schema_hash": "b5fe4ab6c03b967c6ded896e05c494c86a6ba8912cc587c5f23f87da5eb3ea77",
+    "only_intended_change": "candidate-v3.3 prompt and skill add rule precedence and holistic sufficiency"
+  },
+  "model_calls_planned": 1,
+  "model_calls_completed": 1,
+  "model_run_status": "passed_validation_candidate_rejected",
+  "run": {
+    "run_id": "deepseek-C33-q9-precedence-text-dev-reviewed-r1",
+    "run_commit": "3f2adce",
+    "students_expected": 7,
+    "students_passed": 7,
+    "technical_failures": 0,
+    "total_tokens": 118551
+  },
+  "heldout_or_test_accessed": false,
+  "acceptance_gate": "experiments/records/DSAA3071-week5-candidate-v33-q9-precedence/acceptance-gate.json"
+}

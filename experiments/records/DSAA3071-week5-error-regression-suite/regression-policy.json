@@ -22,7 +22,7 @@
       "expected_case_count": 4,
       "regression_class": "positive_credit",
       "gate": {
-        "kind": "exact_gold"
+        "kind": "nonsevere_and_improved"
       }
     }
   ]

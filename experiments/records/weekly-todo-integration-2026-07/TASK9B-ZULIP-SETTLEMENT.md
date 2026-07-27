@@ -16,6 +16,8 @@
 
 套件加入评分 skill 错题册注册表。以后新增正式 skill 版本时，注册表要求提供每个已登记套件的公开通过结果；否则验证失败。
 
+Q6 与 Q9 都使用“非严重且严格改善”的硬门禁。与人工 gold 精确一致只作为观察指标；只有经课程负责人裁决确认的标准案例，才应升级为精确一致硬门禁。
+
 ### 改善了什么
 
 以前的典型错题主要用于人工阅读和版本对比，现在它们还能自动阻止已知错误复发。选择器带固定案例数量，源记录或标签漂移会使构建失败。v3.3 负对照结果为 `0/6` 通过，证明门禁能够识别全部目标错误，而不是形式检查。
@@ -46,6 +48,8 @@ Two automation commands were added:
 - `evaluate-error-regressions` applies frozen case gates to a candidate's complete private error book and exposes a CI/autoresearch-compatible exit code.
 
 The suite is registered in the grading-skill error-book registry. Every future formal skill entry must supply a passing public evaluation for each registered suite.
+
+Both Q6 and Q9 use a non-severe-and-strictly-improved hard gate. Exact gold agreement remains a reported observation rather than a universal hard requirement; it can be promoted only after course-owner adjudication.
 
 ### What improved
 

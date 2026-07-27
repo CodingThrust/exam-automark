@@ -13,10 +13,10 @@
 
 学生编号、答案文字、逐例分数和可关联的案例键只保存在 gitignored 的 `Data/` 中。GitHub 只保存选择规则、聚合数量、哈希和门禁结果。
 
-### 两种门禁
+### 硬门禁与观察指标
 
-- Q9 正向给分案例使用 `exact_gold`：候选结果必须与人工 gold 完全一致。
-- Q6 负向给分案例使用 `nonsevere_and_improved`：绝对误差必须比 v3.3 严格减小，并且不得再达到 5 分严重错误阈值。
+- Q6 与 Q9 都使用 `nonsevere_and_improved` 硬门禁：绝对误差必须比 v3.3 严格减小，并且不得再达到 5 分严重错误阈值。
+- `exact_gold` 作为观察指标单独汇总，不决定套件是否通过。只有经课程负责人确认的标准案例，才适合在未来升级为精确一致硬门禁。
 
 `expected_case_count` 是防漂移检查。如果源错误册或诊断标签意外变化，使选择器不再严格匹配 2 个 Q6 案例和 4 个 Q9 案例，套件构建会直接失败。
 
@@ -62,10 +62,10 @@ It contains six private targets:
 
 Student identifiers, answer text, case-level scores, and linkable keys remain under gitignored `Data/`. GitHub stores only selectors, aggregate counts, hashes, and gate results.
 
-### Two gates
+### Hard gate and observation
 
-- Q9 positive-credit cases use `exact_gold`: the candidate must exactly match human gold.
-- Q6 negative-credit cases use `nonsevere_and_improved`: absolute error must strictly improve over v3.3 and remain below the five-point severe-error threshold.
+- Both Q6 and Q9 use the `nonsevere_and_improved` hard gate: absolute error must strictly improve over v3.3 and remain below the five-point severe-error threshold.
+- Exact gold agreement is reported as a separate observation and does not decide suite passage. It should become a hard gate only for a course-owner-adjudicated exemplar.
 
 `expected_case_count` is a drift guard. Suite construction fails if source records or diagnosis labels no longer select exactly two Q6 and four Q9 cases.
 

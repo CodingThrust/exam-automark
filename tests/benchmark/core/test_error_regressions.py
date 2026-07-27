@@ -129,7 +129,7 @@ class ErrorRegressionTests(unittest.TestCase):
                     "severe_only": False,
                     "expected_case_count": 1,
                     "regression_class": "positive_credit",
-                    "gate": {"kind": "exact_gold"},
+                    "gate": {"kind": "nonsevere_and_improved"},
                 },
             ],
         }
@@ -224,7 +224,7 @@ class ErrorRegressionTests(unittest.TestCase):
             {"target_cases": 2, "passed": 0, "failed": 2},
         )
 
-    def test_exact_and_nonsevere_improvement_pass(self):
+    def test_nonsevere_improvement_can_pass_without_exact_gold(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             book, diagnoses, policy, source, _ = self._fixture(root)
@@ -249,12 +249,21 @@ class ErrorRegressionTests(unittest.TestCase):
                     "predicted_score": 4.0,
                     "absolute_error": 4.0,
                     "severe_error": False,
+                },
+                {
+                    "case_id": "CURRENT-2",
+                    "anonymous_student_id": "S002",
+                    "question_id": "Q9",
+                    "gold_score": 25.0,
+                    "predicted_score": 24.0,
+                    "absolute_error": 1.0,
+                    "severe_error": False,
                 }
             ]
             current["population"].update(
                 {
-                    "error_pairs": 1,
-                    "exact_pairs": 2,
+                    "error_pairs": 2,
+                    "exact_pairs": 1,
                     "severe_error_pairs": 0,
                 }
             )
@@ -268,7 +277,46 @@ class ErrorRegressionTests(unittest.TestCase):
 
         self.assertEqual(evaluation.public_summary["status"], "passed")
         self.assertEqual(evaluation.public_summary["counts"]["passed"], 2)
+        self.assertEqual(
+            evaluation.public_summary["observations"]["exact_gold"][
+                "exact_cases"
+            ],
+            0,
+        )
+        self.assertFalse(
+            evaluation.public_summary["observations"]["exact_gold"][
+                "hard_gate"
+            ]
+        )
         self.assertEqual(audit_public_error_summary(evaluation.public_summary), [])
+
+    def test_exact_gold_gate_remains_available_for_adjudicated_cases(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            book, diagnoses, policy_path, _, policy = self._fixture(root)
+            policy["selectors"][1]["gate"] = {"kind": "exact_gold"}
+            policy_path.write_text(json.dumps(policy), encoding="utf-8")
+            suite_result = build_regression_suite(
+                private_book_path=book,
+                diagnoses_path=diagnoses,
+                policy_path=policy_path,
+            )
+            suite_path = root / "suite.private.json"
+            suite_path.write_text(
+                json.dumps(suite_result.private_suite), encoding="utf-8"
+            )
+            evaluation = evaluate_regression_suite(
+                private_suite_path=suite_path,
+                current_private_book_path=book,
+            )
+
+        q9 = next(
+            row
+            for row in evaluation.private_evaluation["cases"]
+            if row["question_id"] == "Q9"
+        )
+        self.assertFalse(q9["passed"])
+        self.assertEqual(q9["reason"], "still_disagrees_with_gold")
 
     def test_rejects_incomplete_current_error_book(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -386,6 +434,17 @@ class CommittedRegressionRecordTests(unittest.TestCase):
         self.assertEqual(negative_control["status"], "failed")
         self.assertEqual(negative_control["counts"]["passed"], 0)
         self.assertEqual(negative_control["counts"]["failed"], 6)
+        self.assertEqual(
+            {
+                row["gate_kind"]
+                for row in suite["by_selector"]
+            },
+            {"nonsevere_and_improved"},
+        )
+        self.assertEqual(
+            negative_control["observations"]["exact_gold"]["exact_cases"],
+            0,
+        )
 
     def test_readme_is_bilingual_and_states_necessary_not_sufficient(self):
         text = (RECORD_ROOT / "README.md").read_text(encoding="utf-8")

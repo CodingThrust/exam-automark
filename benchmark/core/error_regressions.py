@@ -266,6 +266,7 @@ def evaluate_regression_suite(
         },
         "cases": rows,
     }
+    exact_gold_count = sum(row["exact_gold"] for row in rows)
     public_summary = {
         "record_type": "grading_error_regression_evaluation_public",
         "schema_version": 1,
@@ -278,6 +279,15 @@ def evaluate_regression_suite(
         },
         "provenance": evaluation_provenance,
         "counts": private_evaluation["counts"],
+        "observations": {
+            "exact_gold": {
+                "target_cases": len(rows),
+                "exact_cases": exact_gold_count,
+                "exact_rate": round(exact_gold_count / len(rows), 10),
+                "hard_gate": False,
+            }
+        },
+        "exact_gold_by_question": _exact_gold_counts_by_question(rows),
         "by_question": _evaluation_counts(rows, "question_id"),
         "by_regression_class": _evaluation_counts(
             rows, "regression_class"
@@ -450,6 +460,7 @@ def _evaluate_case(
         "gate_kind": gate_kind,
         "passed": passed,
         "reason": reason,
+        "exact_gold": current_absolute_error == 0,
         "gold_score": gold,
         "baseline_predicted_score": target["baseline_predicted_score"],
         "baseline_absolute_error": target["baseline_absolute_error"],
@@ -638,6 +649,27 @@ def _evaluation_counts(
             "failed": counts["failed"],
         }
         for value, counts in sorted(grouped.items())
+    ]
+
+
+def _exact_gold_counts_by_question(
+    rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    grouped: dict[str, Counter[str]] = defaultdict(Counter)
+    for row in rows:
+        grouped[row["question_id"]][
+            "exact" if row["exact_gold"] else "not_exact"
+        ] += 1
+    return [
+        {
+            "question_id": question_id,
+            "target_cases": counts["exact"] + counts["not_exact"],
+            "exact_cases": counts["exact"],
+            "not_exact_cases": counts["not_exact"],
+        }
+        for question_id, counts in sorted(
+            grouped.items(), key=lambda item: _question_sort_key(item[0])
+        )
     ]
 
 

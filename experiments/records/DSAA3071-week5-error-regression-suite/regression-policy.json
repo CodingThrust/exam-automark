@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "suite_id": "DSAA3071-W5-Q6-Q9-C33-error-regressions-v1",
+  "split": "development",
+  "selectors": [
+    {
+      "selector_id": "Q6-severe-unsupported-credit",
+      "question_id": "Q6",
+      "mechanism_code": "unsupported_evidence_credit",
+      "severe_only": true,
+      "expected_case_count": 2,
+      "regression_class": "negative_credit",
+      "gate": {
+        "kind": "nonsevere_and_improved"
+      }
+    },
+    {
+      "selector_id": "Q9-rule-precedence",
+      "question_id": "Q9",
+      "mechanism_code": "rule_precedence_or_gate_error",
+      "severe_only": false,
+      "expected_case_count": 4,
+      "regression_class": "positive_credit",
+      "gate": {
+        "kind": "nonsevere_and_improved"
+      }
+    }
+  ]
+}

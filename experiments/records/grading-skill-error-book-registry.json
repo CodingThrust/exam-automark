@@ -3,6 +3,7 @@
   "active_skill_version_id": "skill_candidate_v3_2",
   "policy": {
     "required_for_every_skill_update": true,
+    "required_regressions_for_future_skill_updates": true,
     "required_private_artifacts": [
       "complete machine-readable error book",
       "complete case diagnoses",
@@ -23,6 +24,17 @@
     ],
     "held_out_policy": "Development errors only. Held-out or test data must not be used to update a skill."
   },
+  "regression_suites": [
+    {
+      "suite_id": "DSAA3071-W5-Q6-Q9-C33-error-regressions-v1",
+      "policy": "experiments/records/DSAA3071-week5-error-regression-suite/regression-policy.json",
+      "public_suite_summary": "experiments/records/DSAA3071-week5-error-regression-suite/public-suite-summary.json",
+      "public_negative_control": "experiments/records/DSAA3071-week5-error-regression-suite/baseline-negative-control.json",
+      "private_suite_sha256": "c0e7f076d3d55aaa80b359b640d7f6394d0c83e2e3d6f54cfbd08a87c9f1412f",
+      "target_case_count": 6,
+      "required_for_future_registry_entries": true
+    }
+  ],
   "entries": [
     {
       "skill_version_id": "skill_candidate_v3_2",

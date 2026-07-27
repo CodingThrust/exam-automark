@@ -3,6 +3,8 @@
 > 状态：已准备，尚未实际发送到 Zulip。
 >
 > Status: prepared, not yet posted to Zulip.
+>
+> Draft PR / 草稿 PR: https://github.com/CodingThrust/exam-automark/pull/34
 
 ## 中文
 
@@ -75,8 +77,8 @@ TASK4 补完了上周 sci-brain survey 的两个缺口。
 - committed literature manifest audit：通过，但明确显示批准的 legacy gap；
 - committed tooling-survey manifest audit：通过；
 - research-record 单元测试：9 项通过；
-- core experiment/research record 回归测试：待 PR 前完整运行；
-- `git diff --check`：待 PR 前运行。
+- core 回归测试：217 项通过；
+- `git diff origin/main...HEAD --check`：通过。
 
 ### 限制与诚实边界
 
@@ -84,7 +86,7 @@ TASK4 补完了上周 sci-brain survey 的两个缺口。
 - 原始 PDF 与全文缓存仍按版权和仓库体积要求保持 gitignored；
 - 本 TASK 没有运行评分模型，也没有产生 accuracy 改善；
 - 本文件是 Zulip 可粘贴结算稿，当前环境没有 Zulip connector，因此尚未发送；
-- Pull request URL 将在 draft PR 创建后补入本文件。
+- Draft PR #34 已创建，等待 review 和 merge。
 
 ### 下一步
 
@@ -146,8 +148,8 @@ promotion gate.
   shown explicitly;
 - committed tooling-survey manifest audit: passed;
 - research-record unit tests: 9 passed;
-- full core record regression tests: to run before the PR;
-- `git diff --check`: to run before the PR.
+- full core regression tests: 217 passed;
+- `git diff origin/main...HEAD --check`: passed.
 
 ### Limitations and honesty boundary
 
@@ -158,7 +160,7 @@ promotion gate.
 - No grading model was run and no accuracy improvement is claimed.
 - This is a Zulip-ready settlement draft. No Zulip connector is available in
   the current environment, so it has not been posted.
-- The pull-request URL will be added after the draft PR is created.
+- Draft PR #34 is open for review and merge.
 
 ### Next
 

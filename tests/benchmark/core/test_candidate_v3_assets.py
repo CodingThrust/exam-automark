@@ -6,6 +6,7 @@ from pathlib import Path
 PROMPT = Path("experiments/prompt_templates/grade_candidate_v3.txt")
 PROMPT_V31 = Path("experiments/prompt_templates/grade_candidate_v3_1.txt")
 PROMPT_V32 = Path("experiments/prompt_templates/grade_candidate_v3_2.txt")
+PROMPT_V33 = Path("experiments/prompt_templates/grade_candidate_v3_3.txt")
 STRICT_SNAPSHOT = Path(
     "experiments/records/DSAA3071-week5-candidate-v3-dev-plan/"
     "prompts/grade_candidate_v3_strict_schema.txt"
@@ -17,6 +18,10 @@ STRICT_SNAPSHOT_V31 = Path(
 STRICT_SNAPSHOT_V32 = Path(
     "experiments/records/DSAA3071-week5-candidate-v31-dev-plan/"
     "prompts/grade_candidate_v3_2_strict_schema.txt"
+)
+STRICT_SNAPSHOT_V33 = Path(
+    "experiments/records/DSAA3071-week5-candidate-v33-q9-precedence/"
+    "prompts/grade_candidate_v3_3_strict_schema.txt"
 )
 RUBRIC_V2 = Path("experiments/records/DSAA3071-week5-prep/rubric_v2.json")
 SKILL = Path(".agents/skills/grade-homework/SKILL.md")
@@ -310,6 +315,49 @@ class CandidateV3AssetTests(unittest.TestCase):
         for phrase in required:
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, text)
+
+    def test_candidate_v33_rule_precedence_is_present_in_model_facing_assets(self):
+        required = (
+            "rule precedence and holistic sufficiency",
+            "question-specific `full_credit_rule`",
+            "evidence anchors",
+            "checklist",
+            "Brevity alone must not lower an evidence state",
+            "missing required behavior, term, or relation",
+        )
+        expected = (
+            PROMPT_V33,
+            STRICT_SNAPSHOT_V33,
+            SKILL,
+            REFERENCE,
+        )
+
+        for path in expected:
+            with self.subTest(path=path):
+                text = _normalize_whitespace(path.read_text(encoding="utf-8"))
+                for phrase in required:
+                    self.assertIn(_normalize_whitespace(phrase), text)
+
+    def test_candidate_v33_strict_prompt_preserves_generic_algorithm_verbatim(self):
+        generic = _markdown_section(
+            PROMPT_V33.read_text(encoding="utf-8"),
+            "Candidate-v3.3 grading algorithm",
+        )
+        strict = _markdown_section(
+            STRICT_SNAPSHOT_V33.read_text(encoding="utf-8"),
+            "Candidate-v3.3 grading algorithm",
+        )
+
+        self.assertEqual(strict, generic)
+
+    def test_candidate_v33_remains_generic_and_private(self):
+        combined = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (PROMPT_V33, SKILL, REFERENCE)
+        )
+
+        self.assertNotRegex(combined, r"\bS\d{3}\b")
+        self.assertNotIn("DSAA3071", combined)
 
 
 if __name__ == "__main__":

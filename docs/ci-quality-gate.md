@@ -17,7 +17,7 @@ CI 不能证明模型评分已经变准。它能防止的是已经被测试覆�
 
 | 状态检查 | 内容 | 当前最低发现数 |
 | --- | --- | ---: |
-| `CI / Core tests` | 核心评分、advisor workflow、报告与研究记录逻辑 | 217 |
+| `CI / Core tests` | 核心评分、advisor workflow、报告与研究记录逻辑 | 218 |
 | `CI / Physics tests` | Physics benchmark、packet、privacy、评分流程 | 85 |
 | `CI / Safety and provenance gates` | 调研 manifest 审计，以及隐私、held-out 审批和 sealed-test 负向控制 | 不适用 |
 
@@ -80,7 +80,7 @@ sealed-test controls, and research provenance.
 
 | Status check | Coverage | Current discovery floor |
 | --- | --- | ---: |
-| `CI / Core tests` | Core grading, advisor workflow, reporting, and research-record logic | 217 |
+| `CI / Core tests` | Core grading, advisor workflow, reporting, and research-record logic | 218 |
 | `CI / Physics tests` | Physics benchmark, packets, privacy, and grading flow | 85 |
 | `CI / Safety and provenance gates` | Manifest audits plus privacy, held-out approval, and sealed-test negative controls | N/A |
 

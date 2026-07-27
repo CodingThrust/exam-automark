@@ -1,6 +1,6 @@
 {
   "canonical_hash": "4ea2786fb9cf4cab3b55e9710cd780241886df739c9299029e507d202625c57e",
-  "hash_policy": "sha256(normalized LF utf-8 text for files; recursive relative path plus normalized content for directories)",
+  "hash_policy": "sha256(normalized LF utf-8 text for files; recursive relative path plus normalized content in case-folded POSIX relative-path order with an original-path tie-breaker for directories)",
   "mirror_synchronized": true,
   "schema_version": 1,
   "skill_hashes": {

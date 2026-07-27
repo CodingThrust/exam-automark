@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+from .error_audit import write_error_confidence_audit
 from .error_book import write_error_book, write_public_diagnosis_summary
 from .error_book_iteration import (
     validate_error_book_registry,
@@ -291,6 +292,19 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     error_registry.add_argument("--registry", type=Path, required=True)
     error_registry.add_argument("--repo-root", type=Path, default=Path("."))
+
+    confidence_audit = subparsers.add_parser(
+        "audit-error-confidence",
+        help="audit confidence, flags, and error mechanisms on development data",
+    )
+    confidence_audit.add_argument("--run-dir", type=Path, required=True)
+    confidence_audit.add_argument("--private-book", type=Path, required=True)
+    confidence_audit.add_argument("--diagnoses", type=Path, required=True)
+    confidence_audit.add_argument(
+        "--public-error-summary", type=Path, required=True
+    )
+    confidence_audit.add_argument("--public-output", type=Path, required=True)
+    confidence_audit.add_argument("--markdown-output", type=Path, required=True)
     return parser
 
 
@@ -672,6 +686,33 @@ def main(argv: Sequence[str] | None = None) -> int:
             }
             print(json.dumps(result, sort_keys=True))
             return 0 if not findings else 1
+        if args.command == "audit-error-confidence":
+            result = write_error_confidence_audit(
+                run_dir=args.run_dir,
+                private_book_path=args.private_book,
+                diagnoses_path=args.diagnoses,
+                public_error_summary_path=args.public_error_summary,
+                public_output=args.public_output,
+                markdown_output=args.markdown_output,
+            )
+            print(
+                json.dumps(
+                    {
+                        "public_output": str(args.public_output),
+                        "markdown_output": str(args.markdown_output),
+                        "student_question_pairs": result["population"][
+                            "student_question_pairs"
+                        ],
+                        "error_pairs": result["population"]["error_pairs"],
+                        "severe_error_pairs": result["population"][
+                            "severe_error_pairs"
+                        ],
+                        "privacy_audit": "passed",
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
         raise ValueError(f"unsupported command: {args.command}")
     except SystemExit as error:
         return int(error.code)

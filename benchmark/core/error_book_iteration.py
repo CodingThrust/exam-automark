@@ -323,10 +323,16 @@ def _validate_registry_entry(
         entry.get("public_diagnosis_summary"),
         label=f"{label} public_diagnosis_summary",
     )
+    confidence_audit_path = _repo_artifact(
+        repo_root,
+        entry.get("public_confidence_taxonomy_audit"),
+        label=f"{label} public_confidence_taxonomy_audit",
+    )
     for path, artifact_label in (
         (snapshot_path, "skill snapshot"),
         (error_summary_path, "public error summary"),
         (diagnosis_path, "public diagnosis summary"),
+        (confidence_audit_path, "public confidence taxonomy audit"),
     ):
         if path is None or not path.is_file():
             findings.append(f"{label}: missing {artifact_label}")
@@ -387,6 +393,26 @@ def _validate_registry_entry(
             findings.append(f"{label}: diagnosis does not cover every error case")
         if diagnosis.get("review", {}).get("all_error_cases_reviewed") is not True:
             findings.append(f"{label}: diagnoses are incomplete")
+    if confidence_audit_path is not None and confidence_audit_path.is_file():
+        confidence_audit = _read_json(confidence_audit_path)
+        findings.extend(
+            f"{label}: unsafe public confidence audit: {finding}"
+            for finding in audit_public_error_summary(confidence_audit)
+        )
+        if confidence_audit.get("provenance", {}).get(
+            "skill_version_id"
+        ) != skill_id:
+            findings.append(f"{label}: confidence audit skill mismatch")
+        if confidence_audit.get("population", {}).get(
+            "error_pairs"
+        ) != expected_errors:
+            findings.append(f"{label}: confidence audit error_pairs mismatch")
+        if confidence_audit.get("population", {}).get(
+            "severe_error_pairs"
+        ) != entry.get("severe_error_pairs"):
+            findings.append(
+                f"{label}: confidence audit severe_error_pairs mismatch"
+            )
 
     delta_status = entry.get("iteration_delta_status")
     if expected_predecessor is None:
@@ -567,6 +593,10 @@ def _render_case(index: int, case: dict[str, Any]) -> list[str]:
         f"- English diagnosis: {case['diagnosis_en']}",
         f"- 下一动作 / Next action: `{case['recommended_action']}`",
     ]
+    if isinstance(case.get("mechanism_code"), str):
+        lines.append(
+            f"- 错误机制 / Error mechanism: `{case['mechanism_code']}`"
+        )
     if case.get("typical_case") is True:
         lines.extend(
             [

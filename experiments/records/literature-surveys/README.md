@@ -1,7 +1,7 @@
 # Literature Surveys
 
 This directory stores research-background survey reports for exam-automark.
-The reports are written as reproducible background material only: no raw student
+The reports are written as auditable background material only: no raw student
 data is stored here, no model calls were run, and no files under `Data/` were
 read or modified.
 
@@ -45,3 +45,70 @@ background artifacts.
 
 Items whose bibliographic details were not fully verified, such as historical
 non-arXiv Page/PEG context, remain marked `needs verification` in the report.
+
+## Provenance status / 来源链状态
+
+The 2026-07-19 run is explicitly recorded as `legacy_incomplete`. It preserved
+the sci-brain repository URL, workflow, strategy labels, 32 source IDs, report
+files, and cite-key scopes. It did **not** preserve:
+
+- the exact sci-brain Git commit used at run time;
+- the literal discovery queries;
+- a per-source inclusion and exclusion decision log.
+
+These values cannot be reconstructed reliably after the run. In particular, the
+commit of a current local sci-brain checkout must not be copied into the old
+record and presented as historical evidence.
+
+2026-07-19 的运行明确标记为 `legacy_incomplete`。它保存了仓库 URL、workflow、
+检索策略标签、32 个 source ID、报告文件和引用范围，但没有保存运行时的准确
+sci-brain commit、原始检索 query，以及逐来源的纳入/排除记录。这些信息不能
+在事后可靠恢复，也不能用当前本机 checkout 的 commit 冒充旧运行证据。
+
+The only accepted legacy exception is bound to that exact historical date and
+missing-field set. A future run must use `provenance_status: "complete"` and
+record, at minimum:
+
+```json
+{
+  "tool": {
+    "repository": "https://github.com/QuantumBFS/sci-brain",
+    "source_commit": "<40-character-lowercase-git-sha>",
+    "source_commit_status": "recorded_at_run_time"
+  },
+  "discovery": {
+    "queries": ["<literal query used during discovery>"],
+    "selection_log": [
+      {
+        "source_id": "arxiv:<id>",
+        "decision": "include",
+        "reason": "<evidence-based reason>"
+      }
+    ]
+  }
+}
+```
+
+Future runs cannot reuse the legacy exception. The automated audit also checks:
+
+- UTF-8 readability and common mojibake markers;
+- floating GitHub `main` links;
+- equality of the knowledge-base and report BibTeX cite-key sets;
+- declared report scopes against citations actually used in each Typst source;
+- unresolved NOTES or report citations;
+- the 32-source bibliography scope and non-empty rendered PDFs;
+- duplicate or invalid arXiv IDs across topics.
+
+未来运行不能复用旧运行例外。自动审计还会检查 UTF-8/乱码、浮动 GitHub
+`main` 链接、两份 BibTeX 的一致性、报告声明的引用范围、未解析引用、PDF
+是否存在，以及跨 topic 的重复或非法 arXiv ID。
+
+Run the audit locally with:
+
+```powershell
+python -m benchmark.core.research_records `
+  --manifest experiments/records/literature-surveys/sci_brain_run_manifest.json
+```
+
+TASK5 will connect this command to GitHub Actions so that future pull requests
+cannot silently weaken the provenance record.

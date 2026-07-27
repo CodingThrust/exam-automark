@@ -1,6 +1,8 @@
 # Weekly TASK Progress and Advisor TODO Mapping
 
-Date: 2026-07-25
+Started: 2026-07-25
+
+Last updated: 2026-07-27
 
 This file is the live, public-safe execution ledger for the project. `TODO<N>`
 refers only to the advisor's numbering. `TASK<N>` refers to our implementation
@@ -24,8 +26,8 @@ credentials, or case-level Sxxx/Qx analysis.
 | ---: | --- | --- | --- | --- | --- | --- |
 | TASK1 | Advisor run-and-submit skill | This-week TODO6; prerequisite for TODO2 | `implemented_waiting_external_validation` | PR #29 merged as `0255f5a`; offline development/test dry-runs passed | Review the advisor's real Kimi/Claude result PRs | Pending real-run settlement |
 | TASK2 | Meaningful negative-result retrospective | This-week TODO1 | `completed` | SkillOpt R4 plus DSAA3071 candidate-v3/v3.1/v3.2 diagnosis, machine-readable metrics, scope exclusions, and bilingual reports | Carry the diagnosed Q6/Q8/Q9 defects into advisor TODO3; do not reopen operational errors as experiment findings | TODO1 settlement ready to post |
-| TASK3 | quantum.harness / beginner-training explanation | Previous-week carry-over | `running` | Draft PR #31 contains the readable commit-pinned report, bilingual settlement, and implemented option A; YY selected B/C for TASK5/TASK7 | Review and merge PR #31; then mark TASK3 complete without claiming B/C are implemented | Settlement ready; bilingual draft PR #31 open |
-| TASK4 | sci-brain survey explanation | Previous-week carry-over | `pending` | Two committed survey PDFs and knowledge notes | Teach key concepts and present selectable project changes | Pending |
+| TASK3 | quantum.harness / beginner-training explanation | Previous-week carry-over | `completed` | PR #31 and oral-briefing PR #32 merged; source commit pinned; 27 relevant tests passed | Post the prepared settlement to Zulip; B/C remain assigned to TASK5/TASK7 rather than being claimed as TASK3 implementation | Bilingual settlement ready, not posted |
+| TASK4 | sci-brain survey explanation | Previous-week carry-over | `running` | Teaching/options PR #33 merged; draft PR #34 adds an explicit legacy gap, future provenance requirements, citation-scope audit, 217 passing core tests, and a bilingual settlement draft | Review and merge PR #34, then post the prepared settlement to Zulip | Bilingual settlement draft links PR #34; not posted |
 | TASK5 | GitHub Actions CI quality gate | Project infrastructure | `pending` | User accepted option B; local negative controls and research-record health checks exist, but no required test check runs on `main` | Add required core/Physics/skill/privacy/research-record negative-control checks | Pending |
 | TASK6 | Objective error taxonomy and confidence calibration | This-week TODO4 + TODO5 | `pending` | Existing metrics contain accuracy and some confidence fields | Freeze schema and calibration metrics before new runs | Pending |
 | TASK7 | Automated Codex CLI versus Claude Code multimodal comparison | This-week TODO2 | `pending` | User accepted option C; Claude route is in the advisor skill, but matched Codex multimodal evidence and a unified lineage contract are missing | Freeze the minimum run-to-report lineage schema before the matched development config and dry-run | Pending |

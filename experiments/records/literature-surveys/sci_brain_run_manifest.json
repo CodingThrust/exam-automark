@@ -1,34 +1,113 @@
 {
+  "schema_version": 1,
+  "record_type": "sci_brain_survey_run",
   "run_date": "2026-07-19",
-  "sci_brain_repo": "https://github.com/QuantumBFS/sci-brain",
+  "provenance_status": "legacy_incomplete",
+  "legacy_exception": {
+    "id": "sci-brain-2026-07-19-unrecorded-provenance",
+    "missing_fields": [
+      "discovery.queries",
+      "discovery.selection_log",
+      "tool.source_commit"
+    ],
+    "reason": "The original run recorded the repository URL and source IDs but did not record the exact sci-brain commit, search queries, or per-source inclusion and exclusion decisions. These values cannot be reconstructed reliably after the run."
+  },
+  "future_run_requirements": [
+    "discovery.queries",
+    "discovery.selection_log",
+    "tool.source_commit"
+  ],
+  "tool": {
+    "repository": "https://github.com/QuantumBFS/sci-brain",
+    "source_commit": null,
+    "source_commit_status": "not_recorded_at_run_time",
+    "renderer_dependency": "pymupdf4llm 1.28.0"
+  },
   "workflow": [
     "survey",
     "download-ref",
     "survey-writer"
   ],
-  "install": {
-    "repo_path": "C:\\Users\\\u8881\u7fca\\.codex\\skills\\sci-brain",
-    "python": "D:\\Miniforge\\python.exe",
-    "renderer_dependency": "pymupdf4llm 1.28.0"
-  },
-  "outputs": {
-    "knowledge_base": ".knowledge",
-    "bibtex_entries": 32,
-    "metadata_json": 32,
-    "downloaded_arxiv_pdfs": 32,
-    "rendered_markdown_files": 32,
-    "reports": [
-      "experiments/records/literature-surveys/skill_optimization_survey.typ",
-      "experiments/records/literature-surveys/skill_optimization_survey.pdf",
-      "experiments/records/literature-surveys/llm_grading_survey.typ",
-      "experiments/records/literature-surveys/llm_grading_survey.pdf"
+  "discovery": {
+    "backend": "web_search_visible_arxiv_ids",
+    "queries": null,
+    "selection_log": null,
+    "queries_status": "not_recorded_at_run_time",
+    "selection_log_status": "not_recorded_at_run_time",
+    "available_strategy_labels": [
+      "Landscape mapping",
+      "Cross-method",
+      "Historical lineage",
+      "Cross-vocabulary",
+      "Benchmarks and datasets",
+      "Negative results"
     ]
   },
+  "citation_scope_policy": "reports_partition_full_bibliography",
+  "knowledge_base": {
+    "notes_path": ".knowledge/NOTES.md",
+    "index_path": ".knowledge/INDEX.md",
+    "bib_path": ".knowledge/references.bib",
+    "report_bib_path": "experiments/records/literature-surveys/references.bib"
+  },
+  "outputs": {
+    "bibtex_entries": 32,
+    "metadata_json_at_run_time": 32,
+    "downloaded_arxiv_pdfs_at_run_time": 32,
+    "rendered_markdown_files_at_run_time": 32
+  },
+  "report_records": [
+    {
+      "source_path": "experiments/records/literature-surveys/skill_optimization_survey.typ",
+      "rendered_path": "experiments/records/literature-surveys/skill_optimization_survey.pdf",
+      "scoped_cite_keys": [
+        "agrawal_2025_gepa",
+        "khattab_2023_dspy",
+        "lester_2021_power",
+        "li_2021_prefix",
+        "madaan_2023_self",
+        "opsahlong_2024_optimizing",
+        "pryzant_2023_automatic",
+        "shin_2020_eliciting",
+        "shinn_2023_reflexion",
+        "singhvi_2023_dspy",
+        "wang_2023_voyager",
+        "yang_2023_large",
+        "yuksekgonul_2024_textgrad",
+        "zhou_2022_large"
+      ]
+    },
+    {
+      "source_path": "experiments/records/literature-surveys/llm_grading_survey.typ",
+      "rendered_path": "experiments/records/literature-surveys/llm_grading_survey.pdf",
+      "scoped_cite_keys": [
+        "aggarwal_2024_i",
+        "caraeni_2024_evaluating",
+        "chu_2024_llm",
+        "haller_2022_survey",
+        "henkel_2023_can",
+        "jong_2023_review",
+        "lee_2024_unleashing",
+        "levine_2026_automated",
+        "liu_2023_g",
+        "lundgren_2024_large",
+        "mansour_2024_can",
+        "meyer_2024_asag",
+        "schneider_2023_towards",
+        "suzen_2018_automatic",
+        "vanhoyweghen_2026_human",
+        "wang_2022_automated",
+        "wang_2023_large",
+        "zheng_2023_judging"
+      ]
+    }
+  ],
   "notes": [
-    "No arXiv, Semantic Scholar, CrossRef, or Sci-Hub MCP server was detected in Codex.",
+    "No arXiv, Semantic Scholar, CrossRef, or Sci-Hub MCP server was detected in the original Codex session.",
     "The survey stage therefore used WebSearch-style discovery and visible arXiv IDs.",
-    "download-ref helpers are run from the installed sci-brain checkout to populate .knowledge metadata, PDFs, and rendered markdown where available.",
-    ".knowledge/.raw, .knowledge/.figures, and rendered paper markdown are local caches and are intentionally gitignored."
+    "Raw PDFs, metadata caches, figures, and rendered full-text paper Markdown were intentionally gitignored.",
+    "Counts ending in _at_run_time describe the original run and do not assert that ignored caches remain available in a later checkout.",
+    "The current local sci-brain checkout must not be used to retroactively fill the missing original source_commit."
   ],
   "topics": [
     {

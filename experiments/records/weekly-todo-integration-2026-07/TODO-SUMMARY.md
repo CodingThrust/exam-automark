@@ -238,6 +238,10 @@ Artifacts:
 - `experiments/records/literature-surveys/llm_grading_survey.typ`
 - `experiments/records/literature-surveys/references.bib`
 - `experiments/records/literature-surveys/sci_brain_run_manifest.json`
+- `experiments/records/literature-surveys/TASK4-ORAL-BRIEFING.md`
+- `experiments/records/literature-surveys/TASK4-PROJECT-OPTIONS.md`
+- `experiments/records/literature-surveys/TASK4-SCI-BRAIN-SURVEY-EXPLANATION-CONVERSATION.md`
+- `experiments/records/weekly-todo-integration-2026-07/TASK4-ZULIP-SETTLEMENT.md`
 - `.knowledge/INDEX.md`
 - `.knowledge/NOTES.md`
 - `.knowledge/references.bib`
@@ -246,14 +250,21 @@ Current claim:
 
 Two PDF survey reports are now committed. They are background research
 artifacts, not grading experiment results. They contain no raw student data and
-did not read or modify `Data/`.
+did not read or modify `Data/`. The knowledge points are now explained in a
+user-facing oral briefing and preserved conversation, with project options
+mapped to TASK6-TASK9 rather than claimed as already implemented.
 
 Limitation:
 
 The local Codex session did not have dedicated paper-search MCP tools available.
 The sci-brain workflow therefore used WebSearch-style discovery and visible
 arXiv/Semantic Scholar metadata, with unverified historical items marked as
-needing verification.
+needing verification. The 2026-07-19 run also failed to record the exact
+sci-brain commit, literal queries, and per-source selection log. Those values
+cannot be reconstructed honestly after the run. The manifest records this as a
+date-bound `legacy_incomplete` exception; future runs must provide complete
+run-time provenance, and an automated audit checks report citation scopes
+against the 32-entry bibliography.
 
 ## Previous-week advisor TODO 5: Codex CLI Headless Mode And Claude Headless Reproduction
 

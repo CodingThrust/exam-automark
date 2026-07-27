@@ -20,7 +20,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 SUITES = {
     "core": SuiteSpec(
         start_dir=REPO_ROOT / "tests" / "benchmark" / "core",
-        minimum_tests=218,
+        minimum_tests=239,
     ),
     "physics": SuiteSpec(
         start_dir=REPO_ROOT / "tests" / "benchmark" / "physics",

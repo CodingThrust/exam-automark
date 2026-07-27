@@ -720,9 +720,10 @@ class ExperimentRecordFileTests(unittest.TestCase):
         task3_line = next(
             line for line in ledger.splitlines() if line.startswith("| TASK3 |")
         )
-        self.assertIn("`running`", task3_line)
-        self.assertIn("Draft PR #31", task3_line)
-        self.assertIn("bilingual draft PR #31 open", task3_line)
+        self.assertIn("`completed`", task3_line)
+        self.assertIn("PR #31", task3_line)
+        self.assertIn("PR #32 merged", task3_line)
+        self.assertIn("Bilingual settlement ready, not posted", task3_line)
         for text in (report, settlement):
             self.assertNotRegex(text, r"[鍙鐨鏄]")
             self.assertNotRegex(text, r"\bS[0-9]{3}\b")

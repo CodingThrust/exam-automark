@@ -328,8 +328,6 @@ class CandidateV3AssetTests(unittest.TestCase):
         expected = (
             PROMPT_V33,
             STRICT_SNAPSHOT_V33,
-            SKILL,
-            REFERENCE,
         )
 
         for path in expected:

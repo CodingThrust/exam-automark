@@ -1,0 +1,278 @@
+{
+  "by_confidence": [
+    {
+      "confidence": "high",
+      "error_pairs": 14,
+      "exact_agreement": 0.714286,
+      "exact_pairs": 35,
+      "mae": 1.367347,
+      "pairs": 49,
+      "severe_error_pairs": 6,
+      "severe_error_rate_abs_ge_5": 0.122449,
+      "signed_error_mean": -1.163265
+    },
+    {
+      "confidence": "low",
+      "error_pairs": 3,
+      "exact_agreement": 0.0,
+      "exact_pairs": 0,
+      "mae": 6.333333,
+      "pairs": 3,
+      "severe_error_pairs": 3,
+      "severe_error_rate_abs_ge_5": 1.0,
+      "signed_error_mean": -6.333333
+    },
+    {
+      "confidence": "medium",
+      "error_pairs": 14,
+      "exact_agreement": 0.222222,
+      "exact_pairs": 4,
+      "mae": 3.722222,
+      "pairs": 18,
+      "severe_error_pairs": 8,
+      "severe_error_rate_abs_ge_5": 0.444444,
+      "signed_error_mean": 0.277778
+    }
+  ],
+  "by_question": [
+    {
+      "error_pairs": 0,
+      "exact_agreement": 1.0,
+      "exact_pairs": 7,
+      "mae": 0.0,
+      "pairs": 7,
+      "question_id": "Q1",
+      "severe_error_pairs": 0,
+      "severe_error_rate_abs_ge_5": 0.0,
+      "signed_error_mean": 0.0
+    },
+    {
+      "error_pairs": 0,
+      "exact_agreement": 1.0,
+      "exact_pairs": 7,
+      "mae": 0.0,
+      "pairs": 7,
+      "question_id": "Q2",
+      "severe_error_pairs": 0,
+      "severe_error_rate_abs_ge_5": 0.0,
+      "signed_error_mean": 0.0
+    },
+    {
+      "error_pairs": 0,
+      "exact_agreement": 1.0,
+      "exact_pairs": 7,
+      "mae": 0.0,
+      "pairs": 7,
+      "question_id": "Q3",
+      "severe_error_pairs": 0,
+      "severe_error_rate_abs_ge_5": 0.0,
+      "signed_error_mean": 0.0
+    },
+    {
+      "error_pairs": 0,
+      "exact_agreement": 1.0,
+      "exact_pairs": 7,
+      "mae": 0.0,
+      "pairs": 7,
+      "question_id": "Q4",
+      "severe_error_pairs": 0,
+      "severe_error_rate_abs_ge_5": 0.0,
+      "signed_error_mean": 0.0
+    },
+    {
+      "error_pairs": 4,
+      "exact_agreement": 0.428571,
+      "exact_pairs": 3,
+      "mae": 2.857143,
+      "pairs": 7,
+      "question_id": "Q5",
+      "severe_error_pairs": 2,
+      "severe_error_rate_abs_ge_5": 0.285714,
+      "signed_error_mean": -2.857143
+    },
+    {
+      "error_pairs": 6,
+      "exact_agreement": 0.142857,
+      "exact_pairs": 1,
+      "mae": 4.0,
+      "pairs": 7,
+      "question_id": "Q6",
+      "severe_error_pairs": 3,
+      "severe_error_rate_abs_ge_5": 0.428571,
+      "signed_error_mean": 3.428571
+    },
+    {
+      "error_pairs": 5,
+      "exact_agreement": 0.285714,
+      "exact_pairs": 2,
+      "mae": 2.428571,
+      "pairs": 7,
+      "question_id": "Q7",
+      "severe_error_pairs": 2,
+      "severe_error_rate_abs_ge_5": 0.285714,
+      "signed_error_mean": -0.142857
+    },
+    {
+      "error_pairs": 7,
+      "exact_agreement": 0.0,
+      "exact_pairs": 0,
+      "mae": 4.714286,
+      "pairs": 7,
+      "question_id": "Q8",
+      "severe_error_pairs": 5,
+      "severe_error_rate_abs_ge_5": 0.714286,
+      "signed_error_mean": -2.714286
+    },
+    {
+      "error_pairs": 6,
+      "exact_agreement": 0.142857,
+      "exact_pairs": 1,
+      "mae": 7.0,
+      "pairs": 7,
+      "question_id": "Q9",
+      "severe_error_pairs": 5,
+      "severe_error_rate_abs_ge_5": 0.714286,
+      "signed_error_mean": -7.0
+    },
+    {
+      "error_pairs": 3,
+      "exact_agreement": 0.571429,
+      "exact_pairs": 4,
+      "mae": 0.857143,
+      "pairs": 7,
+      "question_id": "Q10",
+      "severe_error_pairs": 0,
+      "severe_error_rate_abs_ge_5": 0.0,
+      "signed_error_mean": -0.857143
+    }
+  ],
+  "error_directions": {
+    "over_score": 8,
+    "under_score": 23
+  },
+  "error_magnitude_bands": [
+    {
+      "band": "gt_0_lt_1",
+      "error_pairs": 0
+    },
+    {
+      "band": "ge_1_lt_5",
+      "error_pairs": 14
+    },
+    {
+      "band": "ge_5",
+      "error_pairs": 17
+    }
+  ],
+  "flags_on_error_cases": [
+    {
+      "error_pairs": 1,
+      "flag": "ambiguous_epsilon_reference",
+      "severe_error_pairs": 0
+    },
+    {
+      "error_pairs": 1,
+      "flag": "assumed_lexicographic_enumeration",
+      "severe_error_pairs": 0
+    },
+    {
+      "error_pairs": 1,
+      "flag": "high_impact_deduction",
+      "severe_error_pairs": 1
+    },
+    {
+      "error_pairs": 2,
+      "flag": "insufficient_evidence",
+      "severe_error_pairs": 2
+    },
+    {
+      "error_pairs": 1,
+      "flag": "invalid_nonmembership_rejection",
+      "severe_error_pairs": 0
+    },
+    {
+      "error_pairs": 1,
+      "flag": "minimal_keywords",
+      "severe_error_pairs": 1
+    },
+    {
+      "error_pairs": 1,
+      "flag": "missing_explicit_acceptance",
+      "severe_error_pairs": 1
+    },
+    {
+      "error_pairs": 2,
+      "flag": "needs_manual_review",
+      "severe_error_pairs": 2
+    },
+    {
+      "error_pairs": 23,
+      "flag": "no_flag",
+      "severe_error_pairs": 11
+    },
+    {
+      "error_pairs": 1,
+      "flag": "vague_enum_construction",
+      "severe_error_pairs": 1
+    }
+  ],
+  "interpretation_limits": {
+    "en": [
+      "These are descriptive development-split statistics, not held-out accuracy.",
+      "Student-question evidence and diagnoses remain only in the gitignored private error book.",
+      "Flags describe model outputs and are not confirmed root causes before review."
+    ],
+    "zh": [
+      "这里只报告开发集上的描述性统计，不能当作测试集准确率。",
+      "逐个学生、逐道题的证据与诊断只保存在 git 忽略的私有错题集中。",
+      "标签只描述模型输出；在人工或最新模型复核前，不等同于已确认的根因。"
+    ]
+  },
+  "metrics": {
+    "question_exact_agreement": 0.557143,
+    "question_score_mae": 2.185714,
+    "question_signed_error_mean": -1.014286,
+    "severe_error_rate_abs_ge_5": 0.242857,
+    "student_total_score_mae": 10.428571,
+    "student_total_signed_error_mean": -10.142857
+  },
+  "population": {
+    "error_pairs": 31,
+    "exact_pairs": 39,
+    "severe_error_pairs": 17,
+    "student_question_pairs": 70,
+    "students": 7,
+    "technical_failure_count": 0,
+    "technical_failures_included_as_grading_cases": false
+  },
+  "provenance": {
+    "assessment_id": "week5_test",
+    "condition": "C3",
+    "course_id": "DSAA3071",
+    "data_snapshot_sha256": "95e744f5811d9d869e86229f5a5177fe69d75104940989a09e9ebba8fc211c37",
+    "gold_sha256": "45d62dfa0411872090c3834a41858c7c91447b9fd510ec08fba446fb411a1b11",
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "output_set_sha256": "d8e3d4956b93d3f226bdbd1c72fa25d20e944c8ea580108bbd881a4b658f18a5",
+    "packet_id": "C33-dev-reviewed-r1",
+    "packet_sha256": "ce62c1db757b5e1dacacf5466b43fbf4a480865322aa3df024a7f281b00c887e",
+    "prompt_sha256": "0ab1a20202ba6f2c9a18a644db97f1fdd6084a7199fff5e487cdeb44fb632ef6",
+    "provider": "deepseek",
+    "rubric_sha256": "3678212e27dd4a506c5e8ee581d49ce651ddabd42fe30b4191a5e3f5992e4740",
+    "run_commit": "3f2adce",
+    "run_id": "deepseek-C33-q9-precedence-text-dev-reviewed-r1",
+    "skill_version_id": "skill_candidate_v3_3",
+    "text_source_sha256": "9f9be72bf088f211a3b5fc35db1439b3e965059ff55d5c0563e2880bdc7f4a00"
+  },
+  "record_type": "grading_error_book_public_summary",
+  "schema_version": 1,
+  "scope": {
+    "contains_answer_or_evidence_text": false,
+    "contains_heldout_or_test_data": false,
+    "contains_student_level_records": false,
+    "selection_rule": "all score disagreements, aggregated for public release",
+    "selection_rule_zh": "完整统计全部评分分歧，仅以聚合形式公开",
+    "severe_error_threshold_points": 5.0,
+    "split": "development"
+  }
+}

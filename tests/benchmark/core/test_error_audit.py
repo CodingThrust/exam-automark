@@ -263,6 +263,11 @@ class ErrorConfidenceAuditTests(unittest.TestCase):
             self.assertIn("## 中文版", report)
             self.assertIn("## English Version", report)
             self.assertIn("explicit_evidence_omission", report)
+            self.assertIn("1 个评分对", report)
+            self.assertIn("contains 1 pair", report)
+            self.assertNotIn("TASK6", report)
+            self.assertNotIn("33 个差异", report)
+            self.assertNotIn("candidate-v3.3", report)
 
     @staticmethod
     def _score(

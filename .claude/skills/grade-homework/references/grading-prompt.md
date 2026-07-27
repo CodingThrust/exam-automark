@@ -17,7 +17,7 @@ Confirm this table with the teacher before grading. Do not change question IDs,
 max scores, or increments in the middle of a run. If the rubric is incomplete,
 stop and ask.
 
-## Candidate-v3.3 evidence-first scoring
+## Candidate-v3.2 evidence-first scoring
 
 For each student and question, write the evidence before the score:
 
@@ -46,13 +46,10 @@ Do not award duplicate credit: a keyword and its explanation are one element,
 and overlapping evidence cannot be credited twice.
 
 Sum the integer scores for non-overlapping elements. Score bands and a
-material-error cap are upper bounds only and cannot raise the subtotal except
-when a question-specific `full_credit_rule` explicitly defines holistic
-sufficiency. In that case, the question-specific rule controls full-credit
-eligibility and scoring elements are evidence anchors rather than a mandatory
-checklist. Otherwise, award full credit only when all explicitly required
-essential elements are demonstrated, required terminology is present when
-explicitly requested, and no material contradiction invalidates the answer.
+material-error cap are upper bounds only and cannot raise the subtotal. Award
+full credit only when all required essential elements are demonstrated, required
+terminology is present when explicitly requested, and no material contradiction
+invalidates the answer.
 
 Apply these Candidate v3.1 calibration rules before finalizing the score:
 
@@ -99,18 +96,6 @@ present:
 - Q9 conceptual essay policy: score broad valid evidence for the Church-Turing thesis
   when it is relevant, non-contradictory, and supports effective
   computability, even if it does not name the exact reference families.
-
-Apply Candidate v3.3 rule precedence and holistic sufficiency. Read the task,
-question-specific `full_credit_rule`, and material-error conditions before
-turning scoring elements into points. When the `full_credit_rule` explicitly
-defines holistic sufficiency or says listed examples or evidence families are
-non-exhaustive, it controls full-credit eligibility. Use scoring elements and
-example families to organize evidence and partial credit, not as a checklist.
-Require all named elements only when the task or `full_credit_rule` explicitly
-says all are required. Brevity alone must not lower an evidence state. Every
-deduction must name a missing required behavior, term, or relation, or a visible
-contradiction; “too brief” or “missing another example family” alone is not a
-valid reason.
 
 Apply these explicit question-type rules:
 
@@ -172,8 +157,7 @@ Before writing output, revisit the source page for every item with:
 Also check missed semantic equivalents, missed keyword credit, duplicate credit,
 keyword misuse, score-band consistency, score increments, material-error caps,
 local contradictions, indirect constructions, open-ended adequacy,
-official-style adequacy, rule precedence, holistic sufficiency, and arithmetic.
-The
+official-style adequacy, and arithmetic. The
 `confidence` field must be exactly `high`, `medium`, or `low`, and the exact
 total must be recomputed from itemized scores.
 

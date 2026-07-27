@@ -1,5 +1,7 @@
 # TASK9 Candidate-v3.3 Rule Precedence Experiment / TASK9 Candidate-v3.3 规则优先级实验
 
+Status / 状态：**rejected by the pre-registered safety gate; active skill remains v3.2 / 未通过预注册安全门；active skill 保持 v3.2**
+
 ## 中文
 
 本实验只修复一个已由开发集错题册确认的评分机制：
@@ -96,3 +98,12 @@ Candidate-v3.3 is accepted only if all conditions pass:
 If the gate fails, retain the negative result and candidate snapshot, but
 restore the active skill to v3.2. Do not edit the prompt and rerun after seeing
 this output; that would tune to run noise.
+
+Final artifacts / 最终产物：
+
+- `public-summary.json`: privacy-safe all-70 score metrics
+- `diagnosis-summary.json`: complete 31-case diagnosis aggregates
+- `iteration-delta-v32-v33.json`: privacy-safe resolved/persistent/regression comparison
+- `confidence-taxonomy-summary.json` and `CONFIDENCE-TAXONOMY.md`: confidence, flag, and mechanism audit
+- `acceptance-decision.json`: machine-readable gate result
+- `FAILURE-ANALYSIS.md`: fully bilingual interpretation and next-step recommendation

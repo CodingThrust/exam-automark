@@ -12,7 +12,7 @@
 - Skill：`skill_candidate_v3_3`
 - Prompt：`grade_candidate_v3_3_strict_schema`
 - Rubric：`DSAA3071-week5-v2`
-- Students：`S017`, `S021`, `S002`, `S015`, `S020`, `S016`, `S022`
+- Students：7 anonymous development students from the frozen students file
 - Split：`development`
 - Provider/model：`deepseek` / `deepseek-v4-pro`
 - Input mode：`text-only`

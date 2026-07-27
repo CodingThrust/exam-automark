@@ -64,7 +64,7 @@ Skill root: the directory containing this `SKILL.md`. Resolve scripts and
 references relative to that directory; do not assume a Claude- or Codex-specific
 home path.
 
-### Candidate v3.3 grading contract
+### Candidate v3.2 grading contract
 
 Grade from visible evidence, not from assumed intent. For every scored question,
 first record the visible equation, statement, diagram feature, answer text, or
@@ -83,13 +83,9 @@ Award the integer credit for that one state only. Do not award duplicate credit:
 a keyword and its explanation belong to one element, and overlapping evidence
 cannot receive points twice. Sum non-overlapping element credit into a subtotal.
 Use the highest satisfied score band and any material-error cap only as upper
-bounds; they cannot raise the subtotal except when a question-specific
-`full_credit_rule` explicitly defines holistic sufficiency. In that case, the
-question-specific rule controls full-credit eligibility and the listed scoring
-elements are evidence anchors rather than a mandatory checklist. Full credit
-otherwise requires every explicitly required essential element to be
-demonstrated or expressed by a semantic equivalent, required terminology when
-explicitly requested, and no material contradiction.
+bounds; they cannot raise the subtotal. Full credit requires every required
+essential element to be demonstrated or expressed by a semantic equivalent,
+required terminology when explicitly requested, and no material contradiction.
 
 When the final answer is wrong, retain justified process credit for correct
 terms, concepts, formulas, substitutions, units, and reasoning unless the
@@ -144,18 +140,6 @@ Candidate v3.2 also adds targeted calibration rules:
 - Q9 conceptual essay policy: score broad valid evidence for the Church-Turing thesis
   when it is relevant, non-contradictory, and supports effective
   computability, even if it does not name the exact reference families.
-
-Candidate v3.3 adds rule precedence and holistic sufficiency. Read the task,
-question-specific `full_credit_rule`, and material-error conditions before
-turning scoring elements into points. When the `full_credit_rule` explicitly
-defines holistic sufficiency or says listed examples or evidence families are
-non-exhaustive, it controls full-credit eligibility. Use scoring elements and
-example families to organize evidence and partial credit, not as a checklist.
-Require all named elements only when the task or `full_credit_rule` explicitly
-says all are required. Brevity alone must not lower an evidence state. Every
-deduction must name a missing required behavior, term, or relation, or a visible
-contradiction; “too brief” or “missing another example family” alone is not a
-valid reason.
 
 Apply these explicit question-type rules:
 
@@ -270,8 +254,7 @@ For each student (in alphabetical order unless the user specifies otherwise):
   deduction. Also check missed semantic equivalents, missed keyword credit,
   duplicate credit, keyword misuse, score-band consistency, material-error
   caps, local contradictions, indirect constructions, open-ended adequacy,
-  official-style adequacy, rule precedence, holistic sufficiency, and
-  arithmetic.
+  official-style adequacy, and arithmetic.
    The second pass must revisit the source image and evidence, not merely repeat
    the first score.
 

@@ -105,8 +105,8 @@ class SkillSnapshotTests(unittest.TestCase):
         )
         self.assertEqual(len(set(snapshot.skill_hashes.values())), 1)
 
-    def test_current_skill_directories_match_candidate_v33_snapshot(self):
-        snapshot_path = Path("experiments/skill_versions/skill_candidate_v3_3.json")
+    def test_current_skill_directories_match_candidate_v32_snapshot(self):
+        snapshot_path = Path("experiments/skill_versions/skill_candidate_v3_2.json")
         snapshot = SkillSnapshot.from_json_path(snapshot_path)
         rebuilt = build_skill_snapshot(
             skill_version_id=snapshot.skill_version_id,

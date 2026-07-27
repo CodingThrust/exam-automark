@@ -817,5 +817,99 @@ class ExperimentRecordFileTests(unittest.TestCase):
             self.assertRegex(bilingual_text, r"[\u4e00-\u9fff]")
 
 
+class CandidateV33RulePrecedenceRecordTests(unittest.TestCase):
+    RECORD_ROOT = Path(
+        "experiments/records/DSAA3071-week5-candidate-v33-q9-precedence"
+    )
+
+    def test_candidate_v33_is_rejected_by_the_frozen_severe_error_gate(self):
+        decision = json.loads(
+            (self.RECORD_ROOT / "acceptance-decision.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        conditions = {
+            row["metric"]: row for row in decision["conditions"]
+        }
+
+        self.assertEqual(decision["decision"], "rejected")
+        self.assertEqual(
+            decision["active_skill_version_after_decision"],
+            "skill_candidate_v3_2",
+        )
+        self.assertEqual(
+            [row["metric"] for row in decision["conditions"] if not row["passed"]],
+            ["severe_error_pairs"],
+        )
+        self.assertEqual(conditions["severe_error_pairs"]["observed"], 17)
+        self.assertEqual(conditions["q9_mae"]["observed"], 7.0)
+        self.assertFalse(decision["heldout_or_test_accessed"])
+        self.assertFalse(decision["post_result_rerun_performed"])
+
+    def test_candidate_v33_complete_public_error_lifecycle_is_present(self):
+        summary = json.loads(
+            (self.RECORD_ROOT / "public-summary.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        diagnoses = json.loads(
+            (self.RECORD_ROOT / "diagnosis-summary.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        delta = json.loads(
+            (self.RECORD_ROOT / "iteration-delta-v32-v33.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        confidence = json.loads(
+            (self.RECORD_ROOT / "confidence-taxonomy-summary.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        self.assertEqual(summary["population"]["student_question_pairs"], 70)
+        self.assertEqual(summary["population"]["error_pairs"], 31)
+        self.assertEqual(summary["population"]["severe_error_pairs"], 17)
+        self.assertEqual(diagnoses["review"]["case_count"], 31)
+        self.assertTrue(diagnoses["review"]["all_error_cases_reviewed"])
+        self.assertEqual(delta["counts"]["resolved"], 3)
+        self.assertEqual(delta["counts"]["regression"], 1)
+        self.assertEqual(confidence["population"]["error_pairs"], 31)
+        self.assertEqual(confidence["population"]["technical_failure_count"], 0)
+
+    def test_candidate_v33_failure_and_settlement_are_fully_bilingual_and_private(self):
+        failure = (self.RECORD_ROOT / "FAILURE-ANALYSIS.md").read_text(
+            encoding="utf-8"
+        )
+        audit = (self.RECORD_ROOT / "CONFIDENCE-TAXONOMY.md").read_text(
+            encoding="utf-8"
+        )
+        settlement = Path(
+            "experiments/records/weekly-todo-integration-2026-07/"
+            "TASK9-ZULIP-SETTLEMENT.md"
+        ).read_text(encoding="utf-8")
+
+        for text in (failure, audit):
+            self.assertIn("## 中文版", text)
+            self.assertIn("## English Version", text)
+        self.assertIn("## 中文", settlement)
+        self.assertIn("## English", settlement)
+        for public_text in (failure, audit, settlement):
+            self.assertNotRegex(public_text, r"\bS[0-9]{3}\b")
+            self.assertNotIn("DEEPSEEK_API_KEY=", public_text)
+        self.assertNotIn("TASK6", audit)
+        self.assertNotIn("candidate-v3.3 先处理", audit)
+
+        plan_text = (self.RECORD_ROOT / "experiment-plan.json").read_text(
+            encoding="utf-8"
+        )
+        protocol = (self.RECORD_ROOT / "RUN-PROTOCOL.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotRegex(plan_text + protocol, r"\bS[0-9]{3}\b")
+        self.assertEqual(json.loads(plan_text)["student_count"], 7)
+
+
 if __name__ == "__main__":
     unittest.main()

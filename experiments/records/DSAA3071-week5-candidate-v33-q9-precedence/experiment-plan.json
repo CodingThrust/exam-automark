@@ -4,15 +4,8 @@
   "course_id": "DSAA3071",
   "assessment_id": "week5_test",
   "split": "development",
-  "student_ids": [
-    "S017",
-    "S021",
-    "S002",
-    "S015",
-    "S020",
-    "S016",
-    "S022"
-  ],
+  "student_count": 7,
+  "student_list_source": "experiments/records/DSAA3071-week5-test-plan/students-development.txt",
   "predecessor": {
     "skill_version_id": "skill_candidate_v3_2",
     "skill_hash": "4ea2786fb9cf4cab3b55e9710cd780241886df739c9299029e507d202625c57e",
@@ -43,8 +36,16 @@
     "only_intended_change": "candidate-v3.3 prompt and skill add rule precedence and holistic sufficiency"
   },
   "model_calls_planned": 1,
-  "model_calls_completed": 0,
-  "model_run_status": "not_started",
+  "model_calls_completed": 1,
+  "model_run_status": "passed_validation_candidate_rejected",
+  "run": {
+    "run_id": "deepseek-C33-q9-precedence-text-dev-reviewed-r1",
+    "run_commit": "3f2adce",
+    "students_expected": 7,
+    "students_passed": 7,
+    "technical_failures": 0,
+    "total_tokens": 118551
+  },
   "heldout_or_test_accessed": false,
   "acceptance_gate": "experiments/records/DSAA3071-week5-candidate-v33-q9-precedence/acceptance-gate.json"
 }

@@ -1,0 +1,88 @@
+{
+  "by_question": [
+    {
+      "persistent_improved": 1,
+      "persistent_unchanged": 1,
+      "persistent_worsened": 2,
+      "question_id": "Q5",
+      "regression": 0,
+      "resolved": 1
+    },
+    {
+      "persistent_improved": 2,
+      "persistent_unchanged": 1,
+      "persistent_worsened": 3,
+      "question_id": "Q6",
+      "regression": 0,
+      "resolved": 1
+    },
+    {
+      "persistent_improved": 1,
+      "persistent_unchanged": 2,
+      "persistent_worsened": 1,
+      "question_id": "Q7",
+      "regression": 1,
+      "resolved": 1
+    },
+    {
+      "persistent_improved": 4,
+      "persistent_unchanged": 3,
+      "persistent_worsened": 0,
+      "question_id": "Q8",
+      "regression": 0,
+      "resolved": 0
+    },
+    {
+      "persistent_improved": 3,
+      "persistent_unchanged": 1,
+      "persistent_worsened": 2,
+      "question_id": "Q9",
+      "regression": 0,
+      "resolved": 0
+    },
+    {
+      "persistent_improved": 1,
+      "persistent_unchanged": 2,
+      "persistent_worsened": 0,
+      "question_id": "Q10",
+      "regression": 0,
+      "resolved": 0
+    }
+  ],
+  "counts": {
+    "persistent_improved": 12,
+    "persistent_unchanged": 10,
+    "persistent_worsened": 8,
+    "regression": 1,
+    "resolved": 3
+  },
+  "interpretation_limits": {
+    "en": [
+      "Resolved means the prior version disagreed and the new version matches gold; regression means the reverse.",
+      "Persistent means the same student-question pair still disagrees and does not prove that its root cause is unchanged.",
+      "Comparison is restricted to the same course, assessment, and development split."
+    ],
+    "zh": [
+      "resolved 表示旧版本错、新版本与 gold 一致；regression 表示旧版本一致、新版本出错。",
+      "persistent 只说明同一学生-题目对仍有分差，不自动证明根因未改变。",
+      "该比较只允许同一课程、测验和 development split。"
+    ]
+  },
+  "provenance": {
+    "assessment_id": "week5_test",
+    "course_id": "DSAA3071",
+    "current_output_set_sha256": "d8e3d4956b93d3f226bdbd1c72fa25d20e944c8ea580108bbd881a4b658f18a5",
+    "current_run_id": "deepseek-C33-q9-precedence-text-dev-reviewed-r1",
+    "current_skill_version_id": "skill_candidate_v3_3",
+    "previous_output_set_sha256": "ceb327e8dd8ae8f57e7246f3d0ce9c656741b3b76151528533807376829c45a7",
+    "previous_run_id": "deepseek-C32-text-dev-reviewed-r1",
+    "previous_skill_version_id": "skill_candidate_v3_2"
+  },
+  "record_type": "grading_error_book_iteration_delta_public",
+  "schema_version": 1,
+  "scope": {
+    "contains_answer_or_evidence_text": false,
+    "contains_student_level_records": false,
+    "split": "development"
+  }
+}

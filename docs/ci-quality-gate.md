@@ -15,11 +15,13 @@ CI 不能证明模型评分已经变准。它能防止的是已经被测试覆�
 
 ### 三个稳定检查
 
+三项检查都属于 `CI` workflow；分支保护使用下表中的准确 context 名：
+
 | 状态检查 | 内容 | 当前最低发现数 |
 | --- | --- | ---: |
-| `CI / Core tests` | 核心评分、advisor workflow、报告与研究记录逻辑 | 218 |
-| `CI / Physics tests` | Physics benchmark、packet、privacy、评分流程 | 85 |
-| `CI / Safety and provenance gates` | 调研 manifest 审计，以及隐私、held-out 审批和 sealed-test 负向控制 | 不适用 |
+| `Core tests` | 核心评分、advisor workflow、报告与研究记录逻辑 | 218 |
+| `Physics tests` | Physics benchmark、packet、privacy、评分流程 | 85 |
+| `Safety and provenance gates` | 调研 manifest 审计，以及隐私、held-out 审批和 sealed-test 负向控制 | 不适用 |
 
 `scripts/run_ci_tests.py` 先统计测试，再运行测试。如果路径写错导致发现
 0 个测试，或者发现数低于已经审核过的基线，CI 会失败，而不是出现
@@ -78,11 +80,14 @@ sealed-test controls, and research provenance.
 
 ### Three stable checks
 
+All three checks belong to the `CI` workflow. Branch protection uses the exact
+contexts in the table:
+
 | Status check | Coverage | Current discovery floor |
 | --- | --- | ---: |
-| `CI / Core tests` | Core grading, advisor workflow, reporting, and research-record logic | 218 |
-| `CI / Physics tests` | Physics benchmark, packets, privacy, and grading flow | 85 |
-| `CI / Safety and provenance gates` | Manifest audits plus privacy, held-out approval, and sealed-test negative controls | N/A |
+| `Core tests` | Core grading, advisor workflow, reporting, and research-record logic | 218 |
+| `Physics tests` | Physics benchmark, packets, privacy, and grading flow | 85 |
+| `Safety and provenance gates` | Manifest audits plus privacy, held-out approval, and sealed-test negative controls | N/A |
 
 `scripts/run_ci_tests.py` counts tests before running them. A bad discovery
 path that returns zero tests, or a count below the reviewed baseline, fails

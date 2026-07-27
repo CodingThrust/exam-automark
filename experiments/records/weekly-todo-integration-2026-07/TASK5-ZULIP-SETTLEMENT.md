@@ -14,9 +14,9 @@
 
 ### 做了什么
 
-- 增加 `CI / Core tests`，运行至少 218 个 core 测试；
-- 增加 `CI / Physics tests`，运行至少 85 个 Physics 测试；
-- 增加 `CI / Safety and provenance gates`，单独执行调研记录审计、
+- 在 `CI` workflow 增加 `Core tests`，运行至少 218 个 core 测试；
+- 在 `CI` workflow 增加 `Physics tests`，运行至少 85 个 Physics 测试；
+- 在 `CI` workflow 增加 `Safety and provenance gates`，单独执行调研记录审计、
   privacy、held-out approval 和 sealed-test 负向控制；
 - 增加测试发现数门禁，避免错误的 discovery 路径运行 0 个测试仍显示成功；
 - 首次 Ubuntu CI 暴露了目录哈希排序依赖操作系统的问题；现已固定为
@@ -61,9 +61,9 @@ repository owner's ability to merge their own pull requests.
 
 ### What was done
 
-- Added `CI / Core tests` with a floor of 218 discovered core tests.
-- Added `CI / Physics tests` with a floor of 85 discovered Physics tests.
-- Added `CI / Safety and provenance gates` for research-record audits plus
+- Added `Core tests` to the `CI` workflow with a floor of 218 discovered core tests.
+- Added `Physics tests` to the `CI` workflow with a floor of 85 discovered Physics tests.
+- Added `Safety and provenance gates` to the `CI` workflow for research-record audits plus
   privacy, held-out approval, and sealed-test negative controls.
 - Added a discovery-count gate so a wrong path cannot run zero tests and pass.
 - The first Ubuntu run exposed platform-dependent directory-hash ordering. The

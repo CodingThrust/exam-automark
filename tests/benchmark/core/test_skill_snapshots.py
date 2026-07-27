@@ -1,3 +1,4 @@
+import hashlib
 import json
 import tempfile
 import unittest
@@ -64,6 +65,32 @@ class SkillSnapshotTests(unittest.TestCase):
 
         self.assertTrue(snapshot.mirror_synchronized)
         self.assertIn("directories", snapshot.hash_policy)
+
+    def test_directory_snapshot_uses_portable_posix_path_order(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            (root / "references").mkdir(parents=True)
+            content_by_path = {
+                "SKILL.md": "skill\n",
+                "references/prompt.md": "prompt\n",
+            }
+            for relative_path, content in content_by_path.items():
+                (root / relative_path).write_text(content, encoding="utf-8")
+
+            snapshot = build_skill_snapshot(
+                skill_version_id="skill_portable_order",
+                source_paths={"agents": root},
+            )
+            expected = hashlib.sha256()
+            for relative_path in ("references/prompt.md", "SKILL.md"):
+                content = content_by_path[relative_path]
+                expected.update(relative_path.encode("utf-8"))
+                expected.update(b"\0")
+                expected.update(content.encode("utf-8"))
+                expected.update(b"\0")
+
+        self.assertEqual(snapshot.canonical_hash, expected.hexdigest())
+        self.assertIn("case-folded POSIX relative-path order", snapshot.hash_policy)
 
     def test_checked_in_baseline_snapshot_is_synchronized(self):
         snapshot = SkillSnapshot.from_json_path(

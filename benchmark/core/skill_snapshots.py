@@ -21,7 +21,8 @@ class SkillSnapshot:
     canonical_hash: str
     hash_policy: str = (
         "sha256(normalized LF utf-8 text for files; recursive relative path plus "
-        "normalized content for directories)"
+        "normalized content in case-folded POSIX relative-path order with an "
+        "original-path tie-breaker for directories)"
     )
     schema_version: int = 1
 
@@ -124,7 +125,14 @@ def _source_hash(path: Path) -> str:
 
 def _directory_hash(path: Path) -> str:
     digest = hashlib.sha256()
-    for file_path in sorted(item for item in path.rglob("*") if item.is_file()):
+    files = (item for item in path.rglob("*") if item.is_file())
+    for file_path in sorted(
+        files,
+        key=lambda item: (
+            item.relative_to(path).as_posix().casefold(),
+            item.relative_to(path).as_posix(),
+        ),
+    ):
         digest.update(file_path.relative_to(path).as_posix().encode("utf-8"))
         digest.update(b"\0")
         digest.update(_normalized_file_bytes(file_path))

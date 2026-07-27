@@ -3,7 +3,7 @@
 > 状态：已准备，尚未实际发送到 Zulip。
 > Status: prepared, not yet posted to Zulip.
 >
-> PR：待创建 / PR: pending
+> PR: https://github.com/CodingThrust/exam-automark/pull/35
 
 ## 中文
 

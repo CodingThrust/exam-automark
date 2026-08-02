@@ -1,5 +1,19 @@
 # Candidate-v3.2 错题与缺陷分析 / Candidate-v3.2 Error and Defect Analysis
 
+## 2026-08-02 人工裁决更正 / Human-adjudication correction
+
+本文件保留当时对 33 个分差的模型诊断，但其中后来进入 Q6/Q9 回归套件的六例
+已经人工复核：确认模型错误为 0，六例全部退出硬门禁。Q8 另复核三例，得到一个
+转录管线错误和两个评分合同冲突。所以下文“已确认模型错误”“Q9 可直接修改”等
+表述必须视为历史的 provisional 判断，不能再单独作为调参依据。
+
+This file preserves the original model-led diagnosis of 33 disagreements.
+Human review later found zero confirmed model errors among the six Q6/Q9 cases
+selected for regression, so all six left the hard gate. Three Q8 cases yielded
+one transcription-pipeline error and two scoring-contract conflicts. Claims
+below that these cases were confirmed or directly actionable are historical
+provisional judgments and must not independently drive tuning.
+
 ## 中文版
 
 ### 结论

@@ -1,0 +1,64 @@
+{
+  "record_type": "grading_error_human_adjudication_public_summary",
+  "schema_version": 1,
+  "status": "retired_after_human_adjudication",
+  "adjudication_date": "2026-08-02",
+  "source_suite_id": "DSAA3071-W5-Q6-Q9-C33-error-regressions-v1",
+  "scope": {
+    "split": "development",
+    "contains_student_level_records": false,
+    "contains_answer_or_evidence_text": false,
+    "review_material": "original submissions, reviewed transcripts, official question, and official solution"
+  },
+  "review": {
+    "reviewed_target_cases": 6,
+    "confirmed_model_error_cases": 0,
+    "retired_target_cases": 6,
+    "active_regression_target_cases": 0
+  },
+  "by_question": [
+    {
+      "question_id": "Q6",
+      "reviewed_cases": 2,
+      "confirmed_model_error_cases": 0,
+      "retired_target_cases": 2,
+      "disposition": "gold_or_score_policy_conflict_and_tolerable_band_difference"
+    },
+    {
+      "question_id": "Q9",
+      "reviewed_cases": 4,
+      "confirmed_model_error_cases": 0,
+      "retired_target_cases": 4,
+      "disposition": "defensible_model_reasoning_or_tolerable_band_difference"
+    }
+  ],
+  "additional_input_contract_review": {
+    "question_id": "Q8",
+    "reviewed_cases": 3,
+    "confirmed_grading_model_error_cases": 0,
+    "transcription_pipeline_error_cases": 1,
+    "scoring_contract_conflict_cases": 2,
+    "intended_exponent": "2^n",
+    "contract_conflict": "The formula generates positive lengths from one onward, while the printed example and official solution include epsilon."
+  },
+  "decision": {
+    "hard_gate_active": false,
+    "historical_outputs_preserved": true,
+    "new_target_requirement_zh": "新回归目标必须先由人工查看原始作答与评分合同，确认是模型错误后才能进入硬门禁。",
+    "new_target_requirement_en": "A new regression target must be confirmed as a model error by human review of the original response and scoring contract before it becomes a hard gate."
+  },
+  "rationale_zh": [
+    "Q6 的两例都不足以证明模型错误：一例使用了有效的 dovetailing 方法却得到可疑的官方零分，另一例只是普通评分宽松度差异。",
+    "Q9 的四例中，模型对循环论证、证据不具体或证据不明确的判断具有可辩护性；另有一例只有三分差，按导师要求不作为非平凡错误。",
+    "因此旧套件的零通过负对照只证明旧门禁能识别与 gold 的差异，不能证明存在六个真实评分缺陷。"
+  ],
+  "rationale_en": [
+    "Neither Q6 target establishes a model error: one uses a valid dovetailing technique despite a questionable official zero, and the other is an ordinary scoring-leniency difference.",
+    "For all four Q9 targets, the model's concerns about circularity, specificity, or unclear evidence are defensible; one case differs by only three points and is excluded under the advisor's tolerance.",
+    "The historical zero-pass negative control therefore shows only that the old gates detect disagreement with gold, not that six real grading defects were present."
+  ],
+  "limitations": {
+    "zh": "本次只裁决了旧套件六例和 Q8 三例，不能推断其余分差都是正确或错误。",
+    "en": "This adjudication covers only the six historical targets and three Q8 cases; it does not classify every remaining score difference."
+  }
+}

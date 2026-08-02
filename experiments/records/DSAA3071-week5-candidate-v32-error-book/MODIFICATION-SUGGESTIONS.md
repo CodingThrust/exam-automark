@@ -1,5 +1,18 @@
 # 修改建议与下一步决策 / Modification Suggestions and Next Decision
 
+## 2026-08-02 supersession / 2026-08-02 更新
+
+下面的 A→C 建议是人工裁决前的历史方案，现已被 TASK8A 取代。六个 Q6/Q9
+回归目标均未被人工确认为模型错误；Q8 属于转录与评分合同问题。当前不应继续
+围绕这些分差修改 skill，而应扩展更多 week/instance，先收集经人工确认的
+非平凡错题，同时把 Q8 用于 transcript 与 direct-multimodal 配对。
+
+The A-then-C plan below predates human adjudication and is superseded by
+TASK8A. None of the six Q6/Q9 regression targets was confirmed as a model
+error, and Q8 exposes transcription and scoring-contract issues. The current
+priority is to expand instances and collect human-confirmed nontrivial errors,
+while using Q8 for paired transcript versus direct-multimodal evaluation.
+
 ## 中文版
 
 ### 推荐方案：A，然后 C

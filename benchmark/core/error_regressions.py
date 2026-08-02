@@ -337,6 +337,12 @@ def _validate_policy(
         raise ValueError("regression policy schema_version must be 1")
     if policy.get("split") != "development":
         raise ValueError("regression policy must be development-only")
+    status = policy.get("status", "active")
+    if status != "active":
+        raise ValueError(
+            "regression policy is retired after human adjudication and "
+            "cannot build an active suite"
+        )
     suite_id = policy.get("suite_id")
     if not isinstance(suite_id, str) or not suite_id.strip():
         raise ValueError("regression policy requires a nonblank suite_id")

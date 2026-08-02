@@ -1,6 +1,19 @@
 # TASK9B: DSAA3071 Week 5 Error Regression Suite
 
+Status / 状态：**retired after human adjudication / 经人工裁决后退役**
+
+The active target count is zero. The six historical targets and their 0/6
+negative control are retained only as an audit trail; they must not gate or
+tune future grading-skill versions. See HUMAN-ADJUDICATION.md and
+human-adjudication-summary.json.
+
+当前活动目标为 0。六个历史目标及其 0/6 负对照只作为审计记录保留，不得继续
+阻止或驱动未来评分 skill。详细裁决见 HUMAN-ADJUDICATION.md 和
+human-adjudication-summary.json。
+
 ## 中文
+
+以下“目的、硬门禁与使用方法”是 2026-08-02 人工裁决前的历史设计，现已停用。
 
 ### 目的
 

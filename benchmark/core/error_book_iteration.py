@@ -494,7 +494,8 @@ def _validate_regression_suites(
     if not isinstance(raw_suites, list) or not raw_suites:
         return (), ["registry must define at least one regression suite"]
 
-    suite_ids: list[str] = []
+    all_suite_ids: list[str] = []
+    required_suite_ids: list[str] = []
     for descriptor in raw_suites:
         if not isinstance(descriptor, dict):
             findings.append("regression suite descriptor must be an object")
@@ -503,11 +504,31 @@ def _validate_regression_suites(
         if not isinstance(suite_id, str) or not suite_id:
             findings.append("regression suite descriptor requires suite_id")
             continue
-        if suite_id in suite_ids:
+        if suite_id in all_suite_ids:
             findings.append(f"duplicate regression suite_id: {suite_id}")
             continue
-        suite_ids.append(suite_id)
+        all_suite_ids.append(suite_id)
         label = f"regression suite {suite_id}"
+        status = descriptor.get("status", "active")
+        if status not in {"active", "retired_after_human_adjudication"}:
+            findings.append(f"{label}: invalid status")
+        required = descriptor.get("required_for_future_registry_entries")
+        if status == "active":
+            if required is not True:
+                findings.append(
+                    f"{label}: active suite must be required for future entries"
+                )
+            else:
+                required_suite_ids.append(suite_id)
+        elif status == "retired_after_human_adjudication":
+            if required is not False:
+                findings.append(
+                    f"{label}: retired suite must not be required for future entries"
+                )
+            if descriptor.get("active_target_case_count") != 0:
+                findings.append(
+                    f"{label}: retired suite must have zero active target cases"
+                )
 
         private_hash = descriptor.get("private_suite_sha256")
         if not isinstance(private_hash, str) or SHA256.fullmatch(private_hash) is None:
@@ -535,6 +556,13 @@ def _validate_regression_suites(
             descriptor.get("public_negative_control"),
             label=f"{label} public negative control",
         )
+        adjudication_path = None
+        if status == "retired_after_human_adjudication":
+            adjudication_path = _repo_artifact(
+                repo_root,
+                descriptor.get("human_adjudication_summary"),
+                label=f"{label} human adjudication summary",
+            )
         for path, artifact_label in (
             (policy_path, "policy"),
             (summary_path, "public suite summary"),
@@ -549,6 +577,8 @@ def _validate_regression_suites(
                 findings.append(f"{label}: policy suite_id mismatch")
             if policy.get("split") != "development":
                 findings.append(f"{label}: policy must be development-only")
+            if policy.get("status", "active") != status:
+                findings.append(f"{label}: policy status mismatch")
         if summary_path is not None and summary_path.is_file():
             summary = _read_json(summary_path)
             findings.extend(
@@ -577,7 +607,40 @@ def _validate_regression_suites(
                 findings.append(
                     f"{label}: negative control must reject every target case"
                 )
-    return tuple(suite_ids), findings
+        if status == "retired_after_human_adjudication":
+            if adjudication_path is None or not adjudication_path.is_file():
+                findings.append(f"{label}: missing human adjudication summary")
+            else:
+                adjudication = _read_json(adjudication_path)
+                findings.extend(
+                    f"{label}: unsafe human adjudication summary: {finding}"
+                    for finding in audit_public_error_summary(adjudication)
+                )
+                review = adjudication.get("review", {})
+                if adjudication.get("source_suite_id") != suite_id:
+                    findings.append(
+                        f"{label}: human adjudication suite_id mismatch"
+                    )
+                if (
+                    adjudication.get("status")
+                    != "retired_after_human_adjudication"
+                ):
+                    findings.append(
+                        f"{label}: human adjudication status mismatch"
+                    )
+                if review.get("reviewed_target_cases") != target_count:
+                    findings.append(
+                        f"{label}: human adjudication target count mismatch"
+                    )
+                if review.get("confirmed_model_error_cases") != 0:
+                    findings.append(
+                        f"{label}: retired suite cannot contain confirmed model errors"
+                    )
+                if review.get("active_regression_target_cases") != 0:
+                    findings.append(
+                        f"{label}: retired suite adjudication must have zero active targets"
+                    )
+    return tuple(required_suite_ids), findings
 
 
 def _load_reviewed_cases(

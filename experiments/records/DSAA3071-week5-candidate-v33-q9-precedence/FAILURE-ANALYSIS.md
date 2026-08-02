@@ -1,5 +1,19 @@
 # Candidate-v3.3 未通过分析 / Candidate-v3.3 Failure Analysis
 
+## 2026-08-02 人工裁决更正 / Human-adjudication correction
+
+v3.3 的拒绝结论保持不变：它确实未通过预注册的全局严重错误门槛。但后来人工
+复核表明，进入历史回归套件的四个 Q9 案例均不能确认为模型错误。因此下文关于
+Q9 机制错误数量和“高客观性模型错误”的逐例归因是历史 provisional 诊断，
+不能继续作为硬门禁或新一轮调参目标。
+
+The v3.3 rejection remains valid because it failed the pre-registered global
+severe-error gate. Later human review, however, did not confirm any of the four
+Q9 cases selected for the historical regression suite as model errors.
+Case-level claims below about Q9 mechanism failures or highly objective model
+errors are therefore historical provisional diagnoses, not active gates or
+tuning targets.
+
 ## 中文版
 
 ### 结论

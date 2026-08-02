@@ -1,5 +1,16 @@
 # TASK9B Settlement: Machine-Checkable Typical-Error Regressions
 
+## 2026-08-02 correction / 2026-08-02 更正
+
+After human adjudication, zero of the six targets remained confirmed model
+errors. This suite is now retired with zero active targets. Its historical
+outputs remain auditable but no longer constrain future skill versions. Use
+TASK8A-HUMAN-ADJUDICATION-ZULIP-SETTLEMENT.md as the current settlement.
+
+人工查看原始作答和评分合同后，六例中没有一例能继续确认为模型错误。本套件
+现已退役，活动目标为 0；历史输出保留审计，但不再约束未来 skill。当前结算
+以 TASK8A-HUMAN-ADJUDICATION-ZULIP-SETTLEMENT.md 为准。
+
 ## 中文
 
 ### 做了什么

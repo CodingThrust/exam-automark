@@ -2,6 +2,16 @@
 
 Status / 状态：**rejected by the pre-registered safety gate; active skill remains v3.2 / 未通过预注册安全门；active skill 保持 v3.2**
 
+Human-adjudication update / 人工裁决更新：The four Q9 cases later selected for
+the historical regression suite were not confirmed as model errors. This does
+not reverse the candidate rejection: v3.3 still failed its pre-registered
+global severe-error gate. It only withdraws the case-level claim that the
+historical Q9 targets were confirmed defects.
+
+后来进入历史回归套件的四个 Q9 案例均未被人工确认为模型错误。这不会推翻
+v3.3 的 rejected 决定，因为它仍未通过预注册的全局严重错误门槛；被撤回的只是
+“这些 Q9 案例已确认是模型缺陷”的逐例结论。
+
 ## 中文
 
 本实验只修复一个已由开发集错题册确认的评分机制：

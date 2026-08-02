@@ -186,6 +186,22 @@ class ErrorRegressionTests(unittest.TestCase):
                     policy_path=policy_path,
                 )
 
+    def test_retired_policy_cannot_be_rebuilt_as_an_active_suite(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            book, diagnoses, policy_path, _, policy = self._fixture(root)
+            policy["status"] = "retired_after_human_adjudication"
+            policy_path.write_text(json.dumps(policy), encoding="utf-8")
+
+            with self.assertRaisesRegex(
+                ValueError, "retired after human adjudication"
+            ):
+                build_regression_suite(
+                    private_book_path=book,
+                    diagnoses_path=diagnoses,
+                    policy_path=policy_path,
+                )
+
     def test_rejects_held_out_source(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -409,7 +425,7 @@ class ErrorRegressionTests(unittest.TestCase):
 
 
 class CommittedRegressionRecordTests(unittest.TestCase):
-    def test_public_record_is_privacy_safe_and_detects_known_errors(self):
+    def test_historical_record_and_adjudication_are_privacy_safe(self):
         suite = json.loads(
             (RECORD_ROOT / "public-suite-summary.json").read_text(
                 encoding="utf-8"
@@ -420,9 +436,15 @@ class CommittedRegressionRecordTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
+        adjudication = json.loads(
+            (RECORD_ROOT / "human-adjudication-summary.json").read_text(
+                encoding="utf-8"
+            )
+        )
 
         self.assertEqual(audit_public_error_summary(suite), [])
         self.assertEqual(audit_public_error_summary(negative_control), [])
+        self.assertEqual(audit_public_error_summary(adjudication), [])
         self.assertEqual(suite["target_case_count"], 6)
         self.assertEqual(
             {
@@ -445,13 +467,18 @@ class CommittedRegressionRecordTests(unittest.TestCase):
             negative_control["observations"]["exact_gold"]["exact_cases"],
             0,
         )
+        self.assertEqual(
+            adjudication["status"], "retired_after_human_adjudication"
+        )
+        self.assertEqual(adjudication["review"]["confirmed_model_error_cases"], 0)
+        self.assertEqual(adjudication["review"]["active_regression_target_cases"], 0)
 
     def test_readme_is_bilingual_and_states_necessary_not_sufficient(self):
         text = (RECORD_ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("## 中文", text)
         self.assertIn("## English", text)
-        self.assertIn("必要条件", text)
-        self.assertIn("necessary", text)
+        self.assertIn("人工裁决", text)
+        self.assertIn("human adjudication", text)
 
     def test_registry_requires_and_validates_the_regression_suite(self):
         self.assertEqual(
@@ -474,7 +501,7 @@ class CommittedRegressionRecordTests(unittest.TestCase):
             any("regression suite" in finding for finding in findings)
         )
 
-    def test_future_registry_entry_cannot_skip_regression_evaluation(self):
+    def test_retired_suite_does_not_require_future_regression_evaluation(self):
         with tempfile.TemporaryDirectory() as tmp:
             registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
             future = copy.deepcopy(registry["entries"][-1])
@@ -499,11 +526,42 @@ class CommittedRegressionRecordTests(unittest.TestCase):
                 registry_path=path,
             )
 
-        self.assertTrue(
-            any(
-                "missing regression evaluation" in finding
-                for finding in findings
+        self.assertFalse(
+            any("missing regression evaluation" in finding for finding in findings)
+        )
+
+    def test_active_suite_requires_future_regression_evaluation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
+            descriptor = registry["regression_suites"][0]
+            descriptor["status"] = "active"
+            descriptor["required_for_future_registry_entries"] = True
+            descriptor.pop("active_target_case_count", None)
+            descriptor.pop("human_adjudication_summary", None)
+            future = copy.deepcopy(registry["entries"][-1])
+            future.update(
+                {
+                    "skill_version_id": "skill_future_fixture",
+                    "predecessor_skill_version_id": registry[
+                        "active_skill_version_id"
+                    ],
+                    "iteration_delta_status": "compared",
+                    "public_iteration_delta": None,
+                }
             )
+            future.pop("public_regression_evaluations", None)
+            registry["entries"].append(future)
+            registry["active_skill_version_id"] = "skill_future_fixture"
+            path = Path(tmp) / "active-without-regression.json"
+            path.write_text(json.dumps(registry), encoding="utf-8")
+
+            findings = validate_error_book_registry(
+                repo_root=REPO_ROOT,
+                registry_path=path,
+            )
+
+        self.assertTrue(
+            any("missing regression evaluation" in finding for finding in findings)
         )
 
 

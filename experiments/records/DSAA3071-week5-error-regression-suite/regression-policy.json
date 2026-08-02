@@ -2,6 +2,13 @@
   "schema_version": 1,
   "suite_id": "DSAA3071-W5-Q6-Q9-C33-error-regressions-v1",
   "split": "development",
+  "status": "retired_after_human_adjudication",
+  "active_target_case_count": 0,
+  "retirement": {
+    "date": "2026-08-02",
+    "reason": "No historical target remained a confirmed model error after human review.",
+    "public_summary": "experiments/records/DSAA3071-week5-error-regression-suite/human-adjudication-summary.json"
+  },
   "selectors": [
     {
       "selector_id": "Q6-severe-unsupported-credit",

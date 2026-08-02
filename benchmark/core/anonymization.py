@@ -14,6 +14,8 @@ SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 REVIEW_STATUSES = frozenset({"pending", "approved", "rejected"})
 
 ANONYMIZATION_REVIEW_COLUMNS = (
+    "render_spec_sha256",
+    "artifact_manifest_sha256",
     "anonymous_id",
     "source_page",
     "output_image",
@@ -292,12 +294,59 @@ def expected_review_pairs(layout: Mapping[str, Any]) -> set[tuple[str, int]]:
     return pairs
 
 
+def expected_review_outputs(
+    layout: Mapping[str, Any],
+) -> dict[tuple[str, int], tuple[str, str]]:
+    """Return the deterministic rendered image/PDF path for every layout page.
+
+    Final human approvals are meaningful only when each row is tied to the
+    actual anonymous page the reviewer inspected.  Source-page numbers cannot
+    be used as image page numbers because a student's assigned source pages
+    need not be consecutive.
+    """
+
+    outputs: dict[tuple[str, int], tuple[str, str]] = {}
+    groups = layout.get("page_groups")
+    if not isinstance(groups, list):
+        raise ValueError("page_groups must be a list")
+    for group in groups:
+        if not isinstance(group, Mapping):
+            raise ValueError("each page group must be an object")
+        anonymous_id = group.get("anonymous_id")
+        source_pages = group.get("source_pages")
+        if not isinstance(anonymous_id, str) or not isinstance(source_pages, list):
+            raise ValueError("page group requires anonymous_id and source_pages")
+        output_pdf = f"anonymized_pdfs/{anonymous_id}.pdf"
+        for local_page, source_page in enumerate(source_pages, start=1):
+            if not _is_positive_int(source_page):
+                raise ValueError("source_pages must contain positive integers")
+            pair = (anonymous_id, source_page)
+            if pair in outputs:
+                raise ValueError("page groups must not duplicate anonymous source pages")
+            outputs[pair] = (
+                f"anonymized_pages/{anonymous_id}/{anonymous_id}-p{local_page:02d}.png",
+                output_pdf,
+            )
+    return outputs
+
+
 def review_rows_for_layout(
     layout: Mapping[str, Any],
     *,
     identity_rectangles: Sequence[Mapping[str, float]],
+    render_spec_sha256: str,
+    artifact_manifest_sha256: str,
 ) -> list[dict[str, str]]:
+    if not SHA256_PATTERN.fullmatch(render_spec_sha256):
+        raise ValueError(
+            "render_spec_sha256 must be a 64-character lowercase SHA-256 digest"
+        )
+    if not SHA256_PATTERN.fullmatch(artifact_manifest_sha256):
+        raise ValueError(
+            "artifact_manifest_sha256 must be a 64-character lowercase SHA-256 digest"
+        )
     rows: list[dict[str, str]] = []
+    expected_outputs = expected_review_outputs(layout)
     for group in layout.get("page_groups", []):
         if not isinstance(group, Mapping):
             continue
@@ -306,11 +355,11 @@ def review_rows_for_layout(
         masks_by_page = _masks_by_page(group)
         output_pdf = f"anonymized_pdfs/{anonymous_id}.pdf"
         for local_page, source_page in enumerate(source_pages, start=1):
-            output_image = (
-                f"anonymized_pages/{anonymous_id}/{anonymous_id}-p{local_page:02d}.png"
-            )
+            output_image, output_pdf = expected_outputs[(anonymous_id, source_page)]
             rows.append(
                 {
+                    "render_spec_sha256": render_spec_sha256,
+                    "artifact_manifest_sha256": artifact_manifest_sha256,
                     "anonymous_id": anonymous_id,
                     "source_page": str(source_page),
                     "output_image": output_image,
@@ -354,6 +403,9 @@ def validate_anonymization_review(
     review_path: Path,
     *,
     expected_pairs: Iterable[tuple[str, int]],
+    expected_outputs: Mapping[tuple[str, int], tuple[str, str]],
+    expected_render_spec_sha256: str | None,
+    expected_artifact_manifest_sha256: str | None,
 ) -> dict[str, Any]:
     with review_path.open(newline="", encoding="utf-8-sig") as handle:
         reader = csv.DictReader(handle)
@@ -364,6 +416,7 @@ def validate_anonymization_review(
         column for column in ANONYMIZATION_REVIEW_COLUMNS if column not in fieldnames
     ]
     expected = set(expected_pairs)
+    output_pairs = set(expected_outputs)
     actual_pairs: list[tuple[str, int]] = []
     malformed_pairs = 0
     invalid_statuses = 0
@@ -371,8 +424,25 @@ def validate_anonymization_review(
     blindness_unapproved = 0
     answer_content_unapproved = 0
     missing_audit_trails = 0
+    render_spec_binding_mismatches = 0
+    artifact_manifest_binding_mismatches = 0
+    output_path_mismatches = 0
+    expected_render_spec_valid = isinstance(
+        expected_render_spec_sha256, str
+    ) and bool(SHA256_PATTERN.fullmatch(expected_render_spec_sha256))
+    expected_artifact_manifest_valid = isinstance(
+        expected_artifact_manifest_sha256, str
+    ) and bool(SHA256_PATTERN.fullmatch(expected_artifact_manifest_sha256))
 
     for row in rows:
+        if _cell(row, "render_spec_sha256") != expected_render_spec_sha256:
+            render_spec_binding_mismatches += 1
+        if (
+            _cell(row, "artifact_manifest_sha256")
+            != expected_artifact_manifest_sha256
+        ):
+            artifact_manifest_binding_mismatches += 1
+
         anonymous_id = _cell(row, "anonymous_id")
         source_page_text = _cell(row, "source_page")
         try:
@@ -383,7 +453,14 @@ def validate_anonymization_review(
             if not ANONYMOUS_ID_PATTERN.fullmatch(anonymous_id) or source_page <= 0:
                 malformed_pairs += 1
             else:
-                actual_pairs.append((anonymous_id, source_page))
+                pair = (anonymous_id, source_page)
+                actual_pairs.append(pair)
+                expected_output = expected_outputs.get(pair)
+                if expected_output is None or (
+                    _cell(row, "output_image") != expected_output[0]
+                    or _cell(row, "output_pdf") != expected_output[1]
+                ):
+                    output_path_mismatches += 1
 
         for status_column, reviewer_column, reviewed_at_column in _REVIEW_STATUS_COLUMNS:
             status = _cell(row, status_column)
@@ -428,6 +505,60 @@ def validate_anonymization_review(
             else (
                 f"malformed={malformed_pairs}; duplicates={len(duplicate_pairs)}; "
                 f"missing={len(missing_pairs)}; unexpected={len(unexpected_pairs)}"
+            ),
+        ),
+        _check_item(
+            "review_output_paths_match_layout",
+            output_pairs == expected and output_path_mismatches == 0,
+            "every review row is tied to its deterministic anonymous image and PDF"
+            if output_pairs == expected and output_path_mismatches == 0
+            else (
+                f"expected-output mapping differs for {len(expected ^ output_pairs)} pairs; "
+                f"{output_path_mismatches} review rows name a different image or PDF"
+            ),
+        ),
+        _check_item(
+            "review_render_spec_matches_preparation",
+            expected_render_spec_valid
+            and render_spec_binding_mismatches == 0
+            and bool(rows),
+            "every review row is bound to the preparation render specification"
+            if expected_render_spec_valid
+            and render_spec_binding_mismatches == 0
+            and rows
+            else (
+                "preparation render-spec hash is invalid"
+                if not expected_render_spec_valid
+                else (
+                    "review has no rows"
+                    if not rows
+                    else (
+                        f"{render_spec_binding_mismatches} review rows belong to a "
+                        "different render specification"
+                    )
+                )
+            ),
+        ),
+        _check_item(
+            "review_artifact_manifest_matches_preparation",
+            expected_artifact_manifest_valid
+            and artifact_manifest_binding_mismatches == 0
+            and bool(rows),
+            "every review row is bound to the rendered output artifact manifest"
+            if expected_artifact_manifest_valid
+            and artifact_manifest_binding_mismatches == 0
+            and rows
+            else (
+                "preparation artifact-manifest hash is invalid"
+                if not expected_artifact_manifest_valid
+                else (
+                    "review has no rows"
+                    if not rows
+                    else (
+                        f"{artifact_manifest_binding_mismatches} review rows belong "
+                        "to a different rendered artifact manifest"
+                    )
+                )
             ),
         ),
         _check_item(

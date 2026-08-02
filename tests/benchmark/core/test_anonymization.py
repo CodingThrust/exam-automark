@@ -7,6 +7,7 @@ from pathlib import Path
 from benchmark.core.anonymization import (
     ANONYMIZATION_REVIEW_COLUMNS,
     expected_review_pairs,
+    expected_review_outputs,
     validate_anonymization_review,
     validate_page_layout,
 )
@@ -14,6 +15,8 @@ from benchmark.core.schema import CourseSpec
 
 
 REPO_ROOT = Path(__file__).parents[3]
+RENDER_SPEC_SHA256 = "b" * 64
+ARTIFACT_MANIFEST_SHA256 = "c" * 64
 
 
 class AnonymousPageLayoutTests(unittest.TestCase):
@@ -52,11 +55,14 @@ class AnonymizationReviewTests(unittest.TestCase):
         layout = _layout()
         with tempfile.TemporaryDirectory() as tmp:
             review_path = Path(tmp) / "anonymization_review.csv"
-            _write_review(review_path, expected_review_pairs(layout))
+            _write_review(review_path, expected_review_pairs(layout), layout)
 
             ready = validate_anonymization_review(
                 review_path,
                 expected_pairs=expected_review_pairs(layout),
+                expected_outputs=expected_review_outputs(layout),
+                expected_render_spec_sha256=RENDER_SPEC_SHA256,
+                expected_artifact_manifest_sha256=ARTIFACT_MANIFEST_SHA256,
             )
 
             with review_path.open(encoding="utf-8") as handle:
@@ -66,11 +72,57 @@ class AnonymizationReviewTests(unittest.TestCase):
             blocked = validate_anonymization_review(
                 review_path,
                 expected_pairs=expected_review_pairs(layout),
+                expected_outputs=expected_review_outputs(layout),
+                expected_render_spec_sha256=RENDER_SPEC_SHA256,
+                expected_artifact_manifest_sha256=ARTIFACT_MANIFEST_SHA256,
             )
 
         self.assertEqual(ready["status"], "ready")
         self.assertEqual(blocked["status"], "not_ready")
         self.assertIn("blindness_review_approved", blocked["failed_checks"])
+
+    def test_old_approval_cannot_be_reused_for_different_rendered_artifacts(self):
+        layout = _layout()
+        with tempfile.TemporaryDirectory() as tmp:
+            review_path = Path(tmp) / "anonymization_review.csv"
+            _write_review(review_path, expected_review_pairs(layout), layout)
+
+            report = validate_anonymization_review(
+                review_path,
+                expected_pairs=expected_review_pairs(layout),
+                expected_outputs=expected_review_outputs(layout),
+                expected_render_spec_sha256="d" * 64,
+                expected_artifact_manifest_sha256="e" * 64,
+            )
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn(
+            "review_render_spec_matches_preparation", report["failed_checks"]
+        )
+        self.assertIn(
+            "review_artifact_manifest_matches_preparation", report["failed_checks"]
+        )
+
+    def test_review_output_paths_must_match_layout(self):
+        layout = _layout()
+        with tempfile.TemporaryDirectory() as tmp:
+            review_path = Path(tmp) / "anonymization_review.csv"
+            _write_review(review_path, expected_review_pairs(layout), layout)
+            with review_path.open(encoding="utf-8") as handle:
+                rows = list(csv.DictReader(handle))
+            rows[0]["output_image"] = "anonymized_pages/S002/S002-p01.png"
+            _write_rows(review_path, rows)
+
+            report = validate_anonymization_review(
+                review_path,
+                expected_pairs=expected_review_pairs(layout),
+                expected_outputs=expected_review_outputs(layout),
+                expected_render_spec_sha256=RENDER_SPEC_SHA256,
+                expected_artifact_manifest_sha256=ARTIFACT_MANIFEST_SHA256,
+            )
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn("review_output_paths_match_layout", report["failed_checks"])
 
     def test_partial_week3_course_spec_is_explicitly_seventy_points(self):
         course = CourseSpec.from_json_path(
@@ -120,7 +172,10 @@ def _layout() -> dict[str, object]:
     }
 
 
-def _write_review(path: Path, pairs: set[tuple[str, int]]) -> None:
+def _write_review(
+    path: Path, pairs: set[tuple[str, int]], layout: dict[str, object]
+) -> None:
+    outputs = expected_review_outputs(layout)
     rows = []
     for anonymous_id, source_page in sorted(pairs):
         row = {column: "" for column in ANONYMIZATION_REVIEW_COLUMNS}
@@ -128,8 +183,10 @@ def _write_review(path: Path, pairs: set[tuple[str, int]]) -> None:
             {
                 "anonymous_id": anonymous_id,
                 "source_page": str(source_page),
-                "output_image": f"anonymized_pages/{anonymous_id}/p{source_page}.png",
-                "output_pdf": f"anonymized_pdfs/{anonymous_id}.pdf",
+                "render_spec_sha256": RENDER_SPEC_SHA256,
+                "artifact_manifest_sha256": ARTIFACT_MANIFEST_SHA256,
+                "output_image": outputs[(anonymous_id, source_page)][0],
+                "output_pdf": outputs[(anonymous_id, source_page)][1],
                 "privacy_review_status": "approved",
                 "privacy_reviewer": "reviewer",
                 "privacy_reviewed_at": "2026-08-02T00:00:00Z",

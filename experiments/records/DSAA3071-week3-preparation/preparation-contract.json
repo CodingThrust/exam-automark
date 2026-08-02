@@ -1,0 +1,129 @@
+{
+  "assessment_id": "week3_partial_pages_1_and_3",
+  "course_id": "DSAA3071",
+  "created_date": "2026-08-02",
+  "data_quality": {
+    "comparison_unit": "the same anonymous student-question pair scored through a matched reviewed-transcript or direct-multimodal input arm",
+    "grain": "one anonymous student-question score",
+    "risk_register": [
+      {
+        "control": "Create page groups only after matching original Page 1 and Page 3 using private identity fields; retain only S### IDs afterward.",
+        "risk": "A wrong Page 1/Page 3 pairing joins two students and corrupts both text and multimodal comparisons."
+      },
+      {
+        "control": "Every rendered page needs separate human privacy, blind-scoring, and answer-content-preservation approval.",
+        "risk": "Identity, total marks, ticks/crosses, red annotations, or grader comments can leak private information or gold scores."
+      },
+      {
+        "control": "Freeze the split before model calls; derive text and direct-multimodal packets from the same approved page group.",
+        "risk": "Changing students or inputs between arms makes an apparent modality difference uninterpretable."
+      },
+      {
+        "control": "Use reviewed transcripts as an input-integrity reference, not silently as every provider's text-only input.",
+        "risk": "A model's own transcription errors would otherwise be hidden in a text-versus-multimodal comparison."
+      }
+    ],
+    "source_shape": "46 scanned image-only pages: 23 Page-1 fragments and 23 Page-3 fragments"
+  },
+  "experiment_status": "data_preparation_only_no_model_calls",
+  "full_assessment": {
+    "all_question_ids": [
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4",
+      "Q5",
+      "Q6",
+      "Q7",
+      "Q8",
+      "Q9",
+      "Q10"
+    ],
+    "max_total": 130
+  },
+  "input_arms": [
+    {
+      "id": "reviewed_transcript",
+      "purpose": "Human-audited representation baseline and transcription-error diagnosis",
+      "required_artifacts": [
+        "one transcript JSON per anonymous student",
+        "per-question unclear flag",
+        "human comparison against the approved anonymous image"
+      ]
+    },
+    {
+      "id": "provider_fresh_transcript_then_grade",
+      "purpose": "Measure an agent's own transcription-plus-grading route",
+      "required_artifacts": [
+        "provider-specific transcription output",
+        "strict transcript schema validation",
+        "separate grading packet from that provider output"
+      ]
+    },
+    {
+      "id": "direct_multimodal",
+      "purpose": "Grade the same approved anonymous images directly",
+      "required_artifacts": [
+        "approved PNG page inputs",
+        "packet manifest with image hashes",
+        "blind-scoring approval for every page"
+      ]
+    }
+  ],
+  "model_run_allowed": false,
+  "partial_scope": {
+    "in_scope_question_ids": [
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4",
+      "Q9",
+      "Q10"
+    ],
+    "max_total": 70,
+    "out_of_scope_question_ids": [
+      "Q5",
+      "Q6",
+      "Q7",
+      "Q8"
+    ],
+    "reason": "The available combined student scan has Page 1 and Page 3 for 23 students but not Page 2. This partial benchmark must never be described as a 130-point full Week 3 evaluation."
+  },
+  "required_gates_before_any_model_call": [
+    {
+      "id": "private_page_pairing_frozen",
+      "status": "blocked",
+      "requirement": "Private layout covers all 46 source pages exactly once and pairs each Page 1 with its Page 3."
+    },
+    {
+      "id": "privacy_and_blindness_review",
+      "status": "blocked",
+      "requirement": "Every generated page has human approval for identity removal, grading-evidence removal, and in-scope answer preservation."
+    },
+    {
+      "id": "split_frozen",
+      "status": "blocked",
+      "requirement": "Development and held-out anonymous IDs are deterministically assigned before any model output is inspected."
+    },
+    {
+      "id": "course_contract_and_gold_ready",
+      "status": "blocked",
+      "requirement": "The partial 70-point course spec, rubric, and complete private per-question gold table are independently checked."
+    },
+    {
+      "id": "matched_packets_audited",
+      "status": "blocked",
+      "requirement": "Transcript and direct-multimodal packets use the same students, question scope, rubric, and declared provider route."
+    }
+  ],
+  "source_anchors": {
+    "official_solution_sha256": "e4e797bf6cadbfe0ca4be9ad2a8ac4454a03f1def548b1aa4a93a19d0e643383",
+    "official_solution_pages": 4,
+    "raw_student_scan_sha256": "62d5c86174965557c5ff753d787d2c533431d464f929af6b72cb83f285c05324",
+    "raw_student_scan_pages": 46
+  },
+  "supersedes": [
+    "The previous approximate claim that Week 3 supplied about 15 complete three-page submissions.",
+    "Any reading of the source inventory that treats the current raw scan as a complete 130-point Week 3 assessment."
+  ]
+}

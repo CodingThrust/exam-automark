@@ -1,0 +1,87 @@
+{
+  "anonymous_id_pattern": "^S[0-9]{3}$",
+  "assessment_id": "week3_partial_pages_1_and_3",
+  "course_id": "DSAA3071",
+  "input_modes": [
+    "image",
+    "pdf",
+    "transcript",
+    "text"
+  ],
+  "notes": [
+    "This is intentionally a partial Week 3 assessment specification.",
+    "The available raw combined scan contains 23 copies of Page 1 and Page 3, but not Page 2.",
+    "Only Q1-Q4, Q9, and Q10 are in scope. Q5-Q8 must not appear in gold, transcripts, packets, predictions, or metrics for this partial benchmark.",
+    "The six in-scope questions total 70 points. The original full Week 3 assessment totals 130 points.",
+    "The raw source is scanned, identity-bearing, and contains human grading evidence; it is not model-ready until anonymization and blind-scoring review pass.",
+    "Question titles summarize the official question-plus-solution PDF without publishing student work."
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": [
+        "multiple_choice",
+        "cfg"
+      ],
+      "title": "CFG formal definition"
+    },
+    {
+      "id": "Q2",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": [
+        "multiple_choice",
+        "cfg",
+        "ambiguity"
+      ],
+      "title": "Meaning of grammar ambiguity"
+    },
+    {
+      "id": "Q3",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": [
+        "multiple_choice",
+        "pda"
+      ],
+      "title": "PDA versus DFA"
+    },
+    {
+      "id": "Q4",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": [
+        "multiple_choice",
+        "pda",
+        "epsilon"
+      ],
+      "title": "PDA epsilon stack notation"
+    },
+    {
+      "id": "Q9",
+      "max_score": 25.0,
+      "score_step": 1.0,
+      "tags": [
+        "construction",
+        "cfg_to_pda",
+        "multimodal"
+      ],
+      "title": "Convert a CFG to an equivalent PDA"
+    },
+    {
+      "id": "Q10",
+      "max_score": 25.0,
+      "score_step": 1.0,
+      "tags": [
+        "conceptual",
+        "nondeterminism",
+        "pda"
+      ],
+      "title": "Why nondeterminism is needed in a PDA"
+    }
+  ],
+  "score_unit": "points",
+  "source_status": "partial_scope_frozen_no_model_run"
+}

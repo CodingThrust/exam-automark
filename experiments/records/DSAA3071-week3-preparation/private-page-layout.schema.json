@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Private anonymous page layout for a scanned combined assessment",
+  "description": "Store the instantiated layout only under ignored Data/. It contains anonymous IDs and source-page pairings, never names or student IDs.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "assessment_id",
+    "source_sha256",
+    "expected_page_count",
+    "page_groups",
+    "excluded_pages"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "assessment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "expected_page_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "page_groups": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "anonymous_id",
+          "source_pages",
+          "page_masks"
+        ],
+        "properties": {
+          "anonymous_id": {
+            "type": "string",
+            "pattern": "^S[0-9]{3}$"
+          },
+          "source_pages": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "page_masks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "source_page",
+                "reason",
+                "rectangles"
+              ],
+              "properties": {
+                "source_page": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "rectangles": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "#/$defs/rectangle"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "excluded_pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source_page",
+          "reason"
+        ],
+        "properties": {
+          "source_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "rectangle": {
+      "type": "object",
+      "required": [
+        "left",
+        "top",
+        "right",
+        "bottom"
+      ],
+      "properties": {
+        "left": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "top": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "right": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "bottom": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}

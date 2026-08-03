@@ -16,7 +16,7 @@ from .error_regressions import (
     write_regression_evaluation,
     write_regression_suite,
 )
-from .gold import validate_gold_table, write_gold_report
+from .gold import validate_gold_subset_table, validate_gold_table, write_gold_report
 from .headless_runner import HeadlessPacketRunConfig, run_headless_packet
 from .inventory import write_data_inventory
 from .model_runner import INPUT_MODES, ModelPacketRunConfig, run_model_packet
@@ -206,6 +206,19 @@ def _build_parser() -> argparse.ArgumentParser:
     gold.add_argument("--student-id", action="append", dest="student_ids")
     gold.add_argument("--students-file", type=Path)
     gold.add_argument("--output", type=Path)
+
+    gold_subset = subparsers.add_parser(
+        "validate-gold-subset",
+        help=(
+            "strictly validate selected students from a shared private gold CSV "
+            "without treating unfinished held-out rows as errors"
+        ),
+    )
+    gold_subset.add_argument("--course", type=Path, required=True)
+    gold_subset.add_argument("--gold", type=Path, required=True)
+    gold_subset.add_argument("--student-id", action="append", dest="student_ids")
+    gold_subset.add_argument("--students-file", type=Path)
+    gold_subset.add_argument("--output", type=Path)
 
     course_metrics = subparsers.add_parser(
         "compare-course-runs",
@@ -585,6 +598,28 @@ def main(argv: Sequence[str] | None = None) -> int:
                 json.dumps(
                     {
                         "status": report["status"],
+                        "failed_checks": report["failed_checks"],
+                        "output": str(args.output) if args.output is not None else None,
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0 if report["status"] == "ready" else 1
+        if args.command == "validate-gold-subset":
+            course = CourseSpec.from_json_path(args.course)
+            report = validate_gold_subset_table(
+                course,
+                args.gold,
+                _load_student_ids(args.student_ids, args.students_file),
+            )
+            if args.output is not None:
+                write_gold_report(report, args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": report["status"],
+                        "report_type": report["report_type"],
+                        "validation_scope": report["validation_scope"],
                         "failed_checks": report["failed_checks"],
                         "output": str(args.output) if args.output is not None else None,
                     },

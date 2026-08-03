@@ -1,0 +1,147 @@
+{
+  "assessment_id": "week4_full_q1_q10",
+  "course_id": "DSAA3071",
+  "grading_policy": {
+    "answer_first_policy": "Identify the answer or claim first. Award credit for correct semantic equivalents and independently correct relevant reasoning even when a student uses different wording, notation, cases, examples, or a valid proof route. Use reasoning to verify the claim and detect material contradictions; do not require keyword matching.",
+    "element_credit_rule": "Assign exactly one evidence level per scoring element. Do not duplicate points for repeated evidence. A material contradiction affects only its associated elements, not automatically every part of a multi-part answer.",
+    "score_step": 1,
+    "score_unit": "points"
+  },
+  "model_facing_language": "English",
+  "questions": [
+    {
+      "id": "Q1", "type": "multiple_choice", "max_score": 5, "correct_answer": "d",
+      "expected": "For the context-free pumping lemma, |uz| <= p is not a required condition.",
+      "rubric": [{"criterion": "Selects d or an equivalent statement.", "points": 5}, {"criterion": "Any incompatible choice or claim.", "points": 0}]
+    },
+    {
+      "id": "Q2", "type": "multiple_choice", "max_score": 5, "correct_answer": "b",
+      "expected": "A stack alphabet is not part of the Turing-machine 7-tuple.",
+      "rubric": [{"criterion": "Selects b or an equivalent statement.", "points": 5}, {"criterion": "Any incompatible choice or claim.", "points": 0}]
+    },
+    {
+      "id": "Q3", "type": "multiple_choice", "max_score": 5, "correct_answer": "b",
+      "expected": "Unlike a DFA, a Turing machine has unbounded read/write tape and may move its head in both directions.",
+      "rubric": [{"criterion": "Selects b or an equivalent capability statement.", "points": 5}, {"criterion": "Any incompatible choice or claim.", "points": 0}]
+    },
+    {
+      "id": "Q4", "type": "multiple_choice", "max_score": 5, "correct_answer": "b",
+      "expected": "A language is decidable when some Turing machine decides it: it halts on every input and accepts or rejects.",
+      "rubric": [{"criterion": "Selects b or an equivalent always-halting-decider statement.", "points": 5}, {"criterion": "Any incompatible choice or claim.", "points": 0}]
+    },
+    {
+      "id": "Q5", "type": "proof", "max_score": 25,
+      "expected": "Assume L={a^n b^n c^n | n>=0} is context-free with pumping length p. Choose s=a^p b^p c^p, apply the CFL pumping decomposition s=uvxyz with |vxy|<=p and |vy|>0, observe the window meets at most two of the three blocks, and show every possible pumping location changes fewer than all three counts. Pumping with i=0 or i=2 produces a string outside L, contradicting the lemma.",
+      "full_credit_rule": "Full credit requires a valid CFL pumping-lemma contradiction: a correct witness, all relevant decomposition conditions, the two-block locality insight, a complete correct treatment of possible positions or an equivalent general argument, and a valid pumped-string contradiction. Equivalent rigorous pumping proofs receive credit.",
+      "material_errors": [
+        {"id": "q5_invalid_pumping_window", "affects": ["q5_lemma_conditions", "q5_two_block_locality", "q5_case_argument"], "cap": 15, "description": "Treats the pumped window as able to span all three a/b/c blocks despite |vxy|<=p for the chosen witness."},
+        {"id": "q5_no_valid_pumping_contradiction", "affects": ["q5_case_argument", "q5_pumped_contradiction"], "cap": 14, "description": "Does not show that a permitted pump changes the required equal counts or otherwise leaves L."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 25, "maximum": 25}, "substantially_correct": {"minimum": 18, "maximum": 24}, "partially_correct": {"minimum": 8, "maximum": 17}, "minimal_relevant": {"minimum": 1, "maximum": 7}, "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q5_assume_cfl_and_p", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "Assume L is context-free and obtain a pumping length p for a proof by contradiction.", "required_for_full_credit": true},
+        {"id": "q5_choose_witness", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "Choose s=a^p b^p c^p and establish s is in L with length at least p.", "required_for_full_credit": true},
+        {"id": "q5_lemma_conditions", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Use a valid decomposition s=uvxyz and state/apply |vxy|<=p, |vy|>0, and pumping for all i>=0.", "required_for_full_credit": true},
+        {"id": "q5_two_block_locality", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Explain that a substring of length at most p cannot touch all three p-length blocks, so the pumping window touches at most two regions.", "required_for_full_credit": true},
+        {"id": "q5_case_argument", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 7}, "meaning": "Correctly cover the possible locations (within one block or crossing a/b or b/c), or give an equally rigorous general argument showing pumping cannot preserve all three equal counts.", "required_for_full_credit": true},
+        {"id": "q5_pumped_contradiction", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Choose a permitted i such as 0 or 2, show the pumped string is not in L, and conclude the contradiction/non-context-freeness.", "required_for_full_credit": true}
+      ]
+    },
+    {
+      "id": "Q6", "type": "short_answer", "max_score": 15,
+      "expected": "A configuration u q v represents current state q, tape contents uv, and a head scanning the first symbol of v. With tape 01101, state q3, and head on the second 1 (position 3), the configuration is 01 q3 101.",
+      "full_credit_rule": "Full credit requires the roles of u, q, and v, the head-at-first-symbol-of-v convention, and the correct concrete configuration 01 q3 101. Equivalent notation that unambiguously encodes the same tape/head/state receives credit.",
+      "material_errors": [
+        {"id": "q6_head_position_reversed", "affects": ["q6_configuration_semantics", "q6_concrete_configuration"], "cap": 8, "description": "Places the head at the end of v or on the wrong symbol while claiming the standard u q v convention."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 15, "maximum": 15}, "substantially_correct": {"minimum": 11, "maximum": 14}, "partially_correct": {"minimum": 5, "maximum": 10}, "minimal_relevant": {"minimum": 1, "maximum": 4}, "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q6_configuration_components", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Define u q v with q the current state and uv the tape contents (or an unambiguously equivalent configuration notation).", "required_for_full_credit": true},
+        {"id": "q6_head_semantics", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 2, "demonstrated": 4}, "meaning": "State that the head scans the first symbol of v, correctly locating the split in the tape contents.", "required_for_full_credit": true},
+        {"id": "q6_concrete_configuration", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 7}, "meaning": "For 01101 with q3 on position 3 (the second 1), give 01 q3 101 or an unambiguously equivalent notation.", "required_for_full_credit": true}
+      ]
+    },
+    {
+      "id": "Q7", "type": "short_answer", "max_score": 15,
+      "expected": "For {a^n b^n c^n | n>=1}, reject input not of form a+ b+ c+. Return to the left end; repeatedly mark the leftmost unmarked a, then the leftmost unmarked b, then the leftmost unmarked c, returning left. When no unmarked a remains, accept only if no unmarked b or c remains; otherwise reject.",
+      "full_credit_rule": "Full credit requires an implementation-level mark-and-scan decider that rejects malformed input, marks one a/b/c per pass in the correct order, repeats, and verifies no unmatched b or c remains. Equivalent internal state names and marks receive credit.",
+      "material_errors": [
+        {"id": "q7_marks_without_order", "affects": ["q7_marking_loop", "q7_finish_and_verify"], "cap": 9, "description": "Marks symbols without ensuring one a, then one b, then one c in each pass, so equality is not checked."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 15, "maximum": 15}, "substantially_correct": {"minimum": 11, "maximum": 14}, "partially_correct": {"minimum": 5, "maximum": 10}, "minimal_relevant": {"minimum": 1, "maximum": 4}, "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q7_validate_shape", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "First verify the input is a nonempty a-block followed by b-block followed by c-block; reject malformed order or missing block.", "required_for_full_credit": true},
+        {"id": "q7_marking_loop", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 6}, "meaning": "In each pass, find and mark the leftmost unmarked a, then the leftmost unmarked b, then the leftmost unmarked c, with coherent scans/returns.", "required_for_full_credit": true},
+        {"id": "q7_finish_and_verify", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "Repeat until no unmarked a remains and then explicitly check that no unmarked b or c remains.", "required_for_full_credit": true},
+        {"id": "q7_correct_outcome", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "Accept exactly when every required mark was paired; reject on a missing partner or leftover symbol.", "required_for_full_credit": true}
+      ]
+    },
+    {
+      "id": "Q8", "type": "short_answer", "max_score": 15,
+      "expected": "The machine for {0^(2^n)} repeatedly sweeps left-to-right crossing off every other 0 until exactly one remains. On 0000 it starts in q1, a first pass leaves two 0s, returns left, a second pass leaves one 0, and accepts. The count halves 4->2->1; an odd count greater than 1 such as 000 is rejected.",
+      "full_credit_rule": "Full credit requires the repeated every-other-0 algorithm, a coherent trace for 0000 with the two halving passes and acceptance, plus the 4->2->1 explanation and the odd-count rejection behavior. Exact official state labels are not required when the trace is internally consistent.",
+      "material_errors": [
+        {"id": "q8_accepts_odd_count", "affects": ["q8_second_pass_and_accept", "q8_power_of_two_reason"], "cap": 10, "description": "Claims an odd count greater than one such as 000 is accepted by the repeated-halving test."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 15, "maximum": 15}, "substantially_correct": {"minimum": 11, "maximum": 14}, "partially_correct": {"minimum": 5, "maximum": 10}, "minimal_relevant": {"minimum": 1, "maximum": 4}, "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q8_halving_algorithm", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "State the repeated left-to-right procedure that crosses off every other 0 until one remains.", "required_for_full_credit": true},
+        {"id": "q8_start_and_first_pass", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Give a coherent start on 0000 and a first alternating-mark pass leaving two uncrossed 0s.", "required_for_full_credit": true},
+        {"id": "q8_second_pass_and_accept", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Return left, perform the second alternating pass leaving one 0, and accept.", "required_for_full_credit": true},
+        {"id": "q8_power_of_two_reason", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 4}, "meaning": "Explain 4->2->1 and that an odd count greater than one (for example 000) is rejected.", "required_for_full_credit": true}
+      ]
+    },
+    {
+      "id": "Q9", "type": "short_answer", "max_score": 25,
+      "expected": "A recognizer accepts members but may reject or loop forever on nonmembers. A decider accepts members, rejects nonmembers, and always halts. A recognizer-but-not-decider can search for a proof and accept when found while running forever otherwise. Every decidable language is recognizable, but not conversely.",
+      "full_credit_rule": "Full credit requires correct recognizer behavior, correct decider behavior, the halting contrast, a valid recognizer-not-decider example, and the decidable-implies-recognizable relationship. Equivalent examples and wording receive credit.",
+      "material_errors": [
+        {"id": "q9_recognizer_must_halt", "affects": ["q9_recognizer_behavior", "q9_halting_contrast"], "cap": 15, "description": "Claims a recognizer must halt or reject every nonmember."},
+        {"id": "q9_decider_may_loop", "affects": ["q9_decider_behavior", "q9_halting_contrast"], "cap": 15, "description": "Claims a decider may loop forever on a nonmember."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 25, "maximum": 25}, "substantially_correct": {"minimum": 17, "maximum": 24}, "partially_correct": {"minimum": 8, "maximum": 16}, "minimal_relevant": {"minimum": 1, "maximum": 7}, "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q9_recognizer_behavior", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 6}, "meaning": "Members are accepted; a nonmember may be rejected or may cause nontermination.", "required_for_full_credit": true},
+        {"id": "q9_decider_behavior", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 6}, "meaning": "A decider halts on every input, accepting exactly members and rejecting nonmembers.", "required_for_full_credit": true},
+        {"id": "q9_halting_contrast", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 5}, "meaning": "Make explicit that recognition permits nontermination on no instances but decision does not.", "required_for_full_credit": true},
+        {"id": "q9_recognizer_not_decider_example", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 6}, "meaning": "Give a valid witness-search/proof-search or equivalent one-sided example.", "required_for_full_credit": true},
+        {"id": "q9_class_relationship", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "State every decidable language is recognizable, but not conversely.", "required_for_full_credit": true}
+      ]
+    },
+    {
+      "id": "Q10", "type": "short_answer", "max_score": 15,
+      "expected": "The three TM description levels are high-level algorithm, implementation-level tape mechanics, and formal 7-tuple. A palindrome example respectively compares outer symbols recursively/iteratively, marks/scans/compares outer symbols on tape, and specifies a 7-tuple with representative transitions.",
+      "full_credit_rule": "Full credit requires all three distinct levels and a correct palindrome construction/example for each. An exhaustive transition table is not required; a coherent 7-tuple-level sketch with representative transitions is sufficient.",
+      "material_errors": [],
+      "score_bands": {
+        "full": {"minimum": 15, "maximum": 15}, "substantially_correct": {"minimum": 10, "maximum": 14}, "partially_correct": {"minimum": 5, "maximum": 9}, "minimal_relevant": {"minimum": 1, "maximum": 4}, "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q10_high_level", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 5}, "meaning": "Identify a high-level algorithm and give a correct palindrome strategy such as repeatedly comparing outer symbols.", "required_for_full_credit": true},
+        {"id": "q10_implementation_level", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 5}, "meaning": "Identify tape mechanics and explain a coherent mark-scan-compare-move-inward palindrome procedure.", "required_for_full_credit": true},
+        {"id": "q10_formal_level", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 5}, "meaning": "Identify the formal 7-tuple level and give states, alphabets, or representative transitions sufficient to show the construction.", "required_for_full_credit": true}
+      ]
+    }
+  ],
+  "rubric_format": "concept_keyterm_v1",
+  "rubric_version": "DSAA3071-week4-full-v0",
+  "schema_version": 1,
+  "source": {
+    "basis": "Extracted, text-checked, and visually checked against the official DSAA3071 Week 4 question-plus-solution reference. This artifact contains rubric semantics only and no student examples.",
+    "official_reference_sha256": "1ee6feceb9836a4d1da872dab0f19b1206e4191402849c375689a5cc347baf78",
+    "reference_page_anchors": {"Q1_Q3": 1, "Q4_Q6": 2, "Q7_Q8": 3, "Q9_Q10": 4},
+    "student_packet_mapping_note": "The p01/p02/p03 mapping is separately user-confirmed for approved anonymized student packets and must not be inferred from four-page reference-PDF pagination.",
+    "status": "draft_extracted_from_official_solution_no_student_content"
+  },
+  "total_points": 130
+}

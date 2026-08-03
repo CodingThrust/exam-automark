@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "record_type": "question_gold_reviewer_binding",
+  "course_id": "DSAA3071",
+  "course_assessment_id": "week4_full_q1_q10",
+  "course_spec_sha256": "40774acac623eff76152b7aa5f23bf6b5ddaf1e7313d37bdb1b4a644971eb5fa",
+  "scoped_snapshot_assessment_id": "DSAA3071_week4_full_source_draft",
+  "scoped_snapshot_manifest_sha256": "f885abe857655cf011ddd4ff9ea0da1eb7dce63979fcec0c74ecea29cfd2c655",
+  "model_run_allowed": false,
+  "purpose": "Binds the corrected frozen full Week 4 course specification to exactly one approved private scoped-image snapshot for local human question-level gold review. This binding is not a model-run authorization.",
+  "purpose_zh": "将范围纠正后的 Week 4 全题课程规范绑定到唯一一份已批准的私有 scope 图片快照，仅供本地人工逐题 gold 复核使用；本文件不授权模型运行。"
+}

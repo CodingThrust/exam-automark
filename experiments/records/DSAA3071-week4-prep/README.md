@@ -1,5 +1,9 @@
 # DSAA3071 Week 4 Partial Benchmark Preparation
 
+> **Superseded / 已废弃：** Only Week 3 has the missing-page limitation. This
+> unrun W4 partial scope has been replaced by the full Q1--Q10 preparation at
+> [`DSAA3071-week4-full-prep`](../DSAA3071-week4-full-prep/). Do not run it.
+
 Status: preparation only. No model call, prediction, gold score, or accuracy
 claim has been made from this record.
 

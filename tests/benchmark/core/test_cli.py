@@ -535,6 +535,54 @@ class CoreCliTests(unittest.TestCase):
         self.assertEqual(result["status"], "ready")
         self.assertEqual(report["filled_score_rows"], 3)
 
+    def test_validate_gold_subset_command_filters_unfinished_heldout_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            gold_path = root / "primary_scores.csv"
+            report_path = root / "gold-subset-readiness.json"
+            with gold_path.open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(
+                    handle,
+                    fieldnames=("student_id", "question_id", "score"),
+                )
+                writer.writeheader()
+                for student_id, scores in {
+                    "S001": {"Q1": "10", "Q2a": "3", "Q2b": "2"},
+                    "S002": {"Q1": "", "Q2a": "", "Q2b": ""},
+                }.items():
+                    for question_id, score in scores.items():
+                        writer.writerow(
+                            {
+                                "student_id": student_id,
+                                "question_id": question_id,
+                                "score": score,
+                            }
+                        )
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "validate-gold-subset",
+                        "--course",
+                        str(FIXTURES / "course_dsaa3073_hw1.json"),
+                        "--gold",
+                        str(gold_path),
+                        "--student-id",
+                        "S001",
+                        "--output",
+                        str(report_path),
+                    ]
+                )
+            result = json.loads(stdout.getvalue())
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(code, 0)
+        self.assertEqual(result["report_type"], "gold_subset_readiness")
+        self.assertEqual(result["validation_scope"], "selected_students_only")
+        self.assertEqual(report["status"], "ready")
+        self.assertEqual(report["selected_rows_read"], 3)
+
     def test_validate_transcripts_command_writes_report(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

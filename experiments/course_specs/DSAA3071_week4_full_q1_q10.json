@@ -1,0 +1,39 @@
+{
+  "anonymous_id_pattern": "^S[0-9]{3}$",
+  "assessment_id": "week4_full_q1_q10",
+  "course_id": "DSAA3071",
+  "input_modes": ["image", "pdf", "transcript", "text"],
+  "notes": [
+    "This is the full 130-point DSAA3071 Week 4 assessment benchmark: Q1-Q10 are in scope.",
+    "The former Q1-Q4/Q9-Q10-only W4 preparation was superseded before any human gold or model output existed, after confirming that only Week 3 has missing pages.",
+    "The p01/p02/p03 mapping is the user-confirmed approved anonymous student-packet layout: p01 Q1-Q4, p02 Q5-Q8, p03 Q9-Q10. It must not be inferred from the four-page official reference PDF.",
+    "Direct multimodal and transcript-first conditions must use the same anonymous students, frozen split, question scope, rubric version, and gold table before comparison.",
+    "No raw student answers, identity map, gold score, or model output is contained in this tracked specification."
+  ],
+  "page_mapping": {
+    "basis": "user_confirmed_for_approved_anonymized_student_submission_packets_not_inferred_from_reference_pdf_pagination",
+    "p01": {"question_ids": ["Q1", "Q2", "Q3", "Q4"]},
+    "p02": {"question_ids": ["Q5", "Q6", "Q7", "Q8"]},
+    "p03": {"question_ids": ["Q9", "Q10"]}
+  },
+  "questions": [
+    {"id": "Q1", "max_score": 5.0, "score_step": 1.0, "tags": ["multiple_choice", "context_free_languages", "pumping_lemma"], "title": "CF pumping lemma condition that is not required"},
+    {"id": "Q2", "max_score": 5.0, "score_step": 1.0, "tags": ["multiple_choice", "turing_machine", "formal_definition"], "title": "Component not in the Turing-machine 7-tuple"},
+    {"id": "Q3", "max_score": 5.0, "score_step": 1.0, "tags": ["multiple_choice", "turing_machine", "dfa"], "title": "Turing-machine capability relative to a DFA"},
+    {"id": "Q4", "max_score": 5.0, "score_step": 1.0, "tags": ["multiple_choice", "decidability", "halting"], "title": "Definition of a decidable language"},
+    {"id": "Q5", "max_score": 25.0, "score_step": 1.0, "tags": ["proof", "context_free_languages", "pumping_lemma"], "title": "Pumping-lemma proof that {a^n b^n c^n} is not context-free"},
+    {"id": "Q6", "max_score": 15.0, "score_step": 1.0, "tags": ["short_answer", "turing_machine", "configuration"], "title": "Turing-machine configuration notation"},
+    {"id": "Q7", "max_score": 15.0, "score_step": 1.0, "tags": ["short_answer", "turing_machine", "implementation_level", "a_n_b_n_c_n"], "title": "Implementation-level decider for {a^n b^n c^n}"},
+    {"id": "Q8", "max_score": 15.0, "score_step": 1.0, "tags": ["short_answer", "turing_machine", "trace", "powers_of_two"], "title": "Trace of a Turing machine for powers of two"},
+    {"id": "Q9", "max_score": 25.0, "score_step": 1.0, "tags": ["short_answer", "turing_recognizable", "decidable", "halting"], "title": "Turing-recognizable versus decidable languages"},
+    {"id": "Q10", "max_score": 15.0, "score_step": 1.0, "tags": ["short_answer", "turing_machine", "description_levels", "palindrome"], "title": "Three Turing-machine description levels using a palindrome example"}
+  ],
+  "score_unit": "points",
+  "scope": {
+    "excluded_question_ids": [],
+    "full_assessment_total_points": 130.0,
+    "in_scope_question_ids": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10"],
+    "benchmark_total_points": 130.0
+  },
+  "source_status": "scope_frozen_after_user_corrected_w3_only_missing_page_rule_official_solution_rubric_v0_extracted_approved_anonymized_inputs_split_and_m1_t1_image_packets_ready_but_model_run_blocked_pending_gold_model_pinning_t1_lineage_and_explicit_approval"
+}

@@ -1,0 +1,38 @@
+{
+  "assessment_id": "week4_full_q1_q10",
+  "cohort_student_ids_sha256": "2ab486ec7b225f66aff3c1a922ac5f262afed52e5f9882ec972747b4c1411a76",
+  "course_id": "DSAA3071",
+  "development_count": 7,
+  "development_student_ids": [
+    "S002",
+    "S003",
+    "S007",
+    "S013",
+    "S015",
+    "S016",
+    "S022"
+  ],
+  "heldout_count": 15,
+  "heldout_student_ids": [
+    "S001",
+    "S004",
+    "S005",
+    "S006",
+    "S008",
+    "S009",
+    "S010",
+    "S011",
+    "S012",
+    "S014",
+    "S017",
+    "S018",
+    "S019",
+    "S020",
+    "S021"
+  ],
+  "schema_version": 1,
+  "seed": "DSAA3071-week4-partial-q1-q4-q9-q10-v1-20260803",
+  "selection_algorithm": "sha256_utf8(seed + '|' + student_id), ascending digest then student_id; lowest heldout_count IDs are held out",
+  "status": "frozen",
+  "student_count": 22
+}

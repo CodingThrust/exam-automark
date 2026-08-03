@@ -1,5 +1,6 @@
 import csv
 import json
+import tempfile
 from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable, Sequence
@@ -124,6 +125,50 @@ def validate_gold_table(
     }
 
 
+def validate_gold_subset_table(
+    course: CourseSpec,
+    gold_path: Path,
+    student_ids: Sequence[str],
+) -> dict[str, Any]:
+    """Strictly validate one selected cohort from a shared private gold table.
+
+    The full table can intentionally contain unfinished held-out rows while a
+    development cohort is ready for analysis.  This explicit helper copies
+    only the requested anonymous rows into a temporary file below the private
+    gold directory, then delegates to the unchanged strict validator.  It
+    never represents the full cohort as ready.
+    """
+
+    expected_students = tuple(student_ids)
+    if not expected_students:
+        raise ValueError("student_ids must not be empty")
+    source_path = Path(gold_path)
+    with tempfile.TemporaryDirectory(
+        prefix="exam-automark-selected-gold-",
+        dir=source_path.parent,
+    ) as tmp:
+        selected_path = Path(tmp) / "selected-gold.csv"
+        source_rows, selected_rows = _write_selected_gold(
+            source_path,
+            selected_path,
+            expected_students,
+        )
+        report = validate_gold_table(course, selected_path, expected_students)
+
+    report.update(
+        {
+            "report_type": "gold_subset_readiness",
+            "validation_scope": "selected_students_only",
+            "gold_path": source_path.as_posix(),
+            "source_gold_path": source_path.as_posix(),
+            "source_rows_read": source_rows,
+            "selected_rows_read": selected_rows,
+            "selected_student_count": len(expected_students),
+        }
+    )
+    return report
+
+
 def write_gold_report(report: dict[str, Any], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
@@ -137,6 +182,32 @@ def _read_csv(path: Path) -> tuple[list[dict[str, str]], tuple[str, ...]]:
     with path.open(newline="", encoding="utf-8-sig") as handle:
         reader = csv.DictReader(handle)
         return list(reader), tuple(reader.fieldnames or ())
+
+
+def _write_selected_gold(
+    source_path: Path,
+    selected_path: Path,
+    student_ids: Sequence[str],
+) -> tuple[int, int]:
+    """Copy requested anonymous rows to an ephemeral private validation CSV."""
+
+    selected_students = set(student_ids)
+    source_rows = 0
+    selected_rows = 0
+    with source_path.open(newline="", encoding="utf-8-sig") as source:
+        reader = csv.DictReader(source)
+        fieldnames = list(reader.fieldnames or ())
+        with selected_path.open("w", newline="", encoding="utf-8") as destination:
+            writer = csv.DictWriter(destination, fieldnames=fieldnames)
+            if fieldnames:
+                writer.writeheader()
+            for row in reader:
+                source_rows += 1
+                student_id = _cell(row, "student_id")
+                if student_id in selected_students:
+                    writer.writerow(row)
+                    selected_rows += 1
+    return source_rows, selected_rows
 
 
 def _cell(row: dict[str, str], key: str) -> str:

@@ -38,6 +38,9 @@ FORBIDDEN_PUBLIC_KEYS = {
     "output_file",
     "output_path",
     "notes",
+    "flag",
+    "flags",
+    "flags_on_error_cases",
 }
 
 
@@ -730,7 +733,15 @@ def _public_summary(
             key=lambda item: item.confidence,
             key_name="confidence",
         ),
-        "flags_on_error_cases": _flag_summary(error_items),
+        "model_flag_coverage": {
+            "error_pairs_with_model_flags": sum(
+                bool(item.flags) for item in error_items
+            ),
+            "error_pairs_without_model_flags": sum(
+                not item.flags for item in error_items
+            ),
+            "model_flag_text_published": False,
+        },
         "interpretation_limits": {
             "zh": [
                 "这里只报告开发集上的描述性统计，不能当作测试集准确率。",
@@ -742,8 +753,8 @@ def _public_summary(
                 "held-out accuracy.",
                 "Student-question evidence and diagnoses remain only in the "
                 "gitignored private error book.",
-                "Flags describe model outputs and are not confirmed root "
-                "causes before review.",
+                "Free-form model flags remain private and are not confirmed "
+                "root causes before review.",
             ],
         },
     }
@@ -815,24 +826,6 @@ def _magnitude_summary(items: list[_ScoredItem]) -> list[dict[str, Any]]:
             "error_pairs": sum(predicate(item.absolute_error) for item in items),
         }
         for label, predicate in bands
-    ]
-
-
-def _flag_summary(items: list[_ScoredItem]) -> list[dict[str, Any]]:
-    counts: Counter[str] = Counter()
-    severe_counts: Counter[str] = Counter()
-    for item in items:
-        labels = item.flags or ("no_flag",)
-        counts.update(labels)
-        if item.is_severe:
-            severe_counts.update(labels)
-    return [
-        {
-            "flag": flag,
-            "error_pairs": counts[flag],
-            "severe_error_pairs": severe_counts[flag],
-        }
-        for flag in sorted(counts)
     ]
 
 

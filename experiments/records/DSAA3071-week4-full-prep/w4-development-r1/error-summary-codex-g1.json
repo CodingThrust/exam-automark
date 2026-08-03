@@ -1,0 +1,231 @@
+{
+  "by_confidence": [
+    {
+      "confidence": "high",
+      "error_pairs": 15,
+      "exact_agreement": 0.666667,
+      "exact_pairs": 30,
+      "mae": 1.333333,
+      "pairs": 45,
+      "severe_error_pairs": 6,
+      "severe_error_rate_abs_ge_5": 0.133333,
+      "signed_error_mean": -0.088889
+    },
+    {
+      "confidence": "low",
+      "error_pairs": 6,
+      "exact_agreement": 0.0,
+      "exact_pairs": 0,
+      "mae": 6.0,
+      "pairs": 6,
+      "severe_error_pairs": 3,
+      "severe_error_rate_abs_ge_5": 0.5,
+      "signed_error_mean": -4.333333
+    },
+    {
+      "confidence": "medium",
+      "error_pairs": 17,
+      "exact_agreement": 0.105263,
+      "exact_pairs": 2,
+      "mae": 3.736842,
+      "pairs": 19,
+      "severe_error_pairs": 6,
+      "severe_error_rate_abs_ge_5": 0.315789,
+      "signed_error_mean": -3.631579
+    }
+  ],
+  "by_question": [
+    {
+      "error_pairs": 0,
+      "exact_agreement": 1.0,
+      "exact_pairs": 7,
+      "mae": 0.0,
+      "pairs": 7,
+      "question_id": "Q1",
+      "severe_error_pairs": 0,
+      "severe_error_rate_abs_ge_5": 0.0,
+      "signed_error_mean": 0.0
+    },
+    {
+      "error_pairs": 1,
+      "exact_agreement": 0.857143,
+      "exact_pairs": 6,
+      "mae": 0.142857,
+      "pairs": 7,
+      "question_id": "Q2",
+      "severe_error_pairs": 0,
+      "severe_error_rate_abs_ge_5": 0.0,
+      "signed_error_mean": 0.142857
+    },
+    {
+      "error_pairs": 1,
+      "exact_agreement": 0.857143,
+      "exact_pairs": 6,
+      "mae": 0.142857,
+      "pairs": 7,
+      "question_id": "Q3",
+      "severe_error_pairs": 0,
+      "severe_error_rate_abs_ge_5": 0.0,
+      "signed_error_mean": 0.142857
+    },
+    {
+      "error_pairs": 1,
+      "exact_agreement": 0.857143,
+      "exact_pairs": 6,
+      "mae": 0.714286,
+      "pairs": 7,
+      "question_id": "Q4",
+      "severe_error_pairs": 1,
+      "severe_error_rate_abs_ge_5": 0.142857,
+      "signed_error_mean": 0.714286
+    },
+    {
+      "error_pairs": 6,
+      "exact_agreement": 0.142857,
+      "exact_pairs": 1,
+      "mae": 2.571429,
+      "pairs": 7,
+      "question_id": "Q5",
+      "severe_error_pairs": 2,
+      "severe_error_rate_abs_ge_5": 0.285714,
+      "signed_error_mean": -2.285714
+    },
+    {
+      "error_pairs": 2,
+      "exact_agreement": 0.714286,
+      "exact_pairs": 5,
+      "mae": 1.142857,
+      "pairs": 7,
+      "question_id": "Q6",
+      "severe_error_pairs": 1,
+      "severe_error_rate_abs_ge_5": 0.142857,
+      "signed_error_mean": 1.142857
+    },
+    {
+      "error_pairs": 7,
+      "exact_agreement": 0.0,
+      "exact_pairs": 0,
+      "mae": 2.857143,
+      "pairs": 7,
+      "question_id": "Q7",
+      "severe_error_pairs": 0,
+      "severe_error_rate_abs_ge_5": 0.0,
+      "signed_error_mean": -2.857143
+    },
+    {
+      "error_pairs": 7,
+      "exact_agreement": 0.0,
+      "exact_pairs": 0,
+      "mae": 7.0,
+      "pairs": 7,
+      "question_id": "Q8",
+      "severe_error_pairs": 4,
+      "severe_error_rate_abs_ge_5": 0.571429,
+      "signed_error_mean": -5.571429
+    },
+    {
+      "error_pairs": 7,
+      "exact_agreement": 0.0,
+      "exact_pairs": 0,
+      "mae": 6.571429,
+      "pairs": 7,
+      "question_id": "Q9",
+      "severe_error_pairs": 5,
+      "severe_error_rate_abs_ge_5": 0.714286,
+      "signed_error_mean": -6.571429
+    },
+    {
+      "error_pairs": 6,
+      "exact_agreement": 0.142857,
+      "exact_pairs": 1,
+      "mae": 2.714286,
+      "pairs": 7,
+      "question_id": "Q10",
+      "severe_error_pairs": 2,
+      "severe_error_rate_abs_ge_5": 0.285714,
+      "signed_error_mean": 1.0
+    }
+  ],
+  "error_directions": {
+    "over_score": 11,
+    "under_score": 27
+  },
+  "error_magnitude_bands": [
+    {
+      "band": "gt_0_lt_1",
+      "error_pairs": 0
+    },
+    {
+      "band": "ge_1_lt_5",
+      "error_pairs": 23
+    },
+    {
+      "band": "ge_5",
+      "error_pairs": 15
+    }
+  ],
+  "interpretation_limits": {
+    "en": [
+      "These are descriptive development-split statistics, not held-out accuracy.",
+      "Student-question evidence and diagnoses remain only in the gitignored private error book.",
+      "Free-form model flags remain private and are not confirmed root causes before review."
+    ],
+    "zh": [
+      "这里只报告开发集上的描述性统计，不能当作测试集准确率。",
+      "逐个学生、逐道题的证据与诊断只保存在 git 忽略的私有错题集中。",
+      "标签只描述模型输出；在人工或最新模型复核前，不等同于已确认的根因。"
+    ]
+  },
+  "metrics": {
+    "question_exact_agreement": 0.457143,
+    "question_score_mae": 2.385714,
+    "question_signed_error_mean": -1.414286,
+    "severe_error_rate_abs_ge_5": 0.214286,
+    "student_total_score_mae": 14.142857,
+    "student_total_signed_error_mean": -14.142857
+  },
+  "model_flag_coverage": {
+    "error_pairs_with_model_flags": 29,
+    "error_pairs_without_model_flags": 9,
+    "model_flag_text_published": false
+  },
+  "population": {
+    "error_pairs": 38,
+    "exact_pairs": 32,
+    "severe_error_pairs": 15,
+    "student_question_pairs": 70,
+    "students": 7,
+    "technical_failure_count": 0,
+    "technical_failures_included_as_grading_cases": false
+  },
+  "provenance": {
+    "assessment_id": "week4_full_q1_q10",
+    "condition": "G1",
+    "course_id": "DSAA3071",
+    "data_snapshot_sha256": "f885abe857655cf011ddd4ff9ea0da1eb7dce63979fcec0c74ecea29cfd2c655",
+    "gold_sha256": "df608b89592e327fe281451f52e357eebcb972af634311251bd55b10ff280983",
+    "input_mode": "text-only",
+    "model": "gpt-5.6-sol",
+    "output_set_sha256": "faac3b0d517fcb89e77908bfd8ef9d03a92a52d48b636bfa51b5be9e2e1948ee",
+    "packet_id": "G1-codex-T1-dev-r1",
+    "packet_sha256": "d7037fd5f11bb3657f533f08b1b78f7216a2ec9fbcbc60b7fd643635a6059c99",
+    "prompt_sha256": "6943714995338d5a9d9586335cdd92797a9be5b95455dd50457bb223cd51833d",
+    "provider": "codex_cli",
+    "rubric_sha256": "0b2b13deb6644f7f175dade381073d60c3256743818a8b33217b4ef2f5a815b2",
+    "run_commit": "147e5af44b78a22f3483fb0cd18abc3434a2e20c",
+    "run_id": "g1-codex-gpt56sol",
+    "skill_version_id": null,
+    "text_source_sha256": "281c9db0854efb306f431f97bd059848fc9f75c8e6ab9002610e405594170709"
+  },
+  "record_type": "grading_error_book_public_summary",
+  "schema_version": 1,
+  "scope": {
+    "contains_answer_or_evidence_text": false,
+    "contains_heldout_or_test_data": false,
+    "contains_student_level_records": false,
+    "selection_rule": "all score disagreements, aggregated for public release",
+    "selection_rule_zh": "完整统计全部评分分歧，仅以聚合形式公开",
+    "severe_error_threshold_points": 5.0,
+    "split": "development"
+  }
+}

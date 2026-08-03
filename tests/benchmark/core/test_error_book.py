@@ -230,6 +230,12 @@ class ErrorBookTests(unittest.TestCase):
     def test_public_summary_contains_no_student_ids_or_evidence(self):
         with tempfile.TemporaryDirectory() as tmp:
             run, gold, packet = self._fixture(Path(tmp))
+            output_path = run / "outputs" / "S001.json"
+            output = json.loads(output_path.read_text(encoding="utf-8"))
+            output["scores"][1]["flags"] = [
+                "unsafe freeform flag derived from a student response"
+            ]
+            output_path.write_text(json.dumps(output), encoding="utf-8")
             result = build_error_book(
                 run_dir=run,
                 gold_path=gold,
@@ -241,6 +247,19 @@ class ErrorBookTests(unittest.TestCase):
         self.assertNotIn("S001", serialized)
         self.assertNotIn("S999", serialized)
         self.assertNotIn("secret", serialized)
+        self.assertNotIn("unsafe freeform flag", serialized)
+        self.assertNotIn("flags_on_error_cases", serialized)
+        self.assertFalse(result.public_summary["model_flag_coverage"]["model_flag_text_published"])
+
+    def test_public_summary_audit_rejects_freeform_flag_fields(self):
+        self.assertTrue(
+            any(
+                "flag" in finding
+                for finding in audit_public_error_summary(
+                    {"flags_on_error_cases": [{"flag": "unsafe text"}]}
+                )
+            )
+        )
 
     def test_rejects_non_development_run_before_building_cases(self):
         with tempfile.TemporaryDirectory() as tmp:

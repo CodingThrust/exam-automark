@@ -46,6 +46,10 @@ class ModelPacketRunnerTests(unittest.TestCase):
                         "T1-dev-r1",
                         "--metadata",
                         "split=development",
+                        "--metadata",
+                        "input_snapshot_manifest_sha256=" + "a" * 64,
+                        "--metadata",
+                        "source_transcription_packet_hash=" + "b" * 64,
                     ]
                 )
 
@@ -79,9 +83,18 @@ class ModelPacketRunnerTests(unittest.TestCase):
                         "--dry-run",
                     ]
                 )
+            run_metadata = json.loads(
+                (root / "runs" / "deepseek-text-G1-dev-r1" / "run-metadata.json").read_text(
+                    encoding="utf-8"
+                )
+            )
 
         self.assertEqual(run_code, 0)
         self.assertEqual(json.loads(run_stdout.getvalue())["validation_status"], "passed")
+        self.assertEqual(run_metadata["data_snapshot_hash"], "a" * 64)
+        self.assertEqual(run_metadata["source_run_id"], "T1-dev-r1")
+        self.assertEqual(run_metadata["text_source_kind"], "transcript")
+        self.assertEqual(run_metadata["source_transcription_packet_hash"], "b" * 64)
 
     def test_build_text_grading_packet_requires_each_transcript(self):
         with tempfile.TemporaryDirectory() as tmp:

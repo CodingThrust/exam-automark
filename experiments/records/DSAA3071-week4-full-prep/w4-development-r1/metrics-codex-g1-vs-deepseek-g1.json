@@ -1,0 +1,270 @@
+{
+  "baseline": {
+    "confidence_accuracy": {
+      "by_level": {
+        "high": {
+          "exact_agreement": 0.6136363636363636,
+          "score_row_count": 44
+        },
+        "low": {
+          "exact_agreement": 0.18181818181818182,
+          "score_row_count": 11
+        },
+        "medium": {
+          "exact_agreement": 0.0,
+          "score_row_count": 15
+        }
+      },
+      "status": "available"
+    },
+    "exact_agreement": 0.4142857142857143,
+    "macro_accuracy": 0.41428571428571426,
+    "mean_signed_error": -2.8285714285714287,
+    "per_question": {
+      "Q1": {
+        "exact_agreement": 1.0,
+        "mae": 0.0,
+        "mean_signed_error": 0.0,
+        "score_row_count": 7
+      },
+      "Q10": {
+        "exact_agreement": 0.0,
+        "mae": 4.142857142857143,
+        "mean_signed_error": -0.7142857142857143,
+        "score_row_count": 7
+      },
+      "Q2": {
+        "exact_agreement": 0.8571428571428571,
+        "mae": 0.14285714285714285,
+        "mean_signed_error": 0.14285714285714285,
+        "score_row_count": 7
+      },
+      "Q3": {
+        "exact_agreement": 0.8571428571428571,
+        "mae": 0.14285714285714285,
+        "mean_signed_error": 0.14285714285714285,
+        "score_row_count": 7
+      },
+      "Q4": {
+        "exact_agreement": 0.8571428571428571,
+        "mae": 0.7142857142857143,
+        "mean_signed_error": 0.7142857142857143,
+        "score_row_count": 7
+      },
+      "Q5": {
+        "exact_agreement": 0.0,
+        "mae": 6.857142857142857,
+        "mean_signed_error": -6.571428571428571,
+        "score_row_count": 7
+      },
+      "Q6": {
+        "exact_agreement": 0.2857142857142857,
+        "mae": 1.8571428571428572,
+        "mean_signed_error": -1.2857142857142858,
+        "score_row_count": 7
+      },
+      "Q7": {
+        "exact_agreement": 0.0,
+        "mae": 5.0,
+        "mean_signed_error": -5.0,
+        "score_row_count": 7
+      },
+      "Q8": {
+        "exact_agreement": 0.2857142857142857,
+        "mae": 8.0,
+        "mean_signed_error": -8.0,
+        "score_row_count": 7
+      },
+      "Q9": {
+        "exact_agreement": 0.0,
+        "mae": 7.714285714285714,
+        "mean_signed_error": -7.714285714285714,
+        "score_row_count": 7
+      }
+    },
+    "severe_error_rate": 1.0,
+    "subquestion_mae": 3.4571428571428573,
+    "total_score_mae": 28.285714285714285,
+    "within_1_point_rate": 0.0
+  },
+  "baseline_run": {
+    "condition": "G1",
+    "course_metadata": "matched",
+    "data_snapshot_hash": "f885abe857655cf011ddd4ff9ea0da1eb7dce63979fcec0c74ecea29cfd2c655",
+    "input_mode": "text-only",
+    "model": "deepseek-v4-pro",
+    "packet_hash": "d7037fd5f11bb3657f533f08b1b78f7216a2ec9fbcbc60b7fd643635a6059c99",
+    "prompt_hash": "6943714995338d5a9d9586335cdd92797a9be5b95455dd50457bb223cd51833d",
+    "provider": "deepseek",
+    "record_type": "model_packet_run",
+    "rubric_hash": "0b2b13deb6644f7f175dade381073d60c3256743818a8b33217b4ef2f5a815b2",
+    "source_kind": "run_directory",
+    "students_expected": 7,
+    "students_failed": 0,
+    "students_passed": 7,
+    "task": "grade",
+    "text_source_hash": "281c9db0854efb306f431f97bd059848fc9f75c8e6ab9002610e405594170709",
+    "validation_status": "passed"
+  },
+  "bootstrap": {
+    "exact_agreement_candidate_minus_baseline": {
+      "lower": -0.028571428571428564,
+      "mean_difference": 0.04285714285714285,
+      "upper": 0.11428571428571425
+    },
+    "samples": 10000,
+    "seed": 20260701
+  },
+  "candidate": {
+    "confidence_accuracy": {
+      "by_level": {
+        "high": {
+          "exact_agreement": 0.6666666666666666,
+          "score_row_count": 45
+        },
+        "low": {
+          "exact_agreement": 0.0,
+          "score_row_count": 6
+        },
+        "medium": {
+          "exact_agreement": 0.10526315789473684,
+          "score_row_count": 19
+        }
+      },
+      "status": "available"
+    },
+    "exact_agreement": 0.45714285714285713,
+    "macro_accuracy": 0.45714285714285713,
+    "mean_signed_error": -1.4142857142857144,
+    "per_question": {
+      "Q1": {
+        "exact_agreement": 1.0,
+        "mae": 0.0,
+        "mean_signed_error": 0.0,
+        "score_row_count": 7
+      },
+      "Q10": {
+        "exact_agreement": 0.14285714285714285,
+        "mae": 2.7142857142857144,
+        "mean_signed_error": 1.0,
+        "score_row_count": 7
+      },
+      "Q2": {
+        "exact_agreement": 0.8571428571428571,
+        "mae": 0.14285714285714285,
+        "mean_signed_error": 0.14285714285714285,
+        "score_row_count": 7
+      },
+      "Q3": {
+        "exact_agreement": 0.8571428571428571,
+        "mae": 0.14285714285714285,
+        "mean_signed_error": 0.14285714285714285,
+        "score_row_count": 7
+      },
+      "Q4": {
+        "exact_agreement": 0.8571428571428571,
+        "mae": 0.7142857142857143,
+        "mean_signed_error": 0.7142857142857143,
+        "score_row_count": 7
+      },
+      "Q5": {
+        "exact_agreement": 0.14285714285714285,
+        "mae": 2.5714285714285716,
+        "mean_signed_error": -2.2857142857142856,
+        "score_row_count": 7
+      },
+      "Q6": {
+        "exact_agreement": 0.7142857142857143,
+        "mae": 1.1428571428571428,
+        "mean_signed_error": 1.1428571428571428,
+        "score_row_count": 7
+      },
+      "Q7": {
+        "exact_agreement": 0.0,
+        "mae": 2.857142857142857,
+        "mean_signed_error": -2.857142857142857,
+        "score_row_count": 7
+      },
+      "Q8": {
+        "exact_agreement": 0.0,
+        "mae": 7.0,
+        "mean_signed_error": -5.571428571428571,
+        "score_row_count": 7
+      },
+      "Q9": {
+        "exact_agreement": 0.0,
+        "mae": 6.571428571428571,
+        "mean_signed_error": -6.571428571428571,
+        "score_row_count": 7
+      }
+    },
+    "severe_error_rate": 1.0,
+    "subquestion_mae": 2.3857142857142857,
+    "total_score_mae": 14.142857142857142,
+    "within_1_point_rate": 0.0
+  },
+  "candidate_minus_baseline": {
+    "exact_agreement": 0.042857142857142816,
+    "macro_accuracy": 0.04285714285714287,
+    "mean_signed_error": 1.4142857142857144,
+    "severe_error_rate": 0.0,
+    "subquestion_mae": -1.0714285714285716,
+    "total_score_mae": -14.142857142857142,
+    "within_1_point_rate": 0.0
+  },
+  "candidate_run": {
+    "condition": "G1",
+    "course_metadata": "matched",
+    "data_snapshot_hash": "f885abe857655cf011ddd4ff9ea0da1eb7dce63979fcec0c74ecea29cfd2c655",
+    "engine": "codex",
+    "experiment_condition": "w4-development-g1-codex-gpt56sol",
+    "input_mode": "text-only",
+    "model": "gpt-5.6-sol",
+    "packet_hash": "d7037fd5f11bb3657f533f08b1b78f7216a2ec9fbcbc60b7fd643635a6059c99",
+    "prompt_hash": "6943714995338d5a9d9586335cdd92797a9be5b95455dd50457bb223cd51833d",
+    "provider": "codex_cli",
+    "record_type": "model_packet_run",
+    "rubric_hash": "0b2b13deb6644f7f175dade381073d60c3256743818a8b33217b4ef2f5a815b2",
+    "source_kind": "run_directory",
+    "students_expected": 7,
+    "students_failed": 0,
+    "students_passed": 7,
+    "task": "grade",
+    "text_source_hash": "281c9db0854efb306f431f97bd059848fc9f75c8e6ab9002610e405594170709",
+    "validation_status": "passed"
+  },
+  "comparison_provenance": {
+    "course_metadata": "matched",
+    "data_snapshot": "matched",
+    "population": "matched_by_exact_question_coverage",
+    "run_validation": "passed"
+  },
+  "course": {
+    "assessment_id": "week4_full_q1_q10",
+    "course_id": "DSAA3071",
+    "max_total": 130.0,
+    "question_count": 10,
+    "score_unit": "points"
+  },
+  "generated_at": "2026-08-03T14:41:52.227477Z",
+  "metric_policy": {
+    "exact_score_tolerance": 1e-09,
+    "paired_bootstrap_unit": "student",
+    "severe_total_points": 2.0,
+    "within_total_points": 1.0
+  },
+  "population": {
+    "score_row_count": 70,
+    "student_count": 7
+  },
+  "privacy": {
+    "aggregate_only": true,
+    "model_evidence_included": false,
+    "per_student_scores_included": false,
+    "private_paths_included": false,
+    "raw_answers_included": false,
+    "student_ids_included": false
+  },
+  "record_type": "course_generic_run_metrics_comparison",
+  "schema_version": 1
+}

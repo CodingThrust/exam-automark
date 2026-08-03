@@ -634,6 +634,10 @@ def _metadata(
     manifest_metadata = manifest.get("metadata", {})
     if not isinstance(manifest_metadata, dict):
         manifest_metadata = {}
+    data_snapshot_hash = (
+        manifest_metadata.get("data_snapshot_hash")
+        or manifest_metadata.get("input_snapshot_manifest_sha256")
+    )
     return {
         "schema_version": 1,
         "record_type": "model_packet_run",
@@ -661,7 +665,12 @@ def _metadata(
         "split": manifest_metadata.get("split"),
         "skill_version_id": manifest_metadata.get("skill_version_id"),
         "prompt_template_id": manifest_metadata.get("prompt_template_id"),
-        "data_snapshot_hash": manifest_metadata.get("data_snapshot_hash"),
+        "data_snapshot_hash": data_snapshot_hash,
+        "source_run_id": manifest_metadata.get("source_run_id"),
+        "text_source_kind": manifest_metadata.get("text_source_kind"),
+        "source_transcription_packet_hash": manifest_metadata.get(
+            "source_transcription_packet_hash"
+        ),
         "packet": packet.as_posix(),
         "packet_hash": directory_digest(packet),
         "prompt_hash": manifest["prompt_hash"],

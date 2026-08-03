@@ -290,7 +290,7 @@ def build_error_confidence_audit(
             "single_observation_flags": sum(
                 row["pairs"] == 1 for row in flag_rows
             ),
-            "per_flag": flag_rows,
+            "model_flag_text_published": False,
         },
         "error_taxonomy": {
             "technical_failure_count": technical_failures,

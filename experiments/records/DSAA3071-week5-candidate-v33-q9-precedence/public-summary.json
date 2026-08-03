@@ -164,58 +164,6 @@
       "error_pairs": 17
     }
   ],
-  "flags_on_error_cases": [
-    {
-      "error_pairs": 1,
-      "flag": "ambiguous_epsilon_reference",
-      "severe_error_pairs": 0
-    },
-    {
-      "error_pairs": 1,
-      "flag": "assumed_lexicographic_enumeration",
-      "severe_error_pairs": 0
-    },
-    {
-      "error_pairs": 1,
-      "flag": "high_impact_deduction",
-      "severe_error_pairs": 1
-    },
-    {
-      "error_pairs": 2,
-      "flag": "insufficient_evidence",
-      "severe_error_pairs": 2
-    },
-    {
-      "error_pairs": 1,
-      "flag": "invalid_nonmembership_rejection",
-      "severe_error_pairs": 0
-    },
-    {
-      "error_pairs": 1,
-      "flag": "minimal_keywords",
-      "severe_error_pairs": 1
-    },
-    {
-      "error_pairs": 1,
-      "flag": "missing_explicit_acceptance",
-      "severe_error_pairs": 1
-    },
-    {
-      "error_pairs": 2,
-      "flag": "needs_manual_review",
-      "severe_error_pairs": 2
-    },
-    {
-      "error_pairs": 23,
-      "flag": "no_flag",
-      "severe_error_pairs": 11
-    },
-    {
-      "error_pairs": 1,
-      "flag": "vague_enum_construction",
-      "severe_error_pairs": 1
-    }
-  ],
   "interpretation_limits": {
     "en": [
       "These are descriptive development-split statistics, not held-out accuracy.",

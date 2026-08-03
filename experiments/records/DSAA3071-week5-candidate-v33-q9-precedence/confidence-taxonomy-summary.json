@@ -398,107 +398,7 @@
       "severe_error_yield": 0.666667
     },
     "flag_vocabulary_size": 11,
-    "per_flag": [
-      {
-        "error_pairs": 1,
-        "error_precision": 1.0,
-        "error_recall": 0.032258,
-        "flag": "ambiguous_epsilon_reference",
-        "pairs": 1,
-        "severe_error_pairs": 0,
-        "severe_error_recall": 0.0
-      },
-      {
-        "error_pairs": 1,
-        "error_precision": 1.0,
-        "error_recall": 0.032258,
-        "flag": "assumed_lexicographic_enumeration",
-        "pairs": 1,
-        "severe_error_pairs": 0,
-        "severe_error_recall": 0.0
-      },
-      {
-        "error_pairs": 1,
-        "error_precision": 1.0,
-        "error_recall": 0.032258,
-        "flag": "high_impact_deduction",
-        "pairs": 1,
-        "severe_error_pairs": 1,
-        "severe_error_recall": 0.058824
-      },
-      {
-        "error_pairs": 2,
-        "error_precision": 1.0,
-        "error_recall": 0.064516,
-        "flag": "insufficient_evidence",
-        "pairs": 2,
-        "severe_error_pairs": 2,
-        "severe_error_recall": 0.117647
-      },
-      {
-        "error_pairs": 1,
-        "error_precision": 1.0,
-        "error_recall": 0.032258,
-        "flag": "invalid_nonmembership_rejection",
-        "pairs": 1,
-        "severe_error_pairs": 0,
-        "severe_error_recall": 0.0
-      },
-      {
-        "error_pairs": 1,
-        "error_precision": 1.0,
-        "error_recall": 0.032258,
-        "flag": "minimal_keywords",
-        "pairs": 1,
-        "severe_error_pairs": 1,
-        "severe_error_recall": 0.058824
-      },
-      {
-        "error_pairs": 1,
-        "error_precision": 1.0,
-        "error_recall": 0.032258,
-        "flag": "missing_explicit_acceptance",
-        "pairs": 1,
-        "severe_error_pairs": 1,
-        "severe_error_recall": 0.058824
-      },
-      {
-        "error_pairs": 2,
-        "error_precision": 0.666667,
-        "error_recall": 0.064516,
-        "flag": "needs_manual_review",
-        "pairs": 3,
-        "severe_error_pairs": 2,
-        "severe_error_recall": 0.117647
-      },
-      {
-        "error_pairs": 0,
-        "error_precision": 0.0,
-        "error_recall": 0.0,
-        "flag": "unclear_extraction",
-        "pairs": 1,
-        "severe_error_pairs": 0,
-        "severe_error_recall": 0.0
-      },
-      {
-        "error_pairs": 0,
-        "error_precision": 0.0,
-        "error_recall": 0.0,
-        "flag": "unclear_handwriting",
-        "pairs": 1,
-        "severe_error_pairs": 0,
-        "severe_error_recall": 0.0
-      },
-      {
-        "error_pairs": 1,
-        "error_precision": 1.0,
-        "error_recall": 0.032258,
-        "flag": "vague_enum_construction",
-        "pairs": 1,
-        "severe_error_pairs": 1,
-        "severe_error_recall": 0.058824
-      }
-    ],
+    "model_flag_text_published": false,
     "single_observation_flags": 9
   },
   "interpretation_limits": {
@@ -542,7 +442,7 @@
     "run_commit": "3f2adce",
     "run_id": "deepseek-C33-q9-precedence-text-dev-reviewed-r1",
     "skill_version_id": "skill_candidate_v3_3",
-    "source_public_summary_sha256": "8d506cc39779e62d976e803469fc59a1013c9d3d1ccd226c6dc344f8a1d211b7",
+    "source_public_summary_sha256": "996c4c3214b964ca11bad0c4abe8ee1d0df919e9b593712ffaba81d75a4cd9bd",
     "text_source_sha256": "9f9be72bf088f211a3b5fc35db1439b3e965059ff55d5c0563e2880bdc7f4a00"
   },
   "record_type": "grading_error_confidence_taxonomy_audit_public",

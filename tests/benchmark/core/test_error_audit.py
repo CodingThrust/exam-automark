@@ -8,6 +8,7 @@ from pathlib import Path
 
 from benchmark.core.error_audit import (
     build_error_confidence_audit,
+    render_error_confidence_markdown,
 )
 from benchmark.core.error_book import audit_public_error_summary
 from benchmark.core.error_book_iteration import validate_error_book_registry
@@ -25,7 +26,7 @@ RECORD_ROOT = (
 
 class ErrorConfidenceAuditTests(unittest.TestCase):
     def _fixture(
-        self, root: Path
+        self, root: Path, *, model_flag: str = "needs_manual_review"
     ) -> tuple[Path, Path, Path, Path]:
         run = root / "run"
         outputs = run / "outputs"
@@ -42,7 +43,7 @@ class ErrorConfidenceAuditTests(unittest.TestCase):
             outputs / "S002.json",
             "S002",
             [
-                self._score("Q1", "medium", ["needs_manual_review"]),
+                self._score("Q1", "medium", [model_flag]),
                 self._score("Q2", "low", ["unclear_region"]),
             ],
         )
@@ -114,7 +115,7 @@ class ErrorConfidenceAuditTests(unittest.TestCase):
                     "anonymous_student_id": "S002",
                     "question_id": "Q1",
                     "confidence": "medium",
-                    "flags": ["needs_manual_review"],
+                    "flags": [model_flag],
                     "absolute_error": 2.0,
                     "severe_error": False,
                     "direction": "over_score",
@@ -197,6 +198,25 @@ class ErrorConfidenceAuditTests(unittest.TestCase):
         self.assertNotIn("S001", serialized)
         self.assertNotIn("S002", serialized)
         self.assertEqual(audit_public_error_summary(result), [])
+
+    def test_public_audit_excludes_freeform_model_flag_text(self):
+        freeform_flag = "student wrote EXFILTRATION_SENTINEL"
+        with tempfile.TemporaryDirectory() as tmp:
+            run, book, diagnoses, summary = self._fixture(
+                Path(tmp), model_flag=freeform_flag
+            )
+            result = build_error_confidence_audit(
+                run_dir=run,
+                private_book_path=book,
+                diagnoses_path=diagnoses,
+                public_error_summary_path=summary,
+            )
+
+        serialized = json.dumps(result)
+        markdown = render_error_confidence_markdown(result)
+        self.assertNotIn("EXFILTRATION_SENTINEL", serialized)
+        self.assertNotIn("EXFILTRATION_SENTINEL", markdown)
+        self.assertFalse(result["flag_audit"]["model_flag_text_published"])
 
     def test_rejects_output_drift_after_error_book_was_built(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -59,3 +59,8 @@ pagination.
 For the exact engine and modality plan, see
 [`RUN-MATRIX-AND-PROTOCOL.md`](RUN-MATRIX-AND-PROTOCOL.md). For the hard gates,
 see [`PRE-RUN-STATUS.json`](PRE-RUN-STATUS.json).
+
+The advisor handoff can prepare, run, and submit Kimi/Claude result artifacts
+through a future PR. It does not yet automatically aggregate direct-vs-text
+accuracy or compare output with prior DeepSeek/Codex runs; that generic
+multi-course metrics work is a separate post-run task.

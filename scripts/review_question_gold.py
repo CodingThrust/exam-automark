@@ -89,6 +89,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         required=True,
         help="existing private blank/question-level gold CSV to edit atomically",
     )
+    parser.add_argument(
+        "--students-file",
+        type=Path,
+        help=(
+            "optional UTF-8 one-anonymous-ID-per-line frozen review subset; "
+            "only these students are shown, while the complete snapshot and gold "
+            "table are still validated and preserved"
+        ),
+    )
     parser.add_argument("--port", type=int, default=8768)
     args = parser.parse_args(argv)
     if not 1 <= args.port <= 65535:
@@ -100,6 +109,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             scoped_image_root=args.scoped_image_root,
             binding_path=args.binding,
             gold_path=args.gold,
+            students_file=args.students_file,
         )
     except (OSError, ValueError, json.JSONDecodeError) as error:
         parser.error(str(error))
@@ -133,6 +143,7 @@ class GoldReviewStore:
         scoped_image_root: Path,
         binding_path: Path,
         gold_path: Path,
+        students_file: Path | None = None,
     ) -> None:
         self.course_path = _require_regular_file(course_path, "course specification")
         self.scoped_image_root = _require_regular_directory(
@@ -165,13 +176,18 @@ class GoldReviewStore:
             page_questions=self._page_questions,
             binding=self._binding,
         )
-        self._students = tuple(sorted(self._images_by_student))
+        self._all_students = tuple(sorted(self._images_by_student))
+        self._rows = self._load_and_validate_gold_rows()
+        self._students = _load_review_student_ids(
+            students_file,
+            course=self.course,
+            snapshot_students=self._all_students,
+        )
         self._allowed_image_paths = frozenset(
             page["image_path"]
-            for pages in self._images_by_student.values()
-            for page in pages
+            for anonymous_id in self._students
+            for page in self._images_by_student[anonymous_id]
         )
-        self._rows = self._load_and_validate_gold_rows()
         self._gold_sha256 = _file_sha256(self.gold_path)
 
     def state(self) -> dict[str, Any]:
@@ -224,6 +240,9 @@ class GoldReviewStore:
                     "pending_students": len(students) - fully_scored,
                     "filled_score_rows": filled_score_rows,
                     "total_score_rows": len(students) * len(self.course.question_ids),
+                    "snapshot_student_count": len(self._all_students),
+                    "snapshot_total_score_rows": len(self._all_students)
+                    * len(self.course.question_ids),
                 },
             }
 
@@ -259,7 +278,7 @@ class GoldReviewStore:
 
         expected_pairs = {
             (anonymous_id, question_id)
-            for anonymous_id in self._students
+            for anonymous_id in self._all_students
             for question_id in self.course.question_ids
         }
         by_pair: dict[tuple[str, str], dict[str, str]] = {}
@@ -344,8 +363,8 @@ class GoldReviewStore:
             )
 
         with self._lock:
-            if anonymous_id not in self._images_by_student:
-                raise ValueError("unknown anonymous student ID")
+            if anonymous_id not in self._students:
+                raise ValueError("anonymous student ID is outside this review subset")
             for question_id in self.course.question_ids:
                 score = parsed_scores[question_id]
                 row = self._rows[(anonymous_id, question_id)]
@@ -370,7 +389,7 @@ class GoldReviewStore:
             lineterminator="\n",
         )
         writer.writeheader()
-        for anonymous_id in self._students:
+        for anonymous_id in self._all_students:
             for question_id in self.course.question_ids:
                 writer.writerow(self._rows[(anonymous_id, question_id)])
         encoded = stream.getvalue().encode("utf-8")
@@ -394,6 +413,60 @@ class GoldReviewStore:
                 temporary_path.unlink()
             raise
         self._gold_sha256 = hashlib.sha256(encoded).hexdigest()
+
+
+def _load_review_student_ids(
+    students_file: Path | None,
+    *,
+    course: CourseSpec,
+    snapshot_students: Sequence[str],
+) -> tuple[str, ...]:
+    """Return the optional frozen review subset without weakening full checks.
+
+    The snapshot and gold CSV are always loaded and validated before this
+    selection is applied.  A subset therefore only limits what this local UI
+    may view or edit; it cannot hide incomplete snapshot coverage or permit a
+    partial gold table to be saved.
+    """
+
+    if students_file is None:
+        return tuple(snapshot_students)
+
+    path = _require_regular_file(students_file, "students file")
+    try:
+        values = [
+            line.strip()
+            for line in path.read_text(encoding="utf-8-sig").splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        ]
+    except OSError as error:
+        raise ValueError(f"cannot read students file: {path}") from error
+    if not values:
+        raise ValueError("students file must contain at least one anonymous student ID")
+    if len(values) != len(set(values)):
+        duplicates = sorted(
+            student_id for student_id in set(values) if values.count(student_id) > 1
+        )
+        raise ValueError(
+            "students file must list each anonymous student ID only once; duplicates: "
+            + ", ".join(duplicates)
+        )
+
+    for student_id in values:
+        try:
+            course.validate_student_id(student_id)
+        except ValueError as error:
+            raise ValueError(
+                "students file has an invalid anonymous student ID: " + student_id
+            ) from error
+    snapshot_student_set = set(snapshot_students)
+    outside_snapshot = sorted(set(values) - snapshot_student_set)
+    if outside_snapshot:
+        raise ValueError(
+            "students file names anonymous students outside the scoped snapshot: "
+            + ", ".join(outside_snapshot)
+        )
+    return tuple(sorted(values))
 
 
 def _load_page_question_mapping(
@@ -855,7 +928,7 @@ function protectedPath(path){const url=new URL(path,location.origin);url.searchP
 async function api(path,method='GET',body){const r=await fetch(protectedPath(path),{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const j=await r.json();if(!r.ok)throw Error(j.error||'request failed');return j;}
 function student(){return state.students[index]}
 function nextIncomplete(after){for(let offset=1;offset<=state.students.length;offset++){const i=(after+offset)%state.students.length;if(!state.students[i].completed)return i}return after}
-async function load(keep=true,advanceAfter=null){const old=keep&&state?state.students[index]?.anonymous_id:null;state=await api('/api/state');const s=state.summary;$('#summary').textContent=`${s.fully_scored_students}/${s.student_count} students complete; ${s.filled_score_rows}/${s.total_score_rows} score rows saved`;const select=$('#student');select.replaceChildren();state.students.forEach((entry,i)=>{const option=document.createElement('option');option.value=i;option.textContent=`${entry.anonymous_id} — ${entry.completed?'complete / 已完成':'pending / 未完成'}`;select.append(option)});if(advanceAfter!==null){index=nextIncomplete(advanceAfter)}else if(old){const found=state.students.findIndex(entry=>entry.anonymous_id===old);if(found>=0)index=found}render();}
+async function load(keep=true,advanceAfter=null){const old=keep&&state?state.students[index]?.anonymous_id:null;state=await api('/api/state');const s=state.summary;const subset=s.student_count===s.snapshot_student_count?'':` (review subset / 审核子集: ${s.student_count}/${s.snapshot_student_count})`;$('#summary').textContent=`${s.fully_scored_students}/${s.student_count} students complete; ${s.filled_score_rows}/${s.total_score_rows} score rows saved${subset}`;const select=$('#student');select.replaceChildren();state.students.forEach((entry,i)=>{const option=document.createElement('option');option.value=i;option.textContent=`${entry.anonymous_id} — ${entry.completed?'complete / 已完成':'pending / 待完成'}`;select.append(option)});if(advanceAfter!==null){index=nextIncomplete(advanceAfter)}else if(old){const found=state.students.findIndex(entry=>entry.anonymous_id===old);if(found>=0)index=found}render();}
 function render(){const entry=student();$('#student').value=index;$('#title').textContent=`${entry.anonymous_id} — ${entry.completed?'complete / 已核准':'pending / 待完成'}`;const images=$('#images');images.replaceChildren();entry.pages.forEach(page=>{const card=document.createElement('section');card.className='image-card';const heading=document.createElement('h3');heading.textContent=`${page.page_suffix}: ${page.question_ids.join(', ')}`;const image=document.createElement('img');image.alt=`${entry.anonymous_id} ${page.page_suffix} anonymous assessment page`;image.src=protectedPath('/images/'+encodeURIComponent(page.image_path));card.append(heading,image);images.append(card)});const questions=$('#questions');questions.replaceChildren();entry.questions.forEach(question=>{const card=document.createElement('div');card.className='question';const heading=document.createElement('strong');heading.textContent=`${question.question_id} — ${question.title}`;const scoreLabel=document.createElement('label');scoreLabel.textContent=`Score / 分数 (0–${question.max_score}, step ${question.score_step}) `;const score=document.createElement('input');score.type='number';score.id=`score-${question.question_id}`;score.min='0';score.max=String(question.max_score);score.step=String(question.score_step);score.value=question.score;score.autocomplete='off';scoreLabel.append(score);const noteLabel=document.createElement('label');noteLabel.textContent='Notes / 备注';const notes=document.createElement('textarea');notes.id=`notes-${question.question_id}`;notes.maxLength=2000;notes.value=question.notes;noteLabel.append(notes);card.append(heading,document.createElement('br'),scoreLabel,document.createElement('br'),noteLabel);questions.append(card)});}
 function payload(){const entry=student(),scores={},notes={};entry.questions.forEach(question=>{scores[question.question_id]=$(`#score-${question.question_id}`).value.trim();notes[question.question_id]=$(`#notes-${question.question_id}`).value;});return {anonymous_id:entry.anonymous_id,reviewer:$('#reviewer').value.trim(),reviewed_at:now(),scores,notes};}
 async function save(kind){const reviewer=$('#reviewer').value.trim();if(!reviewer){alert('请先填写审核人姓名或缩写 / Enter reviewer name or initials first.');return}const before=index;try{await api(kind==='approve'?'/api/approve':'/api/save-draft','POST',payload());await load(false,kind==='approve'?before:null);$('#message').textContent=kind==='approve'?'已原子保存并核准；已跳到下一位未完成学生。\nSaved atomically and approved; moved to the next incomplete student.':'草稿已原子保存。\nDraft saved atomically.'}catch(error){$('#message').textContent=error.message}};

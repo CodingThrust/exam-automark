@@ -80,6 +80,84 @@ class QuestionGoldReviewTests(unittest.TestCase):
         self.assertEqual(next_incomplete_student_index(after_approval["students"], 0), 1)
         self.assertEqual(next_incomplete_student_index(after_approval["students"], 1), 1)
 
+    def test_students_file_limits_local_ui_but_preserves_complete_gold_table(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = _make_inputs(Path(tmp))
+            students_file = Path(tmp) / "development-students.txt"
+            students_file.write_text("# frozen development subset\nS002\n", encoding="utf-8")
+            store = _store(paths, students_file=students_file)
+
+            state = store.state()
+            self.assertEqual([entry["anonymous_id"] for entry in state["students"]], ["S002"])
+            self.assertEqual(state["summary"]["student_count"], 1)
+            self.assertEqual(state["summary"]["total_score_rows"], 2)
+            self.assertEqual(state["summary"]["snapshot_student_count"], 2)
+            self.assertEqual(state["summary"]["snapshot_total_score_rows"], 4)
+            with self.assertRaisesRegex(ValueError, "approved scoped anonymous PNG"):
+                store.image_path("anonymized_pages/S001/S001-p01.png")
+            with self.assertRaisesRegex(ValueError, "outside this review subset"):
+                store.save_draft(_payload("S001", {"Q1": "1", "Q2": ""}))
+
+            store.approve_student(_payload("S002", {"Q1": "2", "Q2": "2.5"}))
+            with paths["gold_path"].open(newline="", encoding="utf-8") as handle:
+                saved = {
+                    (row["student_id"], row["question_id"]): row
+                    for row in csv.DictReader(handle)
+                }
+
+        self.assertEqual(len(saved), 4)
+        self.assertEqual(saved[("S001", "Q1")]["score"], "")
+        self.assertEqual(saved[("S001", "Q2")]["score"], "")
+        self.assertEqual(saved[("S002", "Q1")]["score"], "2")
+        self.assertEqual(saved[("S002", "Q2")]["score"], "2.5")
+
+    def test_students_file_rejects_empty_duplicate_invalid_or_outside_snapshot_ids(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = _make_inputs(Path(tmp))
+            students_file = Path(tmp) / "review-students.txt"
+            for contents, message in (
+                ("# comments only\n\n", "at least one anonymous student ID"),
+                ("S001\nS001\n", "only once"),
+                ("not-an-anonymous-id\n", "invalid anonymous student ID"),
+                ("S999\n", "outside the scoped snapshot"),
+            ):
+                students_file.write_text(contents, encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, message):
+                    _store(paths, students_file=students_file)
+
+    def test_students_file_does_not_bypass_full_snapshot_or_gold_coverage_validation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = _make_inputs(Path(tmp))
+            students_file = Path(tmp) / "review-students.txt"
+            students_file.write_text("S002\n", encoding="utf-8")
+            full_gold = paths["gold_path"].read_bytes()
+
+            with paths["gold_path"].open(newline="", encoding="utf-8") as handle:
+                rows = list(csv.DictReader(handle))
+            with paths["gold_path"].open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(handle, fieldnames=rows[0].keys(), lineterminator="\n")
+                writer.writeheader()
+                writer.writerows(row for row in rows if row["student_id"] != "S001")
+            with self.assertRaisesRegex(ValueError, "cover exactly the snapshot's anonymous students"):
+                _store(paths, students_file=students_file)
+
+            paths["gold_path"].write_bytes(full_gold)
+            manifest_path = paths["snapshot_root"] / SNAPSHOT_MANIFEST_RELATIVE_PATH
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["images"] = [
+                entry
+                for entry in manifest["images"]
+                if not (
+                    entry["anonymous_id"] == "S001"
+                    and entry["page_suffix"] == "p03"
+                )
+            ]
+            manifest["image_count"] = len(manifest["images"])
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            _write_binding(paths)
+            with self.assertRaisesRegex(ValueError, "incomplete page scope for anonymous student S001"):
+                _store(paths, students_file=students_file)
+
     def test_rejects_gold_table_outside_private_snapshot_boundary(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -141,12 +219,15 @@ class QuestionGoldReviewTests(unittest.TestCase):
                 _store(paths)
 
 
-def _store(paths: dict[str, Path]) -> GoldReviewStore:
+def _store(
+    paths: dict[str, Path], *, students_file: Path | None = None
+) -> GoldReviewStore:
     return GoldReviewStore(
         course_path=paths["course_path"],
         scoped_image_root=paths["snapshot_root"],
         binding_path=paths["binding_path"],
         gold_path=paths["gold_path"],
+        students_file=students_file,
     )
 
 

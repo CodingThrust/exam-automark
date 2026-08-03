@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "course_id": "DSAA3071",
+  "assessment_id": "week6_full_q1_q10",
+  "status": "not_ready",
+  "model_run_allowed": false,
+  "scope": {
+    "in_scope_question_ids": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10"],
+    "benchmark_total_points": 130,
+    "score_step": 1
+  },
+  "frozen_artifacts": {
+    "course_spec": {
+      "path": "experiments/course_specs/DSAA3071_week6_full_q1_q10.json",
+      "sha256": "9322b15adfebbb514e8ccd2d629e9ccb1b14b2fa9d1af2c1560ab40f0439bb50"
+    },
+    "rubric": {
+      "path": "experiments/records/DSAA3071-week6-prep/rubric_v0.json",
+      "sha256": "ca54443a6241ea742a989fab73103fedc8d21c8ee6fbdf90381892210ae4dc28"
+    },
+    "split": {
+      "path": "experiments/records/DSAA3071-week6-prep/split.json",
+      "sha256": "01d6aaaabba7d159621340754814772247b8b1ed42ca07bb964740a0bb1f6752",
+      "development_count": 7,
+      "heldout_count": 14,
+      "seed": "DSAA3071-week6-full-q1-q10-v1-20260803"
+    },
+    "approved_scoped_input_snapshot": {
+      "private_gitignored_path": "Data/DSAA3071/week6/anonymization/scoped-inputs/v1-p01-p02-p03",
+      "manifest_sha256": "ea8352f1459b21975351c31a26973d48f57ac947a8ba5f9c7c7556fd67176f17",
+      "student_count": 21,
+      "image_count": 63,
+      "page_suffixes": ["p01", "p02", "p03"]
+    },
+    "blank_private_gold_template": {
+      "private_gitignored_path": "Data/DSAA3071/week6/benchmark/v1/gold/primary_scores.csv",
+      "sha256": "c201b382e4fceb1f5ad303f5a05587f568da93150f89ea6b8131e803f6e7460a",
+      "student_count": 21,
+      "question_count": 10,
+      "row_count": 210,
+      "score_cells_filled": 0
+    },
+    "gold_reviewer_binding": {
+      "path": "experiments/records/DSAA3071-week6-prep/gold-reviewer-binding.json",
+      "sha256": "87b2a17a9b68c564b8efdff469b87c4ccf84d123ee1642cb024d199153dd2367",
+      "status": "binds_frozen_full_course_to_exact_approved_private_snapshot_not_model_authorization"
+    },
+    "private_image_input_packets": {
+      "direct_multimodal_development": {
+        "private_gitignored_path": "Data/DSAA3071/week6/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1/M1-dev-r1",
+        "packet_sha256": "6144b028041aabe89e3b46fde5b922066072fdf98b4b22ae72e7dde96d976aec",
+        "status": "packet_audit_passed_no_model_run"
+      },
+      "direct_multimodal_heldout": {
+        "private_gitignored_path": "Data/DSAA3071/week6/benchmark/v1/packets/direct-multimodal/heldout/M1-heldout-r1/M1-heldout-r1",
+        "packet_sha256": "09cc76d9e1dd2d74bfc6325367962ea1dfb7db875cb276d4fa86a15a176194be",
+        "status": "packet_audit_passed_no_model_run"
+      },
+      "fresh_transcription_development": {
+        "private_gitignored_path": "Data/DSAA3071/week6/benchmark/v1/packets/transcription/development/T1-dev-r1/T1-dev-r1",
+        "packet_sha256": "f376b54a9f71b2e5eb833b87ca932ac75b7e8c1909ff7d9fbe2b6bcb0ac7a5aa",
+        "status": "packet_audit_passed_no_model_run"
+      },
+      "fresh_transcription_heldout": {
+        "private_gitignored_path": "Data/DSAA3071/week6/benchmark/v1/packets/transcription/heldout/T1-heldout-r1/T1-heldout-r1",
+        "packet_sha256": "69a9083c7a18025e2681680af021b29c24ce28800322f50f1ab23df2adedb995",
+        "status": "packet_audit_passed_no_model_run"
+      }
+    }
+  },
+  "gates": [
+    {
+      "id": "final_anonymization_review",
+      "status": "ready",
+      "detail": "The W6 v1 anonymized artifact passed final validation before the scoped snapshot was built."
+    },
+    {
+      "id": "scope_rubric_split_and_image_packets",
+      "status": "ready",
+      "detail": "The full 130-point scope, p01/p02/p03 map, official-solution rubric, 7/14 split, and M1/T1 image packets are frozen and audited."
+    },
+    {
+      "id": "human_question_level_gold",
+      "status": "blocked_pending_human_review",
+      "detail": "A private 210-row template exists but every score cell is blank. Development analysis needs at least the frozen 7-by-10 development subset."
+    },
+    {
+      "id": "engine_capability_and_model_pinning",
+      "status": "not_started",
+      "detail": "Actual local/advisor model identifiers and image/transcription capability must be pinned through authorized zero-data checks."
+    },
+    {
+      "id": "fresh_engine_transcripts_and_lineage",
+      "status": "input_packets_ready_pending_generation",
+      "detail": "T1 image packets are audited. Each image-capable engine must generate a fresh transcript, and its unchanged transcript must pass lineage validation before G1."
+    },
+    {
+      "id": "explicit_run_readiness_approval",
+      "status": "not_started",
+      "detail": "A separate development-only approval is required after all prior gates are ready."
+    }
+  ],
+  "run_blockers": [
+    "Development human question-level gold is blank.",
+    "Exact permitted engine/model identifiers and capability checks are not pinned.",
+    "Fresh automatic T1 transcripts and their G1 lineage audits do not exist.",
+    "No explicit development run-readiness approval exists."
+  ]
+}

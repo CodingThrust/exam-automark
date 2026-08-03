@@ -1,0 +1,216 @@
+{
+  "assessment_id": "week6_full_q1_q10",
+  "course_id": "DSAA3071",
+  "grading_policy": {
+    "answer_first_policy": "Identify the student's answer or claim first. Award credit for correct semantic equivalents and independently correct relevant reasoning even when the wording, notation, base, or proof route differs from the official solution. Use reasoning to verify the claim and detect material contradictions; never require keyword matching.",
+    "element_credit_rule": "Assign exactly one evidence level per scoring element. Do not duplicate points when the same evidence is repeated. A material contradiction removes credit only from affected elements, not automatically from an otherwise multi-part answer.",
+    "score_step": 1,
+    "score_unit": "points"
+  },
+  "model_facing_language": "English",
+  "questions": [
+    {
+      "id": "Q1",
+      "type": "multiple_choice",
+      "max_score": 5,
+      "correct_answer": "b",
+      "expected": "<M, w> is one string encoding a Turing-machine description M and input string w.",
+      "rubric": [
+        {"criterion": "Selects b or an equivalent encoding statement.", "points": 5},
+        {"criterion": "Any incompatible choice or claim.", "points": 0}
+      ]
+    },
+    {
+      "id": "Q2",
+      "type": "multiple_choice",
+      "max_score": 5,
+      "correct_answer": "a",
+      "expected": "A_DFA is decidable because simulating a DFA on its input always halts.",
+      "rubric": [
+        {"criterion": "Selects a or gives the equivalent DFA-simulation reason.", "points": 5},
+        {"criterion": "Any incompatible choice or claim.", "points": 0}
+      ]
+    },
+    {
+      "id": "Q3",
+      "type": "multiple_choice",
+      "max_score": 5,
+      "correct_answer": "b",
+      "expected": "The real numbers are uncountable, for example by Cantor diagonalization.",
+      "rubric": [
+        {"criterion": "Selects b or clearly states uncountability.", "points": 5},
+        {"criterion": "Any incompatible choice or claim.", "points": 0}
+      ]
+    },
+    {
+      "id": "Q4",
+      "type": "multiple_choice",
+      "max_score": 5,
+      "correct_answer": "b",
+      "expected": "A_TM is Turing-recognizable but not decidable.",
+      "rubric": [
+        {"criterion": "Selects b or clearly states recognizable-but-undecidable.", "points": 5},
+        {"criterion": "Any incompatible choice or claim.", "points": 0}
+      ]
+    },
+    {
+      "id": "Q5",
+      "type": "short_answer",
+      "max_score": 12,
+      "expected": "On <B,w>, reject an invalid DFA encoding; otherwise simulate B from its start state, following one transition for each symbol of w. Accept exactly if the final state is accepting; otherwise reject. The finite simulation decides A_DFA.",
+      "full_credit_rule": "Full credit requires valid-encoding handling, an ordinary DFA simulation of all w from its start state, both final branches, and finite termination. Equivalent high-level decider descriptions receive credit.",
+      "material_errors": [
+        {"id": "q5_claimed_nonterminating_dfa_simulation", "affects": ["q5_simulation", "q5_termination"], "cap": 10, "description": "Claims the proposed DFA simulation may loop forever while relying on it as a decider."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 12, "maximum": 12},
+        "substantially_correct": {"minimum": 8, "maximum": 11},
+        "partially_correct": {"minimum": 4, "maximum": 7},
+        "minimal_relevant": {"minimum": 1, "maximum": 3},
+        "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q5_valid_encoding", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Reject or otherwise correctly handle an input that is not a valid DFA encoding.", "required_for_full_credit": true},
+        {"id": "q5_simulation", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Start at B's initial state and follow its transition function exactly once for every input symbol.", "required_for_full_credit": true},
+        {"id": "q5_accept", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Accept exactly if the resulting state is accepting.", "required_for_full_credit": true},
+        {"id": "q5_reject", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Reject when the resulting state is not accepting.", "required_for_full_credit": true},
+        {"id": "q5_termination", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Explain one finite simulation step per input symbol, hence halting/decidability.", "required_for_full_credit": true}
+      ]
+    },
+    {
+      "id": "Q6",
+      "type": "short_answer",
+      "max_score": 13,
+      "expected": "Mark the start state and repeatedly add all one-transition-reachable states until closure. Reject if an accepting state is marked; accept otherwise. L(A) is nonempty iff an accepting state is reachable, and the reachability search is polynomial, O(|Q|*|Sigma|).",
+      "full_credit_rule": "Full credit requires the reachable-state marking algorithm, both branches with the correct empty/nonempty meaning, the reachability correctness argument, and a finite/polynomial-time observation. Equivalent graph-search descriptions receive credit.",
+      "material_errors": [
+        {"id": "q6_reversed_reachability_decision", "affects": ["q6_reject_nonempty", "q6_accept_empty", "q6_correctness_complexity"], "cap": 8, "description": "Accepts when an accepting state is reachable or rejects when none is reachable."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 13, "maximum": 13},
+        "substantially_correct": {"minimum": 9, "maximum": 12},
+        "partially_correct": {"minimum": 4, "maximum": 8},
+        "minimal_relevant": {"minimum": 1, "maximum": 3},
+        "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q6_mark_start", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Initialize the marked/reachable set with the DFA start state.", "required_for_full_credit": true},
+        {"id": "q6_transition_closure", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Repeatedly add all states reachable by one transition from marked states until no new states appear.", "required_for_full_credit": true},
+        {"id": "q6_reject_nonempty", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Reject the E_DFA input if an accepting state is reachable because the language is nonempty.", "required_for_full_credit": true},
+        {"id": "q6_accept_empty", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Accept the E_DFA input if no accepting state is reachable because the language is empty.", "required_for_full_credit": true},
+        {"id": "q6_correctness_complexity", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 2, "demonstrated": 3}, "meaning": "Explain the iff reachability fact and identify the finite graph search as polynomial, for example O(|Q|*|Sigma|).", "required_for_full_credit": true}
+      ]
+    },
+    {
+      "id": "Q7",
+      "type": "proof",
+      "max_score": 25,
+      "expected": "Assume [0,1] has a complete list r1,r2,...; write a common-base digit table and construct x by choosing a digit different from the i-th digit of r_i with a rule avoiding representation ambiguity. Then x differs from every row but belongs to [0,1], a contradiction. Therefore [0,1] is uncountable.",
+      "full_credit_rule": "Full credit requires a list assumption, a well-defined diagonal construction, an argument that the constructed real differs from every listed real, the contradiction, and the conclusion. Any correct base and digit rule receives credit; the official 5/6 rule is not required.",
+      "material_errors": [
+        {"id": "q7_diagonal_not_new", "affects": ["q7_construct_x", "q7_differs_every_row", "q7_contradiction"], "cap": 16, "description": "Does not provide a valid reason that the constructed number differs from every listed row."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 25, "maximum": 25},
+        "substantially_correct": {"minimum": 18, "maximum": 24},
+        "partially_correct": {"minimum": 8, "maximum": 17},
+        "minimal_relevant": {"minimum": 1, "maximum": 7},
+        "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q7_assume_list", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "Assume a complete enumeration r1,r2,r3,... of reals in [0,1].", "required_for_full_credit": true},
+        {"id": "q7_digit_table", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "Represent the rows in a common base so the i-th diagonal digit is defined.", "required_for_full_credit": true},
+        {"id": "q7_construct_x", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 6}, "meaning": "Construct x by changing every diagonal digit using a valid rule that avoids repeated-tail ambiguity.", "required_for_full_credit": true},
+        {"id": "q7_differs_every_row", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 6}, "meaning": "Explain x differs from r_i in its i-th digit for every i.", "required_for_full_credit": true},
+        {"id": "q7_contradiction", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Use x in [0,1] yet missing from the purported complete list to derive a contradiction.", "required_for_full_credit": true},
+        {"id": "q7_conclude_uncountable", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "Conclude that [0,1] is uncountable.", "required_for_full_credit": true}
+      ]
+    },
+    {
+      "id": "Q8",
+      "type": "proof",
+      "max_score": 30,
+      "expected": "Assume a decider H for A_TM. Define D on <M> to query H(<M,<M>>) and do the opposite: reject if H accepts and accept if H rejects. Running D on <D> contradicts either possible H answer, so no H exists and A_TM is undecidable.",
+      "full_credit_rule": "Full credit requires the assumed decider semantics, the self-description query, reversal of the answer, and a logically sound D-on-<D> contradiction. A complete equivalent contradiction or reduction proof receives equivalent credit.",
+      "material_errors": [
+        {"id": "q8_missing_reversal", "affects": ["q8_reverse", "q8_contradiction"], "cap": 21, "description": "Uses the self-query but does not reverse H's outcome, so no contradiction follows."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 30, "maximum": 30},
+        "substantially_correct": {"minimum": 22, "maximum": 29},
+        "partially_correct": {"minimum": 10, "maximum": 21},
+        "minimal_relevant": {"minimum": 1, "maximum": 9},
+        "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q8_assume_h", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 5}, "meaning": "Assume a total decider H for A_TM with correct accept/reject semantics.", "required_for_full_credit": true},
+        {"id": "q8_define_d", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Define a new machine D on an encoded machine description <M>.", "required_for_full_credit": true},
+        {"id": "q8_self_query", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 5}, "meaning": "Query H(<M,<M>>) about whether M accepts its own description.", "required_for_full_credit": true},
+        {"id": "q8_reverse", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Make D do the opposite of H: H accept -> D reject; H reject -> D accept.", "required_for_full_credit": true},
+        {"id": "q8_contradiction", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 4, "demonstrated": 8}, "meaning": "Run D on <D> and derive the contradiction in both possible cases, or a logically equivalent self-contradiction.", "required_for_full_credit": true},
+        {"id": "q8_conclude_undecidable", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 2, "demonstrated": 4}, "meaning": "Conclude that no H exists and A_TM is undecidable.", "required_for_full_credit": true}
+      ]
+    },
+    {
+      "id": "Q9",
+      "type": "short_answer",
+      "max_score": 15,
+      "expected": "Regular is a proper subset of CFL, then Decidable, then Turing-recognizable, then All Languages. Valid witnesses are 0*1*, {a^n b^n}, {a^n b^n c^n}, A_TM, and the complement of A_TM, respectively, with an adequate reason for each.",
+      "full_credit_rule": "Full credit requires the correct strict hierarchy plus one valid level-specific witness and adequate reason at every level. Equivalent witnesses receive credit. The final witness is the complement of A_TM; A_TM itself is recognizable, not a nonrecognizable witness.",
+      "material_errors": [
+        {"id": "q9_reversed_hierarchy_or_a_tm_error", "affects": ["q9_hierarchy", "q9_nonrecognizable"], "cap": 10, "description": "Reverses decidable/recognizable containment or calls A_TM nonrecognizable."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 15, "maximum": 15},
+        "substantially_correct": {"minimum": 11, "maximum": 14},
+        "partially_correct": {"minimum": 5, "maximum": 10},
+        "minimal_relevant": {"minimum": 1, "maximum": 4},
+        "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q9_hierarchy", "importance": "essential", "levels": {"mentioned_only": 1, "partial_understanding": 3, "demonstrated": 5}, "meaning": "State the strict order Regular subset CFL subset Decidable subset Recognizable subset All Languages, with strictness/explanation.", "required_for_full_credit": true},
+        {"id": "q9_regular", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Give a regular witness such as 0*1* and a valid DFA/regular reason.", "required_for_full_credit": true},
+        {"id": "q9_cfl_not_regular", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Give a CFL-not-regular witness such as {a^n b^n} and a valid reason.", "required_for_full_credit": true},
+        {"id": "q9_decidable_not_cfl", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Give a decidable-not-CFL witness such as {a^n b^n c^n} and a valid reason.", "required_for_full_credit": true},
+        {"id": "q9_recognizable_not_decidable", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Give a recognizable-not-decidable witness such as A_TM and a valid simulation/may-loop reason.", "required_for_full_credit": true},
+        {"id": "q9_nonrecognizable", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Give a nonrecognizable witness such as complement(A_TM) and a valid reason.", "required_for_full_credit": true}
+      ]
+    },
+    {
+      "id": "Q10",
+      "type": "short_answer",
+      "max_score": 15,
+      "expected": "TMs have finite binary encodings and binary strings are countable, so TMs are countable. Languages are subsets of Sigma* or infinite membership bitmaps, and are uncountable by diagonalization. Thus only countably many languages can be recognized, so non-Turing-recognizable languages exist and 'almost all' is a cardinality claim.",
+      "full_credit_rule": "Full credit requires both cardinality sides and their connection: finite encodings make TMs countable, whereas language/membership bitmaps are uncountable, so some languages have no recognizer. 'Almost all' must be cardinality language, not an empirical probability claim. Complement(A_TM) is optional supporting evidence, not required.",
+      "material_errors": [
+        {"id": "q10_missing_or_reversed_counting", "affects": ["q10_countable_tms", "q10_compare"], "cap": 7, "description": "Claims TMs are uncountable or asserts the conclusion without a countable-TM versus uncountable-language comparison."}
+      ],
+      "score_bands": {
+        "full": {"minimum": 15, "maximum": 15},
+        "substantially_correct": {"minimum": 11, "maximum": 14},
+        "partially_correct": {"minimum": 5, "maximum": 10},
+        "minimal_relevant": {"minimum": 1, "maximum": 4},
+        "no_credit": {"minimum": 0, "maximum": 0}
+      },
+      "scoring_elements": [
+        {"id": "q10_finite_encodings", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "Explain that each TM has a finite description encodable as a binary string.", "required_for_full_credit": true},
+        {"id": "q10_countable_tms", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Use countability of finite binary strings to conclude that Turing machines are countable.", "required_for_full_credit": true},
+        {"id": "q10_language_bitmaps", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Model a language as a subset of Sigma* or an infinite membership bitmap over an enumeration of strings.", "required_for_full_credit": true},
+        {"id": "q10_uncountable_languages", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "Explain that there are uncountably many such languages/bitmaps, for example by diagonalization.", "required_for_full_credit": true},
+        {"id": "q10_compare", "importance": "essential", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 3}, "meaning": "Compare countably many machines with uncountably many languages to infer that not every language has a recognizer.", "required_for_full_credit": true},
+        {"id": "q10_conclude", "importance": "supporting", "levels": {"mentioned_only": 0, "partial_understanding": 1, "demonstrated": 2}, "meaning": "Conclude that non-Turing-recognizable languages exist and explain 'almost all' as cardinality, not probability.", "required_for_full_credit": true}
+      ]
+    }
+  ],
+  "rubric_format": "concept_keyterm_v1",
+  "rubric_version": "DSAA3071-week6-full-v0",
+  "schema_version": 1,
+  "source": {
+    "basis": "Extracted, text-checked, and visually checked against the official DSAA3071 Week 6 question-plus-solution reference. This artifact contains rubric semantics only and no student examples.",
+    "official_reference_sha256": "baf59a5ff26632fb937cf158f0f2548cb66fc7c94b6c8effd02a61122db604a2",
+    "reference_page_anchors": {"Q1_Q3": 1, "Q4_Q6": 2, "Q7_Q8": 3, "Q9_Q10": 4},
+    "student_packet_mapping_note": "The p01/p02/p03 mapping is separately user-declared and visually checked for anonymized student-submission packets; it must not be inferred from the four-page official reference PDF.",
+    "status": "draft_extracted_from_official_solution_no_student_content"
+  },
+  "total_points": 130
+}

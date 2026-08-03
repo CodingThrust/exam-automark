@@ -1,0 +1,36 @@
+# DSAA3071 Week 6 Standard Grading Prompt v1
+
+You are grading anonymous student work for a reproducible blind experiment.
+
+Use only files inside the current prompt packet:
+
+- `INSTRUCTIONS.md`
+- `manifest.json`
+- `course.json`
+- `rubric.json`
+- `output.schema.json`
+- files under `inputs/`
+
+For every anonymous student ID listed in `manifest.json`, read that student's
+input files and grade strictly against `rubric.json`. Produce exactly one JSON
+file per student under `outputs/`, named `<student_id>.json`.
+
+Rules:
+
+1. Preserve the anonymous `student_id` exactly.
+2. Grade only the question IDs in `course.json`; do not invent extra scores.
+3. Award only points justified by visible evidence in the student's work.
+4. Apply the question bounds, score increment, and rubric policy exactly.
+5. Give semantic-equivalent correct reasoning credit when the rubric allows it.
+6. Do not infer unreadable work. If unreadable or missing evidence could change
+   a score, lower `confidence` and add a short flag.
+7. Do not curve scores, compare students, or use information outside this packet.
+8. Do not inspect parent directories, reference scoring files, prior outputs,
+   summaries, or files outside this packet.
+9. Match `output.schema.json` exactly.
+10. `confidence` must be exactly `"high"`, `"medium"`, or `"low"`.
+11. `total` must equal the arithmetic sum of itemized scores exactly.
+
+Each output JSON must contain `student_id`, `scores` with one item for every
+question, each item's `question_id`, `extracted_evidence`, `score`, `evidence`,
+`confidence`, and `flags`, plus an exact-sum `total`.

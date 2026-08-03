@@ -105,3 +105,22 @@ Orange boxes are detector proposals; drag to add a manual rectangle, then
 complete the page sweep. Saving a candidate or sweep is not final approval and
 does not alter the model-facing artifact until the compile-and-rerender steps
 are run.
+
+## Local post-render final approval
+
+After compiling masks into a new layout and rerendering a new artifact version,
+do not edit `anonymization_review.csv` manually. Start the local final-review
+page instead:
+
+```powershell
+python scripts/review_final_anonymization.py --week 4 --version v1
+```
+
+It verifies the schema-v2 preparation metadata, layout, render specification,
+artifact manifest, deterministic output paths, and review CSV before showing
+only the final anonymous PNGs. For each page, a human must confirm that no
+identity or existing grading evidence remains and that required answer content
+was not masked. **Approve all three checks** records those three approvals
+together; **Reject / needs correction** records a blocking explanation. As with
+the masking-review page, the command prints a one-time local URL and never
+uploads pages.

@@ -1026,7 +1026,9 @@ def _packet_mode_findings(packet: Path, mode: str) -> list[str]:
     except WorkflowError as error:
         return [str(error)]
     metadata = manifest.get("metadata", {})
-    declared_mode = metadata.get("input_mode") if isinstance(metadata, dict) else None
+    if not isinstance(metadata, dict):
+        return ["existing packet metadata must be an object"]
+    declared_mode = metadata.get("input_mode")
     if declared_mode and declared_mode != mode:
         findings.append(
             f"packet input_mode {declared_mode!r} does not match requested {mode!r}"
@@ -1060,6 +1062,29 @@ def _packet_mode_findings(packet: Path, mode: str) -> list[str]:
         _, provenance_findings = _text_provenance(manifest)
         findings.extend(provenance_findings)
     return findings
+
+
+def _multimodal_packet_reuse_findings(
+    packet: Path, manifest: dict[str, Any]
+) -> list[str]:
+    """Verify a reusable image packet without rewriting its immutable manifest.
+
+    Older audited image packets may predate the optional ``metadata.input_mode``
+    marker.  They are still safe to reuse only when their actual inputs pass
+    the same image-only checks used for a new multimodal run.  A conflicting
+    explicit marker remains an error.
+    """
+
+    metadata = manifest.get("metadata", {})
+    if not isinstance(metadata, dict):
+        return ["existing packet metadata must be an object"]
+    declared_mode = metadata.get("input_mode")
+    if declared_mode and declared_mode != "multimodal":
+        return [
+            "existing packet input_mode "
+            f"{declared_mode!r} does not match required 'multimodal'"
+        ]
+    return _packet_mode_findings(packet, "multimodal")
 
 
 def _find_gh() -> str | None:
@@ -1747,12 +1772,14 @@ def prepare(
 
         if target.exists():
             target_manifest = _packet_manifest(target)
+            reuse_findings = _multimodal_packet_reuse_findings(
+                target, target_manifest
+            )
             if (
                 target_manifest["student_ids"] != manifest["student_ids"]
                 or target_manifest.get("condition") != condition
                 or _packet_task(target, target_manifest) != task
-                or target_manifest.get("metadata", {}).get("input_mode")
-                != "multimodal"
+                or reuse_findings
             ):
                 raise WorkflowError(
                     f"existing immutable packet differs: {_relative(repo, target)}"

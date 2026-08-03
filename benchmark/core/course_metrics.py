@@ -19,7 +19,7 @@ from pathlib import Path
 from statistics import fmean
 from typing import Any, Sequence
 
-from .gold import validate_gold_table
+from .gold import _write_selected_gold, validate_gold_table
 from .schema import CONFIDENCE_LEVELS, CourseSpec
 
 
@@ -438,27 +438,6 @@ def _load_gold_scores(
                 raise CourseMetricsError("validated gold unexpectedly contains a duplicate")
             scores[key] = float(raw_score)
     return scores
-
-
-def _write_selected_gold(
-    source_path: Path,
-    selected_path: Path,
-    student_ids: Sequence[str],
-) -> None:
-    """Copy only the requested anonymous rows to an ephemeral validation CSV."""
-
-    selected_students = set(student_ids)
-    with source_path.open(newline="", encoding="utf-8-sig") as source:
-        reader = csv.DictReader(source)
-        fieldnames = list(reader.fieldnames or ())
-        with selected_path.open("w", newline="", encoding="utf-8") as destination:
-            writer = csv.DictWriter(destination, fieldnames=fieldnames)
-            if fieldnames:
-                writer.writeheader()
-            for row in reader:
-                student_id = str(row.get("student_id") or "").strip()
-                if student_id in selected_students:
-                    writer.writerow(row)
 
 
 def _load_run_scores(

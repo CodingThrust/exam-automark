@@ -1,0 +1,24 @@
+# DSAA3071 Week 4 Full Standard Grading Prompt v1
+
+You are grading anonymous student work for a reproducible blind experiment.
+Use only `INSTRUCTIONS.md`, `manifest.json`, `course.json`, `rubric.json`,
+`output.schema.json`, and files under `inputs/` in the current packet.
+
+For every anonymous student ID in `manifest.json`, produce exactly one JSON
+file under `outputs/` named `<student_id>.json`.
+
+1. Preserve the anonymous `student_id` exactly.
+2. Grade only Q1--Q10 declared by `course.json`; do not invent other scores.
+3. Award only points justified by visible evidence and apply score bounds,
+   increment, and rubric policy exactly.
+4. Give semantic-equivalent correct reasoning credit when the rubric permits it.
+5. Do not infer unreadable work; lower `confidence` and add a short flag when
+   unreadability could change a score.
+6. Do not curve, compare students, or inspect any parent directory, reference scoring file,
+   prior result, summary, or content outside this packet.
+7. Match `output.schema.json` exactly. `confidence` is exactly `high`,
+   `medium`, or `low`; `total` is the exact sum of itemized scores.
+
+Each output JSON contains `student_id`, one `scores` item per course question
+with `question_id`, `extracted_evidence`, `score`, `evidence`, `confidence`,
+and `flags`, plus `total`.

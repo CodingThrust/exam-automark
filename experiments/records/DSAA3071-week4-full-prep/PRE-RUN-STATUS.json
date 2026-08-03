@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "course_id": "DSAA3071",
+  "assessment_id": "week4_full_q1_q10",
+  "status": "not_ready",
+  "model_run_allowed": false,
+  "scope_correction": {
+    "status": "ready",
+    "detail": "Only Week 3 is partial due to missing pages. This Week 4 record supersedes the unrun Q1-Q4/Q9-Q10 partial preparation."
+  },
+  "scope": {
+    "in_scope_question_ids": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10"],
+    "benchmark_total_points": 130,
+    "score_step": 1
+  },
+  "frozen_artifacts": {
+    "course_spec": {"path": "experiments/course_specs/DSAA3071_week4_full_q1_q10.json", "sha256": "40774acac623eff76152b7aa5f23bf6b5ddaf1e7313d37bdb1b4a644971eb5fa"},
+    "rubric": {"path": "experiments/records/DSAA3071-week4-full-prep/rubric_v0.json", "sha256": "fa2ef07f1afddc5dc6f4735b7d7bdaa5f168155c80be2bbd05d955a0cc21934e"},
+    "split": {"path": "experiments/records/DSAA3071-week4-full-prep/split.json", "sha256": "583ddd8e24208ee06885b2c63214a03520feb91745c81e43397fafb383499d41", "development_count": 7, "heldout_count": 15, "status": "inherited_same_pre_output_members_from_superseded_partial_split"},
+    "approved_scoped_input_snapshot": {"private_gitignored_path": "Data/DSAA3071/week4/anonymization/scoped-inputs/v2-p01-p02-p03", "manifest_sha256": "f885abe857655cf011ddd4ff9ea0da1eb7dce63979fcec0c74ecea29cfd2c655", "student_count": 22, "image_count": 66, "page_suffixes": ["p01", "p02", "p03"]},
+    "blank_private_gold_template": {"private_gitignored_path": "Data/DSAA3071/week4/benchmark/v2-full-q1-q10/gold/primary_scores.csv", "sha256": "e01e450797a3feb36f9220f55f1eb9661eccca82ad5cf7c049345d081af88b9a", "student_count": 22, "question_count": 10, "row_count": 220, "score_cells_filled": 0},
+    "gold_reviewer_binding": {"path": "experiments/records/DSAA3071-week4-full-prep/gold-reviewer-binding.json", "sha256": "5279a50be0c337ed998f16fa29f357205b0ede738f94f85586da05b77f1353db", "status": "binds_corrected_full_course_to_exact_approved_private_snapshot"},
+    "advisor_workflow_blocked_contract": {"path": "experiments/records/DSAA3071-week4-full-prep/advisor-workflow-development.blocked.json", "sha256": "2069cbd6dd5c2b9787030e88218e6b2041ef3006ca16771e9e69c6c0b4d99f4a", "status": "frozen_future_only_no_model_run"},
+    "private_image_input_packets": {
+      "direct_multimodal_development": {"private_gitignored_path": "Data/DSAA3071/week4/benchmark/v2-full-q1-q10/packets/direct-multimodal/development/M1-dev-r1/M1-dev-r1", "packet_sha256": "f36e0887b5337f7059a30d2f52d434938d779bb207742f6e5ba33d0be8c88941", "status": "packet_audit_passed_no_model_run"},
+      "direct_multimodal_heldout": {"private_gitignored_path": "Data/DSAA3071/week4/benchmark/v2-full-q1-q10/packets/direct-multimodal/heldout/M1-heldout-r1/M1-heldout-r1", "packet_sha256": "951392650ef16e099fc37adf26965dabe47f9cd8981010f256e66c58bd174ea4", "status": "packet_audit_passed_no_model_run"},
+      "fresh_transcription_development": {"private_gitignored_path": "Data/DSAA3071/week4/benchmark/v2-full-q1-q10/packets/transcription/development/T1-dev-r1/T1-dev-r1", "packet_sha256": "0446601ca67f209cf85db4b7472eb43d89a9e7efac348dfb5536694b87969c0c", "status": "packet_audit_passed_no_model_run"},
+      "fresh_transcription_heldout": {"private_gitignored_path": "Data/DSAA3071/week4/benchmark/v2-full-q1-q10/packets/transcription/heldout/T1-heldout-r1/T1-heldout-r1", "packet_sha256": "0e4fa83cf4786b12e3e02be790484ac1e3b0334684e19934f40652a0bfda5f8f", "status": "packet_audit_passed_no_model_run"}
+    }
+  },
+  "gates": [
+    {"id": "final_anonymization_review", "status": "ready", "detail": "The 66-page W4 v1 anonymous artifact passed final validation."},
+    {"id": "scope_rubric_split_and_image_packets", "status": "ready", "detail": "Corrected full Q1-Q10 scope, p01/p02/p03 map, rubric, inherited 7/15 split, and M1/T1 image packets are frozen and audited."},
+    {"id": "human_question_level_gold", "status": "blocked_pending_human_review", "detail": "A new private 220-row template is blank. Development analysis needs the frozen 7-student subset's 70 cells, followed by local validate-gold-subset readiness; held-out cells remain sealed."},
+    {"id": "engine_capability_and_model_pinning", "status": "not_started", "detail": "Actual local/advisor engine IDs and supported image/transcription capabilities need authorized zero-data checks."},
+    {"id": "fresh_engine_transcripts_and_lineage", "status": "input_packets_ready_pending_generation", "detail": "T1 image packets are audited; fresh T1 outputs and unchanged G1 lineage are still absent."},
+    {"id": "explicit_run_readiness_approval", "status": "not_started", "detail": "A separate development-only approval is required after every preceding gate is ready."}
+  ],
+  "development_gold_entry_dependency": {
+    "status": "pending_generic_reviewer_subset_filter",
+    "detail": "Development-only human entry requires the local review_question_gold.py --students-file filter from the separate generic reviewer change. Until it is merged locally, do not use the superseded six-question W4 reviewer or enter held-out scores merely to bypass a UI limitation."
+  },
+  "run_blockers": ["Development human gold is blank.", "Actual permitted engine/model identifiers are not pinned.", "Fresh T1 transcripts and G1 lineage audits do not exist.", "No explicit development run-readiness approval exists."],
+  "known_post_run_gap": "The Kimi/Claude advisor workflow can prepare/run/submit privacy-safe artifacts, but generic W4 direct-vs-text and prior DeepSeek/Codex aggregate comparison is not implemented in this preparation record. Do not claim automatic cross-model metrics until a separate multi-course aggregation task is completed."
+}

@@ -3,7 +3,7 @@
   "course_id": "DSAA3071",
   "model_run_allowed": false,
   "schema_version": 1,
-  "status": "not_ready",
+  "status": "superseded_scope_no_model_run",
   "scope": {
     "in_scope_question_ids": [
       "Q1",
@@ -110,6 +110,7 @@
     }
   ],
   "run_blockers": [
+    "This partial Week 4 scope was superseded after confirming that only Week 3 has missing pages; use DSAA3071-week4-full-prep instead.",
     "Human question-level gold scores are blank.",
     "Fresh automatic T1 transcripts have not been generated and bound to same-engine text packets.",
     "The post-T1 image-to-transcript lineage audit has not run.",

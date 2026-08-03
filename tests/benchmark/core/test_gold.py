@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from benchmark.core.gold import validate_gold_table
+from benchmark.core.gold import validate_gold_subset_table, validate_gold_table
 from benchmark.core.schema import CourseSpec
 
 
@@ -56,6 +56,55 @@ class GoldTableTests(unittest.TestCase):
         self.assertIn("all_expected_pairs_present_once", report["failed_checks"])
         self.assertIn("scores_complete", report["failed_checks"])
         self.assertIn("scores_within_course_steps", report["failed_checks"])
+
+    def test_subset_validation_allows_unfinished_heldout_rows_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            course = CourseSpec.from_json_path(FIXTURES / "course_dsaa3073_hw1.json")
+            gold_path = Path(tmp) / "primary_scores.csv"
+            _write_gold(
+                gold_path,
+                [
+                    ("S001", "Q1", "9.5"),
+                    ("S001", "Q2a", "2.75"),
+                    ("S001", "Q2b", "1.5"),
+                    ("S002", "Q1", ""),
+                    ("S002", "Q2a", ""),
+                    ("S002", "Q2b", ""),
+                ],
+            )
+
+            strict = validate_gold_table(course, gold_path, ["S001"])
+            subset = validate_gold_subset_table(course, gold_path, ["S001"])
+
+        self.assertEqual(strict["status"], "not_ready")
+        self.assertIn("all_expected_pairs_present_once", strict["failed_checks"])
+        self.assertEqual(subset["status"], "ready")
+        self.assertEqual(subset["report_type"], "gold_subset_readiness")
+        self.assertEqual(subset["validation_scope"], "selected_students_only")
+        self.assertEqual(subset["gold_path"], gold_path.as_posix())
+        self.assertEqual(subset["source_rows_read"], 6)
+        self.assertEqual(subset["selected_rows_read"], 3)
+
+    def test_subset_validation_still_blocks_blank_selected_score(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            course = CourseSpec.from_json_path(FIXTURES / "course_dsaa3073_hw1.json")
+            gold_path = Path(tmp) / "primary_scores.csv"
+            _write_gold(
+                gold_path,
+                [
+                    ("S001", "Q1", "9.5"),
+                    ("S001", "Q2a", ""),
+                    ("S001", "Q2b", "1.5"),
+                    ("S002", "Q1", ""),
+                    ("S002", "Q2a", ""),
+                    ("S002", "Q2b", ""),
+                ],
+            )
+
+            report = validate_gold_subset_table(course, gold_path, ["S001"])
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn("scores_complete", report["failed_checks"])
 
 
 def _write_gold(path: Path, rows: list[tuple[str, str, str]]) -> None:

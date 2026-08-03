@@ -12,6 +12,7 @@ from benchmark.core.advisor_workflow import (
     _cross_provider_comparison,
     _create_pr_with_token,
     _github_repo_slug,
+    _multimodal_packet_reuse_findings,
     _private_roots_ignored,
     _probe_receipt_matches,
     _privacy_approvals,
@@ -373,6 +374,54 @@ class AdvisorWorkflowTests(unittest.TestCase):
             approvals,
             {"S001-p01.jpg": True, "S002-p01.jpg": False},
         )
+
+    def test_legacy_image_packet_without_mode_marker_can_be_reused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            packet = Path(tmp)
+            image = packet / "inputs" / "S001" / "S001-p01.png"
+            image.parent.mkdir(parents=True)
+            image.write_bytes(b"not-rendered-by-this-check")
+            manifest = {
+                "student_ids": ["S001"],
+                "metadata": {},
+            }
+            (packet / "manifest.json").write_text(
+                json.dumps(manifest), encoding="utf-8"
+            )
+
+            findings = _multimodal_packet_reuse_findings(packet, manifest)
+
+        self.assertEqual(findings, [])
+
+    def test_legacy_image_packet_reuse_rejects_conflicting_or_nonimage_input(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            packet = Path(tmp)
+            input_dir = packet / "inputs" / "S001"
+            input_dir.mkdir(parents=True)
+            page = input_dir / "S001-p01.png"
+            page.write_bytes(b"not-rendered-by-this-check")
+            (packet / "manifest.json").write_text(
+                json.dumps({"student_ids": ["S001"], "metadata": {}}),
+                encoding="utf-8",
+            )
+            conflicting = _multimodal_packet_reuse_findings(
+                packet,
+                {"student_ids": ["S001"], "metadata": {"input_mode": "text-only"}},
+            )
+            page.unlink()
+            (input_dir / "S001-p01.txt").write_text("text", encoding="utf-8")
+            nonimage = _multimodal_packet_reuse_findings(
+                packet,
+                {"student_ids": ["S001"], "metadata": {}},
+            )
+            malformed = _multimodal_packet_reuse_findings(
+                packet,
+                {"student_ids": ["S001"], "metadata": []},
+            )
+
+        self.assertIn("does not match required", conflicting[0])
+        self.assertIn("non-image multimodal inputs", nonimage[0])
+        self.assertEqual(malformed, ["existing packet metadata must be an object"])
 
     def test_privacy_approvals_reads_ready_schema_v2_final_review(self):
         with tempfile.TemporaryDirectory() as tmp:

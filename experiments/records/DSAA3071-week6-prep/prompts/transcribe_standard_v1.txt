@@ -1,0 +1,31 @@
+# DSAA3071 Week 6 Standard Transcription Prompt v1
+
+You are producing a faithful transcript for a blind grading experiment.
+
+Use only files inside the current prompt packet:
+
+- `INSTRUCTIONS.md`
+- `manifest.json`
+- `course.json`
+- `output.schema.json`
+- files under `inputs/`
+
+For every anonymous student ID listed in `manifest.json`, read that student's
+input files. Produce exactly one JSON file per student under `outputs/`, named
+`<student_id>.json`.
+
+Rules:
+
+1. Preserve the anonymous `student_id` exactly.
+2. Transcribe visible work question by question according to `course.json`.
+3. Do not solve the problem, repair mathematics, or normalize an answer into a
+   more correct form.
+4. Do not infer missing steps. If a symbol, line, or page is unclear, retain the
+   visible part and set `unclear` to `true`.
+5. If a question appears unanswered, use an empty string and `unclear: false`.
+6. Do not inspect parent directories, reference scoring files, prior outputs,
+   summaries, or files outside this packet.
+7. Match `output.schema.json` exactly.
+
+Each output JSON must contain `student_id` and `answers`, with one item for
+every question containing `question_id`, `text`, and `unclear`.

@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "experiment_id": "dsaa3071-week6-kimi-claude-dev-r1",
+  "split": "development",
+  "benchmark_root": "Data/DSAA3071/week6/benchmark/v1",
+  "state_path": "Data/DSAA3071/week6/benchmark/v1/runs/dsaa3071-week6-kimi-claude-dev-r1/advisor-state.json",
+  "record_dir": "experiments/records/DSAA3071-week6-kimi-claude-dev-r1",
+  "required_engines": ["kimi", "claude"],
+  "required_input_modes": ["multimodal", "text-only"],
+  "required_conditions": ["standard"],
+  "packet_builds": [
+    {
+      "id": "m1-development-approved-images",
+      "source_text_packet": "Data/DSAA3071/week6/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1/M1-dev-r1",
+      "input_root": "Data/DSAA3071/week6/anonymization/scoped-inputs/v1-p01-p02-p03/anonymized_pages",
+      "privacy_review": "Data/DSAA3071/week6/anonymization/artifacts/v1/manifest/anonymization_review.csv",
+      "output_root": "Data/DSAA3071/week6/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1",
+      "task": "grade"
+    },
+    {
+      "id": "t1-development-approved-images",
+      "source_text_packet": "Data/DSAA3071/week6/benchmark/v1/packets/transcription/development/T1-dev-r1/T1-dev-r1",
+      "input_root": "Data/DSAA3071/week6/anonymization/scoped-inputs/v1-p01-p02-p03/anonymized_pages",
+      "privacy_review": "Data/DSAA3071/week6/anonymization/artifacts/v1/manifest/anonymization_review.csv",
+      "output_root": "Data/DSAA3071/week6/benchmark/v1/packets/transcription/development/T1-dev-r1",
+      "task": "transcribe"
+    }
+  ],
+  "transcription_runs": [
+    {
+      "id": "kimi-transcription",
+      "engine": "kimi",
+      "model": "UNPINNED-KIMI-CODE-MODEL",
+      "input_mode": "multimodal",
+      "condition": "transcription",
+      "packet": "Data/DSAA3071/week6/benchmark/v1/packets/transcription/development/T1-dev-r1/T1-dev-r1",
+      "output": "Data/DSAA3071/week6/benchmark/v1/runs/dsaa3071-week6-kimi-claude-dev-r1/kimi-transcription",
+      "privacy_review": "Data/DSAA3071/week6/anonymization/artifacts/v1/manifest/anonymization_review.csv",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    },
+    {
+      "id": "claude-transcription",
+      "engine": "claude",
+      "model": "UNPINNED-CLAUDE-CODE-MODEL",
+      "input_mode": "multimodal",
+      "condition": "transcription",
+      "packet": "Data/DSAA3071/week6/benchmark/v1/packets/transcription/development/T1-dev-r1/T1-dev-r1",
+      "output": "Data/DSAA3071/week6/benchmark/v1/runs/dsaa3071-week6-kimi-claude-dev-r1/claude-transcription",
+      "privacy_review": "Data/DSAA3071/week6/anonymization/artifacts/v1/manifest/anonymization_review.csv",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    }
+  ],
+  "transcript_packet_builds": [
+    {
+      "id": "kimi-standard-fresh-transcript",
+      "transcription_run": "kimi-transcription",
+      "source_text_packet": "Data/DSAA3071/week6/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1/M1-dev-r1",
+      "output_root": "Data/DSAA3071/week6/benchmark/v1/packets/fresh-transcripts/kimi",
+      "text_source_kind": "kimi_fresh_automatic_transcript_unchanged"
+    },
+    {
+      "id": "claude-standard-fresh-transcript",
+      "transcription_run": "claude-transcription",
+      "source_text_packet": "Data/DSAA3071/week6/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1/M1-dev-r1",
+      "output_root": "Data/DSAA3071/week6/benchmark/v1/packets/fresh-transcripts/claude",
+      "text_source_kind": "claude_fresh_automatic_transcript_unchanged"
+    }
+  ],
+  "runs": [
+    {
+      "id": "kimi-multimodal-standard",
+      "engine": "kimi",
+      "model": "UNPINNED-KIMI-CODE-MODEL",
+      "input_mode": "multimodal",
+      "condition": "standard",
+      "packet": "Data/DSAA3071/week6/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1/M1-dev-r1",
+      "output": "Data/DSAA3071/week6/benchmark/v1/runs/dsaa3071-week6-kimi-claude-dev-r1/kimi-multimodal-standard",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    },
+    {
+      "id": "kimi-text-standard",
+      "engine": "kimi",
+      "model": "UNPINNED-KIMI-CODE-MODEL",
+      "input_mode": "text-only",
+      "condition": "standard",
+      "packet": "Data/DSAA3071/week6/benchmark/v1/packets/fresh-transcripts/kimi/M1-dev-r1",
+      "output": "Data/DSAA3071/week6/benchmark/v1/runs/dsaa3071-week6-kimi-claude-dev-r1/kimi-text-standard",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    },
+    {
+      "id": "claude-multimodal-standard",
+      "engine": "claude",
+      "model": "UNPINNED-CLAUDE-CODE-MODEL",
+      "input_mode": "multimodal",
+      "condition": "standard",
+      "packet": "Data/DSAA3071/week6/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1/M1-dev-r1",
+      "output": "Data/DSAA3071/week6/benchmark/v1/runs/dsaa3071-week6-kimi-claude-dev-r1/claude-multimodal-standard",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    },
+    {
+      "id": "claude-text-standard",
+      "engine": "claude",
+      "model": "UNPINNED-CLAUDE-CODE-MODEL",
+      "input_mode": "text-only",
+      "condition": "standard",
+      "packet": "Data/DSAA3071/week6/benchmark/v1/packets/fresh-transcripts/claude/M1-dev-r1",
+      "output": "Data/DSAA3071/week6/benchmark/v1/runs/dsaa3071-week6-kimi-claude-dev-r1/claude-text-standard",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    }
+  ],
+  "comparisons": [],
+  "submission": {
+    "base": "main",
+    "branch": "advisor-results/dsaa3071-week6-kimi-claude-dev-r1",
+    "title": "DSAA3071 Week 6 full-scope Kimi/Claude results / DSAA3071 第6周全量范围 Kimi/Claude 结果",
+    "commit_message": "Add DSAA3071 Week 6 full-scope Kimi Claude results / 添加 DSAA3071 第6周全量范围 Kimi Claude 结果"
+  },
+  "future_run_contract": {
+    "status": "blocked_pending_gold_model_pinning_lineage_and_explicit_approval",
+    "model_run_allowed": false,
+    "activation_policy": "Do not edit this frozen file into a runnable configuration. After every gate is ready, copy it to a new versioned activation configuration, pin exact model IDs there, and record explicit approval.",
+    "blockers": [
+      {
+        "id": "human_question_level_gold",
+        "source": "experiments/records/DSAA3071-week6-prep/PRE-RUN-STATUS.json",
+        "required_status": "ready",
+        "detail": "The private 210-row table is blank. Development gold must be independently entered and validated before an accuracy claim or tuning decision. It never enters a model packet."
+      },
+      {
+        "id": "engine_capability_and_model_pinning",
+        "source": "experiments/records/DSAA3071-week6-prep/PRE-RUN-STATUS.json",
+        "required_status": "ready",
+        "detail": "Zero-data authorized checks must pin the exact Kimi/Claude CLI model identifiers and supported image behavior."
+      },
+      {
+        "id": "fresh_transcript_lineage",
+        "source": "experiments/records/DSAA3071-week6-prep/PRE-RUN-STATUS.json",
+        "required_status": "ready",
+        "detail": "Each T1 output must be fresh, unchanged in its own G1 packet, and pass the lineage audit."
+      },
+      {
+        "id": "explicit_run_readiness_approval",
+        "source": "experiments/records/DSAA3071-week6-prep/PRE-RUN-STATUS.json",
+        "required_status": "ready",
+        "detail": "A course-owner/researcher development-run approval must be recorded after the earlier gates."
+      }
+    ],
+    "frozen_inputs": {
+      "course_spec": {"path": "experiments/course_specs/DSAA3071_week6_full_q1_q10.json", "sha256": "9322b15adfebbb514e8ccd2d629e9ccb1b14b2fa9d1af2c1560ab40f0439bb50"},
+      "rubric": {"path": "experiments/records/DSAA3071-week6-prep/rubric_v0.json", "sha256": "ca54443a6241ea742a989fab73103fedc8d21c8ee6fbdf90381892210ae4dc28"},
+      "development_split": {"path": "experiments/records/DSAA3071-week6-prep/students-development.txt", "split_manifest": "experiments/records/DSAA3071-week6-prep/split.json", "split_sha256": "01d6aaaabba7d159621340754814772247b8b1ed42ca07bb964740a0bb1f6752", "student_count": 7},
+      "approved_anonymized_snapshot": {"input_root": "Data/DSAA3071/week6/anonymization/scoped-inputs/v1-p01-p02-p03/anonymized_pages", "snapshot_manifest": "Data/DSAA3071/week6/anonymization/scoped-inputs/v1-p01-p02-p03/manifest/scoped-anonymous-image-snapshot.json", "snapshot_manifest_sha256": "ea8352f1459b21975351c31a26973d48f57ac947a8ba5f9c7c7556fd67176f17", "page_suffixes": ["p01", "p02", "p03"], "student_count": 21, "image_count": 63}
+    },
+    "fresh_transcript_route_policy": {
+      "primary_route": "Each engine's T1 automatic output is passed unchanged into that same engine's text-only G1 packet.",
+      "forbidden": "Do not silently normalize, repair, or replace automatic T1 content before the primary text-only grading run.",
+      "optional_post_run_audit": "A human-corrected transcript is a distinct secondary route, not the engine's transcript-first result."
+    }
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "anonymous_id_pattern": "^S[0-9]{3}$",
+  "assessment_id": "week6_full_q1_q10",
+  "course_id": "DSAA3071",
+  "input_modes": [
+    "image",
+    "pdf",
+    "transcript",
+    "text"
+  ],
+  "notes": [
+    "This is the full 130-point DSAA3071 Week 6 assessment benchmark: Q1-Q10 are in scope.",
+    "The p01/p02/p03 mapping was declared and visually checked for approved anonymized student-submission packets. It must not be inferred from the four-page official question-plus-solution reference PDF.",
+    "Direct multimodal and transcript-first conditions must use the same anonymous students, frozen split, question scope, rubric version, and gold table before comparison.",
+    "No raw student answers, identity map, gold score, or model output is contained in this tracked specification."
+  ],
+  "page_mapping": {
+    "basis": "user_declared_and_visually_checked_for_approved_anonymized_student_submission_packets_not_inferred_from_reference_pdf_pagination",
+    "p01": {
+      "question_ids": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Q5"
+      ]
+    },
+    "p02": {
+      "question_ids": [
+        "Q6",
+        "Q7",
+        "Q8"
+      ]
+    },
+    "p03": {
+      "question_ids": [
+        "Q9",
+        "Q10"
+      ]
+    }
+  },
+  "questions": [
+    {
+      "id": "Q1",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": ["multiple_choice", "turing_machine", "encoding"],
+      "title": "Meaning of the notation <M, w>"
+    },
+    {
+      "id": "Q2",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": ["multiple_choice", "decidability", "dfa"],
+      "title": "Which language is decidable"
+    },
+    {
+      "id": "Q3",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": ["multiple_choice", "countability", "diagonalization"],
+      "title": "Cardinality of the real numbers"
+    },
+    {
+      "id": "Q4",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": ["multiple_choice", "turing_recognizable", "undecidable"],
+      "title": "Recognizability and decidability of A_TM"
+    },
+    {
+      "id": "Q5",
+      "max_score": 12.0,
+      "score_step": 1.0,
+      "tags": ["short_answer", "decider", "dfa", "high_level_turing_machine"],
+      "title": "High-level decider for A_DFA"
+    },
+    {
+      "id": "Q6",
+      "max_score": 13.0,
+      "score_step": 1.0,
+      "tags": ["short_answer", "decider", "dfa", "reachability", "emptiness"],
+      "title": "Deciding E_DFA by reachability"
+    },
+    {
+      "id": "Q7",
+      "max_score": 25.0,
+      "score_step": 1.0,
+      "tags": ["proof", "diagonalization", "uncountability", "real_numbers"],
+      "title": "Diagonal proof that [0, 1] is uncountable"
+    },
+    {
+      "id": "Q8",
+      "max_score": 30.0,
+      "score_step": 1.0,
+      "tags": ["proof", "undecidability", "diagonalization", "a_tm"],
+      "title": "Undecidability of A_TM"
+    },
+    {
+      "id": "Q9",
+      "max_score": 15.0,
+      "score_step": 1.0,
+      "tags": ["short_answer", "language_hierarchy", "examples"],
+      "title": "Strict language hierarchy with witnesses"
+    },
+    {
+      "id": "Q10",
+      "max_score": 15.0,
+      "score_step": 1.0,
+      "tags": ["short_answer", "countability", "turing_recognizable", "counting_argument"],
+      "title": "Why non-Turing-recognizable languages exist"
+    }
+  ],
+  "score_unit": "points",
+  "scope": {
+    "excluded_question_ids": [],
+    "full_assessment_total_points": 130.0,
+    "in_scope_question_ids": [
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4",
+      "Q5",
+      "Q6",
+      "Q7",
+      "Q8",
+      "Q9",
+      "Q10"
+    ],
+    "partial_benchmark_total_points": 130.0
+  },
+  "source_status": "scope_frozen_official_solution_rubric_v0_extracted_approved_anonymized_inputs_ready_but_model_run_blocked_pending_gold_split_packets_lineage_and_readiness"
+}

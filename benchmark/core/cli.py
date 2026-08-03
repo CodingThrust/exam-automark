@@ -25,6 +25,11 @@ from .comparisons import (
     write_three_condition_ablation_json,
     write_three_condition_ablation_markdown,
 )
+from .course_metrics import (
+    compare_course_runs,
+    write_course_metrics_json,
+    write_course_metrics_markdown,
+)
 from .packets import (
     PromptPacketSpec,
     TextGradingPacketSpec,
@@ -201,6 +206,31 @@ def _build_parser() -> argparse.ArgumentParser:
     gold.add_argument("--student-id", action="append", dest="student_ids")
     gold.add_argument("--students-file", type=Path)
     gold.add_argument("--output", type=Path)
+
+    course_metrics = subparsers.add_parser(
+        "compare-course-runs",
+        help=(
+            "compare two completed grading runs against ready course gold and "
+            "write aggregate-only metrics"
+        ),
+    )
+    course_metrics.add_argument("--course", type=Path, required=True)
+    course_metrics.add_argument("--gold", type=Path, required=True)
+    course_metrics.add_argument("--baseline-run", type=Path, required=True)
+    course_metrics.add_argument("--candidate-run", type=Path, required=True)
+    course_metrics.add_argument(
+        "--student-id", action="append", dest="student_ids"
+    )
+    course_metrics.add_argument("--students-file", type=Path)
+    course_metrics.add_argument("--output-json", type=Path, required=True)
+    course_metrics.add_argument("--output-md", type=Path, required=True)
+    course_metrics.add_argument("--bootstrap-seed", type=int, default=20260701)
+    course_metrics.add_argument("--bootstrap-samples", type=int, default=10_000)
+    course_metrics.add_argument(
+        "--require-same-data-snapshot",
+        action="store_true",
+        help="fail unless both run metadata files bind to the same source snapshot",
+    )
 
     transcripts = subparsers.add_parser(
         "validate-transcripts",
@@ -562,6 +592,34 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             )
             return 0 if report["status"] == "ready" else 1
+        if args.command == "compare-course-runs":
+            course = CourseSpec.from_json_path(args.course)
+            report = compare_course_runs(
+                course,
+                args.gold,
+                _load_student_ids(args.student_ids, args.students_file),
+                args.baseline_run,
+                args.candidate_run,
+                bootstrap_seed=args.bootstrap_seed,
+                bootstrap_samples=args.bootstrap_samples,
+                require_same_data_snapshot=args.require_same_data_snapshot,
+            )
+            write_course_metrics_json(args.output_json, report)
+            write_course_metrics_markdown(args.output_md, report)
+            print(
+                json.dumps(
+                    {
+                        "record_type": report["record_type"],
+                        "course_id": report["course"]["course_id"],
+                        "assessment_id": report["course"]["assessment_id"],
+                        "student_count": report["population"]["student_count"],
+                        "score_row_count": report["population"]["score_row_count"],
+                        "privacy": "aggregate_only",
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
         if args.command == "validate-transcripts":
             course = CourseSpec.from_json_path(args.course)
             report = validate_transcript_source(

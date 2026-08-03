@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "experiment_id": "dsaa3071-week4-partial-kimi-claude-dev-r1",
+  "split": "development",
+  "benchmark_root": "Data/DSAA3071/week4/benchmark/v1",
+  "state_path": "Data/DSAA3071/week4/benchmark/v1/runs/dsaa3071-week4-partial-kimi-claude-dev-r1/advisor-state.json",
+  "record_dir": "experiments/records/DSAA3071-week4-prep",
+  "required_engines": [
+    "kimi",
+    "claude"
+  ],
+  "required_input_modes": [
+    "multimodal",
+    "text-only"
+  ],
+  "required_conditions": [
+    "standard"
+  ],
+  "packet_builds": [],
+  "transcription_runs": [
+    {
+      "id": "kimi-transcription",
+      "engine": "kimi",
+      "model": "UNPINNED-KIMI-CODE-MODEL",
+      "input_mode": "multimodal",
+      "condition": "transcription",
+      "packet": "Data/DSAA3071/week4/benchmark/v1/packets/transcription/development/T1-dev-r1",
+      "output": "Data/DSAA3071/week4/benchmark/v1/runs/dsaa3071-week4-partial-kimi-claude-dev-r1/kimi-transcription",
+      "privacy_review": "Data/DSAA3071/week4/anonymization/artifacts/v1/manifest/anonymization_review.csv",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    },
+    {
+      "id": "claude-transcription",
+      "engine": "claude",
+      "model": "UNPINNED-CLAUDE-CODE-MODEL",
+      "input_mode": "multimodal",
+      "condition": "transcription",
+      "packet": "Data/DSAA3071/week4/benchmark/v1/packets/transcription/development/T1-dev-r1",
+      "output": "Data/DSAA3071/week4/benchmark/v1/runs/dsaa3071-week4-partial-kimi-claude-dev-r1/claude-transcription",
+      "privacy_review": "Data/DSAA3071/week4/anonymization/artifacts/v1/manifest/anonymization_review.csv",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    }
+  ],
+  "transcript_packet_builds": [
+    {
+      "id": "kimi-standard-fresh-transcript",
+      "transcription_run": "kimi-transcription",
+      "source_text_packet": "Data/DSAA3071/week4/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1",
+      "output_root": "Data/DSAA3071/week4/benchmark/v1/packets/fresh-transcripts/kimi",
+      "text_source_kind": "kimi_fresh_automatic_transcript_unchanged"
+    },
+    {
+      "id": "claude-standard-fresh-transcript",
+      "transcription_run": "claude-transcription",
+      "source_text_packet": "Data/DSAA3071/week4/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1",
+      "output_root": "Data/DSAA3071/week4/benchmark/v1/packets/fresh-transcripts/claude",
+      "text_source_kind": "claude_fresh_automatic_transcript_unchanged"
+    }
+  ],
+  "runs": [
+    {
+      "id": "kimi-multimodal-standard",
+      "engine": "kimi",
+      "model": "UNPINNED-KIMI-CODE-MODEL",
+      "input_mode": "multimodal",
+      "condition": "standard",
+      "packet": "Data/DSAA3071/week4/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1",
+      "output": "Data/DSAA3071/week4/benchmark/v1/runs/dsaa3071-week4-partial-kimi-claude-dev-r1/kimi-multimodal-standard",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    },
+    {
+      "id": "kimi-text-standard",
+      "engine": "kimi",
+      "model": "UNPINNED-KIMI-CODE-MODEL",
+      "input_mode": "text-only",
+      "condition": "standard",
+      "packet": "Data/DSAA3071/week4/benchmark/v1/packets/fresh-transcripts/kimi/M1-dev-r1",
+      "output": "Data/DSAA3071/week4/benchmark/v1/runs/dsaa3071-week4-partial-kimi-claude-dev-r1/kimi-text-standard",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    },
+    {
+      "id": "claude-multimodal-standard",
+      "engine": "claude",
+      "model": "UNPINNED-CLAUDE-CODE-MODEL",
+      "input_mode": "multimodal",
+      "condition": "standard",
+      "packet": "Data/DSAA3071/week4/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1",
+      "output": "Data/DSAA3071/week4/benchmark/v1/runs/dsaa3071-week4-partial-kimi-claude-dev-r1/claude-multimodal-standard",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    },
+    {
+      "id": "claude-text-standard",
+      "engine": "claude",
+      "model": "UNPINNED-CLAUDE-CODE-MODEL",
+      "input_mode": "text-only",
+      "condition": "standard",
+      "packet": "Data/DSAA3071/week4/benchmark/v1/packets/fresh-transcripts/claude/M1-dev-r1",
+      "output": "Data/DSAA3071/week4/benchmark/v1/runs/dsaa3071-week4-partial-kimi-claude-dev-r1/claude-text-standard",
+      "max_retries": 2,
+      "timeout_seconds": 600
+    }
+  ],
+  "comparisons": [],
+  "submission": {
+    "base": "main",
+    "branch": "advisor-results/dsaa3071-week4-partial-kimi-claude-dev-r1",
+    "title": "DSAA3071 Week 4 partial Kimi/Claude results / DSAA3071 第4周部分 Kimi/Claude 结果",
+    "commit_message": "Add DSAA3071 Week 4 partial Kimi Claude results / 添加 DSAA3071 第4周部分 Kimi Claude 结果"
+  },
+  "future_run_contract": {
+    "status": "blocked_pending_packet_audit_model_pinning_and_explicit_approval",
+    "model_run_allowed": false,
+    "activation_policy": "Do not edit this frozen file into a runnable configuration. After every listed gate is ready, copy it to a new versioned activation config, pin exact CLI model identifiers there, and obtain explicit run approval.",
+    "blockers": [
+      {
+        "id": "human_question_level_gold",
+        "source": "experiments/records/DSAA3071-week4-prep/PRE-RUN-STATUS.json",
+        "required_status": "ready",
+        "detail": "The private 132-row gold template is blank; independently filled and validated gold is required before any accuracy calculation, claim, or tuning decision. It is never placed in a model packet."
+      },
+      {
+        "id": "matched_packet_and_lineage_audit",
+        "source": "experiments/records/DSAA3071-week4-prep/PRE-RUN-STATUS.json",
+        "required_status": "ready",
+        "detail": "The direct G1, transcription T1, and engine-specific fresh-text packets must be scope-, privacy-, split-, hash-, and lineage-audited."
+      },
+      {
+        "id": "explicit_run_readiness_approval",
+        "source": "experiments/records/DSAA3071-week4-prep/PRE-RUN-STATUS.json",
+        "required_status": "ready",
+        "detail": "A course-owner/researcher approval must be recorded after all prior gates pass."
+      }
+    ],
+    "frozen_inputs": {
+      "course_spec": {
+        "path": "experiments/course_specs/DSAA3071_week4_partial_q1_q4_q9_q10.json",
+        "sha256": "ac2c402c60e4bf8758132344ee850380517aab8e4fea3347f1ced8e15d240c24"
+      },
+      "rubric": {
+        "path": "experiments/records/DSAA3071-week4-prep/rubric_v0.json",
+        "sha256": "eba9a6b55a24a1149cc88bcdf0e221da9a320acdd12431980960aeee03e11155"
+      },
+      "development_split": {
+        "path": "experiments/records/DSAA3071-week4-prep/students-development.txt",
+        "split_manifest": "experiments/records/DSAA3071-week4-prep/split.json",
+        "split_sha256": "622b98be8472b80f936b67e853dfc142853f539f202e11b3fb4a87729937ca1f",
+        "student_count": 7
+      },
+      "approved_anonymized_snapshot": {
+        "input_root": "Data/DSAA3071/week4/anonymization/scoped-inputs/v1-p01-p03/anonymized_pages",
+        "snapshot_manifest": "Data/DSAA3071/week4/anonymization/scoped-inputs/v1-p01-p03/manifest/scoped-anonymous-image-snapshot.json",
+        "snapshot_manifest_sha256": "844001c2b05346bce6bc72b6f6c178a23a8688e55fefa50f4cee989e8c71d010",
+        "page_suffixes": [
+          "p01",
+          "p03"
+        ],
+        "image_count": 44,
+        "student_count": 22
+      },
+      "final_anonymization_review": {
+        "review": "Data/DSAA3071/week4/anonymization/artifacts/v1/manifest/anonymization_review.csv",
+        "validation": "Data/DSAA3071/week4/anonymization/artifacts/v1/manifest/final-review-validation.json"
+      },
+      "private_gold_template": {
+        "path": "Data/DSAA3071/week4/benchmark/v1/gold/primary_scores.csv",
+        "sha256": "9f6654924a07bcc6a3dec5164e208295a38db2c90c001bea7eb93822c6977e5a",
+        "score_cells_filled": 0
+      }
+    },
+    "prepared_image_packets": {
+      "direct_multimodal_grading": {
+        "packet": "Data/DSAA3071/week4/benchmark/v1/packets/direct-multimodal/development/M1-dev-r1",
+        "task": "grade",
+        "condition": "M1",
+        "prompt": "experiments/records/DSAA3071-week4-prep/prompts/grade_standard_v1_strict_schema.txt"
+      },
+      "fresh_transcription": {
+        "packet": "Data/DSAA3071/week4/benchmark/v1/packets/transcription/development/T1-dev-r1",
+        "task": "transcribe",
+        "condition": "T1",
+        "prompt": "experiments/records/DSAA3071-week4-prep/prompts/transcribe_standard_v1.txt"
+      },
+      "required_metadata": {
+        "scope_id": "week4_partial_q1_q4_q9_q10",
+        "split": "development",
+        "input_snapshot_manifest_sha256": "844001c2b05346bce6bc72b6f6c178a23a8688e55fefa50f4cee989e8c71d010"
+      }
+    },
+    "fresh_transcript_route_policy": {
+      "primary_route": "Each engine's T1 automatic output is passed unchanged into that same engine's text-only grading packet.",
+      "forbidden": "Do not silently normalize, repair, or replace automatic T1 content before the primary text-only grade run.",
+      "optional_post_run_audit": "A separate human transcription-quality audit may be recorded after the primary runs. Any human-corrected transcript is a distinct secondary route, not the engine's automatic transcript-first result."
+    },
+    "generic_metrics_contract": {
+      "command": "python -m benchmark.core.cli compare-course-runs",
+      "status": "available_not_invoked",
+      "preconditions": [
+        "Complete validated question-level gold for the frozen anonymous student list.",
+        "Two completed grade runs with validation status passed and complete score coverage.",
+        "The frozen baseline/candidate order for the planned pair."
+      ],
+      "require_same_data_snapshot": true,
+      "output_policy": "Write aggregate-only JSON and Markdown reports; exclude student IDs, individual scores, raw answers, evidence, prompts, model responses, and private paths.",
+      "delta_interpretation": "candidate_minus_baseline"
+    },
+    "planned_comparisons": [
+      {
+        "id": "kimi-standard-text-vs-multimodal",
+        "left_run": "kimi-text-standard",
+        "right_run": "kimi-multimodal-standard",
+        "controlled_axis": "input_mode"
+      },
+      {
+        "id": "claude-standard-text-vs-multimodal",
+        "left_run": "claude-text-standard",
+        "right_run": "claude-multimodal-standard",
+        "controlled_axis": "input_mode"
+      },
+      {
+        "id": "standard-multimodal-kimi-vs-claude",
+        "left_run": "kimi-multimodal-standard",
+        "right_run": "claude-multimodal-standard",
+        "controlled_axis": "engine_model"
+      },
+      {
+        "id": "standard-text-kimi-vs-claude",
+        "left_run": "kimi-text-standard",
+        "right_run": "claude-text-standard",
+        "controlled_axis": "engine_model"
+      }
+    ],
+    "known_runner_limits": [
+      "The advisor_workflow runner hard-rejects every probe or run, including dry-run, unless future_run_contract.model_run_allowed is literally true. Its doctor and plan commands also show this execution gate as not ready/blocked. It does not independently prove the remaining human-gold, packet-lineage, or explicit-approval conditions, and must not be used to bypass them.",
+      "The standalone course-generic `python -m benchmark.core.cli compare-course-runs` command is implemented and tested. It may be used only after complete validated gold and two completed grade runs exist, with the same-data-snapshot requirement enabled where applicable. The current advisor_workflow comparison command remains physics-specific, so operational comparisons are intentionally empty here.",
+      "The model strings are deliberately unpinned placeholders. Exact Kimi Code and Claude Code model identifiers must be recorded in a new activation configuration after local CLI availability is checked."
+    ]
+  }
+}

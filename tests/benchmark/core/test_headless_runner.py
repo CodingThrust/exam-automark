@@ -14,6 +14,7 @@ from benchmark.core.headless_runner import (
     HeadlessPacketRunConfig,
     _cli_failure_category,
     _extract_headless_cli_raw_text,
+    _metadata,
     _student_command_argv,
 )
 
@@ -22,6 +23,37 @@ FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
 
 
 class HeadlessRunnerCliTests(unittest.TestCase):
+    def test_metadata_uses_input_snapshot_manifest_hash_fallback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            packet = Path(tmp) / "packet"
+            packet.mkdir()
+            (packet / "input.txt").write_text("synthetic", encoding="utf-8")
+            config = HeadlessPacketRunConfig(
+                engine="codex",
+                model="gpt-5.6-codex",
+                input_mode="text-only",
+                packet=packet,
+                output=Path(tmp) / "output",
+                run_commit="abc1234",
+            )
+            manifest = {
+                "course_id": "dsaa3073",
+                "assessment_id": "hw1",
+                "packet_id": "G1-dev-r1",
+                "condition": "G1",
+                "prompt_hash": "a" * 64,
+                "rubric_hash": "b" * 64,
+                "student_ids": ["S001"],
+                "metadata": {"input_snapshot_manifest_sha256": "c" * 64},
+            }
+
+            fallback = _metadata(config, manifest, command="synthetic")
+            manifest["metadata"]["data_snapshot_hash"] = "d" * 64
+            explicit = _metadata(config, manifest, command="synthetic")
+
+        self.assertEqual(fallback["data_snapshot_hash"], "c" * 64)
+        self.assertEqual(explicit["data_snapshot_hash"], "d" * 64)
+
     def test_codex_headless_dry_run_writes_valid_packet_run_outputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

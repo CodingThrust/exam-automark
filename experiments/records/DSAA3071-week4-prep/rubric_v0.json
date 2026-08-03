@@ -1,0 +1,350 @@
+{
+  "assessment_id": "week4_partial_q1_q4_q9_q10",
+  "course_id": "DSAA3071",
+  "grading_policy": {
+    "answer_first_policy": "Identify the answer or claim first. Award credit for a correct equivalent answer and independently correct relevant reasoning, even when it uses wording or an example different from the official solution. Use reasoning to verify the claim and detect material contradictions; do not require keyword matching or duplicate credit for repeated evidence.",
+    "element_credit_rule": "For each scoring element, assign exactly one evidence level. A phrase and its explanation belong to one element and cannot receive duplicate credit.",
+    "score_step": 1,
+    "score_unit": "points"
+  },
+  "model_facing_language": "English",
+  "questions": [
+    {
+      "correct_answer": "d",
+      "expected": "For the context-free pumping lemma, the required conditions are that u v^i x y^i z is in the language for every i >= 0, |v y| > 0, and |v x y| <= p. There is no requirement that |u z| <= p.",
+      "id": "Q1",
+      "max_score": 5,
+      "rubric": [
+        {
+          "criterion": "Selects option d or clearly states that |u z| <= p is not a pumping-lemma condition.",
+          "points": 5
+        },
+        {
+          "criterion": "Selects another option or gives an incompatible claim.",
+          "points": 0
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "correct_answer": "b",
+      "expected": "A Turing machine has the formal tuple (Q, Sigma, Gamma, delta, q0, qaccept, qreject); it has no stack alphabet.",
+      "id": "Q2",
+      "max_score": 5,
+      "rubric": [
+        {
+          "criterion": "Selects option b or states that a stack alphabet is not part of the Turing-machine 7-tuple.",
+          "points": 5
+        },
+        {
+          "criterion": "Selects another option or gives an incompatible claim.",
+          "points": 0
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "correct_answer": "b",
+      "expected": "Unlike a DFA, a Turing machine has unbounded read/write tape and can move its head in both directions.",
+      "id": "Q3",
+      "max_score": 5,
+      "rubric": [
+        {
+          "criterion": "Selects option b or states the equivalent capability of unbounded writable tape.",
+          "points": 5
+        },
+        {
+          "criterion": "Selects another option or gives an incompatible claim.",
+          "points": 0
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "correct_answer": "b",
+      "expected": "A language is decidable when some Turing machine decides it: on every input it halts and accepts or rejects.",
+      "id": "Q4",
+      "max_score": 5,
+      "rubric": [
+        {
+          "criterion": "Selects option b or states that a deciding Turing machine always halts.",
+          "points": 5
+        },
+        {
+          "criterion": "Selects another option or gives an incompatible claim.",
+          "points": 0
+        }
+      ],
+      "type": "multiple_choice"
+    },
+    {
+      "expected": "A Turing-recognizer accepts members but may reject or loop forever on nonmembers. A decider accepts members, rejects nonmembers, and always halts. A valid recognizer-but-not-decider scenario accepts when a searchable witness such as a proof is found and may otherwise run forever. Every decidable language is recognizable, but not conversely.",
+      "full_credit_rule": "Full credit requires a correct account of recognizer behavior, a correct account of decider behavior, a clear halting contrast, and a valid recognizer-but-not-decider example. The decidable-implies-recognizable relationship completes the answer. Equivalent examples and wording receive credit.",
+      "id": "Q9",
+      "material_errors": [
+        {
+          "affects": [
+            "recognizer_behavior",
+            "halting_contrast"
+          ],
+          "cap": 15,
+          "description": "Claims that a recognizer must halt or reject every nonmember, eliminating the defining recognition-versus-decision distinction.",
+          "id": "recognizer_must_halt_on_nonmembers"
+        },
+        {
+          "affects": [
+            "decider_behavior",
+            "halting_contrast"
+          ],
+          "cap": 15,
+          "description": "Claims that a decider may loop forever on a nonmember.",
+          "id": "decider_may_loop_on_nonmembers"
+        }
+      ],
+      "max_score": 25,
+      "score_bands": {
+        "full": {
+          "maximum": 25,
+          "minimum": 25
+        },
+        "minimal_relevant": {
+          "maximum": 7,
+          "minimum": 1
+        },
+        "no_credit": {
+          "maximum": 0,
+          "minimum": 0
+        },
+        "partially_correct": {
+          "maximum": 16,
+          "minimum": 8
+        },
+        "substantially_correct": {
+          "maximum": 24,
+          "minimum": 17
+        }
+      },
+      "scoring_elements": [
+        {
+          "id": "recognizer_behavior",
+          "importance": "essential",
+          "key_terms": [
+            "Turing-recognizable",
+            "accepts members",
+            "may loop",
+            "nonmember"
+          ],
+          "levels": {
+            "demonstrated": 6,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Explain the one-sided behavior of recognition: members are accepted, while nonmembers may be rejected or may cause nontermination.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "A recognizer is only required to accept strings in the language and is allowed not to halt outside it.",
+            "A semidecision procedure may run forever on a no instance."
+          ]
+        },
+        {
+          "id": "decider_behavior",
+          "importance": "essential",
+          "key_terms": [
+            "decidable",
+            "always halts",
+            "accept or reject",
+            "all inputs"
+          ],
+          "levels": {
+            "demonstrated": 6,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Explain that a decider halts on every input, accepting exactly members and rejecting nonmembers.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "A decision algorithm returns a yes or no answer for every input.",
+            "A decider cannot leave a nonmember in an infinite computation."
+          ]
+        },
+        {
+          "id": "halting_contrast",
+          "importance": "essential",
+          "key_terms": [
+            "difference",
+            "halt",
+            "loop forever",
+            "no instance"
+          ],
+          "levels": {
+            "demonstrated": 5,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Make the decisive contrast explicit: recognition permits nontermination on a nonmember, whereas decision requires halting.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "The distinction is one-sided acceptance versus a total halting procedure.",
+            "A decider is a recognizer with a guaranteed answer on no instances."
+          ]
+        },
+        {
+          "id": "recognizer_not_decider_example",
+          "importance": "essential",
+          "key_terms": [
+            "example",
+            "search",
+            "witness",
+            "proof",
+            "loops"
+          ],
+          "levels": {
+            "demonstrated": 6,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Give a valid scenario in which a machine eventually accepts upon finding a witness but may search forever when no witness exists.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Searching for a proof and accepting if one is found is valid when the no-proof case may run forever.",
+            "Any correct semidecidable-language example with the stated one-sided behavior is acceptable."
+          ]
+        },
+        {
+          "id": "relationship_between_classes",
+          "importance": "supporting",
+          "key_terms": [
+            "every decidable",
+            "recognizable",
+            "not vice versa",
+            "subset"
+          ],
+          "levels": {
+            "demonstrated": 2,
+            "mentioned_only": 0,
+            "partial_understanding": 1
+          },
+          "meaning": "State that every decidable language is Turing-recognizable, but some recognizable languages are not decidable.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Decision is a stricter condition than recognition.",
+            "The decidable languages form a proper subset of the recognizable languages."
+          ]
+        }
+      ],
+      "type": "short_answer"
+    },
+    {
+      "expected": "The three Turing-machine description levels are: high-level algorithm, implementation-level tape mechanics, and formal 7-tuple description. For a palindrome checker, a high-level description compares matching outer symbols and repeats; an implementation-level description marks a first symbol, scans to the matching last symbol, compares, and moves inward; a formal description specifies a 7-tuple and representative transitions that encode this behavior.",
+      "full_credit_rule": "Full credit requires all three distinct levels with a correct palindrome-checking example or equivalent construction for each. A complete exhaustive transition table is not required; a valid 7-tuple-level description with representative transitions is sufficient.",
+      "id": "Q10",
+      "material_errors": [],
+      "max_score": 15,
+      "score_bands": {
+        "full": {
+          "maximum": 15,
+          "minimum": 15
+        },
+        "minimal_relevant": {
+          "maximum": 4,
+          "minimum": 1
+        },
+        "no_credit": {
+          "maximum": 0,
+          "minimum": 0
+        },
+        "partially_correct": {
+          "maximum": 9,
+          "minimum": 5
+        },
+        "substantially_correct": {
+          "maximum": 14,
+          "minimum": 10
+        }
+      },
+      "scoring_elements": [
+        {
+          "id": "high_level_algorithm",
+          "importance": "essential",
+          "key_terms": [
+            "high-level",
+            "algorithm",
+            "first and last",
+            "palindrome"
+          ],
+          "levels": {
+            "demonstrated": 5,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Identify the high-level algorithmic description and give a correct palindrome strategy, such as comparing outer symbols and repeating on the remaining substring.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Recursively or iteratively compare the two ends and accept once the middle is reached.",
+            "Describe the palindrome decision procedure without tape-level implementation details."
+          ]
+        },
+        {
+          "id": "implementation_level_mechanics",
+          "importance": "essential",
+          "key_terms": [
+            "implementation-level",
+            "mark",
+            "scan",
+            "tape",
+            "move inward"
+          ],
+          "levels": {
+            "demonstrated": 5,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Identify implementation-level tape mechanics and explain a coherent mark-scan-compare-repeat procedure for a palindrome.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Marks an outer symbol, travels to the other end, compares and marks the mate, then returns inward.",
+            "Uses any equivalent tape-level mechanism that preserves the necessary comparison information."
+          ]
+        },
+        {
+          "id": "formal_7_tuple_description",
+          "importance": "essential",
+          "key_terms": [
+            "formal",
+            "7-tuple",
+            "state",
+            "transition",
+            "delta"
+          ],
+          "levels": {
+            "demonstrated": 5,
+            "mentioned_only": 1,
+            "partial_understanding": 3
+          },
+          "meaning": "Identify the formal 7-tuple level and give a valid formal sketch for the palindrome machine, including suitable states, alphabets, or representative transitions.",
+          "required_for_full_credit": true,
+          "semantic_equivalents": [
+            "Defines M = (Q, Sigma, Gamma, delta, q0, qaccept, qreject) and enough transition behavior to show the construction.",
+            "Provides a logically coherent formal-state description rather than merely repeating the high-level algorithm."
+          ]
+        }
+      ],
+      "type": "short_answer"
+    }
+  ],
+  "rubric_format": "concept_keyterm_v1",
+  "rubric_version": "DSAA3071-week4-partial-v0",
+  "schema_version": 1,
+  "source": {
+    "basis": "Extracted and visually checked against the official DSAA3071 Week 4 question-plus-solution reference. This artifact contains rubric semantics only and no student examples.",
+    "official_reference_sha256": "1ee6feceb9836a4d1da872dab0f19b1206e4191402849c375689a5cc347baf78",
+    "reference_page_anchors": {
+      "Q1_Q3": 1,
+      "Q4": 2,
+      "Q9_Q10": 4
+    },
+    "student_packet_mapping_note": "The p01 and p03 mapping is separately user-declared for anonymized student-submission packets and must not be inferred from these reference-PDF page anchors.",
+    "status": "draft_extracted_from_official_solution_no_student_content"
+  },
+  "total_points": 60
+}

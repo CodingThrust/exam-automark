@@ -14,10 +14,12 @@ from benchmark.core.advisor_workflow import (
     _github_repo_slug,
     _private_roots_ignored,
     _probe_receipt_matches,
+    _privacy_approvals,
     _run_metadata_matches,
     _scan_public_json,
     _text_provenance,
     build_preset_config,
+    doctor,
     package_results,
     plan,
     probe_models,
@@ -195,6 +197,72 @@ class AdvisorWorkflowTests(unittest.TestCase):
         self.assertEqual(result["status"], "action_required")
         self.assertEqual(len(result["missing_packets"]), 8)
 
+    def test_blocked_future_contract_is_visible_in_plan(self):
+        config = build_preset_config(
+            experiment_id="physics-week9-advisor-blocked-plan",
+            kimi_model="kimi-code/k3",
+            claude_model="sonnet",
+        )
+        config["future_run_contract"] = {
+            "status": "blocked_pending_human_gold",
+            "model_run_allowed": False,
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            result = plan(Path(tmp), config)
+
+        self.assertEqual(result["status"], "blocked")
+        self.assertEqual(result["model_execution_gate"]["status"], "blocked")
+        self.assertIn("model_run_allowed=false", result["execution_blockers"][0])
+
+    def test_blocked_future_contract_keeps_doctor_not_ready_after_probe_receipt(self):
+        config = build_preset_config(
+            experiment_id="physics-week9-advisor-blocked-doctor",
+            kimi_model="kimi-code/k3",
+            claude_model="sonnet",
+        )
+        config["runs"] = []
+        config["transcription_runs"] = []
+        config["future_run_contract"] = {
+            "status": "blocked_pending_human_gold",
+            "model_run_allowed": False,
+        }
+
+        def fake_git(_repo, *args, **_kwargs):
+            if args[:2] == ("remote", "get-url"):
+                return subprocess.CompletedProcess(["git", *args], 0, "origin\n", "")
+            if args[:2] == ("rev-parse", "--short"):
+                return subprocess.CompletedProcess(["git", *args], 0, "abc1234\n", "")
+            return subprocess.CompletedProcess(["git", *args], 0, "", "")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with (
+                patch("benchmark.core.advisor_workflow._command_version", return_value="ok"),
+                patch("benchmark.core.advisor_workflow._private_roots_ignored", return_value=True),
+                patch("benchmark.core.advisor_workflow._git", side_effect=fake_git),
+                patch(
+                    "benchmark.core.advisor_workflow._reproducibility_dirty_paths",
+                    return_value=[],
+                ),
+                patch(
+                    "benchmark.core.advisor_workflow._probe_receipt_matches",
+                    return_value=True,
+                ),
+                patch(
+                    "benchmark.core.advisor_workflow._pr_method",
+                    return_value=("gh", "authenticated GitHub CLI"),
+                ),
+            ):
+                result = doctor(Path(tmp), config)
+
+        checks = {check["id"]: check for check in result["checks"]}
+        self.assertEqual(checks["zero-data-model-probes"]["status"], "passed")
+        self.assertEqual(
+            checks["model-execution-authorization"]["status"], "action_required"
+        )
+        self.assertFalse(result["ready_for_run"])
+        self.assertIn("model-execution-authorization", result["required_actions"])
+
     def test_model_probe_requires_explicit_approval(self):
         config = build_preset_config(
             experiment_id="physics-week9-advisor-test",
@@ -204,6 +272,34 @@ class AdvisorWorkflowTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaisesRegex(WorkflowError, "approve-model-probes"):
                 probe_models(Path(tmp), config)
+
+    def test_future_run_contract_blocks_probe_before_any_subprocess(self):
+        config = build_preset_config(
+            experiment_id="physics-week9-advisor-blocked-probe",
+            kimi_model="kimi-code/k3",
+            claude_model="sonnet",
+        )
+        config["future_run_contract"] = {
+            "status": "blocked_pending_human_gold",
+            "model_run_allowed": False,
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with (
+                patch(
+                    "benchmark.core.advisor_workflow._git",
+                    side_effect=AssertionError("probe must stop before git"),
+                ),
+                patch(
+                    "benchmark.core.advisor_workflow.subprocess.run",
+                    side_effect=AssertionError("probe must stop before CLI"),
+                ),
+            ):
+                with self.assertRaisesRegex(
+                    WorkflowError,
+                    "future_run_contract.model_run_allowed=false",
+                ):
+                    probe_models(Path(tmp), config, approved=True)
 
     def test_model_probe_sends_no_student_data_and_writes_matching_receipt(self):
         config = build_preset_config(
@@ -262,6 +358,98 @@ class AdvisorWorkflowTests(unittest.TestCase):
             self.assertEqual(selected, [page])
             with self.assertRaisesRegex(WorkflowError, "privacy approval"):
                 _approved_images(root, ["S001"], {"S001-p01.jpg": False})
+
+    def test_privacy_approvals_preserves_legacy_page_csv(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            review = Path(tmp) / "privacy-review.csv"
+            review.write_text(
+                "page,approved\nS001-p01.jpg,yes\nS002-p01.jpg,no\n",
+                encoding="utf-8",
+            )
+
+            approvals = _privacy_approvals(review)
+
+        self.assertEqual(
+            approvals,
+            {"S001-p01.jpg": True, "S002-p01.jpg": False},
+        )
+
+    def test_privacy_approvals_reads_ready_schema_v2_final_review(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            review = root / "anonymization_review.csv"
+            (root / "final-review-validation.json").write_text(
+                json.dumps({"status": "ready"}), encoding="utf-8"
+            )
+            review.write_text(
+                "output_image,privacy_review_status,blindness_review_status,"
+                "answer_content_status\n"
+                "inputs/S001/S001-p01.jpg,approved,approved,approved\n"
+                "inputs/S002/S002-p01.jpg,approved,pending,approved\n",
+                encoding="utf-8",
+            )
+
+            approvals = _privacy_approvals(review)
+
+        self.assertEqual(
+            approvals,
+            {"S001-p01.jpg": True, "S002-p01.jpg": False},
+        )
+
+    def test_privacy_approvals_schema_v2_requires_ready_validation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            review = root / "anonymization_review.csv"
+            review.write_text(
+                "output_image,privacy_review_status,blindness_review_status,"
+                "answer_content_status\n"
+                "inputs/S001/S001-p01.jpg,approved,approved,approved\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(WorkflowError, "final-review-validation"):
+                _privacy_approvals(review)
+
+            (root / "final-review-validation.json").write_text(
+                json.dumps({"status": "not_ready"}), encoding="utf-8"
+            )
+            with self.assertRaisesRegex(WorkflowError, "not ready"):
+                _privacy_approvals(review)
+
+    def test_privacy_approvals_schema_v2_rejects_malformed_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            review = root / "anonymization_review.csv"
+            (root / "final-review-validation.json").write_text(
+                json.dumps({"status": "ready"}), encoding="utf-8"
+            )
+
+            review.write_text(
+                "output_image,privacy_review_status,blindness_review_status,"
+                "answer_content_status\n"
+                "inputs/S001/shared.jpg,approved,approved,approved\n"
+                "inputs/S002/shared.jpg,approved,approved,approved\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(WorkflowError, "duplicate output_image"):
+                _privacy_approvals(review)
+
+            review.write_text(
+                "output_image,privacy_review_status,blindness_review_status,"
+                "answer_content_status\n"
+                ",approved,approved,approved\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(WorkflowError, "empty output_image"):
+                _privacy_approvals(review)
+
+            review.write_text(
+                "output_image,privacy_review_status,blindness_review_status\n"
+                "inputs/S001/S001-p01.jpg,approved,approved\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(WorkflowError, "missing required columns"):
+                _privacy_approvals(review)
 
     def test_transcript_provenance_distinguishes_automatic_from_reviewed(self):
         automatic, findings = _text_provenance(
@@ -659,6 +847,28 @@ class AdvisorWorkflowTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaisesRegex(WorkflowError, "explicit --approve-heldout"):
                 run_experiment(Path(tmp), config)
+
+    def test_future_run_contract_blocks_run_before_packet_or_cli_work(self):
+        config = build_preset_config(
+            experiment_id="physics-week9-advisor-blocked-run",
+            kimi_model="kimi-code/k3",
+            claude_model="sonnet",
+        )
+        config["future_run_contract"] = {
+            "status": "blocked_pending_packet_audit",
+            "model_run_allowed": False,
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch(
+                "benchmark.core.advisor_workflow._repo_path",
+                side_effect=AssertionError("run must stop before packet access"),
+            ):
+                with self.assertRaisesRegex(
+                    WorkflowError,
+                    "future_run_contract.model_run_allowed=false",
+                ):
+                    run_experiment(Path(tmp), config, dry_run=True)
 
     def test_github_origin_parser_supports_ssh_and_https(self):
         self.assertEqual(

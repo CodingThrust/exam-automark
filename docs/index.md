@@ -11,6 +11,7 @@ AI grading experiments without exposing private student data.
 
 - [AI Grading Test Handoff](ai-grading-test-handoff.md)
 - [GitHub Actions CI Quality Gate](ci-quality-gate.md)
+- [Course-generic Aggregate Grading Metrics](course-generic-metrics.md)
 
 The handoff page is written so an external AI assistant, Kimi Code, or Claude
 Code can read it and immediately understand:

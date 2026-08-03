@@ -687,6 +687,70 @@ def _required_engine_models(
     return sorted(required)
 
 
+def _model_execution_gate(config: dict[str, Any]) -> dict[str, str] | None:
+    """Return the explicit model-execution authorization state, if configured."""
+
+    contract = config.get("future_run_contract")
+    if contract is None:
+        return None
+    if not isinstance(contract, dict):
+        return {
+            "status": "blocked",
+            "detail": "model execution requires future_run_contract to be an object",
+            "remediation": (
+                "Use a valid future_run_contract, or remove it to retain the "
+                "legacy workflow behavior."
+            ),
+        }
+    allowed = contract.get("model_run_allowed")
+    if allowed is True:
+        return {
+            "status": "ready",
+            "detail": "future_run_contract explicitly authorizes model execution",
+            "remediation": "",
+        }
+    if allowed is False:
+        status = str(contract.get("status", "blocked")).strip() or "blocked"
+        return {
+            "status": "blocked",
+            "detail": (
+                "model execution is blocked by "
+                "future_run_contract.model_run_allowed=false "
+                f"(status: {status})"
+            ),
+            "remediation": (
+                "Complete the declared gates, create a new versioned activation "
+                "config with model_run_allowed=true, and record explicit approval."
+            ),
+        }
+    return {
+        "status": "blocked",
+        "detail": (
+            "model execution requires future_run_contract.model_run_allowed=true "
+            "when future_run_contract is present"
+        ),
+        "remediation": (
+            "Set model_run_allowed=true only in a separately approved activation "
+            "configuration."
+        ),
+    }
+
+
+def _require_model_execution_authorized(config: dict[str, Any]) -> None:
+    """Reject probes and runs when an explicit future-run contract blocks them.
+
+    Older configurations have no ``future_run_contract`` and retain their
+    existing behavior.  Once a configuration opts into that contract, however,
+    an absent or non-true authorization value must never be treated as consent
+    to consume a model quota or process a student packet.
+    """
+
+    gate = _model_execution_gate(config)
+    if gate is None or gate["status"] == "ready":
+        return
+    raise WorkflowError(gate["detail"])
+
+
 def _probe_state_path(repo: Path, config: dict[str, Any]) -> Path:
     state = _repo_path(repo, config["state_path"], label="state_path")
     return state.with_name(state.stem + "-model-probes" + state.suffix)
@@ -748,6 +812,7 @@ def probe_models(
     *,
     approved: bool = False,
 ) -> dict[str, Any]:
+    _require_model_execution_authorized(config)
     if not approved:
         raise WorkflowError(
             "zero-data model probes may consume subscription quota; rerun with "
@@ -1039,6 +1104,21 @@ def _private_roots_ignored(repo: Path) -> bool:
 
 def doctor(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
     checks: list[dict[str, Any]] = []
+    model_execution_gate = _model_execution_gate(config)
+    if model_execution_gate is not None:
+        checks.append(
+            _check(
+                "model-execution-authorization",
+                (
+                    "passed"
+                    if model_execution_gate["status"] == "ready"
+                    else "action_required"
+                ),
+                model_execution_gate["detail"],
+                scope="run",
+                remediation=model_execution_gate["remediation"] or None,
+            )
+        )
     checks.append(
         _check(
             "python-version",
@@ -1435,6 +1515,13 @@ def _comparison_contract(
 
 
 def plan(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
+    model_execution_gate = _model_execution_gate(config)
+    execution_blockers = (
+        [model_execution_gate["detail"]]
+        if model_execution_gate is not None
+        and model_execution_gate["status"] != "ready"
+        else []
+    )
     run_rows = []
     missing_packets: list[str] = []
     manifest_cache: dict[Path, dict[str, Any]] = {}
@@ -1504,14 +1591,14 @@ def plan(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
                 "reason": reason,
             }
         )
-    return {
+    result = {
         "report_type": "advisor_experiment_plan",
         "generated_at": _utc_now(),
         "experiment_id": config["experiment_id"],
         "split": config["split"],
         "status": (
             "blocked"
-            if blocking
+            if blocking or execution_blockers
             else "action_required"
             if missing_packets
             else "planned"
@@ -1522,15 +1609,80 @@ def plan(repo: Path, config: dict[str, Any]) -> dict[str, Any]:
         "comparisons": comparison_rows,
         "heldout_requires_explicit_approval": config["split"] in {"heldout", "test"},
     }
+    if model_execution_gate is not None:
+        result["model_execution_gate"] = model_execution_gate
+        result["execution_blockers"] = execution_blockers
+    return result
 
 
 def _privacy_approvals(path: Path) -> dict[str, bool]:
     try:
         with path.open(newline="", encoding="utf-8-sig") as handle:
-            rows = list(csv.DictReader(handle))
+            reader = csv.DictReader(handle)
+            rows = list(reader)
+            columns = set(reader.fieldnames or ())
     except FileNotFoundError as error:
         raise WorkflowError(f"privacy review is missing: {path}") from error
-    if not rows or "page" not in rows[0] or "approved" not in rows[0]:
+    schema_v2_fields = {
+        "output_image",
+        "privacy_review_status",
+        "blindness_review_status",
+        "answer_content_status",
+    }
+    if columns & schema_v2_fields:
+        missing = sorted(schema_v2_fields - columns)
+        if missing:
+            raise WorkflowError(
+                "schema-v2 privacy review is missing required columns: "
+                + ", ".join(missing)
+            )
+        validation_path = path.with_name("final-review-validation.json")
+        try:
+            validation = _read_json(validation_path)
+        except WorkflowError as error:
+            raise WorkflowError(
+                "schema-v2 privacy review requires final-review-validation.json: "
+                f"{validation_path}"
+            ) from error
+        if validation.get("status") != "ready":
+            raise WorkflowError(
+                "schema-v2 final-review-validation.json is not ready: "
+                f"{validation_path}"
+            )
+
+        approvals: dict[str, bool] = {}
+        for row_number, row in enumerate(rows, start=2):
+            output_image = str(row.get("output_image") or "").strip()
+            image_name = output_image.replace("\\", "/").rsplit("/", 1)[-1].strip()
+            if not image_name or image_name in {".", ".."}:
+                raise WorkflowError(
+                    "schema-v2 privacy review has an empty output_image at "
+                    f"row {row_number}: {path}"
+                )
+            if image_name in approvals:
+                raise WorkflowError(
+                    "schema-v2 privacy review has a duplicate output_image basename: "
+                    f"{image_name}"
+                )
+            statuses: list[str] = []
+            for field in (
+                "privacy_review_status",
+                "blindness_review_status",
+                "answer_content_status",
+            ):
+                value = str(row.get(field) or "").strip()
+                if not value:
+                    raise WorkflowError(
+                        "schema-v2 privacy review has an empty "
+                        f"{field} at row {row_number}: {path}"
+                    )
+                statuses.append(value)
+            approvals[image_name] = all(status == "approved" for status in statuses)
+        if not approvals:
+            raise WorkflowError(f"schema-v2 privacy review has no output images: {path}")
+        return approvals
+
+    if not rows or "page" not in columns or "approved" not in columns:
         raise WorkflowError(f"privacy review requires page and approved columns: {path}")
     return {
         str(row["page"]): str(row["approved"]).strip().lower() in {"1", "true", "yes"}
@@ -2022,6 +2174,7 @@ def run_experiment(
     dry_run: bool = False,
     approve_heldout: bool = False,
 ) -> dict[str, Any]:
+    _require_model_execution_authorized(config)
     if config["split"] in {"heldout", "test"} and not approve_heldout:
         raise WorkflowError(
             "held-out/test execution requires explicit --approve-heldout after "

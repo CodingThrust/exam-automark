@@ -1,0 +1,128 @@
+{
+  "anonymous_id_pattern": "^S[0-9]{3}$",
+  "assessment_id": "week4_partial_q1_q4_q9_q10",
+  "course_id": "DSAA3071",
+  "input_modes": [
+    "image",
+    "pdf",
+    "transcript",
+    "text"
+  ],
+  "notes": [
+    "This is an intentionally partial DSAA3071 Week 4 benchmark, not a 130-point full-assessment result.",
+    "Only Q1-Q4, Q9, and Q10 are in scope. Q5-Q8 must not appear in gold, transcripts, packets, predictions, or metrics for this benchmark.",
+    "The six in-scope questions total 60 points: Q1-Q4 are 5 points each, Q9 is 25 points, and Q10 is 15 points.",
+    "The p01 and p03 input mapping was declared by the course owner for the anonymized student-submission packets. It must not be inferred from the pagination of the official question-plus-solution reference PDF.",
+    "Direct multimodal and transcript-first conditions must use the same anonymous students, frozen split, question scope, and gold-score table before comparison.",
+    "No raw student answers, identity map, gold score, or model output is contained in this tracked specification."
+  ],
+  "page_mapping": {
+    "basis": "user_declared_for_anonymized_student_submission_packets_not_inferred_from_reference_pdf_pagination",
+    "p01": {
+      "question_ids": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4"
+      ]
+    },
+    "p03": {
+      "question_ids": [
+        "Q9",
+        "Q10"
+      ]
+    }
+  },
+  "questions": [
+    {
+      "id": "Q1",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": [
+        "multiple_choice",
+        "context_free_languages",
+        "pumping_lemma"
+      ],
+      "title": "CF pumping lemma condition that is not required"
+    },
+    {
+      "id": "Q2",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": [
+        "multiple_choice",
+        "turing_machine",
+        "formal_definition"
+      ],
+      "title": "Component not in the Turing-machine 7-tuple"
+    },
+    {
+      "id": "Q3",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": [
+        "multiple_choice",
+        "turing_machine",
+        "dfa"
+      ],
+      "title": "Turing-machine capability relative to a DFA"
+    },
+    {
+      "id": "Q4",
+      "max_score": 5.0,
+      "score_step": 1.0,
+      "tags": [
+        "multiple_choice",
+        "decidability",
+        "halting"
+      ],
+      "title": "Definition of a decidable language"
+    },
+    {
+      "id": "Q9",
+      "max_score": 25.0,
+      "score_step": 1.0,
+      "tags": [
+        "short_answer",
+        "turing_recognizable",
+        "decidable",
+        "halting",
+        "multimodal"
+      ],
+      "title": "Turing-recognizable versus decidable languages"
+    },
+    {
+      "id": "Q10",
+      "max_score": 15.0,
+      "score_step": 1.0,
+      "tags": [
+        "short_answer",
+        "turing_machine",
+        "description_levels",
+        "palindrome",
+        "multimodal"
+      ],
+      "title": "Three Turing-machine description levels using a palindrome example"
+    }
+  ],
+  "score_unit": "points",
+  "scope": {
+    "excluded_question_ids": [
+      "Q5",
+      "Q6",
+      "Q7",
+      "Q8"
+    ],
+    "full_assessment_total_points": 130.0,
+    "in_scope_question_ids": [
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4",
+      "Q9",
+      "Q10"
+    ],
+    "partial_benchmark_total_points": 60.0
+  },
+  "source_status": "scope_frozen_rubric_v0_extracted_anonymized_inputs_prepared_but_model_run_blocked_pending_gold_split_transcripts_packet_audit_and_readiness"
+}

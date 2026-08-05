@@ -1,18 +1,66 @@
 {
   "assessment_id": "quiz1",
   "course_id": "linearalgebra",
+  "candidate_skill_policy": {
+    "course_specific_rules_allowed": false,
+    "description": "Any candidate skill evaluated here must remain course-generic. Assessment answers, score allocations, and local grading requirements belong in the frozen course specification and rubric.",
+    "status": "no_candidate_skill_frozen"
+  },
   "course_spec_path": "experiments/course_specs/linearalgebra_quiz1.json",
   "data_inventory_path": "experiments/data_inventory/linearalgebra.json",
-  "data_snapshot_hash": "4338dbb2cb8cbe2ee129dc8a415d0ef964ca580e9e31f33ede3a761491d33518",
+  "data_snapshot_hash": "bc8cc94a7a2e0e4cfb700e14d1322d089a788e09eb78c9580e9fcf4a72a02eba",
   "experiment_id": "linearalgebra-quiz1-plan",
-  "git_branch": "codex/repro-experiment-framework",
-  "git_commit": "75039f8",
+  "git_branch": "codex/la-task1-launch-inventory",
+  "git_commit": "048a17b",
+  "gates_before_model_run": [
+    "course-owner-approved reference solution and rubric",
+    "question-level development gold",
+    "anonymous page-level privacy, blindness, and answer-preservation approvals",
+    "frozen development/held-out split",
+    "matched M1, T1, and G1 packet manifests and lineage validation",
+    "pinned provider/model configuration and explicit development-run approval"
+  ],
+  "launch_base_commit": "048a17b",
+  "launch_branch": "codex/la-task1-launch-inventory",
+  "model_run_allowed": false,
   "notes": [
-    "Draft data inventory only; extract real rubric and question scores before packet construction.",
-    "Raw local submission filenames may contain student identifiers; anonymize before packet construction.",
-    "Uses frozen grade-homework skill baseline before any candidate skill changes."
+    "Scope confirmed from the four-page Chapter 1-3 Quiz: Q1-Q4, 100 base points, integer scoring, and a 100-point final cap.",
+    "No instructor-provided official solution and no existing human scores are available; the course owner will adjudicate the reference solution, rubric, partial credit, and gold.",
+    "M1 direct multimodal grading and T1-to-G1 transcription-first grading will be compared only on matched anonymous inputs.",
+    "Raw local submission filenames may contain student identifiers; no prompt packet may use the raw tree."
+  ],
+  "planned_conditions": [
+    {
+      "condition": "M1",
+      "input_mode": "direct_multimodal",
+      "task": "grade"
+    },
+    {
+      "condition": "T1",
+      "input_mode": "anonymous_images",
+      "task": "transcribe"
+    },
+    {
+      "condition": "G1",
+      "input_mode": "frozen_T1_transcript",
+      "task": "grade"
+    }
   ],
   "planned_packets": [
+    {
+      "condition": "M1",
+      "packet_id": "M1-dev-r1",
+      "prompt_template_id": "grade_standard_v1",
+      "split": "development",
+      "task": "grade"
+    },
+    {
+      "condition": "M1",
+      "packet_id": "M1-test-r1",
+      "prompt_template_id": "grade_standard_v1",
+      "split": "heldout",
+      "task": "grade"
+    },
     {
       "condition": "T1",
       "packet_id": "T1-dev-r1",
@@ -46,7 +94,8 @@
     "grade_standard_v1": "f8aeee5434c5db7b54f9d7b5dbb01b303bd84e48c5d4957731aeb038950953ea",
     "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
   },
-  "schema_version": 1,
+  "reference_solution_status": "absent_to_be_course_owner_approved",
+  "schema_version": 2,
   "skill_hashes": {
     "agents": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27",
     "claude": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27"

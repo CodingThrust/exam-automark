@@ -80,9 +80,8 @@ def _parser() -> argparse.ArgumentParser:
     prepare.add_argument(
         "--identity-redaction-rect",
         action="append",
-        required=True,
         metavar="LEFT,TOP,RIGHT,BOTTOM",
-        help="normalized identity rectangle; provide every required header mask",
+        help="normalized global identity rectangle; omit only with an all-pages-approved identity-mask layout",
     )
     prepare.add_argument("--scale", type=float, default=2.0)
 
@@ -158,8 +157,14 @@ def _prepare(args: argparse.Namespace) -> int:
             f"output root is not empty: {args.output_root}; create a new versioned root"
         )
 
-    identity_rectangles = [_parse_rectangle(value) for value in args.identity_redaction_rect]
+    identity_rectangles = [
+        _parse_rectangle(value) for value in (args.identity_redaction_rect or [])
+    ]
     layout = load_page_layout(args.layout)
+    if not identity_rectangles and not _has_approved_identity_mask_review(layout):
+        raise ValueError(
+            "provide --identity-redaction-rect or compile an all-pages-approved identity-mask layout"
+        )
     source_hash = sha256_file(source_pdf)
     layout_hash = sha256_file(args.layout)
     render_spec = build_render_spec(
@@ -681,6 +686,11 @@ def _parse_rectangle(value: str) -> dict[str, float]:
     if not (0 <= left < right <= 1 and 0 <= top < bottom <= 1):
         raise ValueError(f"redaction rectangle is outside normalized page bounds: {value}")
     return rectangle
+
+
+def _has_approved_identity_mask_review(layout: Mapping[str, Any]) -> bool:
+    review = layout.get("identity_mask_review")
+    return isinstance(review, Mapping) and review.get("status") == "all_pages_approved"
 
 
 def _apply_rectangles(

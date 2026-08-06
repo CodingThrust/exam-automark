@@ -7,6 +7,9 @@
     "status": "no_candidate_skill_frozen"
   },
   "course_spec_path": "experiments/course_specs/linearalgebra_quiz1.json",
+  "completed_gates": [
+    "course-owner-approved reference solution and rubric"
+  ],
   "data_inventory_path": "experiments/data_inventory/linearalgebra.json",
   "data_snapshot_hash": "bc8cc94a7a2e0e4cfb700e14d1322d089a788e09eb78c9580e9fcf4a72a02eba",
   "experiment_id": "linearalgebra-quiz1-plan",
@@ -94,7 +97,10 @@
     "grade_standard_v1": "f8aeee5434c5db7b54f9d7b5dbb01b303bd84e48c5d4957731aeb038950953ea",
     "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
   },
-  "reference_solution_status": "absent_to_be_course_owner_approved",
+  "reference_solution_path": "experiments/records/linearalgebra-quiz1-plan/reference_solution_v0.json",
+  "reference_solution_status": "course_owner_confirmed",
+  "rubric_path": "experiments/records/linearalgebra-quiz1-plan/rubric_v0.json",
+  "rubric_status": "course_owner_confirmed_frozen_v0",
   "schema_version": 2,
   "skill_hashes": {
     "agents": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27",
@@ -105,5 +111,5 @@
     "claude": ".claude/skills/grade-homework/SKILL.md"
   },
   "skill_version_id": "skill_baseline_v1",
-  "status": "data_inventory"
+  "status": "planned"
 }

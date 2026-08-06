@@ -48,21 +48,30 @@
       },
       "id": "Q3",
       "max_score": 25,
-      "question_type": "parameterized_linear_system",
+      "question_type": "calculation",
       "response_requirement": "Determine parameter values for which the system has a unique solution.",
       "score_step": 1,
+      "tags": [
+        "linear_systems",
+        "unique_solution",
+        "alternative_methods_bonus"
+      ],
       "title": "Unique solution of a parameterized linear system"
     },
     {
       "id": "Q4",
       "max_score": 20,
-      "question_type": "geometric_computation",
+      "question_type": "calculation",
       "response_requirement": "Compute the volume of the tetrahedron determined by four vertices.",
       "score_step": 1,
+      "tags": [
+        "geometry",
+        "tetrahedron_volume"
+      ],
       "title": "Tetrahedron volume"
     }
   ],
-  "reference_solution_status": "absent_to_be_course_owner_approved",
+  "reference_solution_status": "course_owner_confirmed_rubric_frozen_v0",
   "score_step": 1,
   "score_unit": "points",
   "source_status": "assessment_extracted_needs_reference_solution_and_rubric",

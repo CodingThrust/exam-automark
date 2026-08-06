@@ -1,6 +1,6 @@
 # Linear Algebra Quiz 1 Launch Contract
 
-Status: scope and source inventory confirmed; **no model run is allowed**.
+Status: scope, source inventory, course-owner-confirmed reference answers, and rubric v0 are frozen; **no model run is allowed**.
 
 ## Confirmed assessment scope
 
@@ -14,7 +14,8 @@ Status: scope and source inventory confirmed; **no model run is allowed**.
 
 - No instructor-provided official solution exists.
 - No pre-existing human scores exist.
-- The course owner will approve the reference solution, rubric, partial-credit policy, and question-level gold.
+- The course owner has confirmed the reference-answer record in `reference_solution_v0.json` and the detailed partial-credit and bonus treatment in `rubric_v0.json`.
+- The next grading-authority step is question-level human gold after anonymization and split freeze.
 
 ## Source inventory and privacy
 

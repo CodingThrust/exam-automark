@@ -1,9 +1,10 @@
 """Prepare and review per-page identity masks on private assembled pages.
 
 The detector proposes only a low-confidence header zone from image geometry. It
-never reads text, uses OCR, or approves a mask. A reviewer must draw or adjust
-at least one rectangle and approve every page before ``compile`` can create a
-new page layout for anonymized rendering. All inputs and outputs are private.
+never reads text, uses OCR, or approves a mask. A reviewer must explicitly
+approve every page, either with one or more identity rectangles or as having no
+personal information, before ``compile`` can create a new page layout for
+anonymized rendering. All inputs and outputs are private.
 """
 
 from __future__ import annotations
@@ -43,7 +44,12 @@ REVIEW_COLUMNS = (
     "reviewed_at",
     "notes",
 )
-REVIEW_STATUSES = {"pending", "approved", "needs_correction"}
+REVIEW_STATUSES = {
+    "pending",
+    "approved",
+    "approved_no_identity",
+    "needs_correction",
+}
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -169,10 +175,15 @@ def compile_review(
     for pair in expected:
         row = by_pair[pair]
         rectangles = _parse_rectangles(row["approved_rectangles"])
-        if row["review_status"] != "approved" or not rectangles:
-            raise ValueError("every page needs an approved non-empty identity mask")
+        status = row["review_status"]
+        if status == "approved" and not rectangles:
+            raise ValueError("every masked page needs an approved non-empty identity mask")
+        if status == "approved_no_identity" and rectangles:
+            raise ValueError("a no-identity page must not include identity rectangles")
+        if status not in {"approved", "approved_no_identity"}:
+            raise ValueError("every page needs an explicit identity review decision")
         if not row["reviewer"].strip() or not row["reviewed_at"].strip():
-            raise ValueError("every approved identity mask needs reviewer and timestamp")
+            raise ValueError("every identity review decision needs reviewer and timestamp")
 
     compiled = deepcopy(layout)
     for group in compiled["page_groups"]:
@@ -180,13 +191,15 @@ def compile_review(
         page_masks = list(group.get("page_masks", []))
         for source_page in group["source_pages"]:
             row = by_pair[(anonymous_id, str(source_page))]
-            page_masks.append(
-                {
-                    "source_page": int(source_page),
-                    "reason": "identity_mask_review",
-                    "rectangles": _parse_rectangles(row["approved_rectangles"]),
-                }
-            )
+            rectangles = _parse_rectangles(row["approved_rectangles"])
+            if rectangles:
+                page_masks.append(
+                    {
+                        "source_page": int(source_page),
+                        "reason": "identity_mask_review",
+                        "rectangles": rectangles,
+                    }
+                )
         group["page_masks"] = page_masks
     compiled["identity_mask_review"] = {
         "schema_version": 1,
@@ -194,6 +207,12 @@ def compile_review(
         "base_layout_sha256": sha256_file(layout_path),
         "review_sha256": sha256_file(review_path),
         "page_count": len(rows),
+        "masked_page_count": sum(
+            row["review_status"] == "approved" for row in rows
+        ),
+        "no_identity_page_count": sum(
+            row["review_status"] == "approved_no_identity" for row in rows
+        ),
     }
     output_layout.parent.mkdir(parents=True, exist_ok=True)
     output_layout.write_text(json.dumps(compiled, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -247,7 +266,18 @@ class IdentityMaskReviewStore:
                 "pages": pages,
                 "summary": {
                     "page_count": len(pages),
-                    "approved": sum(page["review_status"] == "approved" for page in pages),
+                    "approved": sum(
+                        page["review_status"]
+                        in {"approved", "approved_no_identity"}
+                        for page in pages
+                    ),
+                    "masked": sum(
+                        page["review_status"] == "approved" for page in pages
+                    ),
+                    "no_identity": sum(
+                        page["review_status"] == "approved_no_identity"
+                        for page in pages
+                    ),
                     "needs_correction": sum(
                         page["review_status"] == "needs_correction" for page in pages
                     ),
@@ -265,6 +295,8 @@ class IdentityMaskReviewStore:
         reviewed_at = _required_text(payload, "reviewed_at")
         if status == "approved" and not rectangles:
             raise ValueError("an approved page needs at least one identity rectangle")
+        if status == "approved_no_identity" and rectangles:
+            raise ValueError("a no-identity page must not include identity rectangles")
         with self._lock:
             row = self._rows.get((anonymous_id, source_page))
             if row is None:
@@ -497,17 +529,17 @@ def _token_valid(request: Any, token: str) -> bool:
 
 _HTML = r"""<!doctype html><html><head><meta charset="utf-8"><title>Identity mask review</title>
 <style>body{font-family:system-ui,sans-serif;margin:16px;background:#f7f7f8;color:#1f2937}button,input,textarea{font:inherit;margin:4px}.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.canvas{position:relative;display:inline-block;max-width:100%;margin-top:12px}.canvas img{display:block;max-width:min(100%,1000px);max-height:72vh}.mask{position:absolute;border:2px solid #dc2626;background:#dc262633;pointer-events:none}.note{max-width:1000px;color:#4b5563}</style></head><body>
-<h1>Private identity-mask review</h1><p class="note">Local only. Red boxes are suggestions or your draft masks; they are never auto-approved. Drag on the image to add a mask. Every page needs at least one rectangle and explicit approval.</p>
+<h1>Private identity-mask review</h1><p class="note">Local only. Red boxes are suggestions or your draft masks; they are never auto-approved. Drag on the image to add a mask. If a page has no personal information, clear all boxes and explicitly approve it as no-identity.</p>
 <div class="bar"><button id="prev">Previous</button><button id="next">Next</button><strong id="label"></strong><span id="summary"></span></div>
-<div class="bar"><label>Reviewer <input id="reviewer" required></label><button id="suggest">Use suggestions</button><button id="clear">Clear masks</button><button id="approve">Save approved</button><button id="correct">Save needs-correction</button></div>
+<div class="bar"><label>Reviewer <input id="reviewer" required></label><button id="suggest">Use suggestions</button><button id="clear">Clear masks</button><button id="approve">Approve with mask</button><button id="noidentity">Approve no identity</button><button id="correct">Save needs-correction</button></div>
 <textarea id="notes" rows="2" cols="80" placeholder="Private review note"></textarea><div id="canvas" class="canvas"><img id="image" alt="private source page"></div>
 <script>const token=new URLSearchParams(location.search).get('token');let state=null,index=0,draft=[];const $=id=>document.getElementById(id);
-async function refresh(){state=await fetch('/api/state?token='+encodeURIComponent(token),{cache:'no-store'}).then(r=>r.json());$('summary').textContent=`${state.summary.approved}/${state.summary.page_count} approved`;render();}
+async function refresh(){state=await fetch('/api/state?token='+encodeURIComponent(token),{cache:'no-store'}).then(r=>r.json());$('summary').textContent=`${state.summary.approved}/${state.summary.page_count} reviewed (masked ${state.summary.masked}, no identity ${state.summary.no_identity})`;render();}
 function page(){return state.pages[index]};function draw(){const box=$('canvas');box.querySelectorAll('.mask').forEach(x=>x.remove());for(const r of draft){const d=document.createElement('div');d.className='mask';d.style.left=(r.left*100)+'%';d.style.top=(r.top*100)+'%';d.style.width=((r.right-r.left)*100)+'%';d.style.height=((r.bottom-r.top)*100)+'%';box.appendChild(d)}}
-function render(){const p=page();$('label').textContent=`${index+1}/${state.pages.length} — ${p.anonymous_id}, local page ${p.local_page} (${p.review_status})`;$('notes').value=p.notes||'';draft=JSON.parse(JSON.stringify(p.approved_rectangles.length?p.approved_rectangles:p.proposed_rectangles));const img=$('image');img.onload=draw;img.src='/images/'+p.source_page+'?token='+encodeURIComponent(token);}
+function render(){const p=page();$('label').textContent=`${index+1}/${state.pages.length} — ${p.anonymous_id}, local page ${p.local_page} (${p.review_status})`;$('notes').value=p.notes||'';draft=JSON.parse(JSON.stringify(p.review_status==='approved_no_identity'?[]:(p.approved_rectangles.length?p.approved_rectangles:p.proposed_rectangles)));const img=$('image');img.onload=draw;img.src='/images/'+p.source_page+'?token='+encodeURIComponent(token);}
 function point(e){const r=$('image').getBoundingClientRect();return{x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))}}let start=null;$('image').addEventListener('pointerdown',e=>{start=point(e)});$('image').addEventListener('pointerup',e=>{if(!start)return;const end=point(e);if(Math.abs(end.x-start.x)>.005&&Math.abs(end.y-start.y)>.005){draft.push({left:Math.min(start.x,end.x),top:Math.min(start.y,end.y),right:Math.max(start.x,end.x),bottom:Math.max(start.y,end.y)});draw()}start=null});
-async function save(status){const p=page();const reviewer=$('reviewer').value.trim();if(!reviewer){alert('Reviewer is required');return}if(status==='approved'&&!draft.length){alert('Approved page needs a mask');return}const response=await fetch('/api/save?token='+encodeURIComponent(token),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anonymous_id:p.anonymous_id,source_page:p.source_page,review_status:status,approved_rectangles:draft,reviewer,reviewed_at:new Date().toISOString(),notes:$('notes').value})});if(!response.ok){alert((await response.json()).error);return}await refresh();}
-$('prev').onclick=()=>{index=(index+state.pages.length-1)%state.pages.length;render()};$('next').onclick=()=>{index=(index+1)%state.pages.length;render()};$('suggest').onclick=()=>{draft=JSON.parse(JSON.stringify(page().proposed_rectangles));draw()};$('clear').onclick=()=>{draft=[];draw()};$('approve').onclick=()=>save('approved');$('correct').onclick=()=>save('needs_correction');refresh();</script></body></html>"""
+async function save(status){const p=page();const reviewer=$('reviewer').value.trim();if(!reviewer){alert('Reviewer is required');return}if(status==='approved'&&!draft.length){alert('Approved page needs a mask');return}if(status==='approved_no_identity'&&draft.length){alert('Clear masks before approving a no-identity page');return}const response=await fetch('/api/save?token='+encodeURIComponent(token),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({anonymous_id:p.anonymous_id,source_page:p.source_page,review_status:status,approved_rectangles:draft,reviewer,reviewed_at:new Date().toISOString(),notes:$('notes').value})});if(!response.ok){alert((await response.json()).error);return}await refresh();}
+$('prev').onclick=()=>{index=(index+state.pages.length-1)%state.pages.length;render()};$('next').onclick=()=>{index=(index+1)%state.pages.length;render()};$('suggest').onclick=()=>{draft=JSON.parse(JSON.stringify(page().proposed_rectangles));draw()};$('clear').onclick=()=>{draft=[];draw()};$('approve').onclick=()=>save('approved');$('noidentity').onclick=()=>save('approved_no_identity');$('correct').onclick=()=>save('needs_correction');refresh();</script></body></html>"""
 
 
 if __name__ == "__main__":

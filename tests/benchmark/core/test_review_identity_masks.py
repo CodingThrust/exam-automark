@@ -95,6 +95,50 @@ class IdentityMaskReviewTests(unittest.TestCase):
 
         self.assertEqual(tuple(columns or ()), REVIEW_COLUMNS)
 
+    def test_compile_allows_explicit_no_identity_page_without_a_mask(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            layout_path = _write_layout(root)
+            source_root = root / "source_pages"
+            source_root.mkdir()
+            _write_source_page(source_root / "source-p0001.jpg")
+            review_path = root / "review.csv"
+            compiled_path = root / "compiled-layout.json"
+            initialize_review(
+                layout_path=layout_path,
+                source_pages_root=source_root,
+                review_path=review_path,
+                private_output_acknowledged=True,
+            )
+            store = IdentityMaskReviewStore(
+                layout_path=layout_path,
+                source_pages_root=source_root,
+                review_path=review_path,
+            )
+
+            store.save(
+                {
+                    "anonymous_id": "S001",
+                    "source_page": 1,
+                    "review_status": "approved_no_identity",
+                    "approved_rectangles": [],
+                    "reviewer": "reviewer",
+                    "reviewed_at": "2026-08-07T00:00:00Z",
+                }
+            )
+            compiled = compile_review(
+                layout_path=layout_path,
+                review_path=review_path,
+                output_layout=compiled_path,
+                private_output_acknowledged=True,
+            )
+            layout = json.loads(compiled_path.read_text())
+
+        self.assertEqual(compiled["status"], "identity_masks_compiled_pending_render")
+        self.assertEqual(layout["page_groups"][0]["page_masks"], [])
+        self.assertEqual(layout["identity_mask_review"]["masked_page_count"], 0)
+        self.assertEqual(layout["identity_mask_review"]["no_identity_page_count"], 1)
+
 
 def _write_layout(root: Path) -> Path:
     path = root / "layout.json"

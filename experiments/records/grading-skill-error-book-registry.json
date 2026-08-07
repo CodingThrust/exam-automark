@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "active_skill_version_id": "skill_candidate_v3_2",
+  "active_skill_version_id": "skill_candidate_v4",
   "policy": {
     "required_for_every_skill_update": true,
     "required_regressions_for_future_skill_updates": true,
@@ -56,6 +56,22 @@
       "public_iteration_delta": null,
       "note_zh": "candidate-v3.2 是错题生命周期基线。私有典型错题册包含 12 个完整案例、错误机制和全部 33 个差异的索引。",
       "note_en": "Candidate-v3.2 initializes the error-book lifecycle. Its private typical-case report contains 12 full cases, error mechanisms, and an index of all 33 discrepancies."
+    },
+    {
+      "skill_version_id": "skill_candidate_v4",
+      "predecessor_skill_version_id": "skill_candidate_v3_2",
+      "evaluation_status": "pending",
+      "pending_reason": "The cross-course v4 skill and prompt have not been evaluated against a course-specific frozen development gold yet. No accuracy or error-reduction claim is made.",
+      "pending_gates": [
+        "anonymous page-level privacy, blindness, and answer-preservation approvals",
+        "frozen development/held-out split and question-level development gold",
+        "explicit model-run approval",
+        "development error-book, confidence audit, and iteration-delta review"
+      ],
+      "skill_snapshot": "experiments/skill_versions/skill_candidate_v4.json",
+      "skill_canonical_hash": "112cd67519b8f159b0a006b97f71296666ca004ad57d1d1bf5da002e6e77076a",
+      "note_en": "Candidate-v4 is a pending cross-course skill revision. It is registered for reproducibility but must not be represented as evaluated until the stated development gates and error-book review are complete.",
+      "note_zh": "Candidate-v4 是待评测的跨课程 skill 修订版：已登记以保证可复现，但在开发集门禁和错题册审查完成前，不得宣称其准确率或改进效果。"
     }
   ]
 }

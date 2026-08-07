@@ -17,7 +17,7 @@ Confirm this table with the teacher before grading. Do not change question IDs,
 max scores, or increments in the middle of a run. If the rubric is incomplete,
 stop and ask.
 
-## Candidate-v3.2 evidence-first scoring
+## Candidate evidence-first scoring
 
 For each student and question, write the evidence before the score:
 
@@ -32,9 +32,8 @@ correct final answer is supported by a process that seriously conflicts with
 the standard solution, required method, or visible reasoning expectations. When
 the final answer is wrong, inspect the work carefully and award process credit
 for correct terms, concepts, formulas, substitutions, units, and reasoning from
-the frozen rubric. For physics or other calculation problems, arithmetic
-mistakes should not erase a correct method unless the frozen rubric requires
-the exact result.
+the frozen rubric. For calculation problems, arithmetic mistakes should not
+erase a correct method unless the frozen rubric requires the exact result.
 
 Identify the question type before scoring. For each scoring element, record
 `key_term_evidence`, `concept_evidence`, and `relation_evidence`, then use
@@ -81,36 +80,37 @@ or detail is imperfect. Distinguish missing ideal detail from a visible misconce
 Apply large deductions only for material errors, contradictions,
 wrong language/output behavior, or missing required answer behavior.
 
-Apply these targeted Candidate v3.2 calibration rules when the matching task is
-present:
+This is a cross-course prompt contract. Course-specific calibration overlays
+must live in the frozen course rubric and packet; do not import named-question
+rules, named examples, or specialized subject policies from another course.
 
-- Q7 proof-locality: preserve construction credit for each correctly
-  demonstrated proof direction. A local nonmembership or rejection mistake
-  should reduce the affected correctness element but should not erase unrelated
-  construction credit unless it invalidates the whole proof direction.
-- Q8 enumerator policy: first determine the actual output language. Separate 2n versus 2^n,
-  invalid extra outputs, wrong base cases, and vague loop
-  mechanisms. A correct power-of-two sequence with a minor extra-output or
-  base-case issue should receive partial credit; linear even lengths are not a
-  correct enumerator for the target power-of-two language.
-- Q9 conceptual essay policy: score broad valid evidence for the Church-Turing thesis
-  when it is relevant, non-contradictory, and supports effective
-  computability, even if it does not name the exact reference families.
+Classify each question before scoring, then record the type:
 
-Apply these explicit question-type rules:
+- `objective_selection` (multiple choice, matching, true/false): require a
+  selected option or unambiguous equivalent. Explanations are not required
+  unless the prompt explicitly requests proof, explanation, justification, or
+  visible work.
+- `calculation`: evaluate result, valid setup/method, transformations or
+  substitutions, intermediate calculation, and required reasoning. Retain
+  evidenced method credit when the result is wrong. A correct result without
+  required work receives only the frozen answer-only allocation.
+- `calculation_short_answer`: score derivation and requested short conclusion
+  as non-overlapping elements; accept valid alternative methods.
+- `short_answer` or `conceptual`: score key-term, concept, and relation
+  evidence without demanding exact reference wording.
+- `algorithm` or `construction`: score a viable method, relevant steps, and
+  required output behavior; accept valid alternatives.
+- `proof` or `explanation`: score each required logical link/direction; preserve
+  independently demonstrated parts when another part is incomplete.
+- `diagram`, `geometry`, or `representation`: score visible required objects,
+  relations, labels, transformations, and conclusion; never infer invisible
+  diagram work.
+- `essay` or `open_response`: score distinct valid, relevant, non-contradictory
+  claims; do not require fixed order or standard phrasing.
 
-- `multiple_choice`: Require the selected option or an unambiguous equivalent.
-- `short_answer`: Combine key-term and concept evidence; exact standard-answer
-  wording is not required.
-- `calculation`: Check the final numeric or symbolic answer, units, formula
-  choice, substitutions, arithmetic, and physical or mathematical reasoning;
-  retain justified method credit when the final answer is wrong.
-- `algorithm`: Require a viable method plus relevant steps or relations; award
-  credit to valid alternatives.
-- `proof`: Check all required directions and logical links; a missing required
-  direction blocks full credit but preserves credit for each completed direction.
-- `essay`: Score distinct valid relevant claims; do not require fixed ordering
-  or standard phrasing.
+For mixed questions, use non-overlapping rubric elements for each required
+aspect. The frozen rubric, rather than this prompt, sets point values, allowed
+increments, and answer-only credit.
 
 ## Required JSON record
 
@@ -163,3 +163,22 @@ total must be recomputed from itemized scores.
 
 If the second pass still leaves uncertainty, keep the numeric score conservative
 and flag the item for teacher review.
+
+## Route-comparison evidence card
+
+When comparing a direct multimodal route with a transcription-assisted route,
+use the same frozen rubric, gold, split, scoring packet, and review policy.
+For every representative disagreement, write an evidence card before changing
+anything. Set one primary category:
+
+- `clear_model_error`: source evidence and frozen rubric support another score.
+- `representation_loss`: relevant source evidence was lost, mistranscribed,
+  reordered, cropped, or otherwise unavailable to a route.
+- `rubric_or_gold_conflict`: a course-owner decision is needed.
+- `reasonable_severity_difference`: both evidence-grounded scores lie within an
+  acceptable strictness range.
+- `insufficient_evidence`: the source or record cannot support a reliable
+  decision.
+
+Do not label disagreement a model failure by default. Keep the card alongside
+the route artifacts and final human disposition.

@@ -511,6 +511,7 @@ class CommittedRegressionRecordTests(unittest.TestCase):
                     "predecessor_skill_version_id": registry[
                         "active_skill_version_id"
                     ],
+                    "evaluation_status": "evaluated",
                     "iteration_delta_status": "compared",
                     "public_iteration_delta": None,
                 }
@@ -545,6 +546,7 @@ class CommittedRegressionRecordTests(unittest.TestCase):
                     "predecessor_skill_version_id": registry[
                         "active_skill_version_id"
                     ],
+                    "evaluation_status": "evaluated",
                     "iteration_delta_status": "compared",
                     "public_iteration_delta": None,
                 }

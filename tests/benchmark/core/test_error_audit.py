@@ -372,6 +372,7 @@ class CommittedConfidenceAuditTests(unittest.TestCase):
         )
         with tempfile.TemporaryDirectory() as tmp:
             registry = json.loads(registry_path.read_text(encoding="utf-8"))
+            registry["entries"][-1]["evaluation_status"] = "evaluated"
             registry["entries"][-1][
                 "public_confidence_taxonomy_audit"
             ] = "experiments/records/missing-confidence-audit.json"

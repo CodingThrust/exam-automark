@@ -56,6 +56,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="stable local label for the declared question/page scope",
     )
     parser.add_argument("--output-root", type=Path, required=True)
+    parser.add_argument(
+        "--cohort-preflight",
+        type=Path,
+        help=(
+            "optional ready private cohort-preflight report; when supplied, its "
+            "final-approval and page-scope bindings are verified and recorded"
+        ),
+    )
     args = parser.parse_args(argv)
     try:
         result = build_scoped_anonymous_image_snapshot(
@@ -65,6 +73,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             page_suffixes=args.page_suffix,
             scope_id=args.scope_id,
             output_root=args.output_root,
+            cohort_preflight_path=args.cohort_preflight,
         )
     except ScopedSnapshotError as error:
         parser.error(str(error))

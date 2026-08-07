@@ -36,7 +36,7 @@
     "No instructor-provided official solution or pre-existing human scores were available. The course owner has adjudicated the reference solution, rubric, and partial-credit policy; question-level human gold remains pending.",
     "M1 direct multimodal grading and T1-to-G1 transcription-first grading will be compared only on matched anonymous inputs.",
     "Raw local submission filenames may contain student identifiers; no prompt packet may use the raw tree.",
-    "The base anonymous cohort has completed private privacy/blindness/content review. Its five anomalous page-count groups have a private manifest-bound scope worksheet and must be resolved before cohort freeze; a generic cohort preflight validates this dependency.",
+    "The base anonymous cohort has completed private privacy/blindness/content review. Its five anomalous page-count groups have a private manifest-bound scope worksheet and must be resolved before cohort freeze; a generic cohort preflight validates this dependency and its hash will be recorded in the eventual scoped snapshot.",
     "A separately isolated image-only DOCX supplement is assembled but must complete identity, grading-mark, and final answer-preservation review before it can join a frozen cohort."
   ],
   "planned_conditions": [

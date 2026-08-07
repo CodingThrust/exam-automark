@@ -86,6 +86,7 @@ def build_scoped_anonymous_image_snapshot(
     page_suffixes: Sequence[str],
     scope_id: str,
     output_root: Path,
+    cohort_preflight_path: Path | None = None,
 ) -> dict[str, Any]:
     """Copy selected, final-approved PNGs into a new local snapshot root.
 
@@ -143,6 +144,12 @@ def build_scoped_anonymous_image_snapshot(
         validation=validation,
         review_row_count=len(review_rows),
     )
+    cohort_preflight = _load_and_validate_cohort_preflight(
+        cohort_preflight_path=cohort_preflight_path,
+        metadata=metadata,
+        metadata_path=metadata_path,
+        validation_path=validation_path,
+    )
 
     artifact_manifest_path = _resolve_metadata_relative_path(
         source_root=source_root,
@@ -180,6 +187,7 @@ def build_scoped_anonymous_image_snapshot(
         scope_id=normalized_scope_id,
         page_suffixes=normalized_suffixes,
         selected=selected,
+        cohort_preflight=cohort_preflight,
     )
 
     if output_root.exists():
@@ -486,6 +494,48 @@ def _validate_final_review_validation(
         )
 
 
+def _load_and_validate_cohort_preflight(
+    *,
+    cohort_preflight_path: Path | None,
+    metadata: Mapping[str, Any],
+    metadata_path: Path,
+    validation_path: Path,
+) -> dict[str, str] | None:
+    """Optionally bind this snapshot to a ready cohort preflight.
+
+    The optional argument preserves compatibility for existing generic
+    snapshots.  When present, it proves that the preflight's final-approval
+    and page-scope decision were created for these exact source artifacts.
+    """
+
+    if cohort_preflight_path is None:
+        return None
+    preflight_path = _require_file(cohort_preflight_path, "cohort preflight report")
+    preflight = _load_json_object(preflight_path, "cohort preflight report")
+    if preflight.get("schema_version") != 1:
+        raise ScopedSnapshotError("cohort preflight report has an unsupported schema")
+    if preflight.get("record_type") != "private_anonymous_cohort_preflight":
+        raise ScopedSnapshotError("cohort preflight report has an unexpected record_type")
+    if preflight.get("status") != "ready" or preflight.get("failed_checks") != []:
+        raise ScopedSnapshotError("cohort preflight report is not ready")
+    if preflight.get("model_run_allowed") is not False:
+        raise ScopedSnapshotError("cohort preflight report must not authorize model execution")
+    if preflight.get("assessment_id") != metadata.get("assessment_id"):
+        raise ScopedSnapshotError("cohort preflight assessment does not match prep metadata")
+    bindings = preflight.get("bindings")
+    if not isinstance(bindings, Mapping):
+        raise ScopedSnapshotError("cohort preflight report lacks provenance bindings")
+    if bindings.get("preparation_metadata_sha256") != sha256_file(metadata_path):
+        raise ScopedSnapshotError(
+            "cohort preflight preparation metadata hash does not match this artifact"
+        )
+    if bindings.get("final_review_validation_sha256") != sha256_file(validation_path):
+        raise ScopedSnapshotError(
+            "cohort preflight final validation hash does not match this artifact"
+        )
+    return {"sha256": sha256_file(preflight_path)}
+
+
 def _validate_source_artifact_tree(
     *,
     source_root: Path,
@@ -633,10 +683,20 @@ def _build_snapshot_manifest(
     scope_id: str,
     page_suffixes: Sequence[str],
     selected: Sequence[Mapping[str, Any]],
+    cohort_preflight: Mapping[str, str] | None,
 ) -> dict[str, Any]:
     assessment_id = metadata.get("assessment_id")
     if not isinstance(assessment_id, str) or not assessment_id.strip():
         raise ScopedSnapshotError("prep metadata must contain a non-empty assessment_id")
+    source_provenance = {
+        "preparation_metadata_sha256": sha256_file(metadata_path),
+        "final_review_sha256": sha256_file(review_path),
+        "final_review_validation_sha256": sha256_file(validation_path),
+        "output_artifact_manifest_sha256": sha256_file(artifact_manifest_path),
+        "render_spec_sha256": metadata["render_spec_sha256"],
+    }
+    if cohort_preflight is not None:
+        source_provenance["cohort_preflight_sha256"] = cohort_preflight["sha256"]
     return {
         "schema_version": SNAPSHOT_SCHEMA_VERSION,
         "record_type": SNAPSHOT_RECORD_TYPE,
@@ -645,13 +705,7 @@ def _build_snapshot_manifest(
             "scope_id": scope_id,
             "page_suffixes": list(page_suffixes),
         },
-        "source_provenance": {
-            "preparation_metadata_sha256": sha256_file(metadata_path),
-            "final_review_sha256": sha256_file(review_path),
-            "final_review_validation_sha256": sha256_file(validation_path),
-            "output_artifact_manifest_sha256": sha256_file(artifact_manifest_path),
-            "render_spec_sha256": metadata["render_spec_sha256"],
-        },
+        "source_provenance": source_provenance,
         "student_count": len({str(entry["anonymous_id"]) for entry in selected}),
         "image_count": len(selected),
         "images": [dict(entry) for entry in selected],

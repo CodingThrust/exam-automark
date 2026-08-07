@@ -49,6 +49,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _prepare(args)
     if args.command == "propose-grading-masks":
         return _propose_grading_masks(args)
+    if args.command == "propose-grading-masks-from-artifacts":
+        return _propose_grading_masks_from_artifacts(args)
     if args.command == "compile-approved-masks":
         return _compile_approved_masks(args)
     if args.command == "validate-review":
@@ -114,6 +116,34 @@ def _parser() -> argparse.ArgumentParser:
     propose.add_argument("--scale", type=float, default=1.0)
     propose.add_argument("--min-red", type=int, default=90)
     propose.add_argument("--dominance", type=int, default=30)
+
+    propose_from_artifacts = commands.add_parser(
+        "propose-grading-masks-from-artifacts",
+        help=(
+            "privately propose grading-mark masks from a verified post-identity "
+            "anonymous render; never reopens the source assessment PDF"
+        ),
+    )
+    propose_from_artifacts.add_argument(
+        "--layout",
+        type=Path,
+        required=True,
+        help="the exact private layout bound to the anonymous render",
+    )
+    propose_from_artifacts.add_argument(
+        "--artifact-root",
+        type=Path,
+        required=True,
+        help="schema-v2 anonymous render root containing manifest/prep-metadata.json",
+    )
+    propose_from_artifacts.add_argument(
+        "--output-root",
+        type=Path,
+        required=True,
+        help="new private, versioned candidate-review output root",
+    )
+    propose_from_artifacts.add_argument("--min-red", type=int, default=90)
+    propose_from_artifacts.add_argument("--dominance", type=int, default=30)
 
     compile_masks = commands.add_parser(
         "compile-approved-masks",
@@ -412,6 +442,120 @@ def _propose_grading_masks(args: argparse.Namespace) -> int:
     return 0
 
 
+def _propose_grading_masks_from_artifacts(args: argparse.Namespace) -> int:
+    """Detect candidate grading marks only in a verified anonymous render.
+
+    This is intentionally separate from ``propose-grading-masks``.  It prevents
+    a post-identity review from accidentally reopening the raw assessment PDF
+    or relying on a global identity rectangle when page-specific masks were
+    approved.
+    """
+
+    artifact_root = args.artifact_root.resolve()
+    prep_metadata_path = artifact_root / "manifest" / "prep-metadata.json"
+    if not prep_metadata_path.is_file():
+        raise FileNotFoundError(prep_metadata_path)
+    if args.output_root.exists() and any(args.output_root.iterdir()):
+        raise FileExistsError(
+            f"output root is not empty: {args.output_root}; create a new versioned root"
+        )
+
+    layout = load_page_layout(args.layout)
+    layout_hash = sha256_file(args.layout)
+    metadata = _load_json_object(prep_metadata_path)
+    _validate_anonymous_artifact_binding(
+        artifact_root=artifact_root,
+        layout=layout,
+        layout_hash=layout_hash,
+        metadata=metadata,
+        prep_metadata_path=prep_metadata_path,
+    )
+
+    candidates: list[dict[str, Any]] = []
+    candidate_counter = 1
+    for group in layout["page_groups"]:
+        anonymous_id = group["anonymous_id"]
+        for local_page, source_page in enumerate(group["source_pages"], start=1):
+            image_path = (
+                artifact_root
+                / "anonymized_pages"
+                / anonymous_id
+                / f"{anonymous_id}-p{local_page:02d}.png"
+            )
+            if not image_path.is_file():
+                raise FileNotFoundError(image_path)
+            with Image.open(image_path) as image:
+                rectangles = propose_red_ink_candidates(
+                    image,
+                    excluded_rectangles=[],
+                    min_red=args.min_red,
+                    dominance=args.dominance,
+                )
+            for rectangle in rectangles:
+                candidates.append(
+                    {
+                        "candidate_id": f"C{candidate_counter:04d}",
+                        "anonymous_id": anonymous_id,
+                        "source_page": source_page,
+                        "rectangles": [rectangle],
+                        "detector": "red_ink_components_v1",
+                        "confidence": 0.65,
+                        "rationale": (
+                            "red-dominant component in the post-identity anonymous "
+                            "render; whole-page grayscale sweep remains mandatory"
+                        ),
+                    }
+                )
+                candidate_counter += 1
+
+    manifest = build_candidate_manifest(
+        layout=layout,
+        layout_sha256=layout_hash,
+        candidates=candidates,
+        detector={
+            "name": "red_ink_components_v1",
+            "input_mode": "post_identity_anonymous_render",
+            "prep_metadata_sha256": sha256_file(prep_metadata_path),
+            "artifact_manifest_sha256": metadata["artifact_manifest_sha256"],
+            "min_red": args.min_red,
+            "dominance": args.dominance,
+            "limitation": (
+                "detects red-dominant pixels only; grayscale marks require the "
+                "mandatory manual page sweep"
+            ),
+        },
+    )
+    args.output_root.mkdir(parents=True, exist_ok=True)
+    manifest_path = args.output_root / "candidate-manifest.json"
+    decisions_path = args.output_root / "candidate-decisions.csv"
+    sweeps_path = args.output_root / "page-sweeps.csv"
+    write_json(manifest_path, manifest)
+    write_csv(
+        decisions_path,
+        columns=MASK_CANDIDATE_DECISION_COLUMNS,
+        rows=candidate_decision_rows(manifest),
+    )
+    write_csv(
+        sweeps_path,
+        columns=PAGE_SWEEP_COLUMNS,
+        rows=page_sweep_rows(layout),
+    )
+    print(
+        json.dumps(
+            {
+                "status": "candidates_prepared_pending_human_review",
+                "input_mode": "post_identity_anonymous_render",
+                "candidate_count": len(candidates),
+                "page_sweep_count": len(expected_review_pairs(layout)),
+                "output_root": str(args.output_root),
+                "model_run_allowed": False,
+            },
+            sort_keys=True,
+        )
+    )
+    return 0
+
+
 def _compile_approved_masks(args: argparse.Namespace) -> int:
     if args.output_layout.exists():
         raise FileExistsError(
@@ -445,6 +589,62 @@ def _compile_approved_masks(args: argparse.Namespace) -> int:
         )
     )
     return 0
+
+
+def _validate_anonymous_artifact_binding(
+    *,
+    artifact_root: Path,
+    layout: Mapping[str, Any],
+    layout_hash: str,
+    metadata: Mapping[str, Any],
+    prep_metadata_path: Path,
+) -> None:
+    """Require a schema-v2 anonymous render before reading any page PNGs."""
+
+    if metadata.get("schema_version") != 2:
+        raise ValueError("post-identity candidate detection requires schema-v2 prep metadata")
+    if metadata.get("record_type") != "anonymized_assessment_preparation":
+        raise ValueError("prep metadata has an unexpected record_type")
+    if metadata.get("assessment_id") != layout.get("assessment_id"):
+        raise ValueError("prep metadata assessment_id does not match the supplied layout")
+    if metadata.get("layout_sha256") != layout_hash:
+        raise ValueError("prep metadata does not bind to the supplied page layout")
+
+    render_spec = metadata.get("render_spec")
+    render_spec_sha256 = metadata.get("render_spec_sha256")
+    if not isinstance(render_spec, Mapping) or not isinstance(render_spec_sha256, str):
+        raise ValueError("schema-v2 prep metadata lacks a render specification")
+    if render_spec.get("layout_sha256") != layout_hash:
+        raise ValueError("render specification does not bind to the supplied page layout")
+    if canonical_json_sha256(render_spec) != render_spec_sha256:
+        raise ValueError("render specification hash does not match prep metadata")
+
+    artifact_manifest_path = _resolve_declared_output_path(
+        prep_metadata_path=prep_metadata_path,
+        relative_path=metadata.get("artifact_manifest_path"),
+        field_name="artifact_manifest_path",
+    )
+    try:
+        artifact_manifest_path.relative_to(artifact_root)
+    except ValueError as error:
+        raise ValueError("artifact manifest path escapes artifact root") from error
+    if not artifact_manifest_path.is_file():
+        raise FileNotFoundError(artifact_manifest_path)
+    artifact_manifest_sha256 = metadata.get("artifact_manifest_sha256")
+    if not isinstance(artifact_manifest_sha256, str):
+        raise ValueError("schema-v2 prep metadata lacks artifact_manifest_sha256")
+    if artifact_manifest_sha256 != sha256_file(artifact_manifest_path):
+        raise ValueError("artifact manifest does not match prep metadata")
+
+    artifact_report = validate_artifact_manifest(
+        output_root=artifact_root,
+        layout=layout,
+        manifest=_load_json_object(artifact_manifest_path),
+        render_spec_sha256=render_spec_sha256,
+    )
+    if artifact_report["status"] != "ready":
+        failed = ", ".join(artifact_report["failed_checks"])
+        raise ValueError(f"anonymous artifact validation failed: {failed}")
 
 
 def _validate_review(args: argparse.Namespace) -> int:

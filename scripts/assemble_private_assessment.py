@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import re
 import secrets
@@ -18,6 +19,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import zipfile
+from xml.etree import ElementTree
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -28,6 +31,11 @@ from PIL import Image, ImageOps
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png"}
 HEIF_SUFFIXES = {".heic", ".heif"}
 SUPPORTED_SUFFIXES = IMAGE_SUFFIXES | HEIF_SUFFIXES | {".pdf", ".docx"}
+
+WORDPROCESSINGML_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+DRAWINGML_NS = "http://schemas.openxmlformats.org/drawingml/2006/main"
+RELATIONSHIPS_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
+OFFICE_RELATIONSHIPS_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -221,9 +229,12 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--docx-policy",
-        choices=("manual_review",),
+        choices=("manual_review", "embedded_images"),
         default="manual_review",
-        help="DOCX conversion is deliberately blocked pending an explicit converter decision.",
+        help=(
+            "manual_review blocks DOCX files; embedded_images only accepts DOCX files "
+            "that contain ordered embedded images and no text, tables, or other content"
+        ),
     )
     return parser
 
@@ -292,15 +303,30 @@ def _convert_group(
         if suffix == ".docx":
             if docx_policy == "manual_review":
                 return {"status": "blocked", "reason": "docx_requires_manual_conversion_review"}
-            raise ValueError(f"unsupported DOCX policy: {docx_policy}")
-        try:
-            converted = _convert_source(source, staging_root, source_index)
-        except Exception as error:
-            return {
-                "status": "blocked",
-                "reason": f"conversion_failed_{suffix.lstrip('.') or 'unknown'}",
-                "detail": type(error).__name__,
-            }
+            if docx_policy == "embedded_images":
+                try:
+                    converted = _convert_docx_embedded_images(
+                        source,
+                        staging_root,
+                        source_index,
+                    )
+                except Exception as error:
+                    return {
+                        "status": "blocked",
+                        "reason": "conversion_failed_docx",
+                        "detail": type(error).__name__,
+                    }
+            else:
+                raise ValueError(f"unsupported DOCX policy: {docx_policy}")
+        else:
+            try:
+                converted = _convert_source(source, staging_root, source_index)
+            except Exception as error:
+                return {
+                    "status": "blocked",
+                    "reason": f"conversion_failed_{suffix.lstrip('.') or 'unknown'}",
+                    "detail": type(error).__name__,
+                }
         raw_relative_path = source.relative_to(input_root).as_posix()
         for source_file_page, page in enumerate(converted, start=1):
             pages.append(
@@ -356,6 +382,71 @@ def _convert_source(source: Path, staging_root: Path, source_index: int) -> list
             raise RuntimeError("empty_pdf")
         return pages
     raise ValueError(f"unsupported source suffix: {suffix}")
+
+
+def _convert_docx_embedded_images(
+    source: Path,
+    staging_root: Path,
+    source_index: int,
+) -> list[Path]:
+    """Extract ordered page images from a deliberately restricted DOCX shape.
+
+    This is not a general DOCX renderer.  It accepts only image-only documents
+    so an unavailable office renderer cannot silently change a student's work.
+    Text, tables, linked images, VML, and non-image drawing structures remain
+    blocked for manual conversion review.
+    """
+
+    word = f"{{{WORDPROCESSINGML_NS}}}"
+    drawing = f"{{{DRAWINGML_NS}}}"
+    relationship = f"{{{OFFICE_RELATIONSHIPS_NS}}}"
+    package_relationship = f"{{{RELATIONSHIPS_NS}}}"
+    with zipfile.ZipFile(source) as archive:
+        document = ElementTree.fromstring(archive.read("word/document.xml"))
+        disallowed_tags = (
+            f"{word}t",
+            f"{word}tbl",
+            f"{word}object",
+            f"{word}pict",
+            f"{word}altChunk",
+        )
+        if any(next(document.iter(tag), None) is not None for tag in disallowed_tags):
+            raise RuntimeError("docx_is_not_image_only")
+
+        drawings = list(document.iter(f"{word}drawing"))
+        if not drawings:
+            raise RuntimeError("docx_has_no_embedded_images")
+        relationship_ids: list[str] = []
+        for drawing_node in drawings:
+            blips = list(drawing_node.iter(f"{drawing}blip"))
+            if len(blips) != 1:
+                raise RuntimeError("docx_drawing_is_not_a_single_embedded_image")
+            relationship_id = blips[0].get(f"{relationship}embed")
+            if not relationship_id:
+                raise RuntimeError("docx_contains_linked_or_unbound_image")
+            relationship_ids.append(relationship_id)
+
+        relationships = ElementTree.fromstring(
+            archive.read("word/_rels/document.xml.rels")
+        )
+        targets = {
+            entry.get("Id"): entry.get("Target")
+            for entry in relationships.iter(f"{package_relationship}Relationship")
+        }
+        pages: list[Path] = []
+        for page_index, relationship_id in enumerate(relationship_ids, start=1):
+            target = targets.get(relationship_id)
+            if not isinstance(target, str) or not target.startswith("media/"):
+                raise RuntimeError("docx_image_relationship_is_not_embedded_media")
+            member = f"word/{target}"
+            if ".." in Path(target).parts or member not in archive.namelist():
+                raise RuntimeError("docx_image_relationship_is_invalid")
+            image_bytes = archive.read(member)
+            target_path = staging_root / f"file-{source_index:03d}-p{page_index:03d}.png"
+            with Image.open(io.BytesIO(image_bytes)) as image:
+                ImageOps.exif_transpose(image).convert("RGB").save(target_path, format="PNG")
+            pages.append(target_path)
+    return pages
 
 
 def _private_source_file_rows(sources: Sequence[Path], input_root: Path) -> list[dict[str, str]]:

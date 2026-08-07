@@ -23,6 +23,7 @@
     "page-count scope decisions for every anomalous included submission group",
     "question-level development gold",
     "anonymous page-level privacy, blindness, and answer-preservation approvals for every included cohort member",
+    "private anonymous-cohort preflight binding final approvals and page-count scope decisions",
     "frozen development/held-out split",
     "matched M1, T1, and G1 packet manifests and lineage validation",
     "pinned provider/model configuration and explicit development-run approval"
@@ -35,7 +36,7 @@
     "No instructor-provided official solution or pre-existing human scores were available. The course owner has adjudicated the reference solution, rubric, and partial-credit policy; question-level human gold remains pending.",
     "M1 direct multimodal grading and T1-to-G1 transcription-first grading will be compared only on matched anonymous inputs.",
     "Raw local submission filenames may contain student identifiers; no prompt packet may use the raw tree.",
-    "The base anonymous cohort has completed private privacy/blindness/content review. Its five anomalous page-count groups have a private manifest-bound scope worksheet and must be resolved before cohort freeze.",
+    "The base anonymous cohort has completed private privacy/blindness/content review. Its five anomalous page-count groups have a private manifest-bound scope worksheet and must be resolved before cohort freeze; a generic cohort preflight validates this dependency.",
     "A separately isolated image-only DOCX supplement is assembled but must complete identity, grading-mark, and final answer-preservation review before it can join a frozen cohort."
   ],
   "planned_conditions": [

@@ -705,8 +705,9 @@ def build_render_spec(
     layout_sha256: str,
     identity_rectangles: Sequence[Mapping[str, float]],
     render_scale: float,
+    max_render_pixels: int | None = None,
 ) -> dict[str, Any]:
-    return {
+    spec = {
         "schema_version": 1,
         "renderer": "prepare_anonymized_assessment",
         "renderer_version": 2,
@@ -716,6 +717,11 @@ def build_render_spec(
         "identity_redaction_rectangles": _canonical_rectangles(identity_rectangles),
         "render_scale": float(render_scale),
     }
+    if max_render_pixels is not None:
+        if not isinstance(max_render_pixels, int) or max_render_pixels <= 0:
+            raise ValueError("max_render_pixels must be a positive integer")
+        spec["max_render_pixels"] = max_render_pixels
+    return spec
 
 
 def build_artifact_manifest(

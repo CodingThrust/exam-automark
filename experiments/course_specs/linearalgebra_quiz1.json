@@ -1,7 +1,15 @@
 {
   "anonymous_id_pattern": "^S[0-9]{3}$",
   "assessment_id": "quiz1",
+  "assessment_title": "Chapter 1-3 Quiz",
+  "base_total_points": 100,
+  "course_code": "UFUG2103",
   "course_id": "linearalgebra",
+  "final_score_cap": 100,
+  "global_instructions": [
+    "When applying elementary row operations to reduce a matrix to (reduced) echelon form, show each row operation explicitly.",
+    "When writing the solution of a linear system, clearly identify any free variables."
+  ],
   "input_modes": [
     "image",
     "pdf",
@@ -9,18 +17,63 @@
     "text"
   ],
   "notes": [
-    "Draft only: extract real question IDs, max scores, and rubric before grading.",
-    "Local submissions are raw and file names may contain student identifiers; anonymize before packet construction.",
-    "The placeholder score step is not a grading rule; replace it with the rubric-defined increment before any model run."
+    "No instructor-provided official solution or pre-existing human scores are available.",
+    "The course owner will approve a reference solution, rubric, partial-credit policy, and question-level gold before model evaluation.",
+    "Raw submissions may contain identity-bearing filenames and must be anonymized before packet construction.",
+    "The candidate grading skill remains course-generic; course-specific answers and score allocations belong in the rubric."
   ],
   "questions": [
     {
       "id": "Q1",
-      "max_score": 1.0,
-      "score_step": 1.0,
-      "title": "Placeholder question - replace after rubric extraction"
+      "max_score": 25,
+      "question_type": "true_false",
+      "response_requirement": "Mark each of five statements True or False.",
+      "score_step": 1,
+      "subitems": 5,
+      "title": "Matrix and determinant true/false statements"
+    },
+    {
+      "id": "Q2",
+      "max_score": 30,
+      "question_type": "calculation",
+      "response_requirement": "Compute two determinants.",
+      "score_step": 1,
+      "title": "Determinant computation"
+    },
+    {
+      "bonus": {
+        "points": 10,
+        "requirement": "Solve using two distinct methods.",
+        "total_score_cap": 100
+      },
+      "id": "Q3",
+      "max_score": 25,
+      "question_type": "calculation",
+      "response_requirement": "Determine parameter values for which the system has a unique solution.",
+      "score_step": 1,
+      "tags": [
+        "linear_systems",
+        "unique_solution",
+        "alternative_methods_bonus"
+      ],
+      "title": "Unique solution of a parameterized linear system"
+    },
+    {
+      "id": "Q4",
+      "max_score": 20,
+      "question_type": "calculation",
+      "response_requirement": "Compute the volume of the tetrahedron determined by four vertices.",
+      "score_step": 1,
+      "tags": [
+        "geometry",
+        "tetrahedron_volume"
+      ],
+      "title": "Tetrahedron volume"
     }
   ],
+  "reference_solution_status": "course_owner_confirmed_rubric_frozen_v0",
+  "score_step": 1,
   "score_unit": "points",
-  "source_status": "draft_needs_rubric_extraction"
+  "source_status": "course_owner_confirmed_reference_solution_and_rubric_frozen_v0",
+  "time_limit_minutes": 50
 }

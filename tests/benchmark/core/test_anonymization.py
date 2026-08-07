@@ -8,6 +8,7 @@ from benchmark.core.anonymization import (
     ANONYMIZATION_REVIEW_COLUMNS,
     expected_review_pairs,
     expected_review_outputs,
+    review_rows_for_layout,
     validate_anonymization_review,
     validate_page_layout,
 )
@@ -51,6 +52,28 @@ class AnonymousPageLayoutTests(unittest.TestCase):
 
 
 class AnonymizationReviewTests(unittest.TestCase):
+    def test_identity_masks_are_recorded_separately_from_grading_masks(self):
+        layout = _layout()
+        layout["page_groups"][0]["page_masks"] = [
+            {
+                "source_page": 1,
+                "reason": "identity_mask_review",
+                "rectangles": [
+                    {"left": 0.0, "top": 0.0, "right": 0.2, "bottom": 0.1}
+                ],
+            }
+        ]
+        rows = review_rows_for_layout(
+            layout,
+            identity_rectangles=[],
+            render_spec_sha256=RENDER_SPEC_SHA256,
+            artifact_manifest_sha256=ARTIFACT_MANIFEST_SHA256,
+        )
+
+        row = next(item for item in rows if item["source_page"] == "1")
+        self.assertIn('"right":0.2', row["identity_redaction_rectangles"])
+        self.assertEqual(row["grading_mark_mask_rectangles"], "[]")
+
     def test_all_three_human_approvals_are_required(self):
         layout = _layout()
         with tempfile.TemporaryDirectory() as tmp:

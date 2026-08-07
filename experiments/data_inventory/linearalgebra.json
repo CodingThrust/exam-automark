@@ -1,9 +1,14 @@
 {
+  "assessment": {
+    "file_count": 1,
+    "page_count": 4
+  },
   "counts": {
-    "directories": 1,
-    "files": 136,
+    "inferred_submission_groups": 43,
+    "relevant_source_files": 136,
     "submission_files": 135,
-    "top_level_files": 1
+    "system_metadata_files_excluded": 1,
+    "top_level_assessment_files": 1
   },
   "course_id": "linearalgebra",
   "extension_counts": {
@@ -13,6 +18,15 @@
     ".jpg": 98,
     ".pdf": 17
   },
+  "grouping_findings": {
+    "exact_duplicate_content_hash_groups": 0,
+    "files_per_inferred_group": {
+      "1": 13,
+      "4": 29,
+      "6": 1
+    },
+    "note": "Identity-bearing filename prefixes imply 43 provisional submission groups. This is not an approved anonymous student roster."
+  },
   "layout": {
     "has_benchmark_dir": false,
     "has_grades_dir": false,
@@ -20,11 +34,20 @@
     "has_submissions_dir": true
   },
   "notes": [
-    "Inventory is local-only; private anonymous data snapshots should live in HKUST-GZ GitLab.",
-    "Raw filenames are intentionally omitted because they may contain student identifiers.",
-    "Submissions directory exists; create an anonymous packet input tree before model runs.",
-    "Local submission filenames have identity-like prefixes; do not build prompt packets from this raw tree."
+    "Inventory is public-safe: raw filenames, student identifiers, answer content, and identity maps are omitted.",
+    "The source consists of one four-page quiz and 135 mixed-format submission files.",
+    "Five provisional groups have 3, 5, or 6 source pages and require page-level scope review after anonymization.",
+    "One DOCX submission has structural evidence of four pages; it still requires normal anonymization and answer-preservation review.",
+    "Do not build prompt packets from the raw tree."
   ],
+  "page_coverage_findings": {
+    "expected_quiz_pages_per_submission": 4,
+    "groups_with_3_pages": 2,
+    "groups_with_4_pages": 38,
+    "groups_with_5_pages": 2,
+    "groups_with_6_pages": 1,
+    "groups_requiring_page_level_scope_review": 5
+  },
   "packet_exclusion_policy": [],
   "privacy_findings": {
     "distinct_identity_like_submission_filename_prefixes": 43,
@@ -37,9 +60,11 @@
     "raw_filenames_recorded": false,
     "student_identity_maps_recorded": false
   },
-  "schema_version": 1,
-  "snapshot_hash": "4338dbb2cb8cbe2ee129dc8a415d0ef964ca580e9e31f33ede3a761491d33518",
+  "schema_version": 2,
+  "snapshot_hash": "bc8cc94a7a2e0e4cfb700e14d1322d089a788e09eb78c9580e9fcf4a72a02eba",
+  "snapshot_method": "SHA-256 of the sorted multiset of each relevant source file's content hash, byte length, and extension; raw filenames are excluded.",
   "source_root": "Data/linearalgebra",
+  "status": "source_inventory_complete_anonymization_pending",
   "submission_extension_counts": {
     ".docx": 1,
     ".heic": 4,

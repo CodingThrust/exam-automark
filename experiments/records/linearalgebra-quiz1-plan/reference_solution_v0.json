@@ -1,0 +1,54 @@
+{
+  "assessment_id": "quiz1",
+  "course_id": "linearalgebra",
+  "reference_solution_version": "v0",
+  "source": "course-owner-confirmed reconstruction because no official solution was supplied",
+  "status": "course_owner_confirmed_rubric_frozen_v0",
+  "questions": [
+    {
+      "id": "Q1",
+      "answer_sequence": ["T", "F", "T", "F", "F"],
+      "reasoning_anchor": [
+        "A singular 2 by 2 matrix has linearly dependent columns.",
+        "For a 3 by 3 matrix, det(5A) = 5^3 det(A), not 5 det(A).",
+        "A^T A is positive semidefinite, so its determinant is nonnegative.",
+        "Cramer's rule requires a nonzero coefficient determinant.",
+        "For invertible A, det(A^-1) = 1 / det(A)."
+      ]
+    },
+    {
+      "id": "Q2",
+      "expected_results": [
+        "-56",
+        "abcd + ab + ad + cd + 1"
+      ],
+      "reference_method": "One efficient exemplar uses determinant-aware elementary row operations.",
+      "accepted_method_policy": "This exemplar is not a required method. Any valid determinant computation, including direct expansion, determinant properties, row or column transformations, triangularization, or another equivalent route, is acceptable."
+    },
+    {
+      "id": "Q3",
+      "coefficient_matrix": "[[s, -2], [4s, s]]",
+      "reference_derivation": "A unique solution exists exactly when det(A) = s^2 + 8s = s(s + 8) is nonzero.",
+      "expected_result": "s is not equal to 0 or -8",
+      "accepted_method_policy": "The determinant condition and a valid row-reduction or elimination argument are both acceptable. Other mathematically valid arguments establishing the same exclusion set are also acceptable.",
+      "bonus": {
+        "points": 10,
+        "requirement": "The base solution reaches the correct conclusion, and two genuinely distinct methods are each mathematically correct.",
+        "award_policy": "all_or_nothing",
+        "final_assessment_score_cap": 100
+      }
+    },
+    {
+      "id": "Q4",
+      "vertices": {
+        "p0": [1, 0, 1],
+        "p1": [2, 4, 2],
+        "p2": [1, 1, -1],
+        "p3": [-1, 1, 2]
+      },
+      "reference_derivation": "Using p0 as a common vertex gives edge vectors (1, 4, 1), (0, 1, -2), and (-2, 1, 1). Their scalar triple product has absolute value 21, so the tetrahedron volume is |21| / 6 = 7/2.",
+      "expected_result": "7/2",
+      "accepted_method_policy": "A valid scalar-triple-product, determinant, base-times-height, or equivalent coordinate-geometry derivation is acceptable."
+    }
+  ]
+}

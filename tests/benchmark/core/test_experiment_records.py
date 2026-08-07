@@ -82,6 +82,17 @@ class ExperimentRecordFileTests(unittest.TestCase):
                     "grade_standard_v1_strict_schema",
                     plan.prompt_template_hashes,
                 )
+            elif plan.experiment_id == "linearalgebra-quiz1-plan":
+                self.assertEqual(plan.skill_version_id, "skill_candidate_v4")
+                self.assertIn("grade_candidate_v4", plan.prompt_template_hashes)
+                self.assertEqual(
+                    {
+                        packet.prompt_template_id
+                        for packet in plan.planned_packets
+                        if packet.task == "grade"
+                    },
+                    {"grade_candidate_v4"},
+                )
             else:
                 self.assertEqual(plan.skill_version_id, "skill_baseline_v1")
                 self.assertIn("grade_standard_v1", plan.prompt_template_hashes)

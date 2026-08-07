@@ -64,7 +64,7 @@ Skill root: the directory containing this `SKILL.md`. Resolve scripts and
 references relative to that directory; do not assume a Claude- or Codex-specific
 home path.
 
-### Candidate v3.2 grading contract
+### Candidate grading contract
 
 Grade from visible evidence, not from assumed intent. For every scored question,
 first record the visible equation, statement, diagram feature, answer text, or
@@ -89,11 +89,10 @@ required terminology when explicitly requested, and no material contradiction.
 
 When the final answer is wrong, retain justified process credit for correct
 terms, concepts, formulas, substitutions, units, and reasoning unless the
-frozen rubric makes the conclusion indispensable. For physics or other
-calculation problems, arithmetic mistakes should not erase a correct method
-unless the frozen rubric requires the exact result. When the final answer is
-correct and the process is roughly correct, award full credit when the frozen
-requirements are met.
+frozen rubric makes the conclusion indispensable. For calculation problems,
+arithmetic mistakes should not erase a correct method unless the frozen rubric
+requires the exact result. When the final answer is correct and the process is
+roughly correct, award full credit when the frozen requirements are met.
 
 Candidate v3.1 adds four calibration rules for concept, proof, and construction
 answers:
@@ -126,35 +125,46 @@ or detail is imperfect. Distinguish missing ideal detail from a visible misconce
 Apply large deductions only for material errors, contradictions,
 wrong language/output behavior, or missing required answer behavior.
 
-Candidate v3.2 also adds targeted calibration rules:
+Candidate v3.2 is a cross-course contract. Course-specific calibration overlays
+belong in that course's frozen rubric and packet, never in this reusable skill.
+Do not carry rules for named questions, named languages, named theorems, or a
+previous course into another course merely because their labels look similar.
 
-- Q7 proof-locality: preserve construction credit for each correctly
-  demonstrated proof direction. A local nonmembership or rejection mistake
-  should reduce the affected correctness element but should not erase unrelated
-  construction credit unless it invalidates the whole proof direction.
-- Q8 enumerator policy: first determine the actual output language. Separate 2n versus 2^n,
-  invalid extra outputs, wrong base cases, and vague loop
-  mechanisms. A correct power-of-two sequence with a minor extra-output or
-  base-case issue should receive partial credit; linear even lengths are not a
-  correct enumerator for the target power-of-two language.
-- Q9 conceptual essay policy: score broad valid evidence for the Church-Turing thesis
-  when it is relevant, non-contradictory, and supports effective
-  computability, even if it does not name the exact reference families.
+Classify every question from the prompt and frozen rubric *before* scoring. Use
+the most specific applicable type, and record it in the grading record:
 
-Apply these explicit question-type rules:
+- `objective_selection` (including multiple choice, matching, and true/false):
+  require a selected option or an unambiguous equivalent. Do not require an
+  explanation for true/false or other selected-response items unless the prompt
+  explicitly asks to prove, explain, justify, or show work.
+- `calculation`: check the final numeric or symbolic result, method/setup,
+  transformations or substitutions, intermediate calculation, and any
+  mathematical or domain reasoning required by the rubric. Retain justified
+  method credit if the final result is wrong. If the result is correct but
+  required working is absent, award only the course-frozen answer-only credit;
+  do not invent a universal amount.
+- `calculation_short_answer`: score both the visible derivation and the short
+  conclusion/classification requested by the question. A valid alternative
+  derivation is acceptable; the reference solution is an anchor, not a required
+  route.
+- `short_answer` or `conceptual`: combine key-term, concept, and relation
+  evidence; exact standard-answer wording is not required.
+- `algorithm` or `construction`: require a viable method plus relevant steps,
+  relations, and required output behavior; award credit to valid alternatives.
+- `proof` or `explanation`: check each required logical direction/link and
+  preserve credit for independently completed parts. A missing required part
+  blocks full credit but does not erase unrelated demonstrated work.
+- `diagram`, `geometry`, or `representation`: score the observable required
+  objects, relations, labels, transformations, and conclusion. Do not assume a
+  missing diagram feature from accompanying prose.
+- `essay` or `open_response`: score distinct valid, relevant, non-contradictory
+  claims against the task requirement; do not require fixed ordering or
+  standard phrasing.
 
-- `multiple_choice`: Require the selected option or an unambiguous equivalent.
-- `short_answer`: Combine key-term and concept evidence; exact standard-answer
-  wording is not required.
-- `calculation`: Check the final numeric or symbolic answer, units, formula
-  choice, substitutions, arithmetic, and physical or mathematical reasoning;
-  retain justified method credit when the final answer is wrong.
-- `algorithm`: Require a viable method plus relevant steps or relations; award
-  credit to valid alternatives.
-- `proof`: Check all required directions and logical links; a missing required
-  direction blocks full credit but preserves credit for each completed direction.
-- `essay`: Score distinct valid relevant claims; do not require fixed ordering
-  or standard phrasing.
+When a question genuinely combines types, use non-overlapping rubric elements
+for each required aspect rather than forcing it into a narrower legacy label.
+The type controls what evidence is relevant; the frozen rubric controls points,
+score increments, and any answer-only allocation.
 
 Freeze the grading protocol before student grading starts:
 
@@ -181,6 +191,30 @@ or apparently missing answers, total mismatches, and high-impact deductions.
 At handoff, report flagged items and which questions they concentrate on; ask
 the teacher to spot-check at least 3 students and all flagged items before
 publishing grades.
+
+### Route comparison and calibration
+
+If a course authorizes a route comparison, evaluate direct multimodal grading
+and transcription-assisted grading as separate conditions with the same frozen
+rubric, gold, split, prompt packet, and review policy. Transcription is an
+evidence aid, not ground truth; never let it silently replace the page image.
+
+For each representative disagreement, create an evidence card before changing
+the prompt, rubric, or skill. Classify it as exactly one primary cause:
+
+- `clear_model_error`: visible source evidence and frozen rubric support a
+  different score.
+- `representation_loss`: a route lost, mistranscribed, reordered, cropped, or
+  failed to expose relevant source evidence.
+- `rubric_or_gold_conflict`: the frozen scoring rule or reference answer needs
+  course-owner adjudication.
+- `reasonable_severity_difference`: both readings are evidence-supported but
+  differ within an acceptable strictness range.
+- `insufficient_evidence`: source quality or record does not support a reliable
+  conclusion.
+
+Do not assume a disagreement is a model error. Preserve the card, route
+artifacts, and human decision so future prompt changes are auditable.
 
 ### Step 1 — Discover
 

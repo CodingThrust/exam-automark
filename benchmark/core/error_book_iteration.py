@@ -307,20 +307,43 @@ def _validate_registry_entry(
     label = f"entry {skill_id}"
     if entry.get("predecessor_skill_version_id") != expected_predecessor:
         findings.append(f"{label}: predecessor does not match registry order")
+    evaluation_status = entry.get("evaluation_status", "evaluated")
+    if evaluation_status not in {"evaluated", "pending"}:
+        findings.append(f"{label}: invalid evaluation_status")
+    is_pending = evaluation_status == "pending"
+    if is_pending:
+        if expected_predecessor is None:
+            findings.append(f"{label}: the baseline cannot be pending")
+        if not is_active:
+            findings.append(f"{label}: only the active skill may be pending")
+        if not isinstance(entry.get("pending_reason"), str) or not entry.get(
+            "pending_reason"
+        ).strip():
+            findings.append(f"{label}: pending skill requires a pending_reason")
+        pending_gates = entry.get("pending_gates")
+        if not isinstance(pending_gates, list) or not pending_gates or any(
+            not isinstance(gate, str) or not gate.strip() for gate in pending_gates
+        ):
+            findings.append(f"{label}: pending skill requires non-empty pending_gates")
     canonical_hash = entry.get("skill_canonical_hash")
     if not isinstance(canonical_hash, str) or SHA256.fullmatch(canonical_hash) is None:
         findings.append(f"{label}: invalid skill_canonical_hash")
     typical_hash = entry.get("private_typical_report_sha256")
-    if not isinstance(typical_hash, str) or SHA256.fullmatch(typical_hash) is None:
+    if not is_pending and (
+        not isinstance(typical_hash, str) or SHA256.fullmatch(typical_hash) is None
+    ):
         findings.append(f"{label}: invalid private_typical_report_sha256")
     typical_count = entry.get("private_typical_case_count")
-    if not isinstance(typical_count, int) or isinstance(typical_count, bool):
+    if not is_pending and (
+        not isinstance(typical_count, int) or isinstance(typical_count, bool)
+    ):
         findings.append(f"{label}: invalid private_typical_case_count")
-    elif typical_count <= 0:
+    elif not is_pending and typical_count <= 0:
         findings.append(f"{label}: private_typical_case_count must be positive")
     complete_index_count = entry.get("private_complete_error_index_count")
-    if not isinstance(complete_index_count, int) or isinstance(
-        complete_index_count, bool
+    if not is_pending and (
+        not isinstance(complete_index_count, int)
+        or isinstance(complete_index_count, bool)
     ):
         findings.append(f"{label}: invalid private_complete_error_index_count")
 
@@ -348,7 +371,9 @@ def _validate_registry_entry(
         (diagnosis_path, "public diagnosis summary"),
         (confidence_audit_path, "public confidence taxonomy audit"),
     ):
-        if path is None or not path.is_file():
+        if (artifact_label == "skill snapshot" or not is_pending) and (
+            path is None or not path.is_file()
+        ):
             findings.append(f"{label}: missing {artifact_label}")
     if findings and (snapshot_path is None or not snapshot_path.is_file()):
         return findings
@@ -375,6 +400,9 @@ def _validate_registry_entry(
             findings.append(
                 f"{label}: current grading skill changed without an error-book update"
             )
+
+    if is_pending:
+        return findings
 
     if error_summary_path is not None and error_summary_path.is_file():
         summary = _read_json(error_summary_path)

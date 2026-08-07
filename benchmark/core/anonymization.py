@@ -352,10 +352,15 @@ def review_rows_for_layout(
             continue
         anonymous_id = str(group["anonymous_id"])
         source_pages = list(group["source_pages"])
-        masks_by_page = _masks_by_page(group)
         output_pdf = f"anonymized_pdfs/{anonymous_id}.pdf"
         for local_page, source_page in enumerate(source_pages, start=1):
             output_image, output_pdf = expected_outputs[(anonymous_id, source_page)]
+            identity_masks = _page_masks_by_reason(
+                group, source_page, identity_masks=True
+            )
+            grading_masks = _page_masks_by_reason(
+                group, source_page, identity_masks=False
+            )
             rows.append(
                 {
                     "render_spec_sha256": render_spec_sha256,
@@ -365,10 +370,10 @@ def review_rows_for_layout(
                     "output_image": output_image,
                     "output_pdf": output_pdf,
                     "identity_redaction_rectangles": _rectangles_to_json(
-                        identity_rectangles
+                        [*identity_rectangles, *identity_masks]
                     ),
                     "grading_mark_mask_rectangles": _rectangles_to_json(
-                        masks_by_page.get(source_page, ())
+                        grading_masks
                     ),
                     "privacy_review_status": "pending",
                     "privacy_reviewer": "",
@@ -644,6 +649,26 @@ def _masks_by_page(group: Mapping[str, Any]) -> dict[int, list[Mapping[str, floa
             for rectangle in rectangles
             if isinstance(rectangle, Mapping) and _valid_rectangle(rectangle)
         )
+    return result
+
+
+def _page_masks_by_reason(
+    group: Mapping[str, Any], source_page: int, *, identity_masks: bool
+) -> list[Mapping[str, float]]:
+    result: list[Mapping[str, float]] = []
+    for mask in group.get("page_masks", []):
+        if not isinstance(mask, Mapping) or mask.get("source_page") != source_page:
+            continue
+        is_identity = str(mask.get("reason", "")).startswith("identity_")
+        if is_identity != identity_masks:
+            continue
+        rectangles = mask.get("rectangles", [])
+        if isinstance(rectangles, list):
+            result.extend(
+                rectangle
+                for rectangle in rectangles
+                if isinstance(rectangle, Mapping) and _valid_rectangle(rectangle)
+            )
     return result
 
 

@@ -1,18 +1,75 @@
 {
   "assessment_id": "quiz1",
   "course_id": "linearalgebra",
+  "candidate_skill_policy": {
+    "candidate_skill_snapshot_path": "experiments/skill_versions/skill_candidate_v4.json",
+    "candidate_skill_version": "skill_candidate_v4",
+    "course_specific_rules_allowed": false,
+    "description": "Candidate v4 is a cross-course evidence-first skill. Assessment answers, score allocations, question types, answer-only limits, and local grading requirements remain in the frozen course specification and rubric.",
+    "status": "candidate_v4_frozen_pending_development_evaluation"
+  },
   "course_spec_path": "experiments/course_specs/linearalgebra_quiz1.json",
+  "completed_gates": [
+    "course-owner-approved reference solution and rubric",
+    "base anonymous cohort privacy, blindness, and answer-preservation review"
+  ],
   "data_inventory_path": "experiments/data_inventory/linearalgebra.json",
-  "data_snapshot_hash": "4338dbb2cb8cbe2ee129dc8a415d0ef964ca580e9e31f33ede3a761491d33518",
+  "data_snapshot_hash": "bc8cc94a7a2e0e4cfb700e14d1322d089a788e09eb78c9580e9fcf4a72a02eba",
   "experiment_id": "linearalgebra-quiz1-plan",
-  "git_branch": "codex/repro-experiment-framework",
-  "git_commit": "75039f8",
+  "git_branch": "codex/la-task1-launch-inventory",
+  "git_commit": "945774a",
+  "gates_before_model_run": [
+    "course-owner-approved reference solution and rubric",
+    "page-count scope decisions for every anomalous included submission group",
+    "question-level development gold",
+    "anonymous page-level privacy, blindness, and answer-preservation approvals for every included cohort member",
+    "frozen development/held-out split",
+    "matched M1, T1, and G1 packet manifests and lineage validation",
+    "pinned provider/model configuration and explicit development-run approval"
+  ],
+  "launch_base_commit": "048a17b",
+  "launch_branch": "codex/la-task1-launch-inventory",
+  "model_run_allowed": false,
   "notes": [
-    "Draft data inventory only; extract real rubric and question scores before packet construction.",
-    "Raw local submission filenames may contain student identifiers; anonymize before packet construction.",
-    "Uses frozen grade-homework skill baseline before any candidate skill changes."
+    "Scope confirmed from the four-page Chapter 1-3 Quiz: Q1-Q4, 100 base points, integer scoring, and a 100-point final cap.",
+    "No instructor-provided official solution or pre-existing human scores were available. The course owner has adjudicated the reference solution, rubric, and partial-credit policy; question-level human gold remains pending.",
+    "M1 direct multimodal grading and T1-to-G1 transcription-first grading will be compared only on matched anonymous inputs.",
+    "Raw local submission filenames may contain student identifiers; no prompt packet may use the raw tree.",
+    "The base anonymous cohort has completed private privacy/blindness/content review. Its five anomalous page-count groups have a private manifest-bound scope worksheet and must be resolved before cohort freeze.",
+    "A separately isolated image-only DOCX supplement is assembled but must complete identity, grading-mark, and final answer-preservation review before it can join a frozen cohort."
+  ],
+  "planned_conditions": [
+    {
+      "condition": "M1",
+      "input_mode": "direct_multimodal",
+      "task": "grade"
+    },
+    {
+      "condition": "T1",
+      "input_mode": "anonymous_images",
+      "task": "transcribe"
+    },
+    {
+      "condition": "G1",
+      "input_mode": "frozen_T1_transcript",
+      "task": "grade"
+    }
   ],
   "planned_packets": [
+    {
+      "condition": "M1",
+      "packet_id": "M1-dev-r1",
+      "prompt_template_id": "grade_candidate_v4",
+      "split": "development",
+      "task": "grade"
+    },
+    {
+      "condition": "M1",
+      "packet_id": "M1-test-r1",
+      "prompt_template_id": "grade_candidate_v4",
+      "split": "heldout",
+      "task": "grade"
+    },
     {
       "condition": "T1",
       "packet_id": "T1-dev-r1",
@@ -30,31 +87,35 @@
     {
       "condition": "G1",
       "packet_id": "G1-dev-r1",
-      "prompt_template_id": "grade_standard_v1",
+      "prompt_template_id": "grade_candidate_v4",
       "split": "development",
       "task": "grade"
     },
     {
       "condition": "G1",
       "packet_id": "G1-test-r1",
-      "prompt_template_id": "grade_standard_v1",
+      "prompt_template_id": "grade_candidate_v4",
       "split": "heldout",
       "task": "grade"
     }
   ],
   "prompt_template_hashes": {
-    "grade_standard_v1": "f8aeee5434c5db7b54f9d7b5dbb01b303bd84e48c5d4957731aeb038950953ea",
+    "grade_candidate_v4": "634c1c29b4707ba0ddda04139fdaf029f84868074cf629846c9925fcd64f1555",
     "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
   },
-  "schema_version": 1,
+  "reference_solution_path": "experiments/records/linearalgebra-quiz1-plan/reference_solution_v0.json",
+  "reference_solution_status": "course_owner_confirmed",
+  "rubric_path": "experiments/records/linearalgebra-quiz1-plan/rubric_v0.json",
+  "rubric_status": "course_owner_confirmed_frozen_v0",
+  "schema_version": 2,
   "skill_hashes": {
-    "agents": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27",
-    "claude": "23ce24c83d68a1bcae1fa66738c8e4ad5e4db8ed79325e72ac710622effc8b27"
+    "agents": "112cd67519b8f159b0a006b97f71296666ca004ad57d1d1bf5da002e6e77076a",
+    "claude": "112cd67519b8f159b0a006b97f71296666ca004ad57d1d1bf5da002e6e77076a"
   },
   "skill_source_paths": {
     "agents": ".agents/skills/grade-homework/SKILL.md",
     "claude": ".claude/skills/grade-homework/SKILL.md"
   },
-  "skill_version_id": "skill_baseline_v1",
+  "skill_version_id": "skill_candidate_v4",
   "status": "data_inventory"
 }

@@ -7,6 +7,7 @@ PROMPT = Path("experiments/prompt_templates/grade_candidate_v3.txt")
 PROMPT_V31 = Path("experiments/prompt_templates/grade_candidate_v3_1.txt")
 PROMPT_V32 = Path("experiments/prompt_templates/grade_candidate_v3_2.txt")
 PROMPT_V33 = Path("experiments/prompt_templates/grade_candidate_v3_3.txt")
+PROMPT_V4 = Path("experiments/prompt_templates/grade_candidate_v4.txt")
 STRICT_SNAPSHOT = Path(
     "experiments/records/DSAA3071-week5-candidate-v3-dev-plan/"
     "prompts/grade_candidate_v3_strict_schema.txt"
@@ -30,18 +31,14 @@ CLAUDE_SKILL = Path(".claude/skills/grade-homework/SKILL.md")
 CLAUDE_REFERENCE = Path(".claude/skills/grade-homework/references/grading-prompt.md")
 
 QUESTION_TYPE_RULES = (
-    "`multiple_choice`: Require the selected option or an unambiguous equivalent.",
-    "`short_answer`: Combine key-term and concept evidence; exact standard-answer "
-    "wording is not required.",
-    "`calculation`: Check the final numeric or symbolic answer, units, formula "
-    "choice, substitutions, arithmetic, and physical or mathematical reasoning; "
-    "retain justified method credit when the final answer is wrong.",
-    "`algorithm`: Require a viable method plus relevant steps or relations; "
-    "award credit to valid alternatives.",
-    "`proof`: Check all required directions and logical links; a missing required "
-    "direction blocks full credit but preserves credit for each completed direction.",
-    "`essay`: Score distinct valid relevant claims; do not require fixed ordering "
-    "or standard phrasing.",
+    "`objective_selection`",
+    "`calculation`",
+    "`calculation_short_answer`",
+    "`short_answer` or `conceptual`",
+    "`algorithm` or `construction`",
+    "`proof` or `explanation`",
+    "`diagram`, `geometry`, or `representation`",
+    "`essay` or `open_response`",
 )
 
 
@@ -109,8 +106,8 @@ class CandidateV3AssetTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)
 
-    def test_all_assets_define_the_six_question_type_rules(self):
-        for path in (PROMPT, STRICT_SNAPSHOT, SKILL, REFERENCE):
+    def test_current_assets_define_cross_course_question_type_rules(self):
+        for path in (PROMPT_V4, SKILL, REFERENCE):
             text = _normalize_whitespace(path.read_text(encoding="utf-8"))
             for rule in QUESTION_TYPE_RULES:
                 with self.subTest(path=path, rule=rule):
@@ -276,8 +273,6 @@ class CandidateV3AssetTests(unittest.TestCase):
         expected = (
             PROMPT_V32,
             STRICT_SNAPSHOT_V32,
-            SKILL,
-            REFERENCE,
         )
 
         for path in expected:
@@ -351,11 +346,27 @@ class CandidateV3AssetTests(unittest.TestCase):
     def test_candidate_v33_remains_generic_and_private(self):
         combined = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in (PROMPT_V33, SKILL, REFERENCE)
+            for path in (PROMPT_V33, STRICT_SNAPSHOT_V33)
         )
 
         self.assertNotRegex(combined, r"\bS\d{3}\b")
         self.assertNotIn("DSAA3071", combined)
+
+    def test_current_assets_do_not_inherit_dsaa_specific_calibration(self):
+        combined = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (PROMPT_V4, SKILL, REFERENCE)
+        )
+
+        for phrase in (
+            "Q7 proof-locality",
+            "Q8 enumerator policy",
+            "Q9 conceptual essay policy",
+            "Church-Turing thesis",
+            "power-of-two language",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertNotIn(phrase, combined)
 
 
 if __name__ == "__main__":

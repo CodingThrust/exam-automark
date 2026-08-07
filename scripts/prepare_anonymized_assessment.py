@@ -49,6 +49,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _prepare(args)
     if args.command == "propose-grading-masks":
         return _propose_grading_masks(args)
+    if args.command == "propose-grading-masks-from-artifacts":
+        return _propose_grading_masks_from_artifacts(args)
     if args.command == "compile-approved-masks":
         return _compile_approved_masks(args)
     if args.command == "validate-review":
@@ -78,11 +80,19 @@ def _parser() -> argparse.ArgumentParser:
     )
     prepare.add_argument("--output-root", type=Path, required=True)
     prepare.add_argument(
+        "--max-render-pixels",
+        type=int,
+        default=12_000_000,
+        help=(
+            "maximum pixels per rendered page; oversized scans are "
+            "deterministically downscaled to avoid exhausting memory"
+        ),
+    )
+    prepare.add_argument(
         "--identity-redaction-rect",
         action="append",
-        required=True,
         metavar="LEFT,TOP,RIGHT,BOTTOM",
-        help="normalized identity rectangle; provide every required header mask",
+        help="normalized global identity rectangle; omit only with an all-pages-approved identity-mask layout",
     )
     prepare.add_argument("--scale", type=float, default=2.0)
 
@@ -106,6 +116,34 @@ def _parser() -> argparse.ArgumentParser:
     propose.add_argument("--scale", type=float, default=1.0)
     propose.add_argument("--min-red", type=int, default=90)
     propose.add_argument("--dominance", type=int, default=30)
+
+    propose_from_artifacts = commands.add_parser(
+        "propose-grading-masks-from-artifacts",
+        help=(
+            "privately propose grading-mark masks from a verified post-identity "
+            "anonymous render; never reopens the source assessment PDF"
+        ),
+    )
+    propose_from_artifacts.add_argument(
+        "--layout",
+        type=Path,
+        required=True,
+        help="the exact private layout bound to the anonymous render",
+    )
+    propose_from_artifacts.add_argument(
+        "--artifact-root",
+        type=Path,
+        required=True,
+        help="schema-v2 anonymous render root containing manifest/prep-metadata.json",
+    )
+    propose_from_artifacts.add_argument(
+        "--output-root",
+        type=Path,
+        required=True,
+        help="new private, versioned candidate-review output root",
+    )
+    propose_from_artifacts.add_argument("--min-red", type=int, default=90)
+    propose_from_artifacts.add_argument("--dominance", type=int, default=30)
 
     compile_masks = commands.add_parser(
         "compile-approved-masks",
@@ -153,13 +191,21 @@ def _prepare(args: argparse.Namespace) -> int:
         raise FileNotFoundError(source_pdf)
     if args.scale <= 0:
         raise ValueError("--scale must be positive")
+    if args.max_render_pixels <= 0:
+        raise ValueError("--max-render-pixels must be positive")
     if args.output_root.exists() and any(args.output_root.iterdir()):
         raise FileExistsError(
             f"output root is not empty: {args.output_root}; create a new versioned root"
         )
 
-    identity_rectangles = [_parse_rectangle(value) for value in args.identity_redaction_rect]
+    identity_rectangles = [
+        _parse_rectangle(value) for value in (args.identity_redaction_rect or [])
+    ]
     layout = load_page_layout(args.layout)
+    if not identity_rectangles and not _has_approved_identity_mask_review(layout):
+        raise ValueError(
+            "provide --identity-redaction-rect or compile an all-pages-approved identity-mask layout"
+        )
     source_hash = sha256_file(source_pdf)
     layout_hash = sha256_file(args.layout)
     render_spec = build_render_spec(
@@ -167,6 +213,7 @@ def _prepare(args: argparse.Namespace) -> int:
         layout_sha256=layout_hash,
         identity_rectangles=identity_rectangles,
         render_scale=args.scale,
+        max_render_pixels=args.max_render_pixels,
     )
     render_spec_sha256 = canonical_json_sha256(render_spec)
     with fitz.open(source_pdf) as document:
@@ -194,10 +241,17 @@ def _prepare(args: argparse.Namespace) -> int:
             source_pages = group["source_pages"]
             student_image_root = image_root / anonymous_id
             student_image_root.mkdir(parents=True, exist_ok=True)
-            images: list[Image.Image] = []
+            image_paths: list[Path] = []
             for local_page, source_page in enumerate(source_pages, start=1):
-                pixmap = document.load_page(source_page - 1).get_pixmap(
-                    matrix=fitz.Matrix(args.scale, args.scale),
+                page = document.load_page(source_page - 1)
+                effective_scale = _effective_render_scale(
+                    page_width=float(page.rect.width),
+                    page_height=float(page.rect.height),
+                    requested_scale=args.scale,
+                    max_render_pixels=args.max_render_pixels,
+                )
+                pixmap = page.get_pixmap(
+                    matrix=fitz.Matrix(effective_scale, effective_scale),
                     alpha=False,
                 )
                 image = Image.frombytes(
@@ -212,8 +266,9 @@ def _prepare(args: argparse.Namespace) -> int:
                 _apply_rectangles(image, rectangles)
                 image_path = student_image_root / f"{anonymous_id}-p{local_page:02d}.png"
                 image.save(image_path, format="PNG")
-                images.append(image)
-            _write_pdf(pdf_root / f"{anonymous_id}.pdf", images)
+                image.close()
+                image_paths.append(image_path)
+            _write_pdf(pdf_root / f"{anonymous_id}.pdf", image_paths)
 
     artifact_manifest = build_artifact_manifest(
         output_root=args.output_root,
@@ -248,6 +303,7 @@ def _prepare(args: argparse.Namespace) -> int:
         "artifact_manifest_sha256": artifact_manifest_sha256,
         "identity_redaction_rectangles": identity_rectangles,
         "render_scale": args.scale,
+        "max_render_pixels": args.max_render_pixels,
         "outputs": {
             "images": "anonymized_pages/S###/S###-pNN.png",
             "pdfs": "anonymized_pdfs/S###.pdf",
@@ -386,6 +442,120 @@ def _propose_grading_masks(args: argparse.Namespace) -> int:
     return 0
 
 
+def _propose_grading_masks_from_artifacts(args: argparse.Namespace) -> int:
+    """Detect candidate grading marks only in a verified anonymous render.
+
+    This is intentionally separate from ``propose-grading-masks``.  It prevents
+    a post-identity review from accidentally reopening the raw assessment PDF
+    or relying on a global identity rectangle when page-specific masks were
+    approved.
+    """
+
+    artifact_root = args.artifact_root.resolve()
+    prep_metadata_path = artifact_root / "manifest" / "prep-metadata.json"
+    if not prep_metadata_path.is_file():
+        raise FileNotFoundError(prep_metadata_path)
+    if args.output_root.exists() and any(args.output_root.iterdir()):
+        raise FileExistsError(
+            f"output root is not empty: {args.output_root}; create a new versioned root"
+        )
+
+    layout = load_page_layout(args.layout)
+    layout_hash = sha256_file(args.layout)
+    metadata = _load_json_object(prep_metadata_path)
+    _validate_anonymous_artifact_binding(
+        artifact_root=artifact_root,
+        layout=layout,
+        layout_hash=layout_hash,
+        metadata=metadata,
+        prep_metadata_path=prep_metadata_path,
+    )
+
+    candidates: list[dict[str, Any]] = []
+    candidate_counter = 1
+    for group in layout["page_groups"]:
+        anonymous_id = group["anonymous_id"]
+        for local_page, source_page in enumerate(group["source_pages"], start=1):
+            image_path = (
+                artifact_root
+                / "anonymized_pages"
+                / anonymous_id
+                / f"{anonymous_id}-p{local_page:02d}.png"
+            )
+            if not image_path.is_file():
+                raise FileNotFoundError(image_path)
+            with Image.open(image_path) as image:
+                rectangles = propose_red_ink_candidates(
+                    image,
+                    excluded_rectangles=[],
+                    min_red=args.min_red,
+                    dominance=args.dominance,
+                )
+            for rectangle in rectangles:
+                candidates.append(
+                    {
+                        "candidate_id": f"C{candidate_counter:04d}",
+                        "anonymous_id": anonymous_id,
+                        "source_page": source_page,
+                        "rectangles": [rectangle],
+                        "detector": "red_ink_components_v1",
+                        "confidence": 0.65,
+                        "rationale": (
+                            "red-dominant component in the post-identity anonymous "
+                            "render; whole-page grayscale sweep remains mandatory"
+                        ),
+                    }
+                )
+                candidate_counter += 1
+
+    manifest = build_candidate_manifest(
+        layout=layout,
+        layout_sha256=layout_hash,
+        candidates=candidates,
+        detector={
+            "name": "red_ink_components_v1",
+            "input_mode": "post_identity_anonymous_render",
+            "prep_metadata_sha256": sha256_file(prep_metadata_path),
+            "artifact_manifest_sha256": metadata["artifact_manifest_sha256"],
+            "min_red": args.min_red,
+            "dominance": args.dominance,
+            "limitation": (
+                "detects red-dominant pixels only; grayscale marks require the "
+                "mandatory manual page sweep"
+            ),
+        },
+    )
+    args.output_root.mkdir(parents=True, exist_ok=True)
+    manifest_path = args.output_root / "candidate-manifest.json"
+    decisions_path = args.output_root / "candidate-decisions.csv"
+    sweeps_path = args.output_root / "page-sweeps.csv"
+    write_json(manifest_path, manifest)
+    write_csv(
+        decisions_path,
+        columns=MASK_CANDIDATE_DECISION_COLUMNS,
+        rows=candidate_decision_rows(manifest),
+    )
+    write_csv(
+        sweeps_path,
+        columns=PAGE_SWEEP_COLUMNS,
+        rows=page_sweep_rows(layout),
+    )
+    print(
+        json.dumps(
+            {
+                "status": "candidates_prepared_pending_human_review",
+                "input_mode": "post_identity_anonymous_render",
+                "candidate_count": len(candidates),
+                "page_sweep_count": len(expected_review_pairs(layout)),
+                "output_root": str(args.output_root),
+                "model_run_allowed": False,
+            },
+            sort_keys=True,
+        )
+    )
+    return 0
+
+
 def _compile_approved_masks(args: argparse.Namespace) -> int:
     if args.output_layout.exists():
         raise FileExistsError(
@@ -419,6 +589,62 @@ def _compile_approved_masks(args: argparse.Namespace) -> int:
         )
     )
     return 0
+
+
+def _validate_anonymous_artifact_binding(
+    *,
+    artifact_root: Path,
+    layout: Mapping[str, Any],
+    layout_hash: str,
+    metadata: Mapping[str, Any],
+    prep_metadata_path: Path,
+) -> None:
+    """Require a schema-v2 anonymous render before reading any page PNGs."""
+
+    if metadata.get("schema_version") != 2:
+        raise ValueError("post-identity candidate detection requires schema-v2 prep metadata")
+    if metadata.get("record_type") != "anonymized_assessment_preparation":
+        raise ValueError("prep metadata has an unexpected record_type")
+    if metadata.get("assessment_id") != layout.get("assessment_id"):
+        raise ValueError("prep metadata assessment_id does not match the supplied layout")
+    if metadata.get("layout_sha256") != layout_hash:
+        raise ValueError("prep metadata does not bind to the supplied page layout")
+
+    render_spec = metadata.get("render_spec")
+    render_spec_sha256 = metadata.get("render_spec_sha256")
+    if not isinstance(render_spec, Mapping) or not isinstance(render_spec_sha256, str):
+        raise ValueError("schema-v2 prep metadata lacks a render specification")
+    if render_spec.get("layout_sha256") != layout_hash:
+        raise ValueError("render specification does not bind to the supplied page layout")
+    if canonical_json_sha256(render_spec) != render_spec_sha256:
+        raise ValueError("render specification hash does not match prep metadata")
+
+    artifact_manifest_path = _resolve_declared_output_path(
+        prep_metadata_path=prep_metadata_path,
+        relative_path=metadata.get("artifact_manifest_path"),
+        field_name="artifact_manifest_path",
+    )
+    try:
+        artifact_manifest_path.relative_to(artifact_root)
+    except ValueError as error:
+        raise ValueError("artifact manifest path escapes artifact root") from error
+    if not artifact_manifest_path.is_file():
+        raise FileNotFoundError(artifact_manifest_path)
+    artifact_manifest_sha256 = metadata.get("artifact_manifest_sha256")
+    if not isinstance(artifact_manifest_sha256, str):
+        raise ValueError("schema-v2 prep metadata lacks artifact_manifest_sha256")
+    if artifact_manifest_sha256 != sha256_file(artifact_manifest_path):
+        raise ValueError("artifact manifest does not match prep metadata")
+
+    artifact_report = validate_artifact_manifest(
+        output_root=artifact_root,
+        layout=layout,
+        manifest=_load_json_object(artifact_manifest_path),
+        render_spec_sha256=render_spec_sha256,
+    )
+    if artifact_report["status"] != "ready":
+        failed = ", ".join(artifact_report["failed_checks"])
+        raise ValueError(f"anonymous artifact validation failed: {failed}")
 
 
 def _validate_review(args: argparse.Namespace) -> int:
@@ -563,12 +789,16 @@ def _validate_render_integrity(
         )
         return {"checks": checks}
     identity_rectangles = metadata.get("identity_redaction_rectangles")
+    max_render_pixels = metadata.get("max_render_pixels")
+    if not isinstance(max_render_pixels, int) or max_render_pixels <= 0:
+        max_render_pixels = None
     try:
         expected_spec = build_render_spec(
             layout=layout,
             layout_sha256=layout_hash,
             identity_rectangles=identity_rectangles,
             render_scale=float(metadata.get("render_scale")),
+            max_render_pixels=max_render_pixels,
         )
         expected_spec_hash = canonical_json_sha256(expected_spec)
     except (TypeError, ValueError, KeyError):
@@ -683,6 +913,11 @@ def _parse_rectangle(value: str) -> dict[str, float]:
     return rectangle
 
 
+def _has_approved_identity_mask_review(layout: Mapping[str, Any]) -> bool:
+    review = layout.get("identity_mask_review")
+    return isinstance(review, Mapping) and review.get("status") == "all_pages_approved"
+
+
 def _apply_rectangles(
     image: Image.Image,
     rectangles: Sequence[Mapping[str, float]],
@@ -700,17 +935,37 @@ def _apply_rectangles(
         )
 
 
-def _write_pdf(path: Path, images: Sequence[Image.Image]) -> None:
-    if not images:
+def _effective_render_scale(
+    *,
+    page_width: float,
+    page_height: float,
+    requested_scale: float,
+    max_render_pixels: int,
+) -> float:
+    if page_width <= 0 or page_height <= 0:
+        raise ValueError("PDF page dimensions must be positive")
+    if requested_scale <= 0 or max_render_pixels <= 0:
+        raise ValueError("render scale and pixel cap must be positive")
+    requested_pixels = page_width * page_height * requested_scale * requested_scale
+    if requested_pixels <= max_render_pixels:
+        return requested_scale
+    return (max_render_pixels / (page_width * page_height)) ** 0.5
+
+
+def _write_pdf(path: Path, image_paths: Sequence[Path]) -> None:
+    if not image_paths:
         raise ValueError(f"no pages were rendered for {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    images[0].save(
-        path,
-        "PDF",
-        save_all=True,
-        append_images=list(images[1:]),
-        resolution=144,
-    )
+    document = fitz.open()
+    try:
+        for image_path in image_paths:
+            with Image.open(image_path) as image:
+                width, height = image.size
+            page = document.new_page(width=width, height=height)
+            page.insert_image(page.rect, filename=str(image_path))
+        document.save(path)
+    finally:
+        document.close()
 
 
 def _load_json_object(path: Path) -> dict[str, Any]:

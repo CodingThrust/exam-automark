@@ -78,6 +78,15 @@ def _parser() -> argparse.ArgumentParser:
     )
     prepare.add_argument("--output-root", type=Path, required=True)
     prepare.add_argument(
+        "--max-render-pixels",
+        type=int,
+        default=12_000_000,
+        help=(
+            "maximum pixels per rendered page; oversized scans are "
+            "deterministically downscaled to avoid exhausting memory"
+        ),
+    )
+    prepare.add_argument(
         "--identity-redaction-rect",
         action="append",
         metavar="LEFT,TOP,RIGHT,BOTTOM",
@@ -152,6 +161,8 @@ def _prepare(args: argparse.Namespace) -> int:
         raise FileNotFoundError(source_pdf)
     if args.scale <= 0:
         raise ValueError("--scale must be positive")
+    if args.max_render_pixels <= 0:
+        raise ValueError("--max-render-pixels must be positive")
     if args.output_root.exists() and any(args.output_root.iterdir()):
         raise FileExistsError(
             f"output root is not empty: {args.output_root}; create a new versioned root"
@@ -172,6 +183,7 @@ def _prepare(args: argparse.Namespace) -> int:
         layout_sha256=layout_hash,
         identity_rectangles=identity_rectangles,
         render_scale=args.scale,
+        max_render_pixels=args.max_render_pixels,
     )
     render_spec_sha256 = canonical_json_sha256(render_spec)
     with fitz.open(source_pdf) as document:
@@ -199,10 +211,17 @@ def _prepare(args: argparse.Namespace) -> int:
             source_pages = group["source_pages"]
             student_image_root = image_root / anonymous_id
             student_image_root.mkdir(parents=True, exist_ok=True)
-            images: list[Image.Image] = []
+            image_paths: list[Path] = []
             for local_page, source_page in enumerate(source_pages, start=1):
-                pixmap = document.load_page(source_page - 1).get_pixmap(
-                    matrix=fitz.Matrix(args.scale, args.scale),
+                page = document.load_page(source_page - 1)
+                effective_scale = _effective_render_scale(
+                    page_width=float(page.rect.width),
+                    page_height=float(page.rect.height),
+                    requested_scale=args.scale,
+                    max_render_pixels=args.max_render_pixels,
+                )
+                pixmap = page.get_pixmap(
+                    matrix=fitz.Matrix(effective_scale, effective_scale),
                     alpha=False,
                 )
                 image = Image.frombytes(
@@ -217,8 +236,9 @@ def _prepare(args: argparse.Namespace) -> int:
                 _apply_rectangles(image, rectangles)
                 image_path = student_image_root / f"{anonymous_id}-p{local_page:02d}.png"
                 image.save(image_path, format="PNG")
-                images.append(image)
-            _write_pdf(pdf_root / f"{anonymous_id}.pdf", images)
+                image.close()
+                image_paths.append(image_path)
+            _write_pdf(pdf_root / f"{anonymous_id}.pdf", image_paths)
 
     artifact_manifest = build_artifact_manifest(
         output_root=args.output_root,
@@ -253,6 +273,7 @@ def _prepare(args: argparse.Namespace) -> int:
         "artifact_manifest_sha256": artifact_manifest_sha256,
         "identity_redaction_rectangles": identity_rectangles,
         "render_scale": args.scale,
+        "max_render_pixels": args.max_render_pixels,
         "outputs": {
             "images": "anonymized_pages/S###/S###-pNN.png",
             "pdfs": "anonymized_pdfs/S###.pdf",
@@ -568,12 +589,16 @@ def _validate_render_integrity(
         )
         return {"checks": checks}
     identity_rectangles = metadata.get("identity_redaction_rectangles")
+    max_render_pixels = metadata.get("max_render_pixels")
+    if not isinstance(max_render_pixels, int) or max_render_pixels <= 0:
+        max_render_pixels = None
     try:
         expected_spec = build_render_spec(
             layout=layout,
             layout_sha256=layout_hash,
             identity_rectangles=identity_rectangles,
             render_scale=float(metadata.get("render_scale")),
+            max_render_pixels=max_render_pixels,
         )
         expected_spec_hash = canonical_json_sha256(expected_spec)
     except (TypeError, ValueError, KeyError):
@@ -710,17 +735,37 @@ def _apply_rectangles(
         )
 
 
-def _write_pdf(path: Path, images: Sequence[Image.Image]) -> None:
-    if not images:
+def _effective_render_scale(
+    *,
+    page_width: float,
+    page_height: float,
+    requested_scale: float,
+    max_render_pixels: int,
+) -> float:
+    if page_width <= 0 or page_height <= 0:
+        raise ValueError("PDF page dimensions must be positive")
+    if requested_scale <= 0 or max_render_pixels <= 0:
+        raise ValueError("render scale and pixel cap must be positive")
+    requested_pixels = page_width * page_height * requested_scale * requested_scale
+    if requested_pixels <= max_render_pixels:
+        return requested_scale
+    return (max_render_pixels / (page_width * page_height)) ** 0.5
+
+
+def _write_pdf(path: Path, image_paths: Sequence[Path]) -> None:
+    if not image_paths:
         raise ValueError(f"no pages were rendered for {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    images[0].save(
-        path,
-        "PDF",
-        save_all=True,
-        append_images=list(images[1:]),
-        resolution=144,
-    )
+    document = fitz.open()
+    try:
+        for image_path in image_paths:
+            with Image.open(image_path) as image:
+                width, height = image.size
+            page = document.new_page(width=width, height=height)
+            page.insert_image(page.rect, filename=str(image_path))
+        document.save(path)
+    finally:
+        document.close()
 
 
 def _load_json_object(path: Path) -> dict[str, Any]:

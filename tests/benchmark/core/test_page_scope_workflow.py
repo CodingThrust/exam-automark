@@ -17,6 +17,7 @@ from benchmark.core.page_scope_workflow import (
     sha256_file,
     validate_page_scope_review,
 )
+from scripts.review_page_scope_ui import PageScopeReviewStore
 
 
 REPO_ROOT = Path(__file__).parents[3]
@@ -160,6 +161,47 @@ class PageScopeWorkflowTests(unittest.TestCase):
         self.assertEqual(payload["anomaly_group_count"], 1)
         self.assertFalse(payload["model_run_allowed"])
 
+    def test_local_ui_store_serves_only_bound_anonymous_images_and_writes_decision(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest_path = _write_manifest(root)
+            review_path = root / "review.csv"
+            review_metadata_path = root / "review-metadata.json"
+            initialize_page_scope_review(
+                private_manifest_path=manifest_path,
+                expected_pages_per_group=4,
+                review_csv_path=review_path,
+                metadata_path=review_metadata_path,
+            )
+            layout_path, artifact_root = _write_bound_anonymous_artifact(root)
+            store = PageScopeReviewStore(
+                private_manifest_path=manifest_path,
+                expected_pages_per_group=4,
+                review_csv_path=review_path,
+                review_metadata_path=review_metadata_path,
+                layout_path=layout_path,
+                artifact_root=artifact_root,
+            )
+            before = store.state()
+            first_image = before["groups"][0]["images"][0]
+            served_bytes = store.image_path(first_image).read_bytes()
+            store.update(
+                {
+                    "anonymous_id": "S002",
+                    "scope_review_status": "approved_include_all",
+                    "reviewer": "course_owner",
+                    "reviewed_at": "2026-08-07T00:00:00Z",
+                    "notes": "all pages retained",
+                }
+            )
+            after = store.state()
+
+        self.assertEqual(before["summary"]["pending"], 1)
+        self.assertEqual(served_bytes, b"synthetic anonymous image")
+        self.assertEqual(
+            after["groups"][0]["scope_review_status"], "approved_include_all"
+        )
+
 
 def _manifest() -> dict[str, object]:
     return {
@@ -209,6 +251,44 @@ def _write_csv(path: Path, rows: list[dict[str, str]]) -> None:
         writer = csv.DictWriter(handle, fieldnames=PAGE_SCOPE_REVIEW_COLUMNS)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def _write_bound_anonymous_artifact(root: Path) -> tuple[Path, Path]:
+    layout = {
+        "schema_version": 1,
+        "assessment_id": "synthetic-assessment",
+        "source_sha256": "a" * 64,
+        "expected_page_count": 5,
+        "page_groups": [
+            {
+                "anonymous_id": "S002",
+                "source_pages": [1, 2, 3, 4, 5],
+                "page_masks": [],
+            }
+        ],
+        "excluded_pages": [],
+    }
+    layout_path = root / "page-layout.json"
+    layout_path.write_text(json.dumps(layout), encoding="utf-8")
+    artifact_root = root / "final-anonymous"
+    for page_number in range(1, 6):
+        image = (
+            artifact_root
+            / "anonymized_pages"
+            / "S002"
+            / f"S002-p{page_number:02d}.png"
+        )
+        image.parent.mkdir(parents=True, exist_ok=True)
+        image.write_bytes(b"synthetic anonymous image")
+    manifest_root = artifact_root / "manifest"
+    manifest_root.mkdir(parents=True, exist_ok=True)
+    (manifest_root / "prep-metadata.json").write_text(
+        json.dumps({"layout_sha256": sha256_file(layout_path)}), encoding="utf-8"
+    )
+    (manifest_root / "final-review-validation.json").write_text(
+        json.dumps({"status": "ready", "failed_checks": []}), encoding="utf-8"
+    )
+    return layout_path, artifact_root
 
 
 if __name__ == "__main__":

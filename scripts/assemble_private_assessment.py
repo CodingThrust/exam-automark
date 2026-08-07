@@ -55,13 +55,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             "--private-output-acknowledged is required because the output manifest contains raw filenames"
         )
 
-    sources = _discover_sources(args.input_root)
+    included_suffixes = _normalize_included_suffixes(args.include_suffix)
+    sources = _discover_sources(args.input_root, included_suffixes=included_suffixes)
     if not sources:
         raise ValueError("no supported source files found")
     grouped = _group_sources(sources, args.input_root, args.group_separator)
     assignment_seed = secrets.token_hex(32)
     anonymous_groups = _assign_anonymous_ids(
-        grouped, prefix=args.anonymous_id_prefix, seed=assignment_seed
+        grouped,
+        prefix=args.anonymous_id_prefix,
+        seed=assignment_seed,
+        start=args.anonymous_id_start,
     )
 
     args.output_root.mkdir(parents=True, exist_ok=True)
@@ -171,6 +175,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "separator": args.group_separator,
             "source_file_count": len(sources),
             "raw_group_count": len(anonymous_groups),
+            "included_suffixes": sorted(included_suffixes or ()),
+            "anonymous_id_start": args.anonymous_id_start,
         },
         "source_pdf": source_pdf.name,
         "source_sha256": source_sha256,
@@ -221,6 +227,12 @@ def _parser() -> argparse.ArgumentParser:
         help="Files sharing the filename-stem prefix before this separator form one group.",
     )
     parser.add_argument("--anonymous-id-prefix", default="S")
+    parser.add_argument(
+        "--anonymous-id-start",
+        type=int,
+        default=1,
+        help="positive first number for generated anonymous IDs; use a non-overlapping range for supplements",
+    )
     parser.add_argument("--expected-pages-per-group", type=int, default=4)
     parser.add_argument(
         "--private-output-acknowledged",
@@ -236,10 +248,20 @@ def _parser() -> argparse.ArgumentParser:
             "that contain ordered embedded images and no text, tables, or other content"
         ),
     )
+    parser.add_argument(
+        "--include-suffix",
+        action="append",
+        metavar="SUFFIX",
+        help="restrict assembly to one or more supported file suffixes, for example --include-suffix .docx",
+    )
     return parser
 
 
-def _discover_sources(input_root: Path) -> list[Path]:
+def _discover_sources(
+    input_root: Path,
+    *,
+    included_suffixes: set[str] | None = None,
+) -> list[Path]:
     return sorted(
         (
             path
@@ -247,6 +269,7 @@ def _discover_sources(input_root: Path) -> list[Path]:
             if path.is_file()
             and not any(part.startswith(".") for part in path.relative_to(input_root).parts)
             and path.suffix.lower() in SUPPORTED_SUFFIXES
+            and (included_suffixes is None or path.suffix.lower() in included_suffixes)
         ),
         key=lambda path: _natural_key(path.relative_to(input_root).as_posix()),
     )
@@ -274,19 +297,37 @@ def _group_sources(
 
 
 def _assign_anonymous_ids(
-    grouped: dict[str, list[Path]], *, prefix: str, seed: str
+    grouped: dict[str, list[Path]], *, prefix: str, seed: str, start: int
 ) -> list[tuple[str, str, list[Path]]]:
     if not re.fullmatch(r"[A-Za-z]+", prefix):
         raise ValueError("--anonymous-id-prefix must contain only letters")
+    if start < 1:
+        raise ValueError("--anonymous-id-start must be positive")
     ordered = sorted(
         grouped,
         key=lambda key: hashlib.sha256(f"{seed}|{key}".encode("utf-8")).hexdigest(),
     )
-    width = max(3, len(str(len(ordered))))
+    width = max(3, len(str(start + len(ordered) - 1)))
     return [
         (f"{prefix}{index:0{width}d}", key, grouped[key])
-        for index, key in enumerate(ordered, start=1)
+        for index, key in enumerate(ordered, start=start)
     ]
+
+
+def _normalize_included_suffixes(values: Sequence[str] | None) -> set[str] | None:
+    if not values:
+        return None
+    normalized = {
+        value.strip().lower() if value.strip().startswith(".") else f".{value.strip().lower()}"
+        for value in values
+        if value.strip()
+    }
+    if not normalized:
+        raise ValueError("--include-suffix must contain at least one non-empty suffix")
+    unsupported = normalized - SUPPORTED_SUFFIXES
+    if unsupported:
+        raise ValueError(f"unsupported --include-suffix values: {sorted(unsupported)}")
+    return normalized
 
 
 def _convert_group(

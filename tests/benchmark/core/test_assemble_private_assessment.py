@@ -167,6 +167,46 @@ class AssemblePrivateAssessmentTests(unittest.TestCase):
             private_manifest["blocked_groups"][0]["reason"], "conversion_failed_docx"
         )
 
+    def test_docx_supplement_can_use_an_isolated_source_filter_and_id_range(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_root = root / "submissions"
+            input_root.mkdir()
+            _write_image(input_root / "alice_1.jpg", (255, 0, 0))
+            _write_image_only_docx(input_root / "bob_1.docx", [(0, 255, 0)])
+            output_root = root / "private-output"
+
+            with redirect_stdout(io.StringIO()):
+                result = main(
+                    [
+                        "--input-root",
+                        str(input_root),
+                        "--assessment-id",
+                        "synthetic_quiz",
+                        "--output-root",
+                        str(output_root),
+                        "--group-separator",
+                        "_",
+                        "--private-output-acknowledged",
+                        "--docx-policy",
+                        "embedded_images",
+                        "--include-suffix",
+                        ".docx",
+                        "--anonymous-id-start",
+                        "43",
+                    ]
+                )
+
+            layout = json.loads((output_root / "page-layout.json").read_text())
+            private_manifest = json.loads(
+                (output_root / "private-source-manifest.json").read_text()
+            )
+
+        self.assertEqual(result, 0)
+        self.assertEqual([group["anonymous_id"] for group in layout["page_groups"]], ["S043"])
+        self.assertEqual(layout["expected_page_count"], 1)
+        self.assertEqual(private_manifest["grouping"]["included_suffixes"], [".docx"])
+
     def test_requires_explicit_private_output_acknowledgement(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

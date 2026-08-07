@@ -74,6 +74,6 @@
   "reference_solution_status": "course_owner_confirmed_rubric_frozen_v0",
   "score_step": 1,
   "score_unit": "points",
-  "source_status": "assessment_extracted_needs_reference_solution_and_rubric",
+  "source_status": "course_owner_confirmed_reference_solution_and_rubric_frozen_v0",
   "time_limit_minutes": 50
 }

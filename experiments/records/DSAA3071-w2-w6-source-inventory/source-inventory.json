@@ -114,6 +114,103 @@
       "model_run_allowed": false
     }
   ],
+  "structure_audit": {
+    "audit_date": "2026-08-02",
+    "audit_scope": "Public-safe page-structure evidence only. The audit records page numbers and question metadata, never student identities, answer text, grades, or images.",
+    "method": [
+      "Verified each raw-PDF and official-solution-PDF SHA-256 against this inventory.",
+      "Counted source pages and visually checked page footers and page order in the private source PDFs.",
+      "Did not run any model, construct a prompt packet, or claim a scoring result."
+    ],
+    "weeks": [
+      {
+        "week": 2,
+        "status": "provisional_manual_pairing_required",
+        "source_page_count": 92,
+        "core_answer_group_count": 23,
+        "core_answer_pages_per_group": 3,
+        "core_answer_page_groups": [
+          [1, 2, 3],
+          [5, 6, 11],
+          [7, 8, 9],
+          [13, 14, 15],
+          [17, 18, 19],
+          [21, 22, 23],
+          [25, 26, 27],
+          [29, 30, 31],
+          [33, 34, 35],
+          [37, 38, 39],
+          [41, 42, 43],
+          [45, 46, 47],
+          [49, 50, 51],
+          [53, 54, 55],
+          [57, 58, 59],
+          [61, 62, 63],
+          [65, 66, 67],
+          [69, 70, 71],
+          [73, 74, 75],
+          [77, 78, 79],
+          [81, 82, 83],
+          [85, 86, 87],
+          [89, 90, 91]
+        ],
+        "blank_or_separator_pages": [4, 10, 12, 24, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 92],
+        "unresolved_private_layout_items": {
+          "non_contiguous_group_requiring_private_confirmation": [5, 6, 11],
+          "nonempty_attachment_candidate_pages_requiring_ownership_and_scope_confirmation": [16, 20, 28, 32, 88]
+        },
+        "model_run_allowed": false
+      },
+      {
+        "week": 4,
+        "status": "structure_verified_private_v0_prepared_pending_human_review",
+        "source_page_count": 90,
+        "complete_answer_group_count": 22,
+        "answer_pages_per_group": 3,
+        "answer_group_pattern": {
+          "first_group": [3, 4, 5],
+          "last_group": [87, 88, 89],
+          "start_page": 3,
+          "group_stride": 4
+        },
+        "permanently_excluded_pages": {
+          "private_roster_or_total_score_sheet": [1],
+          "verified_blank_or_separator_pages": [2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 66, 70, 74, 78, 82, 86, 90]
+        },
+        "private_v0_preparation": {
+          "anonymous_answer_images": 66,
+          "anonymous_student_pdfs": 22,
+          "header_identity_mask_applied": true,
+          "all_privacy_blindness_and_content_reviews_pending": true
+        },
+        "model_run_allowed": false
+      },
+      {
+        "week": 6,
+        "status": "structure_verified_private_v0_prepared_pending_human_review",
+        "source_page_count": 86,
+        "complete_answer_group_count": 21,
+        "answer_pages_per_group": 3,
+        "answer_group_pattern": {
+          "first_group": [3, 4, 5],
+          "last_group": [83, 84, 85],
+          "start_page": 3,
+          "group_stride": 4
+        },
+        "permanently_excluded_pages": {
+          "private_roster_or_total_score_sheet": [1],
+          "verified_blank_or_separator_pages": [2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 66, 70, 74, 78, 82, 86]
+        },
+        "private_v0_preparation": {
+          "anonymous_answer_images": 63,
+          "anonymous_student_pdfs": 21,
+          "header_identity_mask_applied": true,
+          "all_privacy_blindness_and_content_reviews_pending": true
+        },
+        "model_run_allowed": false
+      }
+    ]
+  },
   "out_of_scope_notes": [
     "Data/DSAA3073/week2-test-sol.pdf remains outside this DSAA3071 inventory because it is not one of the user-confirmed DSAA3071 W2/W3/W4/W6 source pairs.",
     "The raw student-answer PDFs likely include names or student IDs and must be anonymized before prompt packet construction.",

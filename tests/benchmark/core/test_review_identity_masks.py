@@ -9,6 +9,7 @@ from PIL import Image, ImageDraw
 from scripts.review_identity_masks import (
     IdentityMaskReviewStore,
     REVIEW_COLUMNS,
+    _HTML,
     compile_review,
     initialize_review,
 )
@@ -138,6 +139,13 @@ class IdentityMaskReviewTests(unittest.TestCase):
         self.assertEqual(layout["page_groups"][0]["page_masks"], [])
         self.assertEqual(layout["identity_mask_review"]["masked_page_count"], 0)
         self.assertEqual(layout["identity_mask_review"]["no_identity_page_count"], 1)
+
+    def test_reviewer_ui_keeps_geometry_suggestions_out_of_saved_masks(self):
+        self.assertIn("Grey dashed boxes are untrusted geometry suggestions only", _HTML)
+        self.assertIn("for(const r of page().proposed_rectangles)addBox(r,'proposal')", _HTML)
+        self.assertIn("draft=JSON.parse(JSON.stringify(p.approved_rectangles))", _HTML)
+        self.assertIn("Undo last red mask", _HTML)
+        self.assertIn("e.preventDefault();start=point(e)", _HTML)
 
 
 def _write_layout(root: Path) -> Path:

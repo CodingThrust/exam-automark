@@ -48,10 +48,19 @@ from .readiness import (
     write_readiness_json,
     write_readiness_markdown,
 )
+from .route_lineage import check_m1_t1_g1_lineage, write_route_lineage_report
 from .rubrics import validate_concept_rubric
 from .reporting import write_typst_note
 from .schema import CourseSpec
 from .skill_snapshots import build_skill_snapshot, write_skill_snapshot
+from .submission_snapshot_packets import (
+    SubmissionSnapshotPacketSpec,
+    build_submission_snapshot_packet,
+)
+from .submission_snapshot_routes import (
+    MatchedImageRouteSpec,
+    build_matched_image_route_packets,
+)
 from .transcripts import validate_transcript_source, write_transcript_report
 
 
@@ -78,6 +87,56 @@ def _build_parser() -> argparse.ArgumentParser:
         default=[],
         metavar="KEY=VALUE",
         help="optional packet metadata; may be provided multiple times",
+    )
+
+    snapshot_packet = subparsers.add_parser(
+        "build-submission-snapshot-packet",
+        help=(
+            "build a packet from a final-approved anonymous submission snapshot "
+            "without inferring page order from directories"
+        ),
+    )
+    snapshot_packet.add_argument("--course", type=Path, required=True)
+    snapshot_packet.add_argument("--packet-id", required=True)
+    snapshot_packet.add_argument("--condition", required=True)
+    snapshot_packet.add_argument(
+        "--task", choices=("transcribe", "grade"), required=True
+    )
+    snapshot_packet.add_argument("--prompt", type=Path, required=True)
+    snapshot_packet.add_argument("--rubric", type=Path)
+    snapshot_packet.add_argument("--student-id", action="append", dest="student_ids")
+    snapshot_packet.add_argument("--students-file", type=Path)
+    snapshot_packet.add_argument("--snapshot-root", type=Path, required=True)
+    snapshot_packet.add_argument("--output-root", type=Path, required=True)
+    snapshot_packet.add_argument(
+        "--metadata",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="optional packet metadata; may be provided multiple times",
+    )
+
+    matched_routes = subparsers.add_parser(
+        "build-matched-image-route-packets",
+        help="build and validate matched M1 direct-image and T1 transcription packets",
+    )
+    matched_routes.add_argument("--course", type=Path, required=True)
+    matched_routes.add_argument("--snapshot-root", type=Path, required=True)
+    matched_routes.add_argument("--output-root", type=Path, required=True)
+    matched_routes.add_argument("--split", required=True)
+    matched_routes.add_argument("--student-id", action="append", dest="student_ids")
+    matched_routes.add_argument("--students-file", type=Path)
+    matched_routes.add_argument("--m1-packet-id", required=True)
+    matched_routes.add_argument("--t1-packet-id", required=True)
+    matched_routes.add_argument("--grade-prompt", type=Path, required=True)
+    matched_routes.add_argument("--transcribe-prompt", type=Path, required=True)
+    matched_routes.add_argument("--rubric", type=Path, required=True)
+    matched_routes.add_argument(
+        "--metadata",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="optional shared packet metadata; may be provided multiple times",
     )
 
     text_packet = subparsers.add_parser(
@@ -182,6 +241,16 @@ def _build_parser() -> argparse.ArgumentParser:
     readiness.add_argument("--repo-root", type=Path)
     readiness.add_argument("--output", type=Path)
     readiness.add_argument("--markdown-output", type=Path)
+
+    lineage = subparsers.add_parser(
+        "check-route-lineage",
+        help="verify matched M1 direct-image and T1-to-G1 transcription route bindings",
+    )
+    lineage.add_argument("--m1-packet", type=Path, required=True)
+    lineage.add_argument("--t1-packet", type=Path, required=True)
+    lineage.add_argument("--g1-packet", type=Path)
+    lineage.add_argument("--t1-run", type=Path)
+    lineage.add_argument("--output", type=Path)
 
     ablation = subparsers.add_parser(
         "check-ablation-readiness",
@@ -398,6 +467,24 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             )
             return 0
+        if args.command == "build-submission-snapshot-packet":
+            result = _build_submission_snapshot_packet(args)
+            print(
+                json.dumps(
+                    {
+                        "packet_path": str(result.packet_path),
+                        "packet_id": result.manifest["packet_id"],
+                        "packet_hash": result.packet_hash,
+                        "manifest": result.manifest,
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
+        if args.command == "build-matched-image-route-packets":
+            result = _build_matched_image_route_packets(args)
+            print(json.dumps(result, sort_keys=True))
+            return 0
         if args.command == "build-text-grading-packet":
             result = _build_text_grading_packet(args)
             print(
@@ -550,6 +637,29 @@ def main(argv: Sequence[str] | None = None) -> int:
                             if args.markdown_output is not None
                             else None
                         ),
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0 if report["status"] == "ready" else 1
+        if args.command == "check-route-lineage":
+            report = check_m1_t1_g1_lineage(
+                m1_packet=args.m1_packet,
+                t1_packet=args.t1_packet,
+                g1_packet=args.g1_packet,
+                t1_run=args.t1_run,
+            )
+            if args.output is not None:
+                write_route_lineage_report(report, args.output)
+            print(
+                json.dumps(
+                    {
+                        "status": report["status"],
+                        "stage": report["stage"],
+                        "student_count": report["student_count"],
+                        "failed_checks": report["failed_checks"],
+                        "model_run_allowed": report["model_run_allowed"],
+                        "output": str(args.output) if args.output is not None else None,
                     },
                     sort_keys=True,
                 )
@@ -908,6 +1018,51 @@ def _build_packet(args: argparse.Namespace) -> Any:
             input_root=args.input_root,
             output_root=args.output_root,
             rubric=rubric,
+            metadata=_parse_metadata(args.metadata),
+        )
+    )
+
+
+def _build_submission_snapshot_packet(args: argparse.Namespace) -> Any:
+    course = CourseSpec.from_json_path(args.course)
+    rubric = None
+    if args.rubric is not None:
+        rubric = _read_json(args.rubric)
+    elif args.task == "grade":
+        raise ValueError("--rubric is required for grade packets")
+
+    student_ids = _load_student_ids(args.student_ids, args.students_file)
+    return build_submission_snapshot_packet(
+        SubmissionSnapshotPacketSpec(
+            course=course,
+            packet_id=args.packet_id,
+            condition=args.condition,
+            task=args.task,
+            prompt_text=args.prompt.read_text(encoding="utf-8"),
+            student_ids=tuple(student_ids),
+            snapshot_root=args.snapshot_root,
+            output_root=args.output_root,
+            rubric=rubric,
+            metadata=_parse_metadata(args.metadata),
+        )
+    )
+
+
+def _build_matched_image_route_packets(args: argparse.Namespace) -> Any:
+    course = CourseSpec.from_json_path(args.course)
+    student_ids = _load_student_ids(args.student_ids, args.students_file)
+    return build_matched_image_route_packets(
+        MatchedImageRouteSpec(
+            course=course,
+            snapshot_root=args.snapshot_root,
+            output_root=args.output_root,
+            split=args.split,
+            student_ids=tuple(student_ids),
+            m1_packet_id=args.m1_packet_id,
+            t1_packet_id=args.t1_packet_id,
+            grade_prompt_text=args.grade_prompt.read_text(encoding="utf-8"),
+            transcribe_prompt_text=args.transcribe_prompt.read_text(encoding="utf-8"),
+            rubric=_read_json(args.rubric),
             metadata=_parse_metadata(args.metadata),
         )
     )

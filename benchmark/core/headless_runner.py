@@ -345,6 +345,7 @@ def _run_student(
                         attempt_prompt,
                         student_id=student_id,
                         course=course,
+                        task="grade",
                     )
             else:
                 response = _complete_with_headless_cli(

@@ -42,7 +42,8 @@
     "Raw local submission filenames may contain student identifiers; no prompt packet may use the raw tree.",
     "The base anonymous cohort has completed private privacy/blindness/content review. Its five anomalous page-count groups now have manifest-bound human submission-scope decisions, including a reviewed duplicate-page exclusion and an explicit missing-question flag. The local image snapshot preserves variable page counts and requires every student's ordered pages to be treated as one grading unit; it is not a model packet or run approval.",
     "The separately isolated DOCX supplement completed final review. Its original assessment identifier differed from the base source, so the course owner confirmed same-assessment identity through a private hash-bound alignment decision; the sources are now a unified model-blocked cohort of 43 anonymous submissions and 173 approved images.",
-    "The anonymous 30/13 development/held-out split is frozen. A private question-level gold table is initialized for human development-set entry; held-out gold remains unentered and no packet or model run exists."
+    "The anonymous 30/13 development/held-out split is frozen. A private question-level gold table is initialized for human development-set entry; held-out gold remains unentered and no packet or model run exists.",
+    "Public route automation now builds manifest-bound matched M1 direct-image and T1 transcription packets, validates their lineage, and binds a later G1 packet to a successful T1 run. This code is ready for the human-gold gate but has not built a real packet or authorized a model."
   ],
   "planned_conditions": [
     {

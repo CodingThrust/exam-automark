@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Merge final-approved anonymous submission snapshots without model access."""
+"""Create a hash-bound private assessment-identity alignment decision."""
 
 import argparse
 import json
@@ -13,7 +13,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from benchmark.core.anonymous_cohort_snapshot import (  # noqa: E402
-    merge_anonymous_submission_image_snapshots,
+    create_assessment_identity_alignment,
 )
 from benchmark.core.submission_scope_workflow import SubmissionScopeError  # noqa: E402
 
@@ -21,37 +21,34 @@ from benchmark.core.submission_scope_workflow import SubmissionScopeError  # noq
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Merge final-approved anonymous submission snapshots into one private cohort. "
-            "This never invokes or authorizes a grading model."
+            "Record a private, hash-bound course-owner confirmation that independently "
+            "frozen submission snapshots belong to one assessment. This never invokes "
+            "or authorizes a grading model."
         )
     )
+    parser.add_argument("--snapshot-root", type=Path, action="append", required=True)
     parser.add_argument(
-        "--snapshot-root",
+        "--canonical-snapshot-root",
         type=Path,
-        action="append",
         required=True,
-        help="one private submission-snapshot root; repeat for every source",
+        help="declared source whose assessment_id becomes the cohort target",
     )
-    parser.add_argument("--cohort-id", required=True)
-    parser.add_argument("--output-root", type=Path, required=True)
-    parser.add_argument(
-        "--assessment-alignment",
-        type=Path,
-        help=(
-            "private hash-bound course-owner decision required only when source "
-            "snapshots have different assessment identifiers"
-        ),
-    )
+    parser.add_argument("--reviewer", required=True)
+    parser.add_argument("--reviewed-at", required=True)
+    parser.add_argument("--reason", required=True)
+    parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--private-output-acknowledged", action="store_true")
     args = parser.parse_args(argv)
     if not args.private_output_acknowledged:
         parser.error("--private-output-acknowledged is required")
     try:
-        result = merge_anonymous_submission_image_snapshots(
+        result = create_assessment_identity_alignment(
             snapshot_roots=args.snapshot_root,
-            cohort_id=args.cohort_id,
-            output_root=args.output_root,
-            assessment_alignment_path=args.assessment_alignment,
+            canonical_snapshot_root=args.canonical_snapshot_root,
+            reviewer=args.reviewer,
+            reviewed_at=args.reviewed_at,
+            reason=args.reason,
+            output_path=args.output,
         )
     except (OSError, ValueError, SubmissionScopeError, json.JSONDecodeError) as error:
         parser.error(str(error))

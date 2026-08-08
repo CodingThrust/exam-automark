@@ -6,6 +6,7 @@ from pathlib import Path
 from benchmark.core.anonymization import sha256_file, write_json
 from benchmark.core.anonymous_cohort_snapshot import (
     COHORT_SNAPSHOT_MANIFEST_RELATIVE_PATH,
+    create_assessment_identity_alignment,
     merge_anonymous_submission_image_snapshots,
 )
 from benchmark.core.submission_scope_workflow import (
@@ -109,6 +110,80 @@ class AnonymousCohortSnapshotTests(unittest.TestCase):
                     snapshot_roots=[first, second],
                     cohort_id="all-submissions-v1",
                     output_root=private_root / "cohort",
+                )
+
+    def test_hash_bound_alignment_allows_confirmed_assessment_identity(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            private_root = Path(tmp) / "Data" / "synthetic"
+            first = _make_submission_snapshot(
+                private_root / "first",
+                scope_id="base-v1",
+                submissions={"S001": [1, 2, 3, 4]},
+            )
+            second = _make_submission_snapshot(
+                private_root / "second",
+                scope_id="supplement-v1",
+                submissions={"S002": [1, 2, 3, 4]},
+                assessment_id="supplement_label",
+            )
+            alignment = private_root / "alignment" / "decision.json"
+            created = create_assessment_identity_alignment(
+                snapshot_roots=[first, second],
+                canonical_snapshot_root=first,
+                reviewer="course_owner",
+                reviewed_at="2026-08-08T12:00:00Z",
+                reason="Course owner confirmed that both sources are Quiz 1.",
+                output_path=alignment,
+            )
+            self.assertEqual(created["status"], "created")
+            result = merge_anonymous_submission_image_snapshots(
+                snapshot_roots=[first, second],
+                cohort_id="all-submissions-v1",
+                output_root=private_root / "cohort",
+                assessment_alignment_path=alignment,
+            )
+            self.assertEqual(result["status"], "built")
+            manifest = json.loads(
+                (private_root / "cohort" / COHORT_SNAPSHOT_MANIFEST_RELATIVE_PATH).read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual(manifest["assessment_id"], "synthetic_quiz")
+            self.assertIn("assessment_identity_alignment", manifest)
+
+    def test_alignment_rejects_a_source_manifest_changed_after_confirmation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            private_root = Path(tmp) / "Data" / "synthetic"
+            first = _make_submission_snapshot(
+                private_root / "first",
+                scope_id="base-v1",
+                submissions={"S001": [1, 2, 3, 4]},
+            )
+            second = _make_submission_snapshot(
+                private_root / "second",
+                scope_id="supplement-v1",
+                submissions={"S002": [1, 2, 3, 4]},
+                assessment_id="supplement_label",
+            )
+            alignment = private_root / "alignment" / "decision.json"
+            create_assessment_identity_alignment(
+                snapshot_roots=[first, second],
+                canonical_snapshot_root=first,
+                reviewer="course_owner",
+                reviewed_at="2026-08-08T12:00:00Z",
+                reason="Course owner confirmed that both sources are Quiz 1.",
+                output_path=alignment,
+            )
+            manifest_path = second / SUBMISSION_SNAPSHOT_MANIFEST_RELATIVE_PATH
+            changed = json.loads(manifest_path.read_text(encoding="utf-8"))
+            changed["source_provenance"] = {"fixture": "changed-after-confirmation"}
+            write_json(manifest_path, changed)
+            with self.assertRaisesRegex(SubmissionScopeError, "does not bind exactly"):
+                merge_anonymous_submission_image_snapshots(
+                    snapshot_roots=[first, second],
+                    cohort_id="all-submissions-v1",
+                    output_root=private_root / "cohort",
+                    assessment_alignment_path=alignment,
                 )
 
     def test_rejects_tampered_source_image_before_copying(self):

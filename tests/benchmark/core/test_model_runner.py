@@ -156,6 +156,8 @@ class ModelPacketRunnerTests(unittest.TestCase):
                         "json_object",
                         "--max-retries",
                         "1",
+                        "--run-id",
+                        "G1-dev-r1",
                         "--dry-run",
                     ]
                 )
@@ -175,6 +177,7 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertTrue(metadata["dry_run"])
         self.assertEqual(metadata["input_mode"], "text-only")
         self.assertEqual(metadata["max_retries"], 1)
+        self.assertEqual(metadata["run_id"], "G1-dev-r1")
         self.assertEqual(validation["students_passed"], 1)
         self.assertEqual(response["student_id"], "S001")
         self.assertIn("run-model-packet", command)

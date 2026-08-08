@@ -94,6 +94,7 @@ class RouteLineageTests(unittest.TestCase):
                         "course_id": "dsaa3073",
                         "assessment_id": "hw1",
                         "data_snapshot_hash": "a" * 64,
+                        "run_id": "t1-dev-r1",
                     },
                     sort_keys=True,
                 ),
@@ -114,7 +115,6 @@ class RouteLineageTests(unittest.TestCase):
                         )
                     ),
                     text_source_kind="transcript",
-                    source_run_id="t1-dev-r1",
                     metadata={},
                 )
             )

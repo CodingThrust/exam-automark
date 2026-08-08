@@ -76,10 +76,10 @@ python -m benchmark.core.cli check-route-lineage `
   --output Data/<course>/<private-packets>/development/m1-t1-lineage.json
 ```
 
-After the separate development-run approval, run T1 in `multimodal` mode.
-Build G1 from the completed T1 `outputs/` directory; the command below rejects
-a failed or mismatched adjacent T1 run and automatically records its packet and
-snapshot hashes.
+After the separate development-run approval, run T1 in `multimodal` mode and
+give it a stable `--run-id T1-dev-r1`. Build G1 from the completed T1
+`outputs/` directory; the command below rejects a failed or mismatched adjacent
+T1 run and automatically inherits its run ID, packet hash, and snapshot hash.
 
 ```powershell
 # Provider/model values are intentionally omitted until the explicit approval.
@@ -93,7 +93,6 @@ python -m benchmark.core.cli build-text-grading-packet `
   --transcript-source Data/<course>/<private-runs>/T1-dev-r1/outputs `
   --output-root Data/<course>/<private-packets>/development `
   --text-source-kind automatic_transcript `
-  --source-run-id T1-dev-r1 `
   --metadata split=development `
   --metadata skill_version_id=skill_candidate_v5
 

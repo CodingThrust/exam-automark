@@ -227,6 +227,7 @@ def build_text_grading_packet(spec: TextGradingPacketSpec) -> PromptPacketResult
     _write_json(packet_path / "rubric.json", spec.rubric)
 
     metadata = dict(spec.metadata)
+    effective_source_run_id = spec.source_run_id
     run_lineage = _load_transcription_run_lineage(
         transcript_source=spec.transcript_source, course=spec.course
     )
@@ -241,10 +242,15 @@ def build_text_grading_packet(spec: TextGradingPacketSpec) -> PromptPacketResult
             "input_snapshot_manifest_sha256",
             run_lineage["data_snapshot_hash"],
         )
+        inherited_run_id = run_lineage.get("run_id")
+        if inherited_run_id is not None:
+            if effective_source_run_id is not None and effective_source_run_id != inherited_run_id:
+                raise ValueError("source_run_id conflicts with adjacent transcription run")
+            effective_source_run_id = inherited_run_id
     metadata.update(
         {
             "input_mode": "text-only",
-            "source_run_id": spec.source_run_id,
+            "source_run_id": effective_source_run_id,
             "text_source_hash": directory_digest(packet_path / "inputs"),
             "text_source_input_hashes": source_hashes,
             "text_source_kind": spec.text_source_kind,
@@ -456,7 +462,7 @@ def _read_transcript_payload(
 
 def _load_transcription_run_lineage(
     *, transcript_source: Path, course: CourseSpec
-) -> dict[str, str] | None:
+) -> dict[str, str | None] | None:
     """Load an adjacent completed T1 run when ``outputs/`` is its source.
 
     This makes the G1 packet copy its source packet and snapshot bindings from
@@ -484,9 +490,13 @@ def _load_transcription_run_lineage(
     snapshot_hash = payload.get("data_snapshot_hash")
     if not _is_sha256(packet_hash) or not _is_sha256(snapshot_hash):
         raise ValueError("adjacent transcription run has invalid packet or snapshot hash")
+    run_id = payload.get("run_id")
+    if run_id is not None and (not isinstance(run_id, str) or not run_id.strip()):
+        raise ValueError("adjacent transcription run has an invalid run_id")
     return {
         "packet_hash": packet_hash,
         "data_snapshot_hash": snapshot_hash,
+        "run_id": run_id,
     }
 
 

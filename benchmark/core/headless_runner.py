@@ -99,6 +99,7 @@ class HeadlessPacketRunConfig:
     dry_run: bool = False
     command_argv: tuple[str, ...] = ()
     run_commit: str | None = None
+    run_id: str | None = None
     experiment_condition: str | None = None
 
 
@@ -756,6 +757,7 @@ def _metadata(
         "text_source_hash": directory_digest(config.packet / "inputs"),
         "student_ids": list(manifest.get("student_ids", ())),
         "run_commit": config.run_commit or _git_commit(),
+        "run_id": config.run_id,
         "api_key_source": f"{config.engine}_cli_external_auth",
         "engine_binary": config.engine_bin or _default_engine_binary(config.engine),
         "engine_version": None if config.dry_run else _engine_version(config),

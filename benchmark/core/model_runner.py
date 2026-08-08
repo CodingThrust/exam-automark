@@ -67,6 +67,7 @@ class ModelPacketRunConfig:
     dry_run: bool = False
     command_argv: tuple[str, ...] = ()
     run_commit: str | None = None
+    run_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -845,6 +846,7 @@ def _metadata(
         "text_source_hash": directory_digest(packet / "inputs"),
         "student_ids": list(manifest.get("student_ids", ())),
         "run_commit": config.run_commit or _git_commit(),
+        "run_id": config.run_id,
         "api_key_source": (
             f"{_provider_settings(config.provider)['api_key_env']} environment variable"
         ),
@@ -874,6 +876,8 @@ def _write_command_records(output: Path, config: ModelPacketRunConfig) -> str:
             "--output",
             str(config.output),
         ]
+        if config.run_id is not None:
+            argv.extend(["--run-id", config.run_id])
     command = "python -m benchmark.core.cli " + shlex.join(argv)
     _write_json(output / "command.argv.json", argv)
     (output / "command.txt").write_text(command + "\n", encoding="utf-8", newline="\n")

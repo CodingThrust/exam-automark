@@ -340,6 +340,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run_model.add_argument("--response-format", default="json_object")
     run_model.add_argument("--endpoint")
     run_model.add_argument("--run-commit")
+    run_model.add_argument("--run-id")
     run_model.add_argument(
         "--dry-run",
         action="store_true",
@@ -359,6 +360,7 @@ def _build_parser() -> argparse.ArgumentParser:
     headless.add_argument("--max-retries", type=int, default=0)
     headless.add_argument("--timeout-seconds", type=int, default=600)
     headless.add_argument("--run-commit")
+    headless.add_argument("--run-id")
     headless.add_argument("--experiment-condition")
     headless.add_argument(
         "--dry-run",
@@ -802,6 +804,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     dry_run=args.dry_run,
                     command_argv=raw_argv,
                     run_commit=args.run_commit,
+                    run_id=args.run_id,
                 )
             )
             print(json.dumps(result, sort_keys=True))
@@ -820,6 +823,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     dry_run=args.dry_run,
                     command_argv=raw_argv,
                     run_commit=args.run_commit,
+                    run_id=args.run_id,
                     experiment_condition=args.experiment_condition,
                 )
             )

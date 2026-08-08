@@ -11,7 +11,7 @@ from .schema import CourseSpec
 from .skill_snapshots import SkillSnapshot
 
 
-PLAN_STATUSES = {"planned", "data_inventory", "packets_built", "blocked"}
+PLAN_STATUSES = {"planned", "data_inventory", "cohort_scoped", "packets_built", "blocked"}
 PACKET_TASKS = {"transcribe", "grade"}
 SAFE_PACKET_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 

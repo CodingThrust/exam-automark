@@ -2,16 +2,17 @@
   "assessment_id": "quiz1",
   "course_id": "linearalgebra",
   "candidate_skill_policy": {
-    "candidate_skill_snapshot_path": "experiments/skill_versions/skill_candidate_v4.json",
-    "candidate_skill_version": "skill_candidate_v4",
+    "candidate_skill_snapshot_path": "experiments/skill_versions/skill_candidate_v5.json",
+    "candidate_skill_version": "skill_candidate_v5",
     "course_specific_rules_allowed": false,
-    "description": "Candidate v4 is a cross-course evidence-first skill. Assessment answers, score allocations, question types, answer-only limits, and local grading requirements remain in the frozen course specification and rubric.",
-    "status": "candidate_v4_frozen_pending_development_evaluation"
+    "description": "Candidate v5 is a cross-course evidence-first skill. It assembles every ordered page for one anonymous student before question-level scoring and forbids page-level marks. Assessment answers, score allocations, question types, answer-only limits, missing-work policy, and local grading requirements remain in the frozen course specification and rubric.",
+    "status": "candidate_v5_frozen_pending_development_evaluation"
   },
   "course_spec_path": "experiments/course_specs/linearalgebra_quiz1.json",
   "completed_gates": [
     "course-owner-approved reference solution and rubric",
-    "base anonymous cohort privacy, blindness, and answer-preservation review"
+    "base anonymous cohort privacy, blindness, and answer-preservation review",
+    "base-cohort anonymous-submission scope resolution and image snapshot"
   ],
   "data_inventory_path": "experiments/data_inventory/linearalgebra.json",
   "data_snapshot_hash": "bc8cc94a7a2e0e4cfb700e14d1322d089a788e09eb78c9580e9fcf4a72a02eba",
@@ -20,10 +21,10 @@
   "git_commit": "945774a",
   "gates_before_model_run": [
     "course-owner-approved reference solution and rubric",
-    "page-count scope decisions for every anomalous included submission group",
+    "manifest-bound submission-scope decisions for every anomalous included submission group",
     "question-level development gold",
     "anonymous page-level privacy, blindness, and answer-preservation approvals for every included cohort member",
-    "private anonymous-cohort preflight binding final approvals and page-count scope decisions",
+    "private variable-page submission snapshot binding final approvals and scope decisions",
     "frozen development/held-out split",
     "matched M1, T1, and G1 packet manifests and lineage validation",
     "pinned provider/model configuration and explicit development-run approval"
@@ -36,7 +37,7 @@
     "No instructor-provided official solution or pre-existing human scores were available. The course owner has adjudicated the reference solution, rubric, and partial-credit policy; question-level human gold remains pending.",
     "M1 direct multimodal grading and T1-to-G1 transcription-first grading will be compared only on matched anonymous inputs.",
     "Raw local submission filenames may contain student identifiers; no prompt packet may use the raw tree.",
-    "The base anonymous cohort has completed private privacy/blindness/content review. Its five anomalous page-count groups have a private manifest-bound ownership worksheet. Ownership confirmation alone does not freeze a cohort: every nonstandard group still needs a corrected layout or explicitly supported variable-page scope. A generic cohort preflight validates this dependency and its hash will be recorded in the eventual scoped snapshot.",
+    "The base anonymous cohort has completed private privacy/blindness/content review. Its five anomalous page-count groups now have manifest-bound human submission-scope decisions, including a reviewed duplicate-page exclusion and an explicit missing-question flag. The local image snapshot preserves variable page counts and requires every student's ordered pages to be treated as one grading unit; it is not a model packet or run approval.",
     "A separately isolated image-only DOCX supplement is assembled but must complete identity, grading-mark, and final answer-preservation review before it can join a frozen cohort."
   ],
   "planned_conditions": [
@@ -60,14 +61,14 @@
     {
       "condition": "M1",
       "packet_id": "M1-dev-r1",
-      "prompt_template_id": "grade_candidate_v4",
+      "prompt_template_id": "grade_candidate_v5",
       "split": "development",
       "task": "grade"
     },
     {
       "condition": "M1",
       "packet_id": "M1-test-r1",
-      "prompt_template_id": "grade_candidate_v4",
+      "prompt_template_id": "grade_candidate_v5",
       "split": "heldout",
       "task": "grade"
     },
@@ -88,20 +89,20 @@
     {
       "condition": "G1",
       "packet_id": "G1-dev-r1",
-      "prompt_template_id": "grade_candidate_v4",
+      "prompt_template_id": "grade_candidate_v5",
       "split": "development",
       "task": "grade"
     },
     {
       "condition": "G1",
       "packet_id": "G1-test-r1",
-      "prompt_template_id": "grade_candidate_v4",
+      "prompt_template_id": "grade_candidate_v5",
       "split": "heldout",
       "task": "grade"
     }
   ],
   "prompt_template_hashes": {
-    "grade_candidate_v4": "634c1c29b4707ba0ddda04139fdaf029f84868074cf629846c9925fcd64f1555",
+    "grade_candidate_v5": "7c1e9d715628b06e9740eb945fe311e458307346c0ec047e13e0cbfc2c2801f8",
     "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
   },
   "reference_solution_path": "experiments/records/linearalgebra-quiz1-plan/reference_solution_v0.json",
@@ -110,13 +111,13 @@
   "rubric_status": "course_owner_confirmed_frozen_v0",
   "schema_version": 2,
   "skill_hashes": {
-    "agents": "112cd67519b8f159b0a006b97f71296666ca004ad57d1d1bf5da002e6e77076a",
-    "claude": "112cd67519b8f159b0a006b97f71296666ca004ad57d1d1bf5da002e6e77076a"
+    "agents": "7b1f3c02aede473187e39a215390249bce3b107282db5d99739ff85dbc91a38f",
+    "claude": "7b1f3c02aede473187e39a215390249bce3b107282db5d99739ff85dbc91a38f"
   },
   "skill_source_paths": {
     "agents": ".agents/skills/grade-homework/SKILL.md",
     "claude": ".claude/skills/grade-homework/SKILL.md"
   },
-  "skill_version_id": "skill_candidate_v4",
-  "status": "data_inventory"
+  "skill_version_id": "skill_candidate_v5",
+  "status": "cohort_scoped"
 }

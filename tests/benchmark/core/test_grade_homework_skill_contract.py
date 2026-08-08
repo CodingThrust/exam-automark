@@ -4,7 +4,7 @@ from pathlib import Path
 
 AGENT_SKILL = Path(".agents/skills/grade-homework")
 CLAUDE_SKILL = Path(".claude/skills/grade-homework")
-CURRENT_PROMPT = Path("experiments/prompt_templates/grade_candidate_v4.txt")
+CURRENT_PROMPT = Path("experiments/prompt_templates/grade_candidate_v5.txt")
 
 
 class GradeHomeworkSkillContractTests(unittest.TestCase):
@@ -57,6 +57,8 @@ class GradeHomeworkSkillContractTests(unittest.TestCase):
             "second pass",
             "true/false",
             "answer-only allocation",
+            "entire anonymous submission",
+            "page-level marks",
         ):
             with self.subTest(safeguard=safeguard):
                 self.assertIn(safeguard, text)

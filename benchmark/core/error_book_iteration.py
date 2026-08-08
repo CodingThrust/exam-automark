@@ -308,14 +308,16 @@ def _validate_registry_entry(
     if entry.get("predecessor_skill_version_id") != expected_predecessor:
         findings.append(f"{label}: predecessor does not match registry order")
     evaluation_status = entry.get("evaluation_status", "evaluated")
-    if evaluation_status not in {"evaluated", "pending"}:
+    if evaluation_status not in {"evaluated", "pending", "superseded_pending"}:
         findings.append(f"{label}: invalid evaluation_status")
-    is_pending = evaluation_status == "pending"
+    is_pending = evaluation_status in {"pending", "superseded_pending"}
     if is_pending:
         if expected_predecessor is None:
             findings.append(f"{label}: the baseline cannot be pending")
-        if not is_active:
+        if evaluation_status == "pending" and not is_active:
             findings.append(f"{label}: only the active skill may be pending")
+        if evaluation_status == "superseded_pending" and is_active:
+            findings.append(f"{label}: a superseded pending skill cannot be active")
         if not isinstance(entry.get("pending_reason"), str) or not entry.get(
             "pending_reason"
         ).strip():

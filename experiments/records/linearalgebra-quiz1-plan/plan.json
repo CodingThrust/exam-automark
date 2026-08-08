@@ -12,7 +12,10 @@
   "completed_gates": [
     "course-owner-approved reference solution and rubric",
     "base anonymous cohort privacy, blindness, and answer-preservation review",
-    "base-cohort anonymous-submission scope resolution and image snapshot"
+    "base-cohort anonymous-submission scope resolution and image snapshot",
+    "isolated DOCX supplement privacy, blindness, grading-mark, and answer-preservation review",
+    "course-owner-confirmed identity alignment and final-approved unified anonymous cohort snapshot",
+    "frozen 30/13 anonymous development/held-out split"
   ],
   "data_inventory_path": "experiments/data_inventory/linearalgebra.json",
   "data_snapshot_hash": "bc8cc94a7a2e0e4cfb700e14d1322d089a788e09eb78c9580e9fcf4a72a02eba",
@@ -38,7 +41,8 @@
     "M1 direct multimodal grading and T1-to-G1 transcription-first grading will be compared only on matched anonymous inputs.",
     "Raw local submission filenames may contain student identifiers; no prompt packet may use the raw tree.",
     "The base anonymous cohort has completed private privacy/blindness/content review. Its five anomalous page-count groups now have manifest-bound human submission-scope decisions, including a reviewed duplicate-page exclusion and an explicit missing-question flag. The local image snapshot preserves variable page counts and requires every student's ordered pages to be treated as one grading unit; it is not a model packet or run approval.",
-    "A separately isolated image-only DOCX supplement is assembled but must complete identity, grading-mark, and final answer-preservation review before it can join a frozen cohort."
+    "The separately isolated DOCX supplement completed final review. Its original assessment identifier differed from the base source, so the course owner confirmed same-assessment identity through a private hash-bound alignment decision; the sources are now a unified model-blocked cohort of 43 anonymous submissions and 173 approved images.",
+    "The anonymous 30/13 development/held-out split is frozen. A private question-level gold table is initialized for human development-set entry; held-out gold remains unentered and no packet or model run exists."
   ],
   "planned_conditions": [
     {

@@ -24,16 +24,29 @@ class CohortPreflightTests(unittest.TestCase):
         self.assertIn("anomalous_page_scope_review_ready", report["failed_checks"])
         self.assertFalse(report["model_run_allowed"])
 
-    def test_approved_page_scope_enables_preflight_but_not_model_run(self):
+    def test_approved_page_ownership_still_requires_nonstandard_layout_resolution(self):
         with tempfile.TemporaryDirectory() as tmp:
             paths = _make_inputs(Path(tmp))
             _approve_scope(paths["review_csv"])
             report = _build(paths)
 
-        self.assertEqual(report["status"], "ready")
+        self.assertEqual(report["status"], "not_ready")
         self.assertEqual(report["anonymous_page_count"], 5)
         self.assertFalse(report["model_run_allowed"])
         self.assertIn("private_manifest_sha256", report["bindings"])
+        self.assertIn(
+            "cohort_layout_has_no_unreassembled_page_count_anomalies",
+            report["failed_checks"],
+        )
+
+    def test_standard_page_count_cohort_can_pass_preflight_without_model_permission(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = _make_inputs(Path(tmp), anomalous=False)
+            report = _build(paths)
+
+        self.assertEqual(report["status"], "ready")
+        self.assertEqual(report["anonymous_page_count"], 4)
+        self.assertFalse(report["model_run_allowed"])
 
     def test_changed_layout_breaks_preparation_binding(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -62,7 +75,8 @@ def _build(paths: dict[str, Path]) -> dict[str, object]:
     )
 
 
-def _make_inputs(root: Path) -> dict[str, Path]:
+def _make_inputs(root: Path, *, anomalous: bool = True) -> dict[str, Path]:
+    page_count = 5 if anomalous else 4
     manifest = {
         "schema_version": 1,
         "record_type": "private_mixed_submission_assembly",
@@ -71,8 +85,10 @@ def _make_inputs(root: Path) -> dict[str, Path]:
             {
                 "anonymous_id": "S001",
                 "status": "converted_pending_page_review",
-                "rendered_page_count": 5,
-                "page_count_status": "requires_page_scope_review",
+                "rendered_page_count": page_count,
+                "page_count_status": (
+                    "requires_page_scope_review" if anomalous else "matches_expected"
+                ),
             }
         ],
     }
@@ -90,9 +106,13 @@ def _make_inputs(root: Path) -> dict[str, Path]:
         "schema_version": 1,
         "assessment_id": "synthetic",
         "source_sha256": "a" * 64,
-        "expected_page_count": 5,
+        "expected_page_count": page_count,
         "page_groups": [
-            {"anonymous_id": "S001", "source_pages": [1, 2, 3, 4, 5], "page_masks": []}
+            {
+                "anonymous_id": "S001",
+                "source_pages": list(range(1, page_count + 1)),
+                "page_masks": [],
+            }
         ],
         "excluded_pages": [],
     }
@@ -118,8 +138,8 @@ def _make_inputs(root: Path) -> dict[str, Path]:
             {
                 "status": "ready",
                 "failed_checks": [],
-                "expected_page_count": 5,
-                "review_row_count": 5,
+                "expected_page_count": page_count,
+                "review_row_count": page_count,
             }
         ),
         encoding="utf-8",

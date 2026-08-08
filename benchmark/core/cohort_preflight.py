@@ -105,6 +105,17 @@ def build_anonymous_cohort_preflight(
         "all anomalous page-count groups have approved include-all decisions",
         "anomalous page-count review is incomplete or requires a corrected assembly/layout",
     )
+    _check(
+        checks,
+        "cohort_layout_has_no_unreassembled_page_count_anomalies",
+        page_scope.get("anomaly_group_count") == 0,
+        "the cohort layout has no remaining nonstandard page-count groups",
+        (
+            "page ownership decisions are not a substitute for a corrected layout: "
+            "a nonstandard page-count group still requires reassembly or an explicitly "
+            "supported variable-page scope before cohort freeze"
+        ),
+    )
     failed = [check["id"] for check in checks if check["status"] == "failed"]
     return {
         "schema_version": COHORT_PREFLIGHT_SCHEMA_VERSION,

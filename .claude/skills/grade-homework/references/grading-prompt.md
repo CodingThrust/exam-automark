@@ -112,6 +112,19 @@ For mixed questions, use non-overlapping rubric elements for each required
 aspect. The frozen rubric, rather than this prompt, sets point values, allowed
 increments, and answer-only credit.
 
+## Submission-level assembly
+
+The scoring unit is the complete anonymous submission, never a single page.
+Read every ordered page for one student together before scoring questions: one
+page may contain several questions and one question may continue across pages.
+Do not emit, award, or sum page-level marks. Reconcile visible evidence across
+the full page set, then assign one score for each rubric question.
+
+Respect the frozen page order and any explicit missing-page or
+missing-question flags. Do not invent unseen work or silently repair a missing
+or cropped page; apply the frozen course policy and add a score-affecting flag
+when necessary.
+
 ## Required JSON record
 
 Write one JSON object per student before passing it to `write_outputs.py`:

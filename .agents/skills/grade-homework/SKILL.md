@@ -166,6 +166,21 @@ for each required aspect rather than forcing it into a narrower legacy label.
 The type controls what evidence is relevant; the frozen rubric controls points,
 score increments, and any answer-only allocation.
 
+### Submission-level assembly
+
+The grading unit is the entire anonymous submission, not an individual page.
+Before scoring any question, assemble and read every ordered page assigned to
+that student. A page may contain evidence for several questions, and evidence
+for one question may continue across pages. Do not award, emit, or sum
+page-level marks. Instead, reconcile all visible evidence for each question
+across the student's complete supplied page set, then assign that question's
+single rubric score.
+
+Respect the packet's frozen page order and any explicit missing-page or
+missing-question flags. Do not infer absent work from a neighboring page or
+silently repair a missing/cropped page. Use the course-frozen missing-work rule
+and flag any score-affecting uncertainty for review.
+
 Freeze the grading protocol before student grading starts:
 
 - page ordering for solutions and each student submission

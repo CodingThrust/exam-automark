@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "active_skill_version_id": "skill_candidate_v4",
+  "active_skill_version_id": "skill_candidate_v5",
   "policy": {
     "required_for_every_skill_update": true,
     "required_regressions_for_future_skill_updates": true,
@@ -60,8 +60,8 @@
     {
       "skill_version_id": "skill_candidate_v4",
       "predecessor_skill_version_id": "skill_candidate_v3_2",
-      "evaluation_status": "pending",
-      "pending_reason": "The cross-course v4 skill and prompt have not been evaluated against a course-specific frozen development gold yet. No accuracy or error-reduction claim is made.",
+      "evaluation_status": "superseded_pending",
+      "pending_reason": "The cross-course v4 skill and prompt were superseded before evaluation against a course-specific frozen development gold. No accuracy or error-reduction claim is made.",
       "pending_gates": [
         "anonymous page-level privacy, blindness, and answer-preservation approvals",
         "frozen development/held-out split and question-level development gold",
@@ -72,6 +72,23 @@
       "skill_canonical_hash": "112cd67519b8f159b0a006b97f71296666ca004ad57d1d1bf5da002e6e77076a",
       "note_en": "Candidate-v4 is a pending cross-course skill revision. It is registered for reproducibility but must not be represented as evaluated until the stated development gates and error-book review are complete.",
       "note_zh": "Candidate-v4 是待评测的跨课程 skill 修订版：已登记以保证可复现，但在开发集门禁和错题册审查完成前，不得宣称其准确率或改进效果。"
+    },
+    {
+      "skill_version_id": "skill_candidate_v5",
+      "predecessor_skill_version_id": "skill_candidate_v4",
+      "evaluation_status": "pending",
+      "pending_reason": "Candidate-v5 adds a generic submission-level assembly rule: all ordered pages for one anonymous student must be considered together before question-level scoring. It has not been evaluated against frozen Linear Algebra development gold, so no accuracy or error-reduction claim is made.",
+      "pending_gates": [
+        "complete approved anonymous cohort, including any intended supplement",
+        "frozen development/held-out split and question-level development gold",
+        "matched M1 direct-multimodal and T1-to-G1 packet manifests with submission-level page grouping",
+        "explicit model-run approval",
+        "development error-book, confidence audit, and iteration-delta review"
+      ],
+      "skill_snapshot": "experiments/skill_versions/skill_candidate_v5.json",
+      "skill_canonical_hash": "7b1f3c02aede473187e39a215390249bce3b107282db5d99739ff85dbc91a38f",
+      "note_en": "Candidate-v5 is a pending cross-course skill revision. It registers whole-submission rather than page-level grading for reproducibility, but must not be represented as evaluated until its stated development gates and error-book review are complete.",
+      "note_zh": "Candidate-v5 是待评测的跨课程 skill 修订版：它将评分单位固定为整份匿名提交而非单页；在完成既定开发集门禁和错题复审前，不得宣称其准确率或改进效果。"
     }
   ]
 }

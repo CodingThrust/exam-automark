@@ -80,8 +80,9 @@ def page_scope_review_rows(
             "reviewer": "",
             "reviewed_at": "",
             "notes": (
-                "confirm all rendered pages belong in the assessment; use "
-                "requires_correction if any page must be removed or reordered"
+                "confirm whether every displayed page belongs to this same submission; "
+                "use requires_correction for a missing page, duplicate, separator, "
+                "unrelated page, or any nonstandard continuation that needs a revised layout"
             ),
         }
         for anonymous_id, rendered_page_count in anomalies
@@ -289,7 +290,10 @@ def validate_page_scope_review(
         checks,
         "all_anomalies_approved_include_all",
         correction_rows == 0,
-        "all anomalous groups are approved to retain every rendered page",
+        (
+            "all anomalous groups record that every displayed page belongs to the "
+            "same submission; nonstandard page counts still need cohort-scope handling"
+        ),
         (
             f"{correction_rows} group(s) require a new corrected assembly or "
             "page layout before cohort freeze"

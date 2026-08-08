@@ -93,8 +93,47 @@ class ScopedAnonymousImageSnapshotTests(unittest.TestCase):
                 _build(paths, target)
             self.assertEqual(selected.read_bytes(), b"tampered output")
 
+    def test_records_ready_cohort_preflight_in_snapshot_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            paths = _make_approved_artifact(root)
+            preflight = _write_ready_cohort_preflight(paths)
+            target = root / "private" / "artifacts" / "scoped"
 
-def _build(paths: dict[str, Path], target: Path) -> dict[str, object]:
+            _build(paths, target, cohort_preflight_path=preflight)
+            manifest = json.loads(
+                (target / SNAPSHOT_MANIFEST_RELATIVE_PATH).read_text(encoding="utf-8")
+            )
+            preflight_sha256 = sha256_file(preflight)
+
+        self.assertEqual(
+            manifest["source_provenance"]["cohort_preflight_sha256"],
+            preflight_sha256,
+        )
+
+    def test_refuses_nonready_cohort_preflight(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            paths = _make_approved_artifact(root)
+            preflight = _write_ready_cohort_preflight(paths)
+            payload = json.loads(preflight.read_text(encoding="utf-8"))
+            payload["status"] = "not_ready"
+            preflight.write_text(json.dumps(payload), encoding="utf-8")
+
+            with self.assertRaisesRegex(ScopedSnapshotError, "preflight report is not ready"):
+                _build(
+                    paths,
+                    root / "private" / "artifacts" / "scoped",
+                    cohort_preflight_path=preflight,
+                )
+
+
+def _build(
+    paths: dict[str, Path],
+    target: Path,
+    *,
+    cohort_preflight_path: Path | None = None,
+) -> dict[str, object]:
     return build_scoped_anonymous_image_snapshot(
         artifact_root=paths["artifact_root"],
         final_review_path=paths["review_path"],
@@ -102,6 +141,7 @@ def _build(paths: dict[str, Path], target: Path) -> dict[str, object]:
         page_suffixes=("p03", "p01"),
         scope_id="mcq-q9-q10",
         output_root=target,
+        cohort_preflight_path=cohort_preflight_path,
     )
 
 
@@ -238,6 +278,29 @@ def _make_approved_artifact(
         "review_path": review_path,
         "validation_path": validation_path,
     }
+
+
+def _write_ready_cohort_preflight(paths: dict[str, Path]) -> Path:
+    metadata_path = paths["artifact_root"] / "manifest" / "prep-metadata.json"
+    preflight = paths["artifact_root"].parent / "cohort-preflight.json"
+    preflight.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "record_type": "private_anonymous_cohort_preflight",
+                "status": "ready",
+                "failed_checks": [],
+                "assessment_id": "synthetic_scope",
+                "model_run_allowed": False,
+                "bindings": {
+                    "preparation_metadata_sha256": sha256_file(metadata_path),
+                    "final_review_validation_sha256": sha256_file(paths["validation_path"]),
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    return preflight
 
 
 def _tree_files(root: Path) -> set[str]:

@@ -8,6 +8,7 @@ PROMPT_V31 = Path("experiments/prompt_templates/grade_candidate_v3_1.txt")
 PROMPT_V32 = Path("experiments/prompt_templates/grade_candidate_v3_2.txt")
 PROMPT_V33 = Path("experiments/prompt_templates/grade_candidate_v3_3.txt")
 PROMPT_V4 = Path("experiments/prompt_templates/grade_candidate_v4.txt")
+PROMPT_V5 = Path("experiments/prompt_templates/grade_candidate_v5.txt")
 STRICT_SNAPSHOT = Path(
     "experiments/records/DSAA3071-week5-candidate-v3-dev-plan/"
     "prompts/grade_candidate_v3_strict_schema.txt"
@@ -107,7 +108,7 @@ class CandidateV3AssetTests(unittest.TestCase):
                 self.assertIn(phrase, combined)
 
     def test_current_assets_define_cross_course_question_type_rules(self):
-        for path in (PROMPT_V4, SKILL, REFERENCE):
+        for path in (PROMPT_V5, SKILL, REFERENCE):
             text = _normalize_whitespace(path.read_text(encoding="utf-8"))
             for rule in QUESTION_TYPE_RULES:
                 with self.subTest(path=path, rule=rule):
@@ -355,7 +356,7 @@ class CandidateV3AssetTests(unittest.TestCase):
     def test_current_assets_do_not_inherit_dsaa_specific_calibration(self):
         combined = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in (PROMPT_V4, SKILL, REFERENCE)
+            for path in (PROMPT_V5, SKILL, REFERENCE)
         )
 
         for phrase in (
@@ -367,6 +368,24 @@ class CandidateV3AssetTests(unittest.TestCase):
         ):
             with self.subTest(phrase=phrase):
                 self.assertNotIn(phrase, combined)
+
+    def test_current_assets_score_whole_submissions_not_individual_pages(self):
+        combined = _normalize_whitespace(
+            "\n".join(
+                path.read_text(encoding="utf-8")
+                for path in (PROMPT_V5, SKILL, REFERENCE)
+            )
+        ).lower()
+
+        for phrase in (
+            "entire anonymous submission",
+            "individual page",
+            "page-level marks",
+            "evidence for one question may continue across pages",
+            "missing-question flags",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, combined)
 
 
 if __name__ == "__main__":

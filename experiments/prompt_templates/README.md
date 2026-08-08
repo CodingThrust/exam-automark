@@ -24,7 +24,7 @@ grading experiments.
   indirect-construction rules. The current r2 prompt also adds open-ended
   adequacy so open-ended answers are scored against the task requirement rather
   than a closed standard-answer whitelist.
-- `grade_candidate_v4.txt`: current cross-course candidate. It preserves the
+- `grade_candidate_v4.txt`: historical cross-course candidate. It preserves the
   evidence-first, locality, semantic-equivalence, official-style-adequacy, and
   second-pass safeguards from the candidate line while removing inherited
   named-question and subject-specific rules. It begins with question-type
@@ -32,6 +32,13 @@ grading experiments.
   proof, construction, and diagram/representation work. Course-specific point
   values, answer-only credit, and calibration rules must remain in the frozen
   course rubric and packet.
+- `grade_candidate_v5.txt`: current cross-course candidate. It retains v4's
+  evidence-first, question-type, locality, alternative-method, and second-pass
+  safeguards while explicitly making the complete anonymous submission the
+  scoring unit: all ordered pages for one student are assembled before any
+  question is scored; a page is never graded or summed independently. Missing
+  page/question flags remain course-frozen evidence, not a license to infer
+  unseen work.
 
 When an experiment is planned, each template file is hashed into `plan.json`.
 When an experiment is run, the exact prompt text is copied into each prompt

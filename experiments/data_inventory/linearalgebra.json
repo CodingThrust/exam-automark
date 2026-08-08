@@ -37,7 +37,8 @@
     "Inventory is public-safe: raw filenames, student identifiers, answer content, and identity maps are omitted.",
     "The source consists of one four-page quiz and 135 mixed-format submission files.",
     "Five provisional groups have 3, 5, or 6 source pages and require page-level scope review after anonymization.",
-    "One DOCX submission has structural evidence of four pages; it still requires normal anonymization and answer-preservation review.",
+    "The four-page DOCX source completed normal anonymization, grading-mark review, answer-preservation review, and an auditable course-owner assessment-identity alignment before joining the anonymous cohort.",
+    "The final private cohort contains 43 anonymous submissions and 173 approved images; its 30/13 development/held-out split is frozen while development gold remains human-entered.",
     "Do not build prompt packets from the raw tree."
   ],
   "page_coverage_findings": {
@@ -64,7 +65,7 @@
   "snapshot_hash": "bc8cc94a7a2e0e4cfb700e14d1322d089a788e09eb78c9580e9fcf4a72a02eba",
   "snapshot_method": "SHA-256 of the sorted multiset of each relevant source file's content hash, byte length, and extension; raw filenames are excluded.",
   "source_root": "Data/linearalgebra",
-  "status": "source_inventory_complete_anonymization_pending",
+  "status": "source_inventory_complete_cohort_frozen_gold_pending",
   "submission_extension_counts": {
     ".docx": 1,
     ".heic": 4,

@@ -156,6 +156,8 @@ class ModelPacketRunnerTests(unittest.TestCase):
                         "json_object",
                         "--max-retries",
                         "1",
+                        "--run-id",
+                        "G1-dev-r1",
                         "--dry-run",
                     ]
                 )
@@ -175,6 +177,7 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertTrue(metadata["dry_run"])
         self.assertEqual(metadata["input_mode"], "text-only")
         self.assertEqual(metadata["max_retries"], 1)
+        self.assertEqual(metadata["run_id"], "G1-dev-r1")
         self.assertEqual(validation["students_passed"], 1)
         self.assertEqual(response["student_id"], "S001")
         self.assertIn("run-model-packet", command)
@@ -289,6 +292,86 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertEqual(usage["dry_run_image_count"], 1)
         self.assertEqual(usage["dry_run_image_bytes"], len(b"fake image"))
         self.assertEqual(response["student_id"], "S001")
+
+    def test_run_model_packet_multimodal_transcription_accepts_submission_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_root = root / "inputs"
+            student_dir = input_root / "S001"
+            pages = student_dir / "pages"
+            pages.mkdir(parents=True)
+            (pages / "p0002.jpg").write_bytes(b"first page")
+            (pages / "p0007.jpg").write_bytes(b"second page")
+            (student_dir / "submission.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "grading_unit": "anonymous_submission",
+                        "student_id": "S001",
+                        "missing_question_ids": [],
+                        "pages": [
+                            {"source_page": 2, "file": "pages/p0002.jpg"},
+                            {"source_page": 7, "file": "pages/p0007.jpg"},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            packet_root = root / "packets"
+            with contextlib.redirect_stdout(io.StringIO()):
+                build_code = main(
+                    [
+                        "build-packet",
+                        "--course",
+                        str(FIXTURES / "course_dsaa3073_hw1.json"),
+                        "--packet-id",
+                        "T1-dev-r1",
+                        "--condition",
+                        "T1",
+                        "--task",
+                        "transcribe",
+                        "--prompt",
+                        str(FIXTURES / "grade_prompt.txt"),
+                        "--student-id",
+                        "S001",
+                        "--input-root",
+                        str(input_root),
+                        "--output-root",
+                        str(packet_root),
+                    ]
+                )
+            output = root / "runs" / "kimi-T1-dev-r1"
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                run_code = main(
+                    [
+                        "run-model-packet",
+                        "--provider",
+                        "kimi",
+                        "--model",
+                        "kimi-test",
+                        "--input-mode",
+                        "multimodal",
+                        "--packet",
+                        str(packet_root / "T1-dev-r1"),
+                        "--output",
+                        str(output),
+                        "--dry-run",
+                    ]
+                )
+            response = json.loads(
+                (output / "outputs" / "S001.json").read_text(encoding="utf-8")
+            )
+            metadata = json.loads(
+                (output / "run-metadata.json").read_text(encoding="utf-8")
+            )
+
+        self.assertEqual(build_code, 0)
+        self.assertEqual(run_code, 0)
+        self.assertEqual(json.loads(stdout.getvalue())["validation_status"], "passed")
+        self.assertIn("answers", response)
+        self.assertNotIn("scores", response)
+        self.assertEqual(metadata["task"], "transcribe")
 
     def test_run_model_packet_multimodal_rejects_pdf_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:

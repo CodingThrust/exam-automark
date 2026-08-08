@@ -227,10 +227,30 @@ def build_text_grading_packet(spec: TextGradingPacketSpec) -> PromptPacketResult
     _write_json(packet_path / "rubric.json", spec.rubric)
 
     metadata = dict(spec.metadata)
+    effective_source_run_id = spec.source_run_id
+    run_lineage = _load_transcription_run_lineage(
+        transcript_source=spec.transcript_source, course=spec.course
+    )
+    if run_lineage is not None:
+        _bind_metadata_value(
+            metadata,
+            "source_transcription_packet_hash",
+            run_lineage["packet_hash"],
+        )
+        _bind_metadata_value(
+            metadata,
+            "input_snapshot_manifest_sha256",
+            run_lineage["data_snapshot_hash"],
+        )
+        inherited_run_id = run_lineage.get("run_id")
+        if inherited_run_id is not None:
+            if effective_source_run_id is not None and effective_source_run_id != inherited_run_id:
+                raise ValueError("source_run_id conflicts with adjacent transcription run")
+            effective_source_run_id = inherited_run_id
     metadata.update(
         {
             "input_mode": "text-only",
-            "source_run_id": spec.source_run_id,
+            "source_run_id": effective_source_run_id,
             "text_source_hash": directory_digest(packet_path / "inputs"),
             "text_source_input_hashes": source_hashes,
             "text_source_kind": spec.text_source_kind,
@@ -438,6 +458,59 @@ def _read_transcript_payload(
             for answer in answers
         ],
     }
+
+
+def _load_transcription_run_lineage(
+    *, transcript_source: Path, course: CourseSpec
+) -> dict[str, str | None] | None:
+    """Load an adjacent completed T1 run when ``outputs/`` is its source.
+
+    This makes the G1 packet copy its source packet and snapshot bindings from
+    T1 rather than trusting manually repeated metadata.  Generic transcript
+    sources remain supported when they are not model-run output directories.
+    """
+
+    metadata_path = transcript_source.parent / "run-metadata.json"
+    if not metadata_path.is_file():
+        return None
+    try:
+        payload = json.loads(metadata_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError("adjacent transcription run metadata is unreadable") from error
+    if not isinstance(payload, dict):
+        raise ValueError("adjacent transcription run metadata must be an object")
+    if (
+        payload.get("task") != "transcribe"
+        or payload.get("validation_status") != "passed"
+        or payload.get("course_id") != course.course_id
+        or payload.get("assessment_id") != course.assessment_id
+    ):
+        raise ValueError("adjacent run is not a successful matching transcription run")
+    packet_hash = payload.get("packet_hash")
+    snapshot_hash = payload.get("data_snapshot_hash")
+    if not _is_sha256(packet_hash) or not _is_sha256(snapshot_hash):
+        raise ValueError("adjacent transcription run has invalid packet or snapshot hash")
+    run_id = payload.get("run_id")
+    if run_id is not None and (not isinstance(run_id, str) or not run_id.strip()):
+        raise ValueError("adjacent transcription run has an invalid run_id")
+    return {
+        "packet_hash": packet_hash,
+        "data_snapshot_hash": snapshot_hash,
+        "run_id": run_id,
+    }
+
+
+def _bind_metadata_value(metadata: dict[str, Any], key: str, value: str) -> None:
+    existing = metadata.get(key)
+    if existing is not None and existing != value:
+        raise ValueError(f"packet metadata {key} conflicts with transcription run")
+    metadata[key] = value
+
+
+def _is_sha256(value: object) -> bool:
+    return isinstance(value, str) and len(value) == 64 and all(
+        character in "0123456789abcdef" for character in value
+    )
 
 
 def _write_json(path: Path, payload: Any) -> None:

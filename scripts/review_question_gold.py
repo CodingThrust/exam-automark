@@ -33,12 +33,21 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from benchmark.core.anonymization import sha256_file  # noqa: E402
+from benchmark.core.anonymous_cohort_snapshot import (  # noqa: E402
+    COHORT_SNAPSHOT_MANIFEST_RELATIVE_PATH,
+    COHORT_SNAPSHOT_RECORD_TYPE,
+)
 from benchmark.core.readiness_scaffolding import GOLD_TEMPLATE_COLUMNS  # noqa: E402
 from benchmark.core.schema import CourseSpec, QuestionSpec  # noqa: E402
 from benchmark.core.scoped_anonymous_images import (  # noqa: E402
     SNAPSHOT_MANIFEST_RELATIVE_PATH,
     SNAPSHOT_RECORD_TYPE,
     SNAPSHOT_SCHEMA_VERSION,
+)
+from benchmark.core.submission_scope_workflow import (  # noqa: E402
+    SUBMISSION_SCOPE_SCHEMA_VERSION,
+    SUBMISSION_SNAPSHOT_MANIFEST_RELATIVE_PATH,
+    SUBMISSION_SNAPSHOT_RECORD_TYPE,
 )
 
 
@@ -50,6 +59,11 @@ _SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 _MAX_NOTE_LENGTH = 2_000
 _MAX_REVIEWER_LENGTH = 120
 _MAX_TIMESTAMP_LENGTH = 100
+_SUPPORTED_SNAPSHOT_MANIFESTS = {
+    SNAPSHOT_RECORD_TYPE: SNAPSHOT_MANIFEST_RELATIVE_PATH,
+    SUBMISSION_SNAPSHOT_RECORD_TYPE: SUBMISSION_SNAPSHOT_MANIFEST_RELATIVE_PATH,
+    COHORT_SNAPSHOT_RECORD_TYPE: COHORT_SNAPSHOT_MANIFEST_RELATIVE_PATH,
+}
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -70,8 +84,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         type=Path,
         required=True,
         help=(
-            "private approved scoped-image snapshot root, containing "
-            "manifest/scoped-anonymous-image-snapshot.json"
+            "private final-approved anonymous snapshot root (legacy scoped, "
+            "submission-level, or cohort-level)"
         ),
     )
     parser.add_argument(
@@ -161,8 +175,10 @@ class GoldReviewStore:
 
         self._course_payload = _load_json_object(self.course_path, "course specification")
         self.course = CourseSpec.from_dict(self._course_payload)
-        self._page_questions = _load_page_question_mapping(
-            self._course_payload, self.course
+        self._page_questions = (
+            _load_page_question_mapping(self._course_payload, self.course)
+            if "page_mapping" in self._course_payload
+            else {}
         )
         self._binding = _load_reviewer_binding(
             self.binding_path,
@@ -513,20 +529,31 @@ def _load_scoped_snapshot(
     binding: "GoldReviewerBinding",
 ) -> dict[str, tuple[dict[str, Any], ...]]:
     manifest_path = _require_regular_file(
-        root / SNAPSHOT_MANIFEST_RELATIVE_PATH, "scoped snapshot manifest"
+        root / binding.snapshot_manifest_relative_path, "approved snapshot manifest"
     )
-    manifest = _load_json_object(manifest_path, "scoped snapshot manifest")
-    if manifest.get("schema_version") != SNAPSHOT_SCHEMA_VERSION:
-        raise ValueError("scoped snapshot manifest has an unsupported schema version")
-    if manifest.get("record_type") != SNAPSHOT_RECORD_TYPE:
-        raise ValueError("scoped snapshot manifest has an unexpected record type")
+    manifest = _load_json_object(manifest_path, "approved snapshot manifest")
+    if manifest.get("record_type") != binding.snapshot_record_type:
+        raise ValueError("approved snapshot record_type does not match the reviewer binding")
     if manifest.get("assessment_id") != binding.scoped_snapshot_assessment_id:
         raise ValueError(
-            "scoped snapshot assessment_id does not match the exact ID declared by "
+            "approved snapshot assessment_id does not match the exact ID declared by "
             "the reviewer binding"
         )
     if manifest.get("model_run_allowed") is not False:
-        raise ValueError("gold review requires a model-free scoped image snapshot")
+        raise ValueError("gold review requires a model-free anonymous image snapshot")
+    if binding.snapshot_record_type in {
+        SUBMISSION_SNAPSHOT_RECORD_TYPE,
+        COHORT_SNAPSHOT_RECORD_TYPE,
+    }:
+        if manifest.get("schema_version") != SUBMISSION_SCOPE_SCHEMA_VERSION:
+            raise ValueError("submission snapshot manifest has an unsupported schema version")
+        return _load_submission_level_snapshot(root, course, manifest)
+    if manifest.get("schema_version") != SNAPSHOT_SCHEMA_VERSION:
+        raise ValueError("scoped snapshot manifest has an unsupported schema version")
+    if binding.snapshot_record_type != SNAPSHOT_RECORD_TYPE:
+        raise ValueError("reviewer binding declares an unsupported snapshot record type")
+    if not page_questions:
+        raise ValueError("legacy scoped snapshots require a course page_mapping")
     scope = manifest.get("scope")
     if not isinstance(scope, Mapping):
         raise ValueError("scoped snapshot manifest must contain a scope object")
@@ -617,10 +644,97 @@ def _load_scoped_snapshot(
     }
 
 
+def _load_submission_level_snapshot(
+    root: Path, course: CourseSpec, manifest: Mapping[str, Any]
+) -> dict[str, tuple[dict[str, Any], ...]]:
+    """Load ordered whole-submission images without imposing a page-to-question map."""
+
+    if manifest.get("grading_unit") != "anonymous_submission":
+        raise ValueError("submission snapshot must use anonymous_submission grading")
+    raw_submissions = manifest.get("submissions")
+    if not isinstance(raw_submissions, list) or not raw_submissions:
+        raise ValueError("submission snapshot must contain anonymous submission entries")
+    by_student: dict[str, tuple[dict[str, Any], ...]] = {}
+    seen_images: set[str] = set()
+    image_count = 0
+    for index, submission in enumerate(raw_submissions, start=1):
+        if not isinstance(submission, Mapping):
+            raise ValueError(f"submission snapshot entry {index} must be an object")
+        anonymous_id = submission.get("anonymous_id")
+        if not isinstance(anonymous_id, str) or anonymous_id in by_student:
+            raise ValueError("submission snapshot has a duplicate or missing anonymous ID")
+        try:
+            course.validate_student_id(anonymous_id)
+        except ValueError as error:
+            raise ValueError("submission snapshot has an invalid anonymous ID") from error
+        if submission.get("grading_unit") != "anonymous_submission":
+            raise ValueError("submission snapshot entry must use anonymous_submission grading")
+        raw_images = submission.get("images")
+        if not isinstance(raw_images, list) or not raw_images:
+            raise ValueError("submission snapshot entry must contain ordered images")
+        pages: list[dict[str, Any]] = []
+        previous_source_page = 0
+        for image_index, entry in enumerate(raw_images, start=1):
+            if not isinstance(entry, Mapping):
+                raise ValueError("submission snapshot image entry must be an object")
+            source_page = entry.get("source_page")
+            if (
+                type(source_page) is not int
+                or source_page < 1
+                or source_page <= previous_source_page
+            ):
+                raise ValueError("submission snapshot source pages must be positive and ordered")
+            previous_source_page = source_page
+            relative_path = entry.get("snapshot_image")
+            if not isinstance(relative_path, str):
+                raise ValueError("submission snapshot image entry has no snapshot_image")
+            expected_suffix = f"p{source_page:02d}"
+            if relative_path in seen_images:
+                raise ValueError("submission snapshot has a duplicate image path")
+            seen_images.add(relative_path)
+            try:
+                image_path = _scoped_regular_image_file(root, relative_path)
+            except ValueError as error:
+                raise ValueError("submission snapshot image entry is missing or unsafe") from error
+            expected_bytes = entry.get("bytes")
+            expected_sha256 = entry.get("sha256")
+            if (
+                isinstance(expected_bytes, bool)
+                or not isinstance(expected_bytes, int)
+                or expected_bytes < 1
+                or not isinstance(expected_sha256, str)
+                or not _SHA256_PATTERN.fullmatch(expected_sha256)
+                or image_path.stat().st_size != expected_bytes
+                or sha256_file(image_path) != expected_sha256
+            ):
+                raise ValueError("submission snapshot image entry fails its integrity check")
+            pages.append(
+                {
+                    "page_suffix": expected_suffix,
+                    "image_path": relative_path,
+                    "question_ids": [],
+                    "page_label": (
+                        f"Source page {source_page} — ordered whole-submission evidence; "
+                        "no fixed question-to-page mapping"
+                    ),
+                }
+            )
+            image_count += 1
+        by_student[anonymous_id] = tuple(pages)
+    if (
+        manifest.get("student_count") != len(by_student)
+        or manifest.get("image_count") != image_count
+    ):
+        raise ValueError("submission snapshot student/image count does not match its entries")
+    return dict(sorted(by_student.items()))
+
+
 @dataclass(frozen=True)
 class GoldReviewerBinding:
     scoped_snapshot_assessment_id: str
     scoped_snapshot_manifest_sha256: str
+    snapshot_manifest_relative_path: Path
+    snapshot_record_type: str
 
 
 def _load_reviewer_binding(
@@ -639,7 +753,8 @@ def _load_reviewer_binding(
     """
 
     payload = _load_json_object(path, "reviewer binding")
-    if payload.get("schema_version") != 1:
+    schema_version = payload.get("schema_version")
+    if schema_version not in {1, 2}:
         raise ValueError("reviewer binding has an unsupported schema version")
     if payload.get("record_type") != "question_gold_reviewer_binding":
         raise ValueError("reviewer binding has an unexpected record type")
@@ -663,8 +778,23 @@ def _load_reviewer_binding(
         declared_manifest_sha256
     ):
         raise ValueError("reviewer binding scoped_snapshot_manifest_sha256 is invalid")
+    if schema_version == 1:
+        snapshot_record_type = SNAPSHOT_RECORD_TYPE
+        manifest_relative_path = SNAPSHOT_MANIFEST_RELATIVE_PATH
+    else:
+        snapshot_record_type = payload.get("snapshot_record_type")
+        if snapshot_record_type not in _SUPPORTED_SNAPSHOT_MANIFESTS:
+            raise ValueError("reviewer binding snapshot_record_type is unsupported")
+        raw_relative_path = payload.get("snapshot_manifest_relative_path")
+        expected_relative_path = _SUPPORTED_SNAPSHOT_MANIFESTS[snapshot_record_type]
+        if raw_relative_path != expected_relative_path.as_posix():
+            raise ValueError(
+                "reviewer binding snapshot_manifest_relative_path is not canonical "
+                "for its record type"
+            )
+        manifest_relative_path = expected_relative_path
     manifest_path = _require_regular_file(
-        scoped_image_root / SNAPSHOT_MANIFEST_RELATIVE_PATH, "scoped snapshot manifest"
+        scoped_image_root / manifest_relative_path, "approved snapshot manifest"
     )
     if sha256_file(manifest_path) != declared_manifest_sha256:
         raise ValueError(
@@ -674,6 +804,8 @@ def _load_reviewer_binding(
     return GoldReviewerBinding(
         scoped_snapshot_assessment_id=snapshot_assessment_id,
         scoped_snapshot_manifest_sha256=declared_manifest_sha256,
+        snapshot_manifest_relative_path=manifest_relative_path,
+        snapshot_record_type=snapshot_record_type,
     )
 
 

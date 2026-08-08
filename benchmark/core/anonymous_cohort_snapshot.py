@@ -30,6 +30,8 @@ COHORT_SNAPSHOT_RECORD_TYPE = "anonymous_submission_cohort_snapshot"
 COHORT_SNAPSHOT_MANIFEST_RELATIVE_PATH = Path(
     "manifest/anonymous-submission-cohort-snapshot.json"
 )
+ASSESSMENT_ALIGNMENT_SCHEMA_VERSION = 1
+ASSESSMENT_ALIGNMENT_RECORD_TYPE = "private_anonymous_assessment_identity_alignment"
 _COHORT_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$")
 _QUESTION_ID_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9._-]{0,63}$")
 
@@ -39,6 +41,7 @@ def merge_anonymous_submission_image_snapshots(
     snapshot_roots: Sequence[Path],
     cohort_id: str,
     output_root: Path,
+    assessment_alignment_path: Path | None = None,
 ) -> dict[str, Any]:
     """Copy independently frozen submission snapshots into one private cohort.
 
@@ -54,10 +57,9 @@ def merge_anonymous_submission_image_snapshots(
     target = output_root.resolve()
     sources = [_load_snapshot_root(root) for root in snapshot_roots]
     _validate_output_root(target=target, sources=sources)
-
-    assessment_ids = {str(source["manifest"]["assessment_id"]) for source in sources}
-    if len(assessment_ids) != 1:
-        raise SubmissionScopeError("all submission snapshots must have the same assessment_id")
+    assessment_id, alignment = _resolve_assessment_identity(
+        sources=sources, assessment_alignment_path=assessment_alignment_path
+    )
 
     submissions: list[dict[str, Any]] = []
     source_records: list[dict[str, Any]] = []
@@ -115,7 +117,7 @@ def merge_anonymous_submission_image_snapshots(
     manifest = {
         "schema_version": SUBMISSION_SCOPE_SCHEMA_VERSION,
         "record_type": COHORT_SNAPSHOT_RECORD_TYPE,
-        "assessment_id": assessment_ids.pop(),
+        "assessment_id": assessment_id,
         "cohort_id": normalized_cohort_id,
         "grading_unit": "anonymous_submission",
         "source_snapshots": source_records,
@@ -129,6 +131,8 @@ def merge_anonymous_submission_image_snapshots(
             "A frozen split, rubric, gold, packet audit, and explicit model-run approval remain required.",
         ],
     }
+    if alignment is not None:
+        manifest["assessment_identity_alignment"] = alignment
     if target.exists():
         _validate_existing_cohort_snapshot(target, manifest)
         status = "already_built"
@@ -141,6 +145,63 @@ def merge_anonymous_submission_image_snapshots(
         "manifest_path": str(target / COHORT_SNAPSHOT_MANIFEST_RELATIVE_PATH),
         "student_count": manifest["student_count"],
         "image_count": manifest["image_count"],
+        "source_snapshot_count": len(sources),
+        "model_run_allowed": False,
+    }
+
+
+def create_assessment_identity_alignment(
+    *,
+    snapshot_roots: Sequence[Path],
+    canonical_snapshot_root: Path,
+    reviewer: str,
+    reviewed_at: str,
+    reason: str,
+    output_path: Path,
+) -> dict[str, Any]:
+    """Record a course-owner confirmation without rewriting frozen sources.
+
+    A source snapshot's original assessment identifier is immutable.  This
+    decision is the only supported way to declare that independently frozen
+    sources with different identifiers refer to one assessment.  It binds the
+    exact source snapshot manifests, so it becomes invalid as soon as either
+    source snapshot changes.
+    """
+
+    if len(snapshot_roots) < 2:
+        raise SubmissionScopeError("assessment alignment requires at least two submission snapshots")
+    sources = [_load_snapshot_root(root) for root in snapshot_roots]
+    _validate_distinct_sources(sources)
+    canonical_root = Path(canonical_snapshot_root).resolve()
+    canonical = next((source for source in sources if source["root"] == canonical_root), None)
+    if canonical is None:
+        raise SubmissionScopeError("canonical snapshot root must be one of the declared sources")
+    reviewer_text = _required_audit_text(reviewer, "reviewer")
+    reviewed_at_text = _required_audit_text(reviewed_at, "reviewed_at")
+    reason_text = _required_audit_text(reason, "reason")
+    target = Path(output_path).resolve()
+    _validate_alignment_output_path(target=target, sources=sources)
+    existed = target.exists()
+    payload = {
+        "schema_version": ASSESSMENT_ALIGNMENT_SCHEMA_VERSION,
+        "record_type": ASSESSMENT_ALIGNMENT_RECORD_TYPE,
+        "target_assessment_id": canonical["manifest"]["assessment_id"],
+        "canonical_scope_id": canonical["manifest"]["scope_id"],
+        "source_snapshot_manifests": _source_bindings(sources),
+        "reviewer": reviewer_text,
+        "reviewed_at": reviewed_at_text,
+        "reason": reason_text,
+        "model_run_allowed": False,
+        "model_run_blockers": [
+            "Assessment identity alignment is provenance-only and cannot authorize a model run.",
+            "Each source remains bound to its original final-approved anonymous snapshot.",
+        ],
+    }
+    _write_only_if_empty_or_identical(target, payload)
+    return {
+        "status": "already_created" if existed else "created",
+        "output_path": str(target),
+        "target_assessment_id": payload["target_assessment_id"],
         "source_snapshot_count": len(sources),
         "model_run_allowed": False,
     }
@@ -163,9 +224,93 @@ def _load_snapshot_root(root: Path) -> dict[str, Any]:
     _validate_snapshot_manifest(payload, source_root=source_root)
     return {
         "root": source_root,
+        "manifest_path": manifest_path,
         "manifest": payload,
         "manifest_sha256": sha256_file(manifest_path),
     }
+
+
+def _resolve_assessment_identity(
+    *, sources: Sequence[Mapping[str, Any]], assessment_alignment_path: Path | None
+) -> tuple[str, dict[str, str] | None]:
+    assessment_ids = {str(source["manifest"]["assessment_id"]) for source in sources}
+    if assessment_alignment_path is None:
+        if len(assessment_ids) != 1:
+            raise SubmissionScopeError("all submission snapshots must have the same assessment_id")
+        return assessment_ids.pop(), None
+    alignment_path = Path(assessment_alignment_path).resolve()
+    alignment = _load_assessment_alignment(alignment_path, sources=sources)
+    target_assessment_id = str(alignment["target_assessment_id"])
+    if target_assessment_id not in assessment_ids:
+        raise SubmissionScopeError(
+            "assessment alignment target_assessment_id must be declared by a source snapshot"
+        )
+    return (
+        target_assessment_id,
+        {
+            "record_type": ASSESSMENT_ALIGNMENT_RECORD_TYPE,
+            "sha256": sha256_file(alignment_path),
+        },
+    )
+
+
+def _load_assessment_alignment(
+    path: Path, *, sources: Sequence[Mapping[str, Any]]
+) -> dict[str, Any]:
+    if path.is_symlink() or not path.is_file():
+        raise SubmissionScopeError("assessment alignment decision is missing or unsafe")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise SubmissionScopeError("assessment alignment decision is not readable JSON") from error
+    if not isinstance(payload, dict):
+        raise SubmissionScopeError("assessment alignment decision must be a JSON object")
+    if payload.get("schema_version") != ASSESSMENT_ALIGNMENT_SCHEMA_VERSION:
+        raise SubmissionScopeError("assessment alignment has an unsupported schema_version")
+    if payload.get("record_type") != ASSESSMENT_ALIGNMENT_RECORD_TYPE:
+        raise SubmissionScopeError("assessment alignment has an unexpected record_type")
+    target_assessment_id = payload.get("target_assessment_id")
+    if not isinstance(target_assessment_id, str) or not target_assessment_id.strip():
+        raise SubmissionScopeError("assessment alignment target_assessment_id must be non-empty text")
+    if payload.get("model_run_allowed") is not False:
+        raise SubmissionScopeError("assessment alignment must not authorize a model run")
+    for field_name in ("reviewer", "reviewed_at", "reason"):
+        _required_audit_text(payload.get(field_name), field_name)
+    bindings = payload.get("source_snapshot_manifests")
+    if bindings != _source_bindings(sources):
+        raise SubmissionScopeError("assessment alignment does not bind exactly to the supplied source snapshots")
+    canonical_scope_id = payload.get("canonical_scope_id")
+    matching = [
+        binding
+        for binding in bindings
+        if binding["scope_id"] == canonical_scope_id
+        and binding["assessment_id"] == target_assessment_id
+    ]
+    if len(matching) != 1:
+        raise SubmissionScopeError(
+            "assessment alignment canonical_scope_id must bind the target_assessment_id"
+        )
+    return payload
+
+
+def _source_bindings(sources: Sequence[Mapping[str, Any]]) -> list[dict[str, str]]:
+    return sorted(
+        [
+            {
+                "scope_id": str(source["manifest"]["scope_id"]),
+                "assessment_id": str(source["manifest"]["assessment_id"]),
+                "manifest_sha256": str(source["manifest_sha256"]),
+            }
+            for source in sources
+        ],
+        key=lambda item: item["scope_id"],
+    )
+
+
+def _required_audit_text(value: object, field_name: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise SubmissionScopeError(f"assessment alignment {field_name} must be non-empty text")
+    return value
 
 
 def _validate_snapshot_manifest(payload: Mapping[str, Any], *, source_root: Path) -> None:
@@ -290,10 +435,9 @@ def _normalize_cohort_id(value: object, *, field_name: str = "cohort_id") -> str
 
 
 def _validate_output_root(*, target: Path, sources: Sequence[Mapping[str, Any]]) -> None:
-    roots = [Path(source["root"]) for source in sources]
-    if len(set(roots)) != len(roots):
-        raise SubmissionScopeError("the same submission snapshot cannot be merged twice")
-    for source_root in roots:
+    _validate_distinct_sources(sources)
+    for source in sources:
+        source_root = Path(source["root"])
         if _is_within(target, source_root) or _is_within(source_root, target):
             raise SubmissionScopeError(
                 "cohort output root must not overlap a source submission snapshot"
@@ -303,6 +447,39 @@ def _validate_output_root(*, target: Path, sources: Sequence[Mapping[str, Any]])
             raise SubmissionScopeError(
                 "cohort output root must stay inside each source private-data boundary"
             )
+
+
+def _validate_distinct_sources(sources: Sequence[Mapping[str, Any]]) -> None:
+    roots = [Path(source["root"]) for source in sources]
+    if len(set(roots)) != len(roots):
+        raise SubmissionScopeError("the same submission snapshot cannot be merged twice")
+    scope_ids = [str(source["manifest"]["scope_id"]) for source in sources]
+    if len(set(scope_ids)) != len(scope_ids):
+        raise SubmissionScopeError("submission snapshots contain a duplicate scope_id")
+
+
+def _validate_alignment_output_path(*, target: Path, sources: Sequence[Mapping[str, Any]]) -> None:
+    roots = [Path(source["root"]) for source in sources]
+    for source_root in roots:
+        if _is_within(target, source_root):
+            raise SubmissionScopeError(
+                "assessment alignment output must not be inside a source submission snapshot"
+            )
+        private_root = _nearest_data_ancestor(source_root) or source_root.parent
+        if not _is_within(target, private_root):
+            raise SubmissionScopeError(
+                "assessment alignment output must stay inside each source private-data boundary"
+            )
+
+
+def _write_only_if_empty_or_identical(path: Path, payload: Mapping[str, Any]) -> None:
+    canonical = (json.dumps(payload, sort_keys=True, indent=2) + "\n").encode("utf-8")
+    if path.exists():
+        if not path.is_file() or path.read_bytes() != canonical:
+            raise SubmissionScopeError("refusing to overwrite divergent assessment alignment decision")
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(canonical)
 
 
 def _validate_existing_cohort_snapshot(output_root: Path, manifest: Mapping[str, Any]) -> None:

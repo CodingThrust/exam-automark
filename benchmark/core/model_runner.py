@@ -67,6 +67,7 @@ class ModelPacketRunConfig:
     dry_run: bool = False
     command_argv: tuple[str, ...] = ()
     run_commit: str | None = None
+    run_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -84,6 +85,7 @@ class TextModelProvider(Protocol):
         *,
         student_id: str,
         course: CourseSpec,
+        task: str,
     ) -> ModelProviderResult:
         ...
 
@@ -96,6 +98,7 @@ class MultimodalModelProvider(Protocol):
         *,
         student_id: str,
         course: CourseSpec,
+        task: str,
     ) -> ModelProviderResult:
         ...
 
@@ -115,11 +118,14 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
         raise ValueError("--max-retries must be non-negative")
 
     manifest = _read_json(packet / "manifest.json")
-    if manifest.get("task") != "grade":
-        raise ValueError("run-model-packet currently supports grade packets only")
+    task = manifest.get("task")
+    if task not in {"grade", "transcribe"}:
+        raise ValueError("packet task must be grade or transcribe")
+    if task == "transcribe" and config.input_mode != "multimodal":
+        raise ValueError("transcription packets require --input-mode multimodal")
     course = CourseSpec.from_dict(_read_json(packet / "course.json"))
     prompt_text = (packet / "prompt.txt").read_text(encoding="utf-8")
-    rubric = _read_json(packet / "rubric.json")
+    rubric = _read_json(packet / "rubric.json") if task == "grade" else None
     student_ids = tuple(manifest.get("student_ids", ()))
     if not student_ids:
         raise ValueError("packet manifest has no student_ids")
@@ -153,11 +159,22 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
         if config.input_mode == "multimodal":
             images = image_inputs[student_id]
             prompt = _compose_multimodal_prompt(
-                prompt_text, student_id, course, rubric, images
+                prompt_text,
+                student_id,
+                course,
+                rubric,
+                images,
+                task=task,
+                submission_scope=_read_submission_scope(packet, student_id),
             )
         else:
             prompt = _compose_student_prompt(
-                prompt_text, student_id, course, rubric, text_inputs[student_id]
+                prompt_text,
+                student_id,
+                course,
+                rubric,
+                text_inputs[student_id],
+                task=task,
             )
         success = _run_student(
             provider=provider,
@@ -165,6 +182,7 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
             prompt=prompt,
             student_id=student_id,
             images=images,
+            task=task,
             output=output,
             raw_responses=raw_responses,
             failures=failures,
@@ -227,22 +245,36 @@ class DryRunTextProvider:
         *,
         student_id: str,
         course: CourseSpec,
+        task: str,
     ) -> ModelProviderResult:
-        payload = {
-            "student_id": student_id,
-            "scores": [
-                {
-                    "question_id": question.id,
-                    "extracted_evidence": "dry-run placeholder",
-                    "score": 0,
-                    "evidence": "Dry-run response; no model call was made.",
-                    "confidence": "low",
-                    "flags": ["dry_run"],
-                }
-                for question in course.questions
-            ],
-            "total": 0,
-        }
+        if task == "transcribe":
+            payload = {
+                "student_id": student_id,
+                "answers": [
+                    {
+                        "question_id": question.id,
+                        "text": "dry-run placeholder",
+                        "unclear": True,
+                    }
+                    for question in course.questions
+                ],
+            }
+        else:
+            payload = {
+                "student_id": student_id,
+                "scores": [
+                    {
+                        "question_id": question.id,
+                        "extracted_evidence": "dry-run placeholder",
+                        "score": 0,
+                        "evidence": "Dry-run response; no model call was made.",
+                        "confidence": "low",
+                        "flags": ["dry_run"],
+                    }
+                    for question in course.questions
+                ],
+                "total": 0,
+            }
         return ModelProviderResult(
             raw_text=json.dumps(payload, sort_keys=True),
             model=self.model,
@@ -256,8 +288,11 @@ class DryRunTextProvider:
         *,
         student_id: str,
         course: CourseSpec,
+        task: str,
     ) -> ModelProviderResult:
-        result = self.complete_text(prompt, student_id=student_id, course=course)
+        result = self.complete_text(
+            prompt, student_id=student_id, course=course, task=task
+        )
         result.usage["dry_run_image_count"] = len(images)
         result.usage["dry_run_image_bytes"] = sum(len(image["data"]) for image in images)
         return result
@@ -291,6 +326,7 @@ class OpenAICompatibleTextProvider:
         *,
         student_id: str,
         course: CourseSpec,
+        task: str,
     ) -> ModelProviderResult:
         api_key = os.environ.get(self.api_key_env)
         if not api_key:
@@ -326,6 +362,7 @@ class OpenAICompatibleTextProvider:
         *,
         student_id: str,
         course: CourseSpec,
+        task: str,
     ) -> ModelProviderResult:
         api_key = os.environ.get(self.api_key_env)
         if not api_key:
@@ -404,7 +441,12 @@ def _load_text_inputs(packet: Path, student_ids: tuple[str, ...]) -> dict[str, l
 
 
 def _list_image_inputs(packet: Path, student_ids: tuple[str, ...]) -> dict[str, list[str]]:
-    """Return sorted packet-relative image paths per student, validating types."""
+    """Return packet-relative image paths per student, validating types.
+
+    Snapshot-derived packets include a machine-readable ``submission.json`` that
+    is not an image attachment.  When present, it is also the sole authority
+    for page order; directory and filename sorting must not override it.
+    """
     result: dict[str, list[str]] = {}
     for student_id in student_ids:
         input_dir = packet / "inputs" / student_id
@@ -423,18 +465,95 @@ def _list_image_inputs(packet: Path, student_ids: tuple[str, ...]) -> dict[str, 
                 "multimodal runner expects page images, not PDF, for "
                 f"{student_id}: {', '.join(pdfs)}; convert each PDF page to an image first"
             )
-        unsupported = [
-            path.relative_to(input_dir).as_posix()
-            for path in files
-            if path.suffix.lower() not in IMAGE_SUFFIXES
-        ]
+        submission_metadata = input_dir / "submission.json"
+        metadata_relative = "submission.json"
+        if submission_metadata.is_file():
+            ordered = _submission_page_order(submission_metadata, input_dir, student_id)
+            actual_images = {
+                path.relative_to(input_dir).as_posix()
+                for path in files
+                if path.suffix.lower() in IMAGE_SUFFIXES
+            }
+            if actual_images != set(ordered):
+                raise ValueError(
+                    "submission.json pages must match the packet image files for "
+                    f"{student_id}"
+                )
+            unsupported = [
+                path.relative_to(input_dir).as_posix()
+                for path in files
+                if path.relative_to(input_dir).as_posix() != metadata_relative
+                and path.suffix.lower() not in IMAGE_SUFFIXES
+            ]
+        else:
+            ordered = [
+                path.relative_to(input_dir).as_posix()
+                for path in files
+                if path.suffix.lower() in IMAGE_SUFFIXES
+            ]
+            unsupported = [
+                path.relative_to(input_dir).as_posix()
+                for path in files
+                if path.suffix.lower() not in IMAGE_SUFFIXES
+            ]
         if unsupported:
             raise ValueError(
                 "multimodal runner found non-image input files for "
                 f"{student_id}: {', '.join(unsupported)}"
             )
-        result[student_id] = [path.relative_to(input_dir).as_posix() for path in files]
+        result[student_id] = ordered
     return result
+
+
+def _submission_page_order(metadata_path: Path, input_dir: Path, student_id: str) -> list[str]:
+    try:
+        payload = _read_json(metadata_path)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        raise ValueError(f"submission.json is invalid for {student_id}") from error
+    if payload.get("student_id") != student_id:
+        raise ValueError(f"submission.json student_id mismatch for {student_id}")
+    if payload.get("grading_unit") != "anonymous_submission":
+        raise ValueError("submission.json must use anonymous_submission grading")
+    pages = payload.get("pages")
+    if not isinstance(pages, list) or not pages:
+        raise ValueError("submission.json must contain ordered pages")
+    prior_page = 0
+    paths: list[str] = []
+    for page in pages:
+        if not isinstance(page, dict):
+            raise ValueError("submission.json page must be an object")
+        source_page = page.get("source_page")
+        relative = page.get("file")
+        if type(source_page) is not int or source_page <= prior_page:
+            raise ValueError("submission.json source pages must be positive and ordered")
+        if not isinstance(relative, str) or not relative or "\\" in relative:
+            raise ValueError("submission.json page file must be a POSIX relative path")
+        candidate = (input_dir / relative).resolve()
+        if not _is_within(candidate, input_dir) or candidate.suffix.lower() not in IMAGE_SUFFIXES:
+            raise ValueError("submission.json page file must name a packet image")
+        normalized = candidate.relative_to(input_dir).as_posix()
+        if normalized != relative or normalized in paths:
+            raise ValueError("submission.json page file is invalid or duplicated")
+        prior_page = source_page
+        paths.append(normalized)
+    return paths
+
+
+def _read_submission_scope(packet: Path, student_id: str) -> dict[str, Any] | None:
+    metadata_path = packet / "inputs" / student_id / "submission.json"
+    if not metadata_path.is_file():
+        return None
+    input_dir = metadata_path.parent
+    paths = _submission_page_order(metadata_path, input_dir, student_id)
+    payload = _read_json(metadata_path)
+    missing = payload.get("missing_question_ids", [])
+    if not isinstance(missing, list) or not all(isinstance(item, str) for item in missing):
+        raise ValueError("submission.json missing_question_ids must be text")
+    return {
+        "grading_unit": "anonymous_submission",
+        "missing_question_ids": missing,
+        "ordered_page_files": paths,
+    }
 
 
 def _load_image_inputs(
@@ -459,20 +578,32 @@ def _compose_multimodal_prompt(
     prompt_text: str,
     student_id: str,
     course: CourseSpec,
-    rubric: dict[str, Any],
+    rubric: dict[str, Any] | None,
     images: list[dict[str, Any]],
+    *,
+    task: str,
+    submission_scope: dict[str, Any] | None,
 ) -> str:
     context = {
         "student_id": student_id,
         "course": course.to_dict(),
-        "rubric": rubric,
         "input_images": [image["path"] for image in images],
     }
+    if rubric is not None:
+        context["rubric"] = rubric
+    if submission_scope is not None:
+        context["submission_scope"] = submission_scope
+    task_instruction = (
+        "Transcribe only visible work from these images; do not assign scores."
+        if task == "transcribe"
+        else "Grade from these images directly."
+    )
     return (
         prompt_text.rstrip()
         + f"\n\nOutput student_id must be {student_id}."
         + "\nThe student's scanned paper pages are attached as images in the "
-        "order listed under input_images. Grade from these images directly."
+        "order listed under input_images. "
+        + task_instruction
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
@@ -482,15 +613,20 @@ def _compose_student_prompt(
     prompt_text: str,
     student_id: str,
     course: CourseSpec,
-    rubric: dict[str, Any],
+    rubric: dict[str, Any] | None,
     inputs: list[dict[str, str]],
+    *,
+    task: str = "grade",
 ) -> str:
     context = {
         "student_id": student_id,
         "course": course.to_dict(),
-        "rubric": rubric,
         "inputs": inputs,
     }
+    if rubric is not None:
+        context["rubric"] = rubric
+    if task == "transcribe":
+        context["task_instruction"] = "Transcribe only visible work; do not assign scores."
     return (
         prompt_text.rstrip()
         + f"\n\nOutput student_id must be {student_id}."
@@ -506,6 +642,7 @@ def _run_student(
     prompt: str,
     student_id: str,
     images: list[dict[str, Any]] | None,
+    task: str,
     output: Path,
     raw_responses: Path,
     failures: Path,
@@ -527,6 +664,7 @@ def _run_student(
                     attempt_prompt,
                     student_id=student_id,
                     course=course,
+                    task=task,
                 )
             else:
                 result = provider.complete_images(
@@ -534,9 +672,13 @@ def _run_student(
                     images,
                     student_id=student_id,
                     course=course,
+                    task=task,
                 )
             payload = _parse_json_result(result.raw_text)
-            _validate_grade_payload(payload, student_id, course)
+            if task == "grade":
+                _validate_grade_payload(payload, student_id, course)
+            else:
+                _validate_transcript_payload(payload, student_id, course)
             _write_json(output / "outputs" / f"{student_id}.json", payload)
             _append_jsonl(
                 raw_responses,
@@ -624,6 +766,32 @@ def _validate_grade_payload(payload: dict[str, Any], student_id: str, course: Co
             raise ValueError(f"invalid confidence: {row['confidence']}")
 
 
+def _validate_transcript_payload(
+    payload: dict[str, Any], student_id: str, course: CourseSpec
+) -> None:
+    if payload.get("student_id") != student_id:
+        raise ValueError(f"student_id mismatch: expected {student_id}")
+    answers = payload.get("answers")
+    if not isinstance(answers, list):
+        raise ValueError("transcript answers must be a list")
+    question_ids: list[str] = []
+    for answer in answers:
+        if not isinstance(answer, dict):
+            raise ValueError("transcript answer must be an object")
+        question_id = answer.get("question_id")
+        if not isinstance(question_id, str):
+            raise ValueError("transcript answer question_id must be text")
+        if not isinstance(answer.get("text"), str):
+            raise ValueError("transcript answer text must be text")
+        if not isinstance(answer.get("unclear"), bool):
+            raise ValueError("transcript answer unclear must be boolean")
+        question_ids.append(question_id)
+    if set(question_ids) != set(course.question_ids) or len(question_ids) != len(
+        set(question_ids)
+    ):
+        raise ValueError("transcript question_ids must match the course exactly once")
+
+
 def _metadata(
     config: ModelPacketRunConfig,
     packet: Path,
@@ -678,6 +846,7 @@ def _metadata(
         "text_source_hash": directory_digest(packet / "inputs"),
         "student_ids": list(manifest.get("student_ids", ())),
         "run_commit": config.run_commit or _git_commit(),
+        "run_id": config.run_id,
         "api_key_source": (
             f"{_provider_settings(config.provider)['api_key_env']} environment variable"
         ),
@@ -707,6 +876,8 @@ def _write_command_records(output: Path, config: ModelPacketRunConfig) -> str:
             "--output",
             str(config.output),
         ]
+        if config.run_id is not None:
+            argv.extend(["--run-id", config.run_id])
     command = "python -m benchmark.core.cli " + shlex.join(argv)
     _write_json(output / "command.argv.json", argv)
     (output / "command.txt").write_text(command + "\n", encoding="utf-8", newline="\n")
@@ -782,6 +953,14 @@ def _git_commit() -> str | None:
     except Exception:
         return None
     return result.stdout.strip() or None
+
+
+def _is_within(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+    except ValueError:
+        return False
+    return True
 
 
 def _utc_now() -> str:

@@ -7,15 +7,56 @@ from pathlib import Path
 
 from benchmark.core.readiness_scaffolding import initialize_blank_gold
 from benchmark.core.schema import CourseSpec
+from benchmark.core.anonymous_cohort_snapshot import (
+    COHORT_SNAPSHOT_MANIFEST_RELATIVE_PATH,
+    COHORT_SNAPSHOT_RECORD_TYPE,
+)
 from benchmark.core.scoped_anonymous_images import (
     SNAPSHOT_MANIFEST_RELATIVE_PATH,
     SNAPSHOT_RECORD_TYPE,
     SNAPSHOT_SCHEMA_VERSION,
 )
 from scripts.review_question_gold import GoldReviewStore, next_incomplete_student_index
+from scripts.initialize_question_gold_review import initialize_question_gold_review
 
 
 class QuestionGoldReviewTests(unittest.TestCase):
+    def test_initializer_creates_hash_bound_gold_review_files_for_cohort_snapshot(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = _make_cohort_submission_inputs(Path(tmp))
+            output_root = Path(tmp) / "Data" / "synthetic" / "gold-review"
+            result = initialize_question_gold_review(
+                course_path=paths["course_path"],
+                snapshot_root=paths["snapshot_root"],
+                output_root=output_root,
+            )
+            store = GoldReviewStore(
+                course_path=paths["course_path"],
+                scoped_image_root=paths["snapshot_root"],
+                binding_path=Path(result["binding_path"]),
+                gold_path=Path(result["gold_path"]),
+            )
+
+        self.assertEqual(result["status"], "ready")
+        self.assertEqual(result["student_count"], 1)
+        self.assertEqual(store.state()["summary"]["total_score_rows"], 2)
+
+    def test_cohort_submission_snapshot_uses_ordered_whole_submission_without_page_mapping(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = _make_cohort_submission_inputs(Path(tmp))
+            store = GoldReviewStore(
+                course_path=paths["course_path"],
+                scoped_image_root=paths["snapshot_root"],
+                binding_path=paths["binding_path"],
+                gold_path=paths["gold_path"],
+            )
+            state = store.state()
+
+        self.assertEqual(state["summary"]["student_count"], 1)
+        self.assertEqual([page["page_suffix"] for page in state["students"][0]["pages"]], ["p01", "p02"])
+        self.assertEqual([page["question_ids"] for page in state["students"][0]["pages"]], [[], []])
+        self.assertTrue(state["students"][0]["pages"][0]["page_label"].startswith("Source page 1"))
+
     def test_state_uses_only_declared_scope_questions_and_approved_snapshot_pages(self):
         with tempfile.TemporaryDirectory() as tmp:
             paths = _make_inputs(Path(tmp))
@@ -328,6 +369,89 @@ def _write_binding(
         ),
         encoding="utf-8",
     )
+
+
+def _make_cohort_submission_inputs(root: Path) -> dict[str, Path]:
+    course_payload = {
+        "course_id": "SYN101",
+        "assessment_id": "synthetic_question_gold",
+        "anonymous_id_pattern": "^S[0-9]{3}$",
+        "input_modes": ["image"],
+        "score_unit": "points",
+        "questions": [
+            {"id": "Q1", "max_score": 2, "score_step": 1, "title": "First"},
+            {"id": "Q2", "max_score": 3, "score_step": 0.5, "title": "Second"},
+        ],
+    }
+    course_path = root / "course.json"
+    course_path.write_text(json.dumps(course_payload), encoding="utf-8")
+    snapshot_root = root / "Data" / "synthetic" / "cohort"
+    images = []
+    for source_page in (1, 2):
+        relative = f"anonymized_pages/S001/rendered-source-{source_page}.png"
+        image = snapshot_root / relative
+        image.parent.mkdir(parents=True, exist_ok=True)
+        image.write_bytes(f"synthetic-submission-{source_page}".encode("ascii"))
+        images.append(
+            {
+                "source_page": source_page,
+                "snapshot_image": relative,
+                "sha256": hashlib.sha256(image.read_bytes()).hexdigest(),
+                "bytes": image.stat().st_size,
+                "source_snapshot_scope_id": "fixture-v1",
+            }
+        )
+    manifest_path = snapshot_root / COHORT_SNAPSHOT_MANIFEST_RELATIVE_PATH
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "record_type": COHORT_SNAPSHOT_RECORD_TYPE,
+                "assessment_id": "synthetic_question_gold",
+                "cohort_id": "fixture-cohort-v1",
+                "grading_unit": "anonymous_submission",
+                "source_snapshots": [],
+                "student_count": 1,
+                "image_count": 2,
+                "submissions": [
+                    {
+                        "anonymous_id": "S001",
+                        "grading_unit": "anonymous_submission",
+                        "missing_question_ids": [],
+                        "images": images,
+                    }
+                ],
+                "model_run_allowed": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+    gold_path = root / "Data" / "synthetic" / "gold" / "primary.csv"
+    initialize_blank_gold(CourseSpec.from_dict(course_payload), ("S001",), gold_path)
+    binding_path = root / "reviewer-binding.json"
+    binding_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 2,
+                "record_type": "question_gold_reviewer_binding",
+                "course_id": "SYN101",
+                "course_assessment_id": "synthetic_question_gold",
+                "course_spec_sha256": hashlib.sha256(course_path.read_bytes()).hexdigest(),
+                "scoped_snapshot_assessment_id": "synthetic_question_gold",
+                "scoped_snapshot_manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
+                "snapshot_record_type": COHORT_SNAPSHOT_RECORD_TYPE,
+                "snapshot_manifest_relative_path": COHORT_SNAPSHOT_MANIFEST_RELATIVE_PATH.as_posix(),
+            }
+        ),
+        encoding="utf-8",
+    )
+    return {
+        "course_path": course_path,
+        "snapshot_root": snapshot_root,
+        "gold_path": gold_path,
+        "binding_path": binding_path,
+    }
 
 
 if __name__ == "__main__":

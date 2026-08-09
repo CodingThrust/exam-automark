@@ -1038,13 +1038,18 @@ body { font:14px system-ui,sans-serif; margin:16px; color:#18212f; background:#f
 #top { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
 button,select,input,textarea { font:inherit; padding:6px 8px; } button { cursor:pointer; }
 #main { display:grid; grid-template-columns:minmax(0,1fr) 370px; gap:16px; align-items:start; }
-#images { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+#images { display:grid; grid-template-columns:minmax(0,1fr); gap:14px; }
 .image-card,#panel { background:white; border:1px solid #d4dce8; padding:12px; border-radius:8px; }
 .image-card img { width:100%; border:1px solid #9aa8bc; background:white; display:block; }
 .image-toolbar { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 8px; }
 .image-toolbar button { padding:4px 8px; }
 .image-stage { overflow:auto; min-height:56px; background:#edf2f7; border:1px solid #9aa8bc; }
 .image-stage canvas { display:block; max-width:100%; height:auto; margin:auto; background:white; }
+.image-zoom-dialog { width:min(96vw,1600px); height:92vh; max-width:none; box-sizing:border-box; border:1px solid #718096; border-radius:8px; padding:14px; }
+.image-zoom-dialog::backdrop { background:rgba(16,24,40,.58); }
+.image-zoom-toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin:0 0 10px; }
+.image-zoom-stage { height:calc(100% - 46px); overflow:auto; background:#edf2f7; border:1px solid #9aa8bc; }
+.image-zoom-stage canvas { display:block; max-width:none; height:auto; margin:auto; background:white; }
 .hint { color:#526175; line-height:1.55; } .warning { color:#8a5600; font-weight:600; }
 .ok { color:#20724d; font-weight:600; } .question { border-top:1px solid #e3e8f0; padding:10px 0; }
 .question:first-child { border-top:0; } .question input { width:100px; } textarea { width:100%; min-height:42px; box-sizing:border-box; }
@@ -1079,6 +1084,10 @@ function renderReviewScope(){const summary=state.summary,scope=$('#review-scope'
 function enhanceImageReview(){const entry=student(),cards=[...document.querySelectorAll('#images .image-card')];cards.forEach((card,pageIndex)=>{const page=entry.pages[pageIndex],heading=card.querySelector('h3'),image=card.querySelector('img');if(!page||!image)return;heading.textContent=page.question_ids.length?`${page.page_suffix}: ${page.question_ids.join(', ')}`:`${page.page_suffix} — ordered whole-submission page`;const toolbar=document.createElement('div');toolbar.className='image-toolbar';const stage=document.createElement('div');stage.className='image-stage';const canvas=document.createElement('canvas');canvas.setAttribute('aria-label',`${entry.anonymous_id} ${page.page_suffix} rotated anonymous assessment page`);stage.append(canvas);let rotation=pageRotation(page);const redraw=()=>drawPage(canvas,image,rotation);[['↶ 左转 90° / Left',-90],['↷ 右转 90° / Right',90],['重置 / Reset',null]].forEach(([label,delta])=>{const button=document.createElement('button');button.type='button';button.textContent=label;button.onclick=()=>{rotation=delta===null?0:(rotation+delta+360)%360;savePageRotation(page,rotation);redraw()};toolbar.append(button)});image.hidden=true;card.insertBefore(toolbar,image);card.insertBefore(stage,image);image.addEventListener('load',redraw,{once:true});if(image.complete)redraw()})}
 const baseRender=render;
 render=()=>{baseRender();renderReviewScope();enhanceImageReview()};
+function openNativeImageViewer(image,rotation,label){const dialog=document.createElement('dialog');dialog.className='image-zoom-dialog';const toolbar=document.createElement('div');toolbar.className='image-zoom-toolbar';const title=document.createElement('strong');title.textContent=`${label} — original resolution / 原分辨率`;const close=document.createElement('button');close.type='button';close.textContent='关闭 / Close';close.onclick=()=>dialog.close();toolbar.append(title,close);const stage=document.createElement('div');stage.className='image-zoom-stage';const canvas=document.createElement('canvas');canvas.setAttribute('aria-label',`${label} original-resolution rotated assessment page`);stage.append(canvas);dialog.append(toolbar,stage);dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);drawPage(canvas,image,rotation);dialog.showModal()}
+function addNativeResolutionButtons(){const entry=student(),cards=[...document.querySelectorAll('#images .image-card')];cards.forEach((card,pageIndex)=>{const page=entry.pages[pageIndex],toolbar=card.querySelector('.image-toolbar'),image=card.querySelector('img[hidden]');if(!page||!toolbar||!image)return;const button=document.createElement('button');button.type='button';button.textContent='原分辨率查看 / Full resolution';button.disabled=!image.naturalWidth;button.onclick=()=>openNativeImageViewer(image,pageRotation(page),`${entry.anonymous_id} ${page.page_suffix}`);if(button.disabled)image.addEventListener('load',()=>{button.disabled=false},{once:true});toolbar.append(button)})}
+const baseEnhanceImageReview=enhanceImageReview;
+enhanceImageReview=()=>{baseEnhanceImageReview();addNativeResolutionButtons()};
 </script></body></html>"""
 
 

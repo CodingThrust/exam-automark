@@ -16,7 +16,7 @@ from benchmark.core.scoped_anonymous_images import (
     SNAPSHOT_RECORD_TYPE,
     SNAPSHOT_SCHEMA_VERSION,
 )
-from scripts.review_question_gold import GoldReviewStore, next_incomplete_student_index
+from scripts.review_question_gold import _HTML, GoldReviewStore, next_incomplete_student_index
 from scripts.initialize_question_gold_review import initialize_question_gold_review
 
 
@@ -134,6 +134,7 @@ class QuestionGoldReviewTests(unittest.TestCase):
             self.assertEqual(state["summary"]["total_score_rows"], 2)
             self.assertEqual(state["summary"]["snapshot_student_count"], 2)
             self.assertEqual(state["summary"]["snapshot_total_score_rows"], 4)
+            self.assertTrue(state["summary"]["review_subset"])
             with self.assertRaisesRegex(ValueError, "approved scoped anonymous PNG"):
                 store.image_path("anonymized_pages/S001/S001-p01.png")
             with self.assertRaisesRegex(ValueError, "outside this review subset"):
@@ -151,6 +152,15 @@ class QuestionGoldReviewTests(unittest.TestCase):
         self.assertEqual(saved[("S001", "Q2")]["score"], "")
         self.assertEqual(saved[("S002", "Q1")]["score"], "2")
         self.assertEqual(saved[("S002", "Q2")]["score"], "2.5")
+
+    def test_local_ui_explains_review_subset_and_has_non_destructive_rotation_controls(self):
+        self.assertIn('id="review-scope"', _HTML)
+        self.assertIn("review_subset", _HTML)
+        self.assertIn("rotationStorageKey", _HTML)
+        self.assertIn("drawPage", _HTML)
+        self.assertIn("Left", _HTML)
+        self.assertIn("Right", _HTML)
+        self.assertIn("Reset", _HTML)
 
     def test_students_file_rejects_empty_duplicate_invalid_or_outside_snapshot_ids(self):
         with tempfile.TemporaryDirectory() as tmp:

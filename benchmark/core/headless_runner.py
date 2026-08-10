@@ -1,6 +1,7 @@
 import json
 import os
 import shlex
+import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -475,6 +476,7 @@ def _complete_with_headless_cli(
         config.output / "last-messages" / f"{student_id}-a{attempt}.txt"
     ).resolve()
     argv = _student_command_argv(config, last_message, prompt=prompt)
+    argv = _resolve_executable_for_packet_cwd(config, argv)
     run_kwargs: dict[str, Any] = {
         "cwd": config.packet.resolve(),
         "capture_output": True,
@@ -512,6 +514,63 @@ def _complete_with_headless_cli(
         last_message,
     )
     return ModelProviderResult(raw_text=raw_text.strip(), model=config.model)
+
+
+def _resolve_executable_for_packet_cwd(
+    config: HeadlessPacketRunConfig,
+    argv: list[str],
+) -> list[str]:
+    """Resolve the Windows Codex npm shim before changing into a packet.
+
+    Python cannot execute a ``.cmd`` shim directly, and an elevated process may
+    not inherit the user's npm path after changing into a junction-backed private
+    packet.  Launch the npm-installed Codex JavaScript entry point through Node
+    when it can be resolved.  The recorded reproduction command intentionally
+    retains the canonical Codex command name.
+    """
+
+    if (
+        config.engine != "codex"
+        or os.name != "nt"
+        or not argv
+        or Path(argv[0]).is_absolute()
+    ):
+        return argv
+    script = _windows_codex_npm_script(argv[0])
+    node = _windows_node_executable()
+    if script is None or node is None:
+        return argv
+    return [str(node), str(script), *argv[1:]]
+
+
+def _windows_codex_npm_script(command: str) -> Path | None:
+    """Return the JS entry point paired with a Windows npm ``codex.cmd`` shim."""
+
+    candidates: list[Path] = []
+    resolved = shutil.which(command)
+    if resolved:
+        candidates.append(Path(resolved))
+    appdata = os.environ.get("APPDATA")
+    if appdata:
+        candidates.append(Path(appdata) / "npm" / command)
+    for shim in candidates:
+        if shim.suffix.lower() != ".cmd" or not shim.is_file():
+            continue
+        script = shim.parent / "node_modules" / "@openai" / "codex" / "bin" / "codex.js"
+        if script.is_file():
+            return script
+    return None
+
+
+def _windows_node_executable() -> Path | None:
+    resolved = shutil.which("node.exe")
+    if resolved:
+        return Path(resolved)
+    program_files = os.environ.get("ProgramFiles")
+    if not program_files:
+        return None
+    candidate = Path(program_files) / "nodejs" / "node.exe"
+    return candidate if candidate.is_file() else None
 
 
 def _write_command_records(config: HeadlessPacketRunConfig) -> str:

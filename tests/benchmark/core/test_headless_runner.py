@@ -15,6 +15,7 @@ from benchmark.core.headless_runner import (
     _cli_failure_category,
     _extract_headless_cli_raw_text,
     _metadata,
+    _resolve_executable_for_packet_cwd,
     _student_command_argv,
 )
 
@@ -196,6 +197,35 @@ class HeadlessRunnerCliTests(unittest.TestCase):
             _cli_failure_category("unexpected process exit"),
             "cli/runtime",
         )
+
+    def test_windows_codex_command_shim_is_resolved_before_packet_cwd(self):
+        config = HeadlessPacketRunConfig(
+            engine="codex",
+            model="gpt-5.6-sol",
+            input_mode="multimodal",
+            packet=Path("packet"),
+            output=Path("output"),
+        )
+        argv = ["codex.cmd", "exec", "--json"]
+
+        with (
+            patch("benchmark.core.headless_runner.os.name", "nt"),
+            patch(
+                "benchmark.core.headless_runner._windows_codex_npm_script",
+                return_value=Path(r"C:\tools\codex.js"),
+            ),
+            patch(
+                "benchmark.core.headless_runner._windows_node_executable",
+                return_value=Path(r"C:\tools\node.exe"),
+            ),
+        ):
+            actual = _resolve_executable_for_packet_cwd(config, argv)
+
+        self.assertEqual(
+            actual,
+            [r"C:\tools\node.exe", r"C:\tools\codex.js", "exec", "--json"],
+        )
+        self.assertEqual(argv, ["codex.cmd", "exec", "--json"])
 
     def test_nonretryable_auth_failure_stops_after_one_attempt(self):
         with tempfile.TemporaryDirectory() as tmp:

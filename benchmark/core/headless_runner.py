@@ -533,7 +533,10 @@ def _resolve_executable_for_packet_cwd(
         config.engine != "codex"
         or os.name != "nt"
         or not argv
-        or Path(argv[0]).is_absolute()
+        or (
+            Path(argv[0]).is_absolute()
+            and Path(argv[0]).suffix.lower() != ".cmd"
+        )
     ):
         return argv
     script = _windows_codex_npm_script(argv[0])
@@ -547,12 +550,16 @@ def _windows_codex_npm_script(command: str) -> Path | None:
     """Return the JS entry point paired with a Windows npm ``codex.cmd`` shim."""
 
     candidates: list[Path] = []
-    resolved = shutil.which(command)
-    if resolved:
-        candidates.append(Path(resolved))
-    appdata = os.environ.get("APPDATA")
-    if appdata:
-        candidates.append(Path(appdata) / "npm" / command)
+    explicit = Path(command)
+    if explicit.is_absolute():
+        candidates.append(explicit)
+    else:
+        resolved = shutil.which(command)
+        if resolved:
+            candidates.append(Path(resolved))
+        appdata = os.environ.get("APPDATA")
+        if appdata:
+            candidates.append(Path(appdata) / "npm" / command)
     for shim in candidates:
         if shim.suffix.lower() != ".cmd" or not shim.is_file():
             continue

@@ -206,7 +206,7 @@ class HeadlessRunnerCliTests(unittest.TestCase):
             packet=Path("packet"),
             output=Path("output"),
         )
-        argv = ["codex.cmd", "exec", "--json"]
+        argv = [r"C:\tools\codex.cmd", "exec", "--json"]
 
         with (
             patch("benchmark.core.headless_runner.os.name", "nt"),
@@ -225,7 +225,7 @@ class HeadlessRunnerCliTests(unittest.TestCase):
             actual,
             [r"C:\tools\node.exe", r"C:\tools\codex.js", "exec", "--json"],
         )
-        self.assertEqual(argv, ["codex.cmd", "exec", "--json"])
+        self.assertEqual(argv, [r"C:\tools\codex.cmd", "exec", "--json"])
 
     def test_nonretryable_auth_failure_stops_after_one_attempt(self):
         with tempfile.TemporaryDirectory() as tmp:

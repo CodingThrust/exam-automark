@@ -33,12 +33,20 @@
       "title": "Matrix and determinant true/false statements"
     },
     {
-      "id": "Q2",
-      "max_score": 30,
+      "id": "Q2a",
+      "max_score": 15,
       "question_type": "calculation",
-      "response_requirement": "Compute two determinants.",
+      "response_requirement": "Compute the first determinant.",
       "score_step": 1,
-      "title": "Determinant computation"
+      "title": "First determinant computation"
+    },
+    {
+      "id": "Q2b",
+      "max_score": 15,
+      "question_type": "calculation",
+      "response_requirement": "Compute the second determinant.",
+      "score_step": 1,
+      "title": "Second determinant computation"
     },
     {
       "bonus": {
@@ -71,9 +79,9 @@
       "title": "Tetrahedron volume"
     }
   ],
-  "reference_solution_status": "course_owner_confirmed_rubric_frozen_v0",
+  "reference_solution_status": "course_owner_confirmed_rubric_frozen_v1_q2_subparts",
   "score_step": 1,
   "score_unit": "points",
-  "source_status": "course_owner_confirmed_reference_solution_and_rubric_frozen_v0",
+  "source_status": "course_owner_confirmed_reference_solution_and_rubric_frozen_v1_q2_subparts",
   "time_limit_minutes": 50
 }

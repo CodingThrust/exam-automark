@@ -64,7 +64,7 @@ python -m benchmark.core.cli build-matched-image-route-packets `
   --t1-packet-id T1-dev-r1 `
   --grade-prompt experiments/prompt_templates/grade_candidate_v5.txt `
   --transcribe-prompt experiments/prompt_templates/transcribe_standard_v1.txt `
-  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v0.json `
+  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v1.json `
   --metadata skill_version_id=skill_candidate_v5 `
   --metadata grade_prompt_template_id=grade_candidate_v5 `
   --metadata transcribe_prompt_template_id=transcribe_standard_v1
@@ -88,7 +88,7 @@ python -m benchmark.core.cli build-text-grading-packet `
   --packet-id G1-dev-r1 `
   --condition G1 `
   --prompt experiments/prompt_templates/grade_candidate_v5.txt `
-  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v0.json `
+  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v1.json `
   --students-file Data/<course>/<private-split>/development-students.txt `
   --transcript-source Data/<course>/<private-runs>/T1-dev-r1/outputs `
   --output-root Data/<course>/<private-packets>/development `

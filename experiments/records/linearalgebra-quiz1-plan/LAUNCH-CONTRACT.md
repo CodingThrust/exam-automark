@@ -1,12 +1,12 @@
 # Linear Algebra Quiz 1 Launch Contract
 
-Status: scope, source inventory, course-owner-confirmed reference answers, and rubric v0 are frozen; **no model run is allowed**.
+Status: scope, source inventory, course-owner-confirmed reference answers, and rubric v1 are frozen; **no model run is allowed**.
 
 ## Confirmed assessment scope
 
 - Course: `UFUG2103 Linear Algebra`.
 - Assessment: `Chapter 1-3 Quiz`, 50 minutes, four source pages.
-- Scope: Q1-Q4; 100 base points; integer-only question scores.
+- Scope: four source questions with five score fields (Q1, Q2a, Q2b, Q3, Q4); 100 base points; integer-only question scores. Q2a and Q2b are independently scored at 15 points each.
 - Q3 offers an additional 10-point bonus for two distinct methods, but the final assessment score is capped at 100.
 - Q1 asks students only to mark five statements True or False. The generic grading skill must not require explanations unless an assessment-level or question-level instruction explicitly requires them.
 
@@ -14,7 +14,7 @@ Status: scope, source inventory, course-owner-confirmed reference answers, and r
 
 - No instructor-provided official solution exists.
 - No pre-existing human scores exist.
-- The course owner has confirmed the reference-answer record in `reference_solution_v0.json` and the detailed partial-credit and bonus treatment in `rubric_v0.json`.
+- The course owner has confirmed the reference-answer record in `reference_solution_v1.json` and the detailed partial-credit and bonus treatment in `rubric_v1.json`. The older merged-Q2 v0 artifacts remain retained for audit only.
 - The next grading-authority step is question-level human gold after anonymization and split freeze.
 
 ## Source inventory and privacy

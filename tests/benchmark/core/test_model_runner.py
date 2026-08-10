@@ -1,6 +1,8 @@
 import contextlib
 import io
 import json
+import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -372,6 +374,55 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertIn("answers", response)
         self.assertNotIn("scores", response)
         self.assertEqual(metadata["task"], "transcribe")
+
+    def test_submission_metadata_accepts_a_junction_or_symlink_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            physical = root / "physical-inputs"
+            student_dir = physical / "S001"
+            pages = student_dir / "pages"
+            pages.mkdir(parents=True)
+            (pages / "p0001.png").write_bytes(b"fixture image")
+            (student_dir / "submission.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "grading_unit": "anonymous_submission",
+                        "student_id": "S001",
+                        "missing_question_ids": [],
+                        "pages": [{"source_page": 1, "file": "pages/p0001.png"}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            logical = root / "logical-inputs"
+            try:
+                os.symlink(physical, logical, target_is_directory=True)
+            except OSError as error:
+                if os.name != "nt":
+                    self.skipTest(f"directory symlinks are unavailable: {error}")
+                junction = subprocess.run(
+                    ["cmd", "/c", "mklink", "/J", str(logical), str(physical)],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                if junction.returncode:
+                    self.skipTest(
+                        "directory links are unavailable: "
+                        + (junction.stderr or junction.stdout).strip()
+                    )
+
+            from benchmark.core.model_runner import _submission_page_order
+
+            self.assertEqual(
+                _submission_page_order(
+                    logical / "S001" / "submission.json",
+                    logical / "S001",
+                    "S001",
+                ),
+                ["pages/p0001.png"],
+            )
 
     def test_run_model_packet_multimodal_rejects_pdf_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:

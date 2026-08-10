@@ -506,6 +506,11 @@ def _list_image_inputs(packet: Path, student_ids: tuple[str, ...]) -> dict[str, 
 
 
 def _submission_page_order(metadata_path: Path, input_dir: Path, student_id: str) -> list[str]:
+    # ``candidate`` below is resolved before its confinement check.  Resolve the
+    # root at the same boundary: on Windows a private Data directory can be
+    # reached through a junction, and comparing a physical candidate with the
+    # logical junction path otherwise rejects every valid page.
+    input_dir = input_dir.resolve()
     try:
         payload = _read_json(metadata_path)
     except (OSError, ValueError, json.JSONDecodeError) as error:

@@ -111,6 +111,7 @@ class HeadlessRunnerCliTests(unittest.TestCase):
         self.assertTrue(raw_responses_exists)
         self.assertIn("exec --json", command)
         self.assertIn("--output-schema", command)
+        self.assertIn("--skip-git-repo-check", command)
         self.assertNotIn("--ask-for-approval", command)
         self.assertIn("Blind headless grading run", prompt)
         self.assertIn("Packet context:", prompt)

@@ -636,6 +636,7 @@ def _student_command_argv(
             str(schema),
             "--sandbox",
             "read-only",
+            "--skip-git-repo-check",
             "--cd",
             str(packet),
         ]

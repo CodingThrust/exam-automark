@@ -42,6 +42,7 @@ OPENAI_COMPATIBLE_PROVIDERS = {
         "api_key_env": "DEEPSEEK_API_KEY",
         "default_endpoint": "https://api.deepseek.com",
         "display_name": "DeepSeek",
+        "request_extra_body": {"thinking": {"type": "disabled"}},
     },
     "kimi": {
         "api_key_env": "MOONSHOT_API_KEY",
@@ -232,6 +233,7 @@ def _provider_from_config(
         top_p=config.top_p,
         max_tokens=config.max_tokens,
         response_format=config.response_format,
+        request_extra_body=settings.get("request_extra_body"),
     )
 
 
@@ -310,6 +312,7 @@ class OpenAICompatibleTextProvider:
         top_p: float | None,
         max_tokens: int | None,
         response_format: str,
+        request_extra_body: dict[str, Any] | None = None,
     ):
         self.model = model
         self.endpoint = endpoint
@@ -319,6 +322,7 @@ class OpenAICompatibleTextProvider:
         self.top_p = top_p
         self.max_tokens = max_tokens
         self.response_format = response_format
+        self.request_extra_body = request_extra_body
 
     def complete_text(
         self,
@@ -347,6 +351,8 @@ class OpenAICompatibleTextProvider:
             request["top_p"] = self.top_p
         if self.max_tokens is not None:
             request["max_tokens"] = self.max_tokens
+        if self.request_extra_body is not None:
+            request["extra_body"] = self.request_extra_body
         response = client.chat.completions.create(**request)
         message = response.choices[0].message.content
         return ModelProviderResult(
@@ -392,6 +398,8 @@ class OpenAICompatibleTextProvider:
             request["top_p"] = self.top_p
         if self.max_tokens is not None:
             request["max_tokens"] = self.max_tokens
+        if self.request_extra_body is not None:
+            request["extra_body"] = self.request_extra_body
         response = client.chat.completions.create(**request)
         message = response.choices[0].message.content
         return ModelProviderResult(

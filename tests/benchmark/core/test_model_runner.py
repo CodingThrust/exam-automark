@@ -3,17 +3,62 @@ import io
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from benchmark.core.cli import main
+from benchmark.core.model_runner import OpenAICompatibleTextProvider
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
 
 
 class ModelPacketRunnerTests(unittest.TestCase):
+    def test_deepseek_provider_disables_thinking_via_extra_body(self):
+        captured: dict[str, object] = {}
+
+        class FakeCompletions:
+            def create(self, **kwargs):
+                captured.update(kwargs)
+                return SimpleNamespace(
+                    choices=[SimpleNamespace(message=SimpleNamespace(content="{}"))],
+                    model="deepseek-v4-pro",
+                    usage=None,
+                )
+
+        class FakeOpenAI:
+            def __init__(self, **kwargs):
+                captured["client"] = kwargs
+                self.chat = SimpleNamespace(completions=FakeCompletions())
+
+        provider = OpenAICompatibleTextProvider(
+            model="deepseek-v4-pro",
+            endpoint="https://api.deepseek.com",
+            api_key_env="DEEPSEEK_API_KEY",
+            display_name="DeepSeek",
+            temperature=None,
+            top_p=None,
+            max_tokens=4096,
+            response_format="json_object",
+            request_extra_body={"thinking": {"type": "disabled"}},
+        )
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}), patch.dict(
+            sys.modules, {"openai": SimpleNamespace(OpenAI=FakeOpenAI)}
+        ):
+            provider.complete_text(
+                "Return JSON.",
+                student_id="S001",
+                course=None,
+                task="grade",
+            )
+
+        self.assertEqual(captured["extra_body"], {"thinking": {"type": "disabled"}})
+        self.assertEqual(captured["max_tokens"], 4096)
+
     def test_build_text_grading_packet_can_feed_dry_run_runner(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

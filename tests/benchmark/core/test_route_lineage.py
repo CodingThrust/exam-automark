@@ -156,6 +156,10 @@ class RouteLineageTests(unittest.TestCase):
             audit = json.loads(audit_text)
             self.assertNotIn("detail", audit["checks"][0])
             self.assertNotIn("untrusted detail", audit_text)
+            # Projection must also accept the persisted, privacy-redacted
+            # report shape rather than requiring transient check details.
+            persisted_binding = project_public_route_lineage_binding(audit)
+            self.assertEqual(persisted_binding, binding)
 
             manifest_path = g1.packet_path / "manifest.json"
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))

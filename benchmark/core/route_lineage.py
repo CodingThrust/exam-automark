@@ -148,7 +148,17 @@ def canonicalize_route_lineage_report(report: Mapping[str, Any]) -> dict[str, An
     checks: list[dict[str, str]] = []
     for value in checks_value:
         check = _mapping(value, "route lineage check")
-        _require_exact_keys(check, {"id", "status", "detail"}, "route lineage check")
+        # Fresh checker output includes a human-readable detail, while the
+        # persisted aggregate audit deliberately omits it.  Both shapes are
+        # valid inputs to this canonicalizer; detail is never propagated.
+        # This keeps a report written by ``write_route_lineage_report`` usable
+        # by the later public-binding projection without admitting arbitrary
+        # extra fields into a public artifact.
+        check_keys = set(check)
+        if check_keys not in ({"id", "status"}, {"id", "status", "detail"}):
+            _require_exact_keys(
+                check, {"id", "status", "detail"}, "route lineage check"
+            )
         check_id = _safe_identifier(check["id"], "route lineage check id")
         if check["status"] not in {"passed", "failed"}:
             raise ValueError("route lineage check status is invalid")

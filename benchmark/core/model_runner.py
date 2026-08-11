@@ -621,6 +621,11 @@ def _compose_multimodal_prompt(
         + f"\n\nOutput student_id must be {student_id}."
         + "\nThe student's scanned paper pages are attached as images in the "
         "order listed under input_images. "
+        + "Page-position rule: attachment order, input index, source-page number, "
+        "and image filename are locators only, not question identifiers. Never "
+        "infer a question_id from them. Question order may vary by submission; "
+        "locate each question from visible labels, stems, and answer content "
+        "across all supplied pages. "
         + task_instruction
         + "\nRequired response contract:\n"
         + _structured_output_contract(course, student_id, task)

@@ -43,7 +43,8 @@ grading experiments.
   assembly while making each declared `question_id` the smallest independently
   scoreable leaf: separately allocated subparts are scored separately across
   all ordered pages, while undeclared subparts are never invented.
-- `grade_candidate_v5_2.txt`: current cross-course candidate. It retains the
+- `grade_candidate_v5_2.txt`: historical first release of the v5.2 template.
+  It retains the
   v5.1 leaf-subpart contract and explicitly treats page positions, source-page
   labels, image filenames, and attachment indices as locators only—not question
   numbers or a question-to-page mapping. It requires complete-submission
@@ -53,6 +54,12 @@ grading experiments.
   It applies the same locator-only rule before producing per-leaf transcripts,
   so transcription preserves content rather than inventing a page-to-question
   association.
+- `grade_candidate_v5_2_r2.txt`: current v5.2 execution template. It corrects
+  the per-student page-list reference to `inputs/<student_id>/submission.json`
+  and is paired with a runtime locator-only safeguard for multimodal routes.
+- `transcribe_standard_v2_r2.txt`: matching current transcription template.
+  It makes the same packet-metadata distinction and preserves the v2
+  locator-only rule.
 
 When an experiment is planned, each template file is hashed into `plan.json`.
 When an experiment is run, the exact prompt text is copied into each prompt

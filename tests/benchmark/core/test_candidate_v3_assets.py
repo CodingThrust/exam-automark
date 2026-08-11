@@ -10,7 +10,7 @@ PROMPT_V33 = Path("experiments/prompt_templates/grade_candidate_v3_3.txt")
 PROMPT_V4 = Path("experiments/prompt_templates/grade_candidate_v4.txt")
 PROMPT_V5 = Path("experiments/prompt_templates/grade_candidate_v5.txt")
 PROMPT_V5_1 = Path("experiments/prompt_templates/grade_candidate_v5_1.txt")
-PROMPT_V5_2 = Path("experiments/prompt_templates/grade_candidate_v5_2.txt")
+PROMPT_V5_2 = Path("experiments/prompt_templates/grade_candidate_v5_2_r2.txt")
 STRICT_SNAPSHOT = Path(
     "experiments/records/DSAA3071-week5-candidate-v3-dev-plan/"
     "prompts/grade_candidate_v3_strict_schema.txt"
@@ -423,6 +423,17 @@ class CandidateV3AssetTests(unittest.TestCase):
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)
+
+    def test_current_v5_2_prompt_has_correct_metadata_location_and_version(self):
+        text = PROMPT_V5_2.read_text(encoding="utf-8")
+
+        self.assertTrue(text.startswith("# Candidate Grading Prompt v5.2 r2"))
+        self.assertIn("inputs/<student_id>/submission.json", text)
+        self.assertIn(
+            "authoritative per-student page list",
+            _normalize_whitespace(text),
+        )
+        self.assertNotIn("every ordered page listed for the student in `manifest.json`", text)
 
 
 if __name__ == "__main__":

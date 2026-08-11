@@ -518,13 +518,15 @@ def _load_page_question_mapping(
         question_ids = tuple(raw_question_ids)
         if not all(isinstance(question_id, str) for question_id in question_ids):
             raise ValueError(f"course page_mapping[{page_suffix}] question IDs must be text")
+        if len(question_ids) != len(set(question_ids)):
+            raise ValueError(
+                f"course page_mapping[{page_suffix}] cannot repeat a question ID on one page"
+            )
         result[page_suffix] = question_ids
         encountered.extend(question_ids)
-    if len(encountered) != len(set(encountered)):
-        raise ValueError("each in-scope question must map to exactly one snapshot page")
     if set(encountered) != set(course.question_ids):
         raise ValueError(
-            "course page_mapping must cover exactly the course's in-scope question IDs"
+            "course page_mapping must cover every course question on at least one snapshot page"
         )
     return dict(sorted(result.items()))
 

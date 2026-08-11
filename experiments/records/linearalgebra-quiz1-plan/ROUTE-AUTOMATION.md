@@ -19,7 +19,7 @@ locked until the corresponding human gold subset is complete and validated.
 For Linear Algebra Quiz 1 v2, the course owner authorized this exception on
 2026-08-11 for the frozen 30-submission development roster and the four M1,
 T1, Codex-G1, and DeepSeek-G1 routes only. Legacy v1 outputs and any partial
-v5.1 route outputs are excluded from comparison and must not be resumed.
+v5.1/v5.2-r1 route outputs are excluded from comparison and must not be resumed.
 
 ## What is automated / 已自动化内容
 
@@ -83,14 +83,14 @@ python -m benchmark.core.cli build-matched-image-route-packets `
   --output-root Data/<course>/<private-packets>/development `
   --split development `
   --students-file Data/<course>/<private-split>/development-students.txt `
-  --m1-packet-id M1-dev-r1 `
-  --t1-packet-id T1-dev-r1 `
-  --grade-prompt experiments/prompt_templates/grade_candidate_v5_2.txt `
-  --transcribe-prompt experiments/prompt_templates/transcribe_standard_v2.txt `
+  --m1-packet-id M1-dev-r2 `
+  --t1-packet-id T1-dev-r2 `
+  --grade-prompt experiments/prompt_templates/grade_candidate_v5_2_r2.txt `
+  --transcribe-prompt experiments/prompt_templates/transcribe_standard_v2_r2.txt `
   --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v2.json `
   --metadata skill_version_id=skill_candidate_v5_2 `
-  --metadata grade_prompt_template_id=grade_candidate_v5_2 `
-  --metadata transcribe_prompt_template_id=transcribe_standard_v2
+  --metadata grade_prompt_template_id=grade_candidate_v5_2_r2 `
+  --metadata transcribe_prompt_template_id=transcribe_standard_v2_r2
 
 # 3. This must be ready before any provider call. It never grants approval.
 python -m benchmark.core.cli check-route-lineage `
@@ -108,16 +108,17 @@ T1 run and automatically inherits its run ID, packet hash, and snapshot hash.
 # Provider/model values are intentionally omitted until the explicit approval.
 python -m benchmark.core.cli build-text-grading-packet `
   --course experiments/course_specs/linearalgebra_quiz1_v2.json `
-  --packet-id G1-dev-r1 `
+  --packet-id G1-dev-r2 `
   --condition G1 `
-  --prompt experiments/prompt_templates/grade_candidate_v5_2.txt `
+  --prompt experiments/prompt_templates/grade_candidate_v5_2_r2.txt `
   --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v2.json `
   --students-file Data/<course>/<private-split>/development-students.txt `
   --transcript-source Data/<course>/<private-runs>/T1-dev-r1/outputs `
   --output-root Data/<course>/<private-packets>/development `
   --text-source-kind automatic_transcript `
   --metadata split=development `
-  --metadata skill_version_id=skill_candidate_v5_2
+  --metadata skill_version_id=skill_candidate_v5_2 `
+  --metadata grade_prompt_template_id=grade_candidate_v5_2_r2
 
 python -m benchmark.core.cli check-route-lineage `
   --m1-packet Data/<course>/<private-packets>/development/M1-dev-r1 `

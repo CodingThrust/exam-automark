@@ -13,6 +13,7 @@ from unittest.mock import patch
 from benchmark.core.cli import main
 from benchmark.core.model_runner import (
     OpenAICompatibleTextProvider,
+    _compose_multimodal_prompt,
     _compose_student_prompt,
     _submission_page_order,
 )
@@ -44,6 +45,25 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertIn("input index, source-page number, or image filename", prompt)
         self.assertIn("Question order may vary by submission", prompt)
         self.assertIn('"student_id":"S001"', prompt)
+
+    def test_multimodal_prompt_repeats_page_locator_rule(self):
+        course = CourseSpec.from_dict(
+            json.loads((FIXTURES / "course_dsaa3073_hw1.json").read_text(encoding="utf-8"))
+        )
+
+        prompt = _compose_multimodal_prompt(
+            "Return JSON.",
+            "S001",
+            course,
+            rubric={},
+            images=[{"path": "pages/p0001.png"}],
+            task="grade",
+            submission_scope=None,
+        )
+
+        self.assertIn("source-page number, and image filename are locators only", prompt)
+        self.assertIn("Never infer a question_id from them", prompt)
+        self.assertIn("Question order may vary by submission", prompt)
 
     def test_deepseek_provider_disables_thinking_via_extra_body(self):
         captured: dict[str, object] = {}

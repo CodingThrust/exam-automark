@@ -1,0 +1,140 @@
+{
+  "anonymous_id_pattern": "^S[0-9]{3}$",
+  "assessment_id": "quiz1",
+  "assessment_title": "Chapter 1-3 Quiz",
+  "base_total_points": 100,
+  "course_code": "UFUG2103",
+  "course_id": "linearalgebra",
+  "final_score_cap": 100,
+  "global_instructions": [
+    "When applying elementary row operations to reduce a matrix to (reduced) echelon form, show each row operation explicitly.",
+    "When writing the solution of a linear system, clearly identify any free variables."
+  ],
+  "input_modes": [
+    "image",
+    "pdf",
+    "transcript",
+    "text"
+  ],
+  "notes": [
+    "No instructor-provided official solution or pre-existing human scores are available.",
+    "The course owner will approve a reference solution, rubric, partial-credit policy, and question-level gold before model evaluation.",
+    "Raw submissions may contain identity-bearing filenames and must be anonymized before packet construction.",
+    "The candidate grading skill remains course-generic; course-specific answers and score allocations belong in the rubric.",
+    "Every entry in questions is the smallest independently scoreable leaf item. Parent stems are metadata only and are never emitted as aggregate score rows."
+  ],
+  "questions": [
+    {
+      "allowed_scores": [0, 5],
+      "id": "Q1a",
+      "max_score": 5,
+      "parent_question_id": "Q1",
+      "question_type": "true_false",
+      "response_requirement": "Mark statement (a) True or False.",
+      "score_step": 1,
+      "title": "Q1(a) matrix and determinant true/false"
+    },
+    {
+      "allowed_scores": [0, 5],
+      "id": "Q1b",
+      "max_score": 5,
+      "parent_question_id": "Q1",
+      "question_type": "true_false",
+      "response_requirement": "Mark statement (b) True or False.",
+      "score_step": 1,
+      "title": "Q1(b) matrix and determinant true/false"
+    },
+    {
+      "allowed_scores": [0, 5],
+      "id": "Q1c",
+      "max_score": 5,
+      "parent_question_id": "Q1",
+      "question_type": "true_false",
+      "response_requirement": "Mark statement (c) True or False.",
+      "score_step": 1,
+      "title": "Q1(c) matrix and determinant true/false"
+    },
+    {
+      "allowed_scores": [0, 5],
+      "id": "Q1d",
+      "max_score": 5,
+      "parent_question_id": "Q1",
+      "question_type": "true_false",
+      "response_requirement": "Mark statement (d) True or False.",
+      "score_step": 1,
+      "title": "Q1(d) matrix and determinant true/false"
+    },
+    {
+      "allowed_scores": [0, 5],
+      "id": "Q1e",
+      "max_score": 5,
+      "parent_question_id": "Q1",
+      "question_type": "true_false",
+      "response_requirement": "Mark statement (e) True or False.",
+      "score_step": 1,
+      "title": "Q1(e) matrix and determinant true/false"
+    },
+    {
+      "id": "Q2a",
+      "max_score": 15,
+      "parent_question_id": "Q2",
+      "question_type": "calculation",
+      "response_requirement": "Compute the first determinant.",
+      "score_step": 1,
+      "title": "Q2(a) first determinant computation"
+    },
+    {
+      "id": "Q2b",
+      "max_score": 15,
+      "parent_question_id": "Q2",
+      "question_type": "calculation",
+      "response_requirement": "Compute the second determinant.",
+      "score_step": 1,
+      "title": "Q2(b) second determinant computation"
+    },
+    {
+      "id": "Q3",
+      "max_score": 25,
+      "question_type": "calculation_short_answer",
+      "response_requirement": "Determine parameter values for which the system has a unique solution.",
+      "score_step": 1,
+      "tags": [
+        "linear_systems",
+        "unique_solution"
+      ],
+      "title": "Q3 unique solution of a parameterized linear system"
+    },
+    {
+      "allowed_scores": [0, 10],
+      "id": "Q3bonus",
+      "is_bonus": true,
+      "max_score": 10,
+      "parent_question_id": "Q3",
+      "question_type": "calculation",
+      "response_requirement": "Award only for a correct conclusion supported by two genuinely distinct and mathematically correct methods.",
+      "score_step": 1,
+      "tags": [
+        "alternative_methods_bonus",
+        "all_or_nothing"
+      ],
+      "title": "Q3 bonus: distinct second correct method"
+    },
+    {
+      "id": "Q4",
+      "max_score": 20,
+      "question_type": "calculation",
+      "response_requirement": "Compute the volume of the tetrahedron determined by four vertices.",
+      "score_step": 1,
+      "tags": [
+        "geometry",
+        "tetrahedron_volume"
+      ],
+      "title": "Q4 tetrahedron volume"
+    }
+  ],
+  "reference_solution_status": "course_owner_confirmed_rubric_frozen_v2_q1_subparts_and_q3_bonus",
+  "score_step": 1,
+  "score_unit": "points",
+  "source_status": "course_owner_confirmed_reference_solution_and_rubric_frozen_v2_q1_subparts_and_q3_bonus",
+  "time_limit_minutes": 50
+}

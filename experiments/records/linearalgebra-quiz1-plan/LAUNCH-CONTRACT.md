@@ -1,20 +1,30 @@
 # Linear Algebra Quiz 1 Launch Contract
 
-Status: scope, source inventory, course-owner-confirmed reference answers, and rubric v0 are frozen; **no model run is allowed**.
+Status: scope, source inventory, course-owner-confirmed v2 reference answers, and
+rubric v2 are frozen; v2 human gold is pending, so **no v2 model run is
+allowed**.
 
 ## Confirmed assessment scope
 
 - Course: `UFUG2103 Linear Algebra`.
 - Assessment: `Chapter 1-3 Quiz`, 50 minutes, four source pages.
-- Scope: Q1-Q4; 100 base points; integer-only question scores.
-- Q3 offers an additional 10-point bonus for two distinct methods, but the final assessment score is capped at 100.
+- Scope: four source questions with ten score fields (`Q1a`–`Q1e`, `Q2a`,
+  `Q2b`, `Q3`, `Q3bonus`, `Q4`); 100 base points; integer-only question scores.
+  Q1's five selections are independently scored at 5 points each, and Q2a and
+  Q2b are independently scored at 15 points each.
+- `Q3bonus` is an all-or-nothing 10-point leaf for two genuinely distinct,
+  mathematically correct methods with the correct conclusion. Sum all leaves
+  and cap the final assessment score at 100.
 - Q1 asks students only to mark five statements True or False. The generic grading skill must not require explanations unless an assessment-level or question-level instruction explicitly requires them.
 
 ## Human grading authority
 
 - No instructor-provided official solution exists.
 - No pre-existing human scores exist.
-- The course owner has confirmed the reference-answer record in `reference_solution_v0.json` and the detailed partial-credit and bonus treatment in `rubric_v0.json`.
+- The course owner has confirmed the reference-answer record in
+  `reference_solution_v2.json` and the detailed partial-credit and bonus
+  treatment in `rubric_v2.json`. The older v0/v1 artifacts remain retained for
+  audit only; their aggregate Q1 row must not be mixed with v2 scores.
 - The next grading-authority step is question-level human gold after anonymization and split freeze.
 
 ## Source inventory and privacy
@@ -26,7 +36,10 @@ Status: scope, source inventory, course-owner-confirmed reference answers, and r
 
 ## Candidate skill and route contract
 
-- The candidate grading skill is cross-course. It must not contain Linear Algebra-specific answers, point allocations, question IDs, or course names.
+- The candidate grading skill is cross-course. It must not contain Linear
+  Algebra-specific answers, point allocations, question IDs, or course names.
+- It must assemble the whole submission, then score each independently
+  allocated, course-declared leaf subpart rather than pages or aggregate stems.
 - Course-specific requirements belong in the frozen course specification and rubric.
 - The future comparison uses matched anonymous inputs for M1 direct multimodal grading and T1-to-G1 transcription-first grading.
 

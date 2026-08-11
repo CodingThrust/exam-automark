@@ -28,3 +28,15 @@ Candidate v3.1 is a development calibration of v3 that preserves the
 calculation rule while adding locality and semantic equivalence safeguards. The
 r2 snapshot adds open-ended adequacy for open-ended short-answer, proof,
 construction, and essay questions.
+
+`skill_candidate_v5.json` remains the frozen whole-submission candidate used
+before independent subpart handling was added. `skill_candidate_v5_1.json`
+records the successor contract: declared score IDs are the smallest
+independently scoreable leaves, parent stems are orientation only, and evidence
+may still be assembled across all ordered pages of a submission.
+
+`skill_candidate_v5_2.json` records the next generic safeguard: page position,
+source-page labels, image filenames, and attachment indices are locators only,
+not question IDs or a question-to-page mapping. It preserves whole-submission,
+leaf-level evidence assembly for submissions whose scanned page order differs
+from assessment question order.

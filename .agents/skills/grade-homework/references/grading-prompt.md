@@ -120,10 +120,33 @@ page may contain several questions and one question may continue across pages.
 Do not emit, award, or sum page-level marks. Reconcile visible evidence across
 the full page set, then assign one score for each rubric question.
 
+Page position, source-page number, image filename, and attachment/input index
+identify only scan/display order. They never identify Q1, Q2, or any other
+question and do not create a question-to-page mapping. Do not infer question
+order from P01/P02 or from another student's page sequence; locate each answer
+from visible question labels, stems, and content across the complete page set.
+When the relevant page cannot be established from visible evidence, flag
+`page_order_uncertain` rather than awarding credit by page position.
+
 Respect the frozen page order and any explicit missing-page or
 missing-question flags. Do not invent unseen work or silently repair a missing
 or cropped page; apply the frozen course policy and add a score-affecting flag
 when necessary.
+
+## Scorable subparts and hierarchy
+
+Before scoring, identify the hierarchy of each stem. Each frozen `question_id`
+is the smallest independently scoreable leaf item. If the assessment and
+rubric separately allocate points to subparts, score each declared leaf
+separately even when they share a page, stem, or calculation. Parent/stem
+labels provide orientation only; do not emit or add an aggregate parent score
+in addition to its leaf scores.
+
+Do not invent subparts when the frozen contract does not declare independent
+scoring units. Do not merge, average, borrow, or offset credit between
+declared leaves. Read the complete submission first and collect evidence for
+each leaf across all ordered pages. A missing or unclear region affects only
+the material leaf or leaves unless the frozen rubric explicitly says otherwise.
 
 ## Required JSON record
 

@@ -227,6 +227,13 @@ class GoldReviewStore:
                             "title": question.title or question_id,
                             "max_score": question.max_score,
                             "score_step": question.score_step,
+                            "allowed_scores": (
+                                list(question.allowed_scores)
+                                if question.allowed_scores is not None
+                                else None
+                            ),
+                            "parent_question_id": question.parent_question_id,
+                            "is_bonus": question.is_bonus,
                             "score": row["score"],
                             "notes": row["notes"],
                         }
@@ -259,6 +266,7 @@ class GoldReviewStore:
                     "snapshot_student_count": len(self._all_students),
                     "snapshot_total_score_rows": len(self._all_students)
                     * len(self.course.question_ids),
+                    "review_subset": len(self._students) != len(self._all_students),
                 },
             }
 
@@ -510,13 +518,15 @@ def _load_page_question_mapping(
         question_ids = tuple(raw_question_ids)
         if not all(isinstance(question_id, str) for question_id in question_ids):
             raise ValueError(f"course page_mapping[{page_suffix}] question IDs must be text")
+        if len(question_ids) != len(set(question_ids)):
+            raise ValueError(
+                f"course page_mapping[{page_suffix}] cannot repeat a question ID on one page"
+            )
         result[page_suffix] = question_ids
         encountered.extend(question_ids)
-    if len(encountered) != len(set(encountered)):
-        raise ValueError("each in-scope question must map to exactly one snapshot page")
     if set(encountered) != set(course.question_ids):
         raise ValueError(
-            "course page_mapping must cover exactly the course's in-scope question IDs"
+            "course page_mapping must cover every course question on at least one snapshot page"
         )
     return dict(sorted(result.items()))
 
@@ -1037,9 +1047,18 @@ body { font:14px system-ui,sans-serif; margin:16px; color:#18212f; background:#f
 #top { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
 button,select,input,textarea { font:inherit; padding:6px 8px; } button { cursor:pointer; }
 #main { display:grid; grid-template-columns:minmax(0,1fr) 370px; gap:16px; align-items:start; }
-#images { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+#images { display:grid; grid-template-columns:minmax(0,1fr); gap:14px; }
 .image-card,#panel { background:white; border:1px solid #d4dce8; padding:12px; border-radius:8px; }
 .image-card img { width:100%; border:1px solid #9aa8bc; background:white; display:block; }
+.image-toolbar { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 8px; }
+.image-toolbar button { padding:4px 8px; }
+.image-stage { overflow:auto; min-height:56px; background:#edf2f7; border:1px solid #9aa8bc; }
+.image-stage canvas { display:block; max-width:100%; height:auto; margin:auto; background:white; }
+.image-zoom-dialog { width:min(96vw,1600px); height:92vh; max-width:none; box-sizing:border-box; border:1px solid #718096; border-radius:8px; padding:14px; }
+.image-zoom-dialog::backdrop { background:rgba(16,24,40,.58); }
+.image-zoom-toolbar { display:flex; justify-content:space-between; align-items:center; gap:10px; margin:0 0 10px; }
+.image-zoom-stage { height:calc(100% - 46px); overflow:auto; background:#edf2f7; border:1px solid #9aa8bc; }
+.image-zoom-stage canvas { display:block; max-width:none; height:auto; margin:auto; background:white; }
 .hint { color:#526175; line-height:1.55; } .warning { color:#8a5600; font-weight:600; }
 .ok { color:#20724d; font-weight:600; } .question { border-top:1px solid #e3e8f0; padding:10px 0; }
 .question:first-child { border-top:0; } .question input { width:100px; } textarea { width:100%; min-height:42px; box-sizing:border-box; }
@@ -1049,6 +1068,7 @@ button,select,input,textarea { font:inherit; padding:6px 8px; } button { cursor:
 <body><h1>匿名 Gold 录入 / Anonymous question-level gold review</h1>
 <p class="hint">仅在本机运行。请根据已终审的匿名图片人工录入本次 scope 内的逐题 gold 分数；页面不包含原始身份，也不会调用模型。保存会原子替换私有 gold CSV。<br>Local only. Enter human gold scores only for the frozen in-scope questions. No raw identity and no model call are involved.</p>
 <p id="binding" class="ok">Scoped anonymous snapshot and private gold table loaded.</p>
+<p id="review-scope" class="hint"></p>
 <div id="top"><label>审核人 / Reviewer <input id="reviewer" placeholder="姓名或缩写 / name or initials"></label><span id="summary"></span><button id="prev">上一位 / Previous</button><select id="student"></select><button id="next">下一位 / Next</button></div>
 <div id="main"><div><div id="images"></div><p class="hint">只显示课程 scope 声明的匿名页；例如 p01 对应 Q1–Q4，p03 对应 Q9–Q10。请不要根据未显示页面给分。<br>Only approved pages declared by the course scope are shown; do not score from unseen pages.</p></div>
 <div id="panel"><h2 id="title"></h2><p class="hint">填写分数后可先保存草稿；“保存并核准”要求该匿名学生所有 scope 内题目均有合法分数，并自动跳到下一位未完成学生。<br>Save draft keeps partial work. Save & approve requires valid scores for every in-scope question and advances automatically.</p><div id="questions"></div><button id="draft">保存草稿 / Save draft</button> <button id="approve">保存并核准 / Save & approve</button><p id="message"></p></div></div>
@@ -1065,6 +1085,21 @@ function render(){const entry=student();$('#student').value=index;$('#title').te
 function payload(){const entry=student(),scores={},notes={};entry.questions.forEach(question=>{scores[question.question_id]=$(`#score-${question.question_id}`).value.trim();notes[question.question_id]=$(`#notes-${question.question_id}`).value;});return {anonymous_id:entry.anonymous_id,reviewer:$('#reviewer').value.trim(),reviewed_at:now(),scores,notes};}
 async function save(kind){const reviewer=$('#reviewer').value.trim();if(!reviewer){alert('请先填写审核人姓名或缩写 / Enter reviewer name or initials first.');return}const before=index;try{await api(kind==='approve'?'/api/approve':'/api/save-draft','POST',payload());await load(false,kind==='approve'?before:null);$('#message').textContent=kind==='approve'?'已原子保存并核准；已跳到下一位未完成学生。\nSaved atomically and approved; moved to the next incomplete student.':'草稿已原子保存。\nDraft saved atomically.'}catch(error){$('#message').textContent=error.message}};
 $('#student').onchange=e=>{index=+e.target.value;render()};$('#prev').onclick=()=>{index=Math.max(0,index-1);render()};$('#next').onclick=()=>{index=Math.min(state.students.length-1,index+1);render()};$('#draft').onclick=()=>save('draft');$('#approve').onclick=()=>save('approve');if(!token){$('#binding').textContent='此页面需要本次本地会话 token / This page requires its single-session local access token.';$('#binding').className='warning';}else{load(false).catch(error=>{$('#binding').textContent=error.message;$('#binding').className='warning';});}
+function rotationStorageKey(page){return `gold-review-image-rotation-v1:${state.assessment.course_id}:${state.assessment.assessment_id}:${page.image_path}`}
+function pageRotation(page){try{const value=Number(localStorage.getItem(rotationStorageKey(page)));return [0,90,180,270].includes(value)?value:0}catch(_error){return 0}}
+function savePageRotation(page,rotation){try{localStorage.setItem(rotationStorageKey(page),String(rotation))}catch(_error){/* Browser storage is an optional local-only convenience. */}}
+function drawPage(canvas,image,rotation){if(!image.naturalWidth||!image.naturalHeight)return;const quarterTurn=rotation===90||rotation===270;canvas.width=quarterTurn?image.naturalHeight:image.naturalWidth;canvas.height=quarterTurn?image.naturalWidth:image.naturalHeight;const context=canvas.getContext('2d');context.save();if(rotation===90){context.translate(canvas.width,0);context.rotate(Math.PI/2)}else if(rotation===180){context.translate(canvas.width,canvas.height);context.rotate(Math.PI)}else if(rotation===270){context.translate(0,canvas.height);context.rotate(-Math.PI/2)}context.drawImage(image,0,0);context.restore()}
+function renderReviewScope(){const summary=state.summary,scope=$('#review-scope');if(summary.review_subset){scope.textContent=`本次仅审核冻结开发集：${summary.student_count}/${summary.snapshot_student_count}。留出集（例如 S041）被刻意隐藏，将在独立封存审核阶段录入。 / This session is development-only; heldout submissions are intentionally hidden.`;scope.className='warning'}else{scope.textContent=`本次审核完整匿名 cohort：${summary.student_count}/${summary.snapshot_student_count}。 / This session contains the complete anonymous cohort.`;scope.className='hint'}}
+function enhanceImageReview(){const entry=student(),cards=[...document.querySelectorAll('#images .image-card')];cards.forEach((card,pageIndex)=>{const page=entry.pages[pageIndex],heading=card.querySelector('h3'),image=card.querySelector('img');if(!page||!image)return;heading.textContent=page.question_ids.length?`${page.page_suffix}: ${page.question_ids.join(', ')}`:`${page.page_suffix} — ordered whole-submission page`;const toolbar=document.createElement('div');toolbar.className='image-toolbar';const stage=document.createElement('div');stage.className='image-stage';const canvas=document.createElement('canvas');canvas.setAttribute('aria-label',`${entry.anonymous_id} ${page.page_suffix} rotated anonymous assessment page`);stage.append(canvas);let rotation=pageRotation(page);const redraw=()=>drawPage(canvas,image,rotation);[['↶ 左转 90° / Left',-90],['↷ 右转 90° / Right',90],['重置 / Reset',null]].forEach(([label,delta])=>{const button=document.createElement('button');button.type='button';button.textContent=label;button.onclick=()=>{rotation=delta===null?0:(rotation+delta+360)%360;savePageRotation(page,rotation);redraw()};toolbar.append(button)});image.hidden=true;card.insertBefore(toolbar,image);card.insertBefore(stage,image);image.addEventListener('load',redraw,{once:true});if(image.complete)redraw()})}
+const baseRender=render;
+function renderAllowedScoreControls(){const entry=student();entry.questions.forEach(question=>{if(!Array.isArray(question.allowed_scores))return;const existing=$(`#score-${question.question_id}`);if(!existing||existing.tagName==='SELECT')return;const select=document.createElement('select');select.id=existing.id;select.autocomplete='off';const blank=document.createElement('option');blank.value='';blank.textContent='';select.append(blank);question.allowed_scores.forEach(value=>{const option=document.createElement('option');option.value=String(value);option.textContent=String(value);if(String(value)===String(question.score))option.selected=true;select.append(option)});existing.replaceWith(select);const label=select.parentElement;if(label)label.firstChild.textContent=`Score / 分数 (allowed: ${question.allowed_scores.join(', ')}) `})}
+function renderPageOrderNotice(){const images=$('#images');let notice=$('#page-order-notice');if(!notice){notice=document.createElement('p');notice.id='page-order-notice';notice.className='warning';images.before(notice)}notice.textContent='\u9875\u9762 P01/P02 \u7b49\u4ec5\u8868\u793a\u56fe\u7247\u663e\u793a/\u539f\u59cb\u9875\u5e8f\uff0c\u4e0d\u662f Q1/Q2 \u7b49\u9898\u53f7\u3002\u5355\u9875\u53ef\u542b\u4efb\u610f\u3001\u591a\u4e2a\u6216\u4e0d\u5b8c\u6574\u9898\u76ee\uff0c\u540c\u4e00\u9898\u53ef\u8de8\u9875\u3002\u7ed9\u4efb\u4e00\u5c0f\u9898\u8bc4\u5206\u524d\uff0c\u8bf7\u67e5\u770b\u8be5\u4f5c\u7b54\u7684\u5168\u90e8\u9875\u9762\u3002 / P01/P02 identify source/display order only, not question numbers. A page may contain any, multiple, or incomplete questions, and one question may span pages. Review all pages before scoring any item.'}
+function renderPageHeadings(){const entry=student(),cards=[...document.querySelectorAll('#images .image-card')];cards.forEach((card,pageIndex)=>{const page=entry.pages[pageIndex],heading=card.querySelector('h3');if(!page||!heading)return;const evidence=page.question_ids.length?`course-declared evidence for: ${page.question_ids.join(', ')}`:'whole-submission evidence';heading.textContent=`${page.page_suffix} — page/order only (not a question number); ${evidence}`;heading.title=page.page_label||''})}
+render=()=>{baseRender();renderAllowedScoreControls();renderReviewScope();enhanceImageReview();renderPageOrderNotice();renderPageHeadings()};
+function openNativeImageViewer(image,rotation,label){const dialog=document.createElement('dialog');dialog.className='image-zoom-dialog';const toolbar=document.createElement('div');toolbar.className='image-zoom-toolbar';const title=document.createElement('strong');title.textContent=`${label} — original resolution / 原分辨率`;const close=document.createElement('button');close.type='button';close.textContent='关闭 / Close';close.onclick=()=>dialog.close();toolbar.append(title,close);const stage=document.createElement('div');stage.className='image-zoom-stage';const canvas=document.createElement('canvas');canvas.setAttribute('aria-label',`${label} original-resolution rotated assessment page`);stage.append(canvas);dialog.append(toolbar,stage);dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.append(dialog);drawPage(canvas,image,rotation);dialog.showModal()}
+function addNativeResolutionButtons(){const entry=student(),cards=[...document.querySelectorAll('#images .image-card')];cards.forEach((card,pageIndex)=>{const page=entry.pages[pageIndex],toolbar=card.querySelector('.image-toolbar'),image=card.querySelector('img[hidden]');if(!page||!toolbar||!image)return;const button=document.createElement('button');button.type='button';button.textContent='原分辨率查看 / Full resolution';button.disabled=!image.naturalWidth;button.onclick=()=>openNativeImageViewer(image,pageRotation(page),`${entry.anonymous_id} ${page.page_suffix}`);if(button.disabled)image.addEventListener('load',()=>{button.disabled=false},{once:true});toolbar.append(button)})}
+const baseEnhanceImageReview=enhanceImageReview;
+enhanceImageReview=()=>{baseEnhanceImageReview();addNativeResolutionButtons()};
 </script></body></html>"""
 
 

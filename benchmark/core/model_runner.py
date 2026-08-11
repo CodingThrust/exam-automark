@@ -42,6 +42,7 @@ OPENAI_COMPATIBLE_PROVIDERS = {
         "api_key_env": "DEEPSEEK_API_KEY",
         "default_endpoint": "https://api.deepseek.com",
         "display_name": "DeepSeek",
+        "request_extra_body": {"thinking": {"type": "disabled"}},
     },
     "kimi": {
         "api_key_env": "MOONSHOT_API_KEY",
@@ -232,6 +233,7 @@ def _provider_from_config(
         top_p=config.top_p,
         max_tokens=config.max_tokens,
         response_format=config.response_format,
+        request_extra_body=settings.get("request_extra_body"),
     )
 
 
@@ -310,6 +312,7 @@ class OpenAICompatibleTextProvider:
         top_p: float | None,
         max_tokens: int | None,
         response_format: str,
+        request_extra_body: dict[str, Any] | None = None,
     ):
         self.model = model
         self.endpoint = endpoint
@@ -319,6 +322,7 @@ class OpenAICompatibleTextProvider:
         self.top_p = top_p
         self.max_tokens = max_tokens
         self.response_format = response_format
+        self.request_extra_body = request_extra_body
 
     def complete_text(
         self,
@@ -347,6 +351,8 @@ class OpenAICompatibleTextProvider:
             request["top_p"] = self.top_p
         if self.max_tokens is not None:
             request["max_tokens"] = self.max_tokens
+        if self.request_extra_body is not None:
+            request["extra_body"] = self.request_extra_body
         response = client.chat.completions.create(**request)
         message = response.choices[0].message.content
         return ModelProviderResult(
@@ -392,6 +398,8 @@ class OpenAICompatibleTextProvider:
             request["top_p"] = self.top_p
         if self.max_tokens is not None:
             request["max_tokens"] = self.max_tokens
+        if self.request_extra_body is not None:
+            request["extra_body"] = self.request_extra_body
         response = client.chat.completions.create(**request)
         message = response.choices[0].message.content
         return ModelProviderResult(
@@ -506,6 +514,11 @@ def _list_image_inputs(packet: Path, student_ids: tuple[str, ...]) -> dict[str, 
 
 
 def _submission_page_order(metadata_path: Path, input_dir: Path, student_id: str) -> list[str]:
+    # ``candidate`` below is resolved before its confinement check.  Resolve the
+    # root at the same boundary: on Windows a private Data directory can be
+    # reached through a junction, and comparing a physical candidate with the
+    # logical junction path otherwise rejects every valid page.
+    input_dir = input_dir.resolve()
     try:
         payload = _read_json(metadata_path)
     except (OSError, ValueError, json.JSONDecodeError) as error:
@@ -522,6 +535,11 @@ def _submission_page_order(metadata_path: Path, input_dir: Path, student_id: str
     for page in pages:
         if not isinstance(page, dict):
             raise ValueError("submission.json page must be an object")
+        if "question_id" in page or "question_ids" in page:
+            raise ValueError(
+                "submission.json page must not assign question IDs; "
+                "page order is not a question mapping"
+            )
         source_page = page.get("source_page")
         relative = page.get("file")
         if type(source_page) is not int or source_page <= prior_page:
@@ -603,7 +621,14 @@ def _compose_multimodal_prompt(
         + f"\n\nOutput student_id must be {student_id}."
         + "\nThe student's scanned paper pages are attached as images in the "
         "order listed under input_images. "
+        + "Page-position rule: attachment order, input index, source-page number, "
+        "and image filename are locators only, not question identifiers. Never "
+        "infer a question_id from them. Question order may vary by submission; "
+        "locate each question from visible labels, stems, and answer content "
+        "across all supplied pages. "
         + task_instruction
+        + "\nRequired response contract:\n"
+        + _structured_output_contract(course, student_id, task)
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
@@ -630,8 +655,56 @@ def _compose_student_prompt(
     return (
         prompt_text.rstrip()
         + f"\n\nOutput student_id must be {student_id}."
+        + "\nPage-position rule: listed input pages are ordered evidence, not "
+        "question identifiers. Never infer a question_id from an input index, "
+        "source-page number, or image filename. Question order may vary by "
+        "submission; locate each question from visible labels, stems, and answer "
+        "content across all supplied pages."
+        + "\nRequired response contract:\n"
+        + _structured_output_contract(course, student_id, task)
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
+    )
+
+
+def _structured_output_contract(
+    course: CourseSpec, student_id: str, task: str
+) -> str:
+    """Return an explicit cross-provider JSON field contract for one response."""
+    if task == "transcribe":
+        example: dict[str, Any] = {
+            "student_id": student_id,
+            "answers": [
+                {"question_id": question_id, "text": "visible text", "unclear": False}
+                for question_id in course.question_ids
+            ],
+        }
+    else:
+        example = {
+            "student_id": student_id,
+            "scores": [
+                {
+                    "question_id": question_id,
+                    "extracted_evidence": "visible evidence",
+                    "score": 0,
+                    "evidence": "scoring rationale",
+                    "confidence": "medium",
+                    "flags": [],
+                }
+                for question_id in course.question_ids
+            ],
+            "total": 0,
+        }
+    return (
+        "Return exactly one JSON object and no Markdown. Follow this structural "
+        "example exactly: "
+        + json.dumps(example, ensure_ascii=True, separators=(",", ":"))
+        + ". Replace example values with the actual response. Use every listed "
+        "question_id exactly once. Each listed question_id is one independently "
+        "scored or transcribed leaf item; do not aggregate declared subparts. "
+        "For grading, `total` must equal the sum of score rows after applying "
+        "course.final_score_cap when that field is present. Do not rename `scores` "
+        "to `items` or add alternative top-level fields."
     )
 
 
@@ -759,8 +832,14 @@ def _validate_grade_payload(payload: dict[str, Any], student_id: str, course: Co
             )
         )
     total = validate_score_records(records, course)
-    if "total" not in payload or abs(float(payload["total"]) - total) > 1e-9:
-        raise ValueError("total must equal the sum of question scores")
+    if "total" not in payload:
+        raise ValueError("total is required")
+    # Leaf score rows have already passed the course-specific coverage, range,
+    # step, evidence, confidence, and flags checks above.  The model-reported
+    # total is therefore redundant: replace it with the deterministic course
+    # total so final-score caps and bonus rules are applied consistently across
+    # models.
+    payload["total"] = total
     for row in payload["scores"]:
         if row["confidence"] not in CONFIDENCE_LEVELS:
             raise ValueError(f"invalid confidence: {row['confidence']}")

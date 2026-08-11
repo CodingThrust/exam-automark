@@ -1,0 +1,39 @@
+{
+  "experiment_id": "linearalgebra-quiz1-v2-development-r2",
+  "course_id": "linearalgebra",
+  "assessment_id": "quiz1",
+  "git_branch": "codex/la-gold-review-orientation",
+  "git_commit": "affb313530394ed26c68b3615dee3d0c2e0c56a8",
+  "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+  "prompt_packet_hashes": {
+    "G1-Codex": "271588f95aeec311892116f8c6aac64cd99451d7e4aa3b466ce4f6f924a3f5d2",
+    "G1-DeepSeek": "271588f95aeec311892116f8c6aac64cd99451d7e4aa3b466ce4f6f924a3f5d2",
+    "M1": "d70093ab5bd474d8edcbb71c489d29232b656ed736385014b69c5b02a77b65b2",
+    "T1": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14"
+  },
+  "conditions": [
+    "M1",
+    "T1",
+    "G1-Codex",
+    "G1-DeepSeek"
+  ],
+  "metrics_path": "experiments/records/linearalgebra-quiz1-v2-development-r2/multi-route.aggregate.json",
+  "note_path": "experiments/records/linearalgebra-quiz1-v2-development-r2/multi-route-dashboard.typ",
+  "report_pdf_path": "experiments/records/linearalgebra-quiz1-v2-development-r2/multi-route-dashboard.pdf",
+  "skill_version_id": "skill_candidate_v5_2",
+  "skill_source_paths": {
+    "agents": ".agents/skills/grade-homework/SKILL.md",
+    "claude": ".claude/skills/grade-homework/SKILL.md"
+  },
+  "skill_hashes": {
+    "agents": "d623f29cfce9cb327bcd553d427c44d261c7bd10c216c67632853a43d800ccfe",
+    "claude": "d623f29cfce9cb327bcd553d427c44d261c7bd10c216c67632853a43d800ccfe"
+  },
+  "notes": [
+    "Development split only; no held-out or production claim.",
+    "Human development gold was completed and locally validated before aggregate comparisons.",
+    "Public artifacts are aggregate-only; raw submissions, gold rows, transcripts, packet manifests, individual outputs, and private paths remain excluded.",
+    "M1 directly grades anonymized images; T1 is transcription readiness only; G1-Codex and G1-DeepSeek grade the same frozen T1 transcript source.",
+    "This controlled development result does not establish general accuracy, teacher replacement, or production readiness."
+  ]
+}

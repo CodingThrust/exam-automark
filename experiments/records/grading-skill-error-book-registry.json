@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "active_skill_version_id": "skill_candidate_v5",
+  "active_skill_version_id": "skill_candidate_v5_2",
   "policy": {
     "required_for_every_skill_update": true,
     "required_regressions_for_future_skill_updates": true,
@@ -76,8 +76,8 @@
     {
       "skill_version_id": "skill_candidate_v5",
       "predecessor_skill_version_id": "skill_candidate_v4",
-      "evaluation_status": "pending",
-      "pending_reason": "Candidate-v5 adds a generic submission-level assembly rule: all ordered pages for one anonymous student must be considered together before question-level scoring. It has not been evaluated against frozen Linear Algebra development gold, so no accuracy or error-reduction claim is made.",
+      "evaluation_status": "superseded_pending",
+      "pending_reason": "Candidate-v5 adds a generic submission-level assembly rule. It was superseded by the v5.1 cross-course leaf-subpart contract before evaluation against frozen Linear Algebra development gold, so no accuracy or error-reduction claim is made.",
       "pending_gates": [
         "complete approved anonymous cohort, including any intended supplement",
         "frozen development/held-out split and question-level development gold",
@@ -89,6 +89,38 @@
       "skill_canonical_hash": "7b1f3c02aede473187e39a215390249bce3b107282db5d99739ff85dbc91a38f",
       "note_en": "Candidate-v5 is a pending cross-course skill revision. It registers whole-submission rather than page-level grading for reproducibility, but must not be represented as evaluated until its stated development gates and error-book review are complete.",
       "note_zh": "Candidate-v5 是待评测的跨课程 skill 修订版：它将评分单位固定为整份匿名提交而非单页；在完成既定开发集门禁和错题复审前，不得宣称其准确率或改进效果。"
+    },
+    {
+      "skill_version_id": "skill_candidate_v5_1",
+      "predecessor_skill_version_id": "skill_candidate_v5",
+      "evaluation_status": "superseded_pending",
+      "pending_reason": "Candidate-v5.1 adds a cross-course leaf-subpart rule, but it was superseded before a valid matched v2 development evaluation when review exposed a generic risk of inferring question identity from page position. No accuracy or error-reduction claim is made.",
+      "pending_gates": [
+        "complete v2 development question gold at the declared leaf level",
+        "matched M1 direct-multimodal and T1-to-G1 packet manifests using the same v2 course/rubric/prompt contract",
+        "explicit model-run approval after v2 gold and packet validation",
+        "development error-book, confidence audit, and iteration-delta review"
+      ],
+      "skill_snapshot": "experiments/skill_versions/skill_candidate_v5_1.json",
+      "skill_canonical_hash": "e45d32c0adf231429efa8141d79f54a9cf76caa11c0988da1ce9a4527b64a929",
+      "note_en": "Candidate-v5.1 is a pending cross-course skill revision. It retains whole-submission assembly and adds declared leaf-subpart scoring; no performance claim is permitted until the v2 development gates and error-book review are complete.",
+      "note_zh": "Candidate-v5.1 是待评测的跨课程 skill 修订版：它保留整份匿名作答的组装，并要求对课程合同已声明的最小可评分小题分别评分；在完成 v2 开发集门禁和错题复审前，不得宣称准确率或改进效果。"
+    },
+    {
+      "skill_version_id": "skill_candidate_v5_2",
+      "predecessor_skill_version_id": "skill_candidate_v5_1",
+      "evaluation_status": "pending",
+      "pending_reason": "Candidate-v5.2 adds a cross-course page-locator safeguard: page positions, source-page labels, attachment indices, and filenames are never question IDs or a question-to-page mapping. It has not yet been evaluated against validated Linear Algebra development gold, so no accuracy or error-reduction claim is made.",
+      "pending_gates": [
+        "fresh matched M1 direct-multimodal and T1-to-G1 packet manifests using the v5.2/v2 page-locator contract",
+        "recorded development-only owner approval for the blinded four-route execution",
+        "complete validated v2 development question gold before metrics or route comparison",
+        "development error-book, confidence audit, and iteration-delta review"
+      ],
+      "skill_snapshot": "experiments/skill_versions/skill_candidate_v5_2.json",
+      "skill_canonical_hash": "d623f29cfce9cb327bcd553d427c44d261c7bd10c216c67632853a43d800ccfe",
+      "note_en": "Candidate-v5.2 is a pending cross-course revision. It preserves whole-submission, declared-leaf scoring while preventing page order from being treated as question identity; no performance claim is permitted until the stated gold, route, and error-book gates are complete.",
+      "note_zh": "Candidate-v5.2 是待评测的跨课程 skill 修订版：它保留整份作答和最小计分叶子的证据组装，同时禁止把页序、页码或文件名当作题号；在完成既定的 gold、路线和错题册门槛前，不得声称准确率或改进效果。"
     }
   ]
 }

@@ -1,17 +1,210 @@
 import contextlib
 import io
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from benchmark.core.cli import main
+from benchmark.core.model_runner import (
+    OpenAICompatibleTextProvider,
+    _compose_multimodal_prompt,
+    _compose_student_prompt,
+    _submission_page_order,
+    _validate_grade_payload,
+)
+from benchmark.core.schema import CourseSpec, QuestionSpec
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
 
 
 class ModelPacketRunnerTests(unittest.TestCase):
+    def test_grade_payload_canonicalizes_total_from_capped_bonus_leaf_scores(self):
+        course = CourseSpec(
+            course_id="synthetic",
+            assessment_id="quiz",
+            questions=(
+                QuestionSpec("Q1", 95, score_step=1),
+                QuestionSpec("Q2", 5, score_step=1),
+                QuestionSpec(
+                    "Q2bonus",
+                    10,
+                    score_step=1,
+                    parent_question_id="Q2",
+                    allowed_scores=(0, 10),
+                    is_bonus=True,
+                ),
+            ),
+            base_total_points=100,
+            final_score_cap=100,
+        )
+        payload = {
+            "student_id": "S001",
+            "scores": [
+                {
+                    "question_id": "Q1",
+                    "extracted_evidence": "complete work",
+                    "score": 95,
+                    "evidence": "full credit",
+                    "confidence": "high",
+                    "flags": [],
+                },
+                {
+                    "question_id": "Q2",
+                    "extracted_evidence": "complete work",
+                    "score": 5,
+                    "evidence": "full credit",
+                    "confidence": "high",
+                    "flags": [],
+                },
+                {
+                    "question_id": "Q2bonus",
+                    "extracted_evidence": "second valid method",
+                    "score": 10,
+                    "evidence": "bonus condition met",
+                    "confidence": "high",
+                    "flags": [],
+                },
+            ],
+            "total": 110,
+        }
+
+        _validate_grade_payload(payload, "S001", course)
+
+        self.assertEqual(payload["total"], 100)
+
+    def test_grade_payload_still_rejects_malformed_leaf_scores(self):
+        course = CourseSpec(
+            course_id="synthetic",
+            assessment_id="quiz",
+            questions=(
+                QuestionSpec("Q1", 5, score_step=1),
+                QuestionSpec(
+                    "Q1bonus",
+                    10,
+                    score_step=1,
+                    parent_question_id="Q1",
+                    allowed_scores=(0, 10),
+                    is_bonus=True,
+                ),
+            ),
+            base_total_points=5,
+            final_score_cap=5,
+        )
+        payload = {
+            "student_id": "S001",
+            "scores": [
+                {
+                    "question_id": "Q1",
+                    "extracted_evidence": "complete work",
+                    "score": 5,
+                    "evidence": "full credit",
+                    "confidence": "high",
+                    "flags": [],
+                },
+                {
+                    "question_id": "Q1bonus",
+                    "extracted_evidence": "extra method",
+                    "score": 9,
+                    "evidence": "bonus condition met",
+                    "confidence": "high",
+                    "flags": [],
+                },
+            ],
+            "total": 5,
+        }
+
+        with self.assertRaisesRegex(ValueError, "Q1bonus score"):
+            _validate_grade_payload(payload, "S001", course)
+
+    def test_text_prompt_inlines_cross_provider_scores_contract(self):
+        course = CourseSpec.from_dict(
+            json.loads((FIXTURES / "course_dsaa3073_hw1.json").read_text(encoding="utf-8"))
+        )
+
+        prompt = _compose_student_prompt(
+            "Return JSON.",
+            "S001",
+            course,
+            rubric={},
+            inputs=[],
+            task="grade",
+        )
+
+        self.assertIn("Required response contract", prompt)
+        self.assertIn('"scores"', prompt)
+        self.assertIn("Do not rename `scores` to `items`", prompt)
+        self.assertIn("independently scored or transcribed leaf item", prompt)
+        self.assertIn("input index, source-page number, or image filename", prompt)
+        self.assertIn("Question order may vary by submission", prompt)
+        self.assertIn('"student_id":"S001"', prompt)
+
+    def test_multimodal_prompt_repeats_page_locator_rule(self):
+        course = CourseSpec.from_dict(
+            json.loads((FIXTURES / "course_dsaa3073_hw1.json").read_text(encoding="utf-8"))
+        )
+
+        prompt = _compose_multimodal_prompt(
+            "Return JSON.",
+            "S001",
+            course,
+            rubric={},
+            images=[{"path": "pages/p0001.png"}],
+            task="grade",
+            submission_scope=None,
+        )
+
+        self.assertIn("source-page number, and image filename are locators only", prompt)
+        self.assertIn("Never infer a question_id from them", prompt)
+        self.assertIn("Question order may vary by submission", prompt)
+
+    def test_deepseek_provider_disables_thinking_via_extra_body(self):
+        captured: dict[str, object] = {}
+
+        class FakeCompletions:
+            def create(self, **kwargs):
+                captured.update(kwargs)
+                return SimpleNamespace(
+                    choices=[SimpleNamespace(message=SimpleNamespace(content="{}"))],
+                    model="deepseek-v4-pro",
+                    usage=None,
+                )
+
+        class FakeOpenAI:
+            def __init__(self, **kwargs):
+                captured["client"] = kwargs
+                self.chat = SimpleNamespace(completions=FakeCompletions())
+
+        provider = OpenAICompatibleTextProvider(
+            model="deepseek-v4-pro",
+            endpoint="https://api.deepseek.com",
+            api_key_env="DEEPSEEK_API_KEY",
+            display_name="DeepSeek",
+            temperature=None,
+            top_p=None,
+            max_tokens=4096,
+            response_format="json_object",
+            request_extra_body={"thinking": {"type": "disabled"}},
+        )
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}), patch.dict(
+            sys.modules, {"openai": SimpleNamespace(OpenAI=FakeOpenAI)}
+        ):
+            provider.complete_text(
+                "Return JSON.",
+                student_id="S001",
+                course=None,
+                task="grade",
+            )
+
+        self.assertEqual(captured["extra_body"], {"thinking": {"type": "disabled"}})
+        self.assertEqual(captured["max_tokens"], 4096)
+
     def test_build_text_grading_packet_can_feed_dry_run_runner(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -372,6 +565,85 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertIn("answers", response)
         self.assertNotIn("scores", response)
         self.assertEqual(metadata["task"], "transcribe")
+
+    def test_submission_metadata_rejects_page_question_mapping(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_dir = root / "S001"
+            pages = input_dir / "pages"
+            pages.mkdir(parents=True)
+            (pages / "p0001.png").write_bytes(b"fixture image")
+            metadata = input_dir / "submission.json"
+            metadata.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "grading_unit": "anonymous_submission",
+                        "student_id": "S001",
+                        "missing_question_ids": [],
+                        "pages": [
+                            {
+                                "source_page": 1,
+                                "file": "pages/p0001.png",
+                                "question_ids": ["Q1"],
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "not assign question IDs"):
+                _submission_page_order(metadata, input_dir, "S001")
+
+    def test_submission_metadata_accepts_a_junction_or_symlink_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            physical = root / "physical-inputs"
+            student_dir = physical / "S001"
+            pages = student_dir / "pages"
+            pages.mkdir(parents=True)
+            (pages / "p0001.png").write_bytes(b"fixture image")
+            (student_dir / "submission.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "grading_unit": "anonymous_submission",
+                        "student_id": "S001",
+                        "missing_question_ids": [],
+                        "pages": [{"source_page": 1, "file": "pages/p0001.png"}],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            logical = root / "logical-inputs"
+            try:
+                os.symlink(physical, logical, target_is_directory=True)
+            except OSError as error:
+                if os.name != "nt":
+                    self.skipTest(f"directory symlinks are unavailable: {error}")
+                junction = subprocess.run(
+                    ["cmd", "/c", "mklink", "/J", str(logical), str(physical)],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                if junction.returncode:
+                    self.skipTest(
+                        "directory links are unavailable: "
+                        + (junction.stderr or junction.stdout).strip()
+                    )
+
+            from benchmark.core.model_runner import _submission_page_order
+
+            self.assertEqual(
+                _submission_page_order(
+                    logical / "S001" / "submission.json",
+                    logical / "S001",
+                    "S001",
+                ),
+                ["pages/p0001.png"],
+            )
 
     def test_run_model_packet_multimodal_rejects_pdf_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:

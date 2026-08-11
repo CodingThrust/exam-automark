@@ -16,7 +16,7 @@ from benchmark.core.scoped_anonymous_images import (
     SNAPSHOT_RECORD_TYPE,
     SNAPSHOT_SCHEMA_VERSION,
 )
-from scripts.review_question_gold import GoldReviewStore, next_incomplete_student_index
+from scripts.review_question_gold import _HTML, GoldReviewStore, next_incomplete_student_index
 from scripts.initialize_question_gold_review import initialize_question_gold_review
 
 
@@ -79,6 +79,23 @@ class QuestionGoldReviewTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "approved scoped anonymous PNG"):
                 store.image_path("anonymized_pages/S001/S001-p02.png")
 
+    def test_legacy_page_mapping_allows_one_question_to_span_pages(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = _make_inputs(Path(tmp))
+            payload = json.loads(paths["course_path"].read_text(encoding="utf-8"))
+            payload["page_mapping"] = {
+                "basis": "synthetic declared cross-page evidence",
+                "p01": {"question_ids": ["Q1", "Q2"]},
+                "p03": {"question_ids": ["Q2"]},
+            }
+            paths["course_path"].write_text(json.dumps(payload), encoding="utf-8")
+            _write_binding(paths)
+
+            first = _store(paths).state()["students"][0]
+
+        self.assertEqual(first["pages"][0]["question_ids"], ["Q1", "Q2"])
+        self.assertEqual(first["pages"][1]["question_ids"], ["Q2"])
+
     def test_score_validation_rejects_off_step_without_changing_gold_then_approves_atomically(self):
         with tempfile.TemporaryDirectory() as tmp:
             paths = _make_inputs(Path(tmp))
@@ -134,6 +151,7 @@ class QuestionGoldReviewTests(unittest.TestCase):
             self.assertEqual(state["summary"]["total_score_rows"], 2)
             self.assertEqual(state["summary"]["snapshot_student_count"], 2)
             self.assertEqual(state["summary"]["snapshot_total_score_rows"], 4)
+            self.assertTrue(state["summary"]["review_subset"])
             with self.assertRaisesRegex(ValueError, "approved scoped anonymous PNG"):
                 store.image_path("anonymized_pages/S001/S001-p01.png")
             with self.assertRaisesRegex(ValueError, "outside this review subset"):
@@ -151,6 +169,24 @@ class QuestionGoldReviewTests(unittest.TestCase):
         self.assertEqual(saved[("S001", "Q2")]["score"], "")
         self.assertEqual(saved[("S002", "Q1")]["score"], "2")
         self.assertEqual(saved[("S002", "Q2")]["score"], "2.5")
+
+    def test_local_ui_explains_review_subset_and_has_non_destructive_rotation_controls(self):
+        self.assertIn('id="review-scope"', _HTML)
+        self.assertIn("review_subset", _HTML)
+        self.assertIn("rotationStorageKey", _HTML)
+        self.assertIn("drawPage", _HTML)
+        self.assertIn("Left", _HTML)
+        self.assertIn("Right", _HTML)
+        self.assertIn("Reset", _HTML)
+        self.assertIn("grid-template-columns:minmax(0,1fr)", _HTML)
+        self.assertIn("openNativeImageViewer", _HTML)
+        self.assertIn("Full resolution", _HTML)
+        self.assertIn("renderAllowedScoreControls", _HTML)
+        self.assertIn("allowed_scores", _HTML)
+        self.assertIn("page-order-notice", _HTML)
+        self.assertIn("not question numbers", _HTML)
+        self.assertIn("Review all pages", _HTML)
+        self.assertIn("page/order only", _HTML)
 
     def test_students_file_rejects_empty_duplicate_invalid_or_outside_snapshot_ids(self):
         with tempfile.TemporaryDirectory() as tmp:

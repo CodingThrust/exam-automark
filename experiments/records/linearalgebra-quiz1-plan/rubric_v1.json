@@ -1,0 +1,118 @@
+{
+  "assessment_id": "quiz1",
+  "course_id": "linearalgebra",
+  "rubric_version": "v1",
+  "supersedes": "rubric_v0.json",
+  "status": "course_owner_confirmed_frozen_v1_q2_subparts",
+  "score_policy": {
+    "base_total_points": 100,
+    "final_assessment_score_cap": 100,
+    "allowed_increment": 1,
+    "scope": "All questions in this assessment, with question-specific treatment only where explicitly stated.",
+    "grading_principles": [
+      "Identify the question type before scoring.",
+      "Score visible mathematical evidence rather than inferred intent.",
+      "Accept mathematically valid alternatives; a reference route is an anchor, not a method whitelist.",
+      "For calculation questions, a correct result with broadly correct visible work earns full credit.",
+      "For calculation questions, a correct unsupported final answer is capped at 3 points unless the question-specific rubric says otherwise.",
+      "When a final result is wrong, retain credit for valid visible setup and computation.",
+      "A single local arithmetic or sign error normally causes only a 1- or 2-point total deduction when the method otherwise remains valid.",
+      "Treat functional scoring components as evidence anchors rather than a mandatory ideal-solution checklist; concise, reordered, or nonstandard valid work can earn full credit.",
+      "Do not deduct twice for the same local error, and reserve large deductions for material mathematical errors, contradictions, or missing required output behavior.",
+      "Do not require a proof, explanation, or displayed work unless the assessment or question explicitly requires it."
+    ]
+  },
+  "questions": [
+    {
+      "id": "Q1",
+      "max_score": 25,
+      "allowed_increment": 1,
+      "question_type": "true_false",
+      "expected_evidence": "One unambiguous True or False selection for each of the five statements.",
+      "partial_credit_notes": "Each correct selection earns 5 points. Accept any unambiguous True/False notation or equivalent selection. The prompt does not require an explanation; do not deduct for its absence. Score each statement independently; an ambiguous, missing, or contradictory selection earns 0 only for that statement.",
+      "accepted_answers": ["T", "F", "T", "F", "F"]
+    },
+    {
+      "id": "Q2a",
+      "max_score": 15,
+      "allowed_increment": 1,
+      "question_type": "calculation",
+      "expected_result": "-56",
+      "expected_evidence": "A valid determinant-calculation route and its visible intermediate work, if any.",
+      "scoring_components": [
+        {"id": "valid_method_or_setup", "max_points": 3, "evidence": "A mathematically valid route is selected and applied to the given determinant."},
+        {"id": "determinant_structure", "max_points": 5, "evidence": "The determinant transformations, expansion structure, or equivalent intermediate setup is correct."},
+        {"id": "calculation_and_simplification", "max_points": 4, "evidence": "The visible numerical calculation and simplification are correct."},
+        {"id": "final_result", "max_points": 3, "evidence": "The stated result is correct.", "minor_local_error_credit": 2}
+      ],
+      "partial_credit_notes": "Score independently from Q2b. Accept direct expansion, determinant properties, row or column transformations, triangularization, and other valid routes. Components are functional evidence categories, not a prescribed sequence of row operations. A correct unsupported result earns 3 of 15. If one local arithmetic or sign error is directly responsible for an otherwise coherent wrong result, deduct only 1 or 2 points in total; do not mechanically remove every downstream component.",
+      "answer_only_cap": 3,
+      "minor_local_error_total_deduction": [1, 2],
+      "reference_method_constraint": "None"
+    },
+    {
+      "id": "Q2b",
+      "max_score": 15,
+      "allowed_increment": 1,
+      "question_type": "calculation",
+      "expected_result": "abcd + ab + ad + cd + 1",
+      "expected_evidence": "A valid determinant-calculation route and its visible intermediate work, if any.",
+      "scoring_components": [
+        {"id": "valid_method_or_setup", "max_points": 3, "evidence": "A mathematically valid route is selected and applied to the given determinant."},
+        {"id": "determinant_structure", "max_points": 5, "evidence": "The determinant transformations, expansion structure, or equivalent intermediate setup is correct."},
+        {"id": "calculation_and_simplification", "max_points": 4, "evidence": "The visible symbolic calculation and simplification are correct."},
+        {"id": "final_result", "max_points": 3, "evidence": "The stated result is correct.", "minor_local_error_credit": 2}
+      ],
+      "partial_credit_notes": "Score independently from Q2a. Accept direct expansion, determinant properties, row or column transformations, triangularization, and other valid routes. Components are functional evidence categories, not a prescribed sequence of row operations. A correct unsupported result earns 3 of 15. If one local arithmetic or sign error is directly responsible for an otherwise coherent wrong result, deduct only 1 or 2 points in total; do not mechanically remove every downstream component.",
+      "answer_only_cap": 3,
+      "minor_local_error_total_deduction": [1, 2],
+      "reference_method_constraint": "None"
+    },
+    {
+      "id": "Q3",
+      "max_score": 25,
+      "allowed_increment": 1,
+      "question_type": "calculation",
+      "expected_result": "s is not equal to 0 or -8",
+      "expected_evidence": "A valid argument that identifies the condition for a unique solution and excludes both exceptional parameter values.",
+      "scoring_components": [
+        {"id": "unique_solution_condition", "max_points": 6, "evidence": "A valid condition for uniqueness is identified, such as a nonzero coefficient determinant or an equivalent full-rank argument."},
+        {"id": "derivation", "max_points": 8, "evidence": "A correct determinant computation, elimination, row reduction, or equivalent derivation establishes the relevant parameter condition."},
+        {"id": "exceptional_values", "max_points": 8, "evidence": "Both exceptional values 0 and -8 are correctly identified and excluded."},
+        {"id": "final_conclusion", "max_points": 3, "evidence": "The final permitted parameter set is clearly stated.", "minor_local_error_credit": 2}
+      ],
+      "partial_credit_notes": "Accept determinant, row-reduction, elimination, or another valid argument. Components are evidence anchors rather than required named steps. A correct unsupported conclusion earns 3 points. If one local arithmetic or sign error leaves an otherwise coherent route, deduct only 1 or 2 points in total and do not mechanically zero downstream components. If the conclusion is wrong for a material reason, retain credit for valid visible setup and parameter analysis.",
+      "answer_only_cap": 3,
+      "minor_local_error_total_deduction": [1, 2],
+      "bonus": {
+        "max_score": 10,
+        "criterion": "The final conclusion is correct, and the first and second methods are genuinely distinct and each mathematically correct.",
+        "award_policy": "all_or_nothing",
+        "non_award_cases": [
+          "The final conclusion is incorrect.",
+          "Either method contains a material mathematical error.",
+          "The purported second method is only a cosmetic rewrite or continuation of the first method."
+        ],
+        "final_assessment_score_cap": 100
+      }
+    },
+    {
+      "id": "Q4",
+      "max_score": 20,
+      "allowed_increment": 1,
+      "question_type": "calculation",
+      "expected_result": "7/2",
+      "expected_evidence": "A valid tetrahedron-volume setup, such as three edge vectors from one common vertex with an absolute scalar triple product divided by 6, or an equivalent derivation.",
+      "scoring_components": [
+        {"id": "geometric_quantities", "max_points": 4, "evidence": "Correct edge vectors from a common vertex or equivalent valid geometric quantities are constructed."},
+        {"id": "volume_setup", "max_points": 8, "evidence": "A valid tetrahedron-volume relation is established, such as the absolute scalar triple product divided by 6 or an equivalent base-times-height route."},
+        {"id": "calculation", "max_points": 5, "evidence": "The determinant, scalar triple product, or equivalent volume calculation is correctly evaluated."},
+        {"id": "final_result", "max_points": 3, "evidence": "The final volume is correctly stated.", "minor_local_error_credit": 2}
+      ],
+      "partial_credit_notes": "Accept scalar-triple-product, determinant, base-times-height, or another valid coordinate-geometry route. Components are evidence anchors rather than required named steps. A correct unsupported result earns 3 points. If one local arithmetic or sign error is directly responsible for an otherwise coherent wrong result, deduct only 1 or 2 points in total and do not mechanically zero downstream components.",
+      "answer_only_cap": 3,
+      "minor_local_error_total_deduction": [1, 2],
+      "reference_method_constraint": "None"
+    }
+  ]
+}

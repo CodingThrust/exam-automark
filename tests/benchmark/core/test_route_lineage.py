@@ -10,7 +10,11 @@ from benchmark.core.packets import (
     build_text_grading_packet,
     directory_digest,
 )
-from benchmark.core.route_lineage import check_m1_t1_g1_lineage
+from benchmark.core.route_lineage import (
+    check_m1_t1_g1_lineage,
+    project_public_route_lineage_binding,
+    write_route_lineage_report,
+)
 from benchmark.core.schema import CourseSpec
 
 
@@ -90,6 +94,7 @@ class RouteLineageTests(unittest.TestCase):
                         "packet_hash": directory_digest(t1.packet_path),
                         "task": "transcribe",
                         "condition": "T1",
+                        "input_mode": "multimodal",
                         "validation_status": "passed",
                         "course_id": "dsaa3073",
                         "assessment_id": "hw1",
@@ -126,10 +131,49 @@ class RouteLineageTests(unittest.TestCase):
                 t1_run=run,
             )
 
-        self.assertEqual(report["status"], "ready")
-        self.assertEqual(report["stage"], "full_routes")
-        self.assertFalse(report["failed_checks"])
+            self.assertEqual(report["status"], "ready")
+            self.assertEqual(report["stage"], "full_routes")
+            self.assertFalse(report["failed_checks"])
+            binding = project_public_route_lineage_binding(report)
+            encoded = json.dumps(binding, sort_keys=True)
+            self.assertEqual(binding["status"], "ready")
+            self.assertEqual(binding["t1"]["run_id"], "t1-dev-r1")
+            self.assertEqual(
+                binding["g1"]["source_transcription_packet_hash"],
+                binding["t1"]["packet_hash"],
+            )
+            self.assertNotIn("S001", encoded)
 
+            unsafe = json.loads(json.dumps(report))
+            unsafe["lineage_binding"]["t1"]["run_id"] = "Data/private-run"
+            with self.assertRaisesRegex(ValueError, "not safe"):
+                project_public_route_lineage_binding(unsafe)
+
+            report["checks"][0]["detail"] = "untrusted detail must not be exported"
+            audit_path = root / "route-lineage.aggregate.json"
+            write_route_lineage_report(report, audit_path)
+            audit_text = audit_path.read_text(encoding="utf-8")
+            audit = json.loads(audit_text)
+            self.assertNotIn("detail", audit["checks"][0])
+            self.assertNotIn("untrusted detail", audit_text)
+            # Projection must also accept the persisted, privacy-redacted
+            # report shape rather than requiring transient check details.
+            persisted_binding = project_public_route_lineage_binding(audit)
+            self.assertEqual(persisted_binding, binding)
+
+            manifest_path = g1.packet_path / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["metadata"]["source_run_id"] = "other-t1-run"
+            manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+            mismatched = check_m1_t1_g1_lineage(
+                m1_packet=m1.packet_path,
+                t1_packet=t1.packet_path,
+                g1_packet=g1.packet_path,
+                t1_run=run,
+            )
+
+        self.assertEqual(mismatched["status"], "not_ready")
+        self.assertIn("g1_source_run_id_matches_t1_run", mismatched["failed_checks"])
     def _build_image_pair(self, root: Path):
         input_root = root / "inputs"
         student = input_root / "S001"

@@ -1,8 +1,25 @@
 # Linear Algebra Quiz 1 route automation / 线路自动化
 
-Status: the anonymous cohort and development/held-out split are frozen, but
-`model_run_allowed` remains `false`. This document contains no student work,
-gold scores, or private filenames.
+Status: the anonymous cohort and development/held-out split are frozen. The
+snapshot-level `model_run_allowed` marker remains `false`; it is not mutated by
+route execution. This document contains no student work, gold scores, or
+private filenames.
+
+## Authorized blinded parallel development run
+
+The default gate order below requires completed development gold before a model
+run. A course owner may explicitly authorize one blinded development execution
+while human gold entry is still in progress only when all of the following are
+recorded: the exact frozen development roster, course/rubric/reference/skill
+contract, matched M1/T1 packet lineage, provider/model configuration, and the
+owner's scope-limited approval. This exception does not authorize held-out work
+or any metric, accuracy, agreement, or route-comparison claim. Those remain
+locked until the corresponding human gold subset is complete and validated.
+
+For Linear Algebra Quiz 1 v2, the course owner authorized this exception on
+2026-08-11 for the frozen 30-submission development roster and the four M1,
+T1, Codex-G1, and DeepSeek-G1 routes only. Legacy v1 outputs and any partial
+v5.1/v5.2-r1 route outputs are excluded from comparison and must not be resumed.
 
 ## What is automated / 已自动化内容
 
@@ -16,6 +33,12 @@ directory naming convention, supplies every submission's ordered pages.
 snapshot-derived T1 packet it reads `submission.json` only as page-order and
 scope metadata, attaches every listed image in that order, and validates a
 transcription-shaped output. It does not score T1 output.
+
+The source-page number, attachment index, and image filename are locators only:
+they never identify a question and are not a question-to-page mapping. Every
+route must review the full ordered submission and find each declared leaf from
+visible question labels, stems, and answer content. A page may contain several
+answers, an answer may span pages, and scan order may differ across students.
 
 `build-text-grading-packet` detects a completed adjacent T1 `outputs/` folder.
 It inherits and verifies that run's T1 packet hash and frozen snapshot hash, so
@@ -48,26 +71,26 @@ submission tree and do not put command output in Git.
 ```powershell
 # 1. Human gold must be complete for the frozen development roster.
 python -m benchmark.core.cli validate-gold-subset `
-  --course experiments/course_specs/linearalgebra_quiz1.json `
+  --course experiments/course_specs/linearalgebra_quiz1_v2.json `
   --gold Data/<course>/<private-gold>/question-gold.csv `
   --students-file Data/<course>/<private-split>/development-students.txt `
   --output Data/<course>/<private-gold>/development-gold-readiness.json
 
 # 2. Build byte-matched M1 and T1 image packets. This does not call a model.
 python -m benchmark.core.cli build-matched-image-route-packets `
-  --course experiments/course_specs/linearalgebra_quiz1.json `
+  --course experiments/course_specs/linearalgebra_quiz1_v2.json `
   --snapshot-root Data/<course>/<final-approved-cohort> `
   --output-root Data/<course>/<private-packets>/development `
   --split development `
   --students-file Data/<course>/<private-split>/development-students.txt `
-  --m1-packet-id M1-dev-r1 `
-  --t1-packet-id T1-dev-r1 `
-  --grade-prompt experiments/prompt_templates/grade_candidate_v5.txt `
-  --transcribe-prompt experiments/prompt_templates/transcribe_standard_v1.txt `
-  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v0.json `
-  --metadata skill_version_id=skill_candidate_v5 `
-  --metadata grade_prompt_template_id=grade_candidate_v5 `
-  --metadata transcribe_prompt_template_id=transcribe_standard_v1
+  --m1-packet-id M1-dev-r2 `
+  --t1-packet-id T1-dev-r2 `
+  --grade-prompt experiments/prompt_templates/grade_candidate_v5_2_r2.txt `
+  --transcribe-prompt experiments/prompt_templates/transcribe_standard_v2_r2.txt `
+  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v2.json `
+  --metadata skill_version_id=skill_candidate_v5_2 `
+  --metadata grade_prompt_template_id=grade_candidate_v5_2_r2 `
+  --metadata transcribe_prompt_template_id=transcribe_standard_v2_r2
 
 # 3. This must be ready before any provider call. It never grants approval.
 python -m benchmark.core.cli check-route-lineage `
@@ -84,17 +107,18 @@ T1 run and automatically inherits its run ID, packet hash, and snapshot hash.
 ```powershell
 # Provider/model values are intentionally omitted until the explicit approval.
 python -m benchmark.core.cli build-text-grading-packet `
-  --course experiments/course_specs/linearalgebra_quiz1.json `
-  --packet-id G1-dev-r1 `
+  --course experiments/course_specs/linearalgebra_quiz1_v2.json `
+  --packet-id G1-dev-r2 `
   --condition G1 `
-  --prompt experiments/prompt_templates/grade_candidate_v5.txt `
-  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v0.json `
+  --prompt experiments/prompt_templates/grade_candidate_v5_2_r2.txt `
+  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v2.json `
   --students-file Data/<course>/<private-split>/development-students.txt `
   --transcript-source Data/<course>/<private-runs>/T1-dev-r1/outputs `
   --output-root Data/<course>/<private-packets>/development `
   --text-source-kind automatic_transcript `
   --metadata split=development `
-  --metadata skill_version_id=skill_candidate_v5
+  --metadata skill_version_id=skill_candidate_v5_2 `
+  --metadata grade_prompt_template_id=grade_candidate_v5_2_r2
 
 python -m benchmark.core.cli check-route-lineage `
   --m1-packet Data/<course>/<private-packets>/development/M1-dev-r1 `

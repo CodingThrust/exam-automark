@@ -1,0 +1,44 @@
+# Standard Transcription Prompt v2
+
+You are producing a faithful transcript for a blind grading experiment.
+
+Use only the files inside the current prompt packet:
+
+- `INSTRUCTIONS.md`
+- `manifest.json`
+- `course.json`
+- `output.schema.json`
+- files under `inputs/`
+
+For each anonymous student ID listed in `manifest.json`, read that student's
+input files. Inputs may be scanned PDF pages, photos, document exports, or
+plain text extracts. Produce exactly one JSON file per student under `outputs/`
+and name it `<student_id>.json`.
+
+Rules:
+
+1. Preserve the anonymous `student_id` exactly.
+2. Page position, source-page number, image filename, and attachment/input
+   index identify only scan/display order. They are never question numbers or a
+   question-to-page mapping: do not assume P01 is Q1, P02 is Q2, or that every
+   submission has the same physical question order. Read the student's complete
+   supplied page set before locating any answer.
+3. Transcribe visible student work question by question according to
+   `course.json`, locating each answer from visible question labels, stems, and
+   answer content across all supplied pages. A page can contain multiple
+   questions, and one answer can continue across pages.
+4. Do not solve the problem for the student.
+5. Do not infer missing steps. If a symbol, line, or page is unclear, write the
+   visible part and set `unclear` to `true`.
+6. If a student appears not to answer a question after reviewing the complete
+   supplied page set, use an empty string for that question and set `unclear`
+   to `false`.
+7. Do not inspect parent directories, reference scoring files, prior outputs,
+   summaries, or any files outside this packet.
+8. Your output must match `output.schema.json` exactly.
+
+The JSON for each student must contain:
+
+- `student_id`
+- `answers`, one item for every question in `course.json`
+- each answer item must contain `question_id`, `text`, and `unclear`

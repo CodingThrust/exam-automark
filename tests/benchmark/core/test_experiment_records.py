@@ -83,8 +83,9 @@ class ExperimentRecordFileTests(unittest.TestCase):
                     plan.prompt_template_hashes,
                 )
             elif plan.experiment_id == "linearalgebra-quiz1-plan":
-                self.assertEqual(plan.skill_version_id, "skill_candidate_v5")
-                self.assertIn("grade_candidate_v5", plan.prompt_template_hashes)
+                self.assertEqual(plan.skill_version_id, "skill_candidate_v5_2")
+                self.assertIn("grade_candidate_v5_2_r2", plan.prompt_template_hashes)
+                self.assertIn("transcribe_standard_v2_r2", plan.prompt_template_hashes)
                 self.assertEqual(plan.status, "cohort_scoped")
                 self.assertEqual(
                     {
@@ -92,7 +93,7 @@ class ExperimentRecordFileTests(unittest.TestCase):
                         for packet in plan.planned_packets
                         if packet.task == "grade"
                     },
-                    {"grade_candidate_v5"},
+                    {"grade_candidate_v5_2_r2"},
                 )
             else:
                 self.assertEqual(plan.skill_version_id, "skill_baseline_v1")
@@ -104,6 +105,7 @@ class ExperimentRecordFileTests(unittest.TestCase):
             Path("experiments/course_specs/DSAA3073_week2_test.json"),
             Path("experiments/course_specs/DSAA3071_week5_test.json"),
             Path("experiments/course_specs/linearalgebra_quiz1.json"),
+            Path("experiments/course_specs/linearalgebra_quiz1_v2.json"),
         ]
 
         specs = [CourseSpec.from_json_path(path) for path in spec_paths]

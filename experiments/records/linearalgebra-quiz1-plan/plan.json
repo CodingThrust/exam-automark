@@ -2,13 +2,13 @@
   "assessment_id": "quiz1",
   "course_id": "linearalgebra",
   "candidate_skill_policy": {
-    "candidate_skill_snapshot_path": "experiments/skill_versions/skill_candidate_v5.json",
-    "candidate_skill_version": "skill_candidate_v5",
+    "candidate_skill_snapshot_path": "experiments/skill_versions/skill_candidate_v5_2.json",
+    "candidate_skill_version": "skill_candidate_v5_2",
     "course_specific_rules_allowed": false,
-    "description": "Candidate v5 is a cross-course evidence-first skill. It assembles every ordered page for one anonymous student before question-level scoring and forbids page-level marks. Assessment answers, score allocations, question types, answer-only limits, missing-work policy, and local grading requirements remain in the frozen course specification and rubric.",
-    "status": "candidate_v5_frozen_pending_development_evaluation"
+    "description": "Candidate v5.2 is a cross-course evidence-first skill. It assembles every ordered page for one anonymous student before scoring the smallest independently scoreable, course-declared leaf item; it forbids page-level and aggregate-parent marks. Page positions, source-page labels, input indices, and image filenames are locators only, never question numbers or a question-to-page mapping. Assessment answers, score allocations, question types, answer-only limits, missing-work policy, and local grading requirements remain in the frozen course specification and rubric.",
+    "status": "candidate_v5_2_frozen_pending_development_evaluation"
   },
-  "course_spec_path": "experiments/course_specs/linearalgebra_quiz1.json",
+  "course_spec_path": "experiments/course_specs/linearalgebra_quiz1_v2.json",
   "completed_gates": [
     "course-owner-approved reference solution and rubric",
     "base anonymous cohort privacy, blindness, and answer-preservation review",
@@ -20,8 +20,8 @@
   "data_inventory_path": "experiments/data_inventory/linearalgebra.json",
   "data_snapshot_hash": "bc8cc94a7a2e0e4cfb700e14d1322d089a788e09eb78c9580e9fcf4a72a02eba",
   "experiment_id": "linearalgebra-quiz1-plan",
-  "git_branch": "codex/la-task1-launch-inventory",
-  "git_commit": "945774a",
+  "git_branch": "codex/la-gold-review-orientation",
+  "git_commit": "84fc6ad",
   "gates_before_model_run": [
     "course-owner-approved reference solution and rubric",
     "manifest-bound submission-scope decisions for every anomalous included submission group",
@@ -35,15 +35,34 @@
   "launch_base_commit": "048a17b",
   "launch_branch": "codex/la-task1-launch-inventory",
   "model_run_allowed": false,
+  "parallel_blind_development_execution": {
+    "authorization_status": "course_owner_explicitly_approved",
+    "scope": "frozen_30_submission_development_only",
+    "contract": "v2_leaf_subparts_capped_bonus_and_page_order_safe_r2",
+    "authorized_routes": [
+      "M1",
+      "T1",
+      "G1-Codex",
+      "G1-DeepSeek"
+    ],
+    "human_gold_state_at_authorization": "in_progress",
+    "metrics_and_comparison": "locked_until_human_gold_is_complete_and_validated",
+    "heldout_execution": "not_authorized"
+  },
   "notes": [
     "Scope confirmed from the four-page Chapter 1-3 Quiz: Q1-Q4, 100 base points, integer scoring, and a 100-point final cap.",
     "No instructor-provided official solution or pre-existing human scores were available. The course owner has adjudicated the reference solution, rubric, and partial-credit policy; question-level human gold remains pending.",
+    "Before gold entry, the course owner corrected an implementation omission: the two determinant subparts are independently scored as Q2a and Q2b, 15 points each. The earlier merged-Q2 v0 public artifacts remain retained for audit.",
+    "Before the v2 human-gold session, the course owner identified that Q1 contains five independently scored true/false subparts and confirmed the pre-existing Q3 distinct-method bonus must be an independently recorded 0-or-10 leaf with a final total cap of 100. v1 course/rubric/reference and five-row model artifacts remain audit-only; v2 is the active nine-base-leaf plus one-bonus-leaf scoring contract.",
     "M1 direct multimodal grading and T1-to-G1 transcription-first grading will be compared only on matched anonymous inputs.",
     "Raw local submission filenames may contain student identifiers; no prompt packet may use the raw tree.",
     "The base anonymous cohort has completed private privacy/blindness/content review. Its five anomalous page-count groups now have manifest-bound human submission-scope decisions, including a reviewed duplicate-page exclusion and an explicit missing-question flag. The local image snapshot preserves variable page counts and requires every student's ordered pages to be treated as one grading unit; it is not a model packet or run approval.",
     "The separately isolated DOCX supplement completed final review. Its original assessment identifier differed from the base source, so the course owner confirmed same-assessment identity through a private hash-bound alignment decision; the sources are now a unified model-blocked cohort of 43 anonymous submissions and 173 approved images.",
     "The anonymous 30/13 development/held-out split is frozen. A private question-level gold table is initialized for human development-set entry; held-out gold remains unentered and no packet or model run exists.",
-    "Public route automation now builds manifest-bound matched M1 direct-image and T1 transcription packets, validates their lineage, and binds a later G1 packet to a successful T1 run. This code is ready for the human-gold gate but has not built a real packet or authorized a model."
+    "On 2026-08-11, the course owner explicitly authorized one blinded v2 execution of M1, T1, Codex-G1, and DeepSeek-G1 on the frozen 30-submission development set while human gold entry continues. The model routes must use new v2 packets only; no metrics, accuracy/agreement claim, held-out activity, or reuse of legacy v1 outputs is permitted until the human gold subset is complete and validated.",
+    "Before the authorized run completed, review of a submission with non-question scan order identified a generic page-position inference risk. Candidate v5.2 and transcription v2 make page/source/file labels locators only, require leaf evidence to be found from visible labels, stems, and answer content across the complete submission, and require uncertainty to be flagged rather than inferred from page position. Any partial v5.1 route output is audit-only and cannot be compared or resumed.",
+    "A preflight review then found an obsolete prompt title/page-list reference and an incomplete runtime injection for multimodal packets. The small v5.2-r1 partial run is audit-only and stopped. Fresh v5.2-r2 grading and transcription templates, together with a runtime locator-only rule and a new private rerun root, are required for all four routes.",
+    "Public route automation builds manifest-bound matched M1 direct-image and T1 transcription packets, validates their lineage, and binds G1 only to a successful same-run T1 output. The authorized blinded v2 development execution remains private; human gold validation is still required before metrics or route comparison."
   ],
   "planned_conditions": [
     {
@@ -65,64 +84,64 @@
   "planned_packets": [
     {
       "condition": "M1",
-      "packet_id": "M1-dev-r1",
-      "prompt_template_id": "grade_candidate_v5",
+      "packet_id": "M1-dev-r2",
+      "prompt_template_id": "grade_candidate_v5_2_r2",
       "split": "development",
       "task": "grade"
     },
     {
       "condition": "M1",
-      "packet_id": "M1-test-r1",
-      "prompt_template_id": "grade_candidate_v5",
+      "packet_id": "M1-test-r2",
+      "prompt_template_id": "grade_candidate_v5_2_r2",
       "split": "heldout",
       "task": "grade"
     },
     {
       "condition": "T1",
-      "packet_id": "T1-dev-r1",
-      "prompt_template_id": "transcribe_standard_v1",
+      "packet_id": "T1-dev-r2",
+      "prompt_template_id": "transcribe_standard_v2_r2",
       "split": "development",
       "task": "transcribe"
     },
     {
       "condition": "T1",
-      "packet_id": "T1-test-r1",
-      "prompt_template_id": "transcribe_standard_v1",
+      "packet_id": "T1-test-r2",
+      "prompt_template_id": "transcribe_standard_v2_r2",
       "split": "heldout",
       "task": "transcribe"
     },
     {
       "condition": "G1",
-      "packet_id": "G1-dev-r1",
-      "prompt_template_id": "grade_candidate_v5",
+      "packet_id": "G1-dev-r2",
+      "prompt_template_id": "grade_candidate_v5_2_r2",
       "split": "development",
       "task": "grade"
     },
     {
       "condition": "G1",
-      "packet_id": "G1-test-r1",
-      "prompt_template_id": "grade_candidate_v5",
+      "packet_id": "G1-test-r2",
+      "prompt_template_id": "grade_candidate_v5_2_r2",
       "split": "heldout",
       "task": "grade"
     }
   ],
   "prompt_template_hashes": {
-    "grade_candidate_v5": "7c1e9d715628b06e9740eb945fe311e458307346c0ec047e13e0cbfc2c2801f8",
-    "transcribe_standard_v1": "6f8da57a19fd572ba9d927e6cee2aa5ba10b1a114cff3280108916fca702f8f9"
+    "grade_candidate_v5_2_r2": "29123e7cd9ce4ec40d2ee46d2b00999c4c1dfcf449e0700e9bd970e27c3bcb23",
+    "transcribe_standard_v2_r2": "79881ce52496bedc8d31c4d80696df50384b47d4cd5d112f1568c864e881bf32"
   },
-  "reference_solution_path": "experiments/records/linearalgebra-quiz1-plan/reference_solution_v0.json",
-  "reference_solution_status": "course_owner_confirmed",
-  "rubric_path": "experiments/records/linearalgebra-quiz1-plan/rubric_v0.json",
-  "rubric_status": "course_owner_confirmed_frozen_v0",
+  "reference_solution_path": "experiments/records/linearalgebra-quiz1-plan/reference_solution_v2.json",
+  "reference_solution_status": "course_owner_confirmed_frozen_v2_q1_subparts_and_q3_bonus",
+  "rubric_path": "experiments/records/linearalgebra-quiz1-plan/rubric_v2.json",
+  "rubric_status": "course_owner_confirmed_frozen_v2_q1_subparts_and_q3_bonus",
   "schema_version": 2,
   "skill_hashes": {
-    "agents": "7b1f3c02aede473187e39a215390249bce3b107282db5d99739ff85dbc91a38f",
-    "claude": "7b1f3c02aede473187e39a215390249bce3b107282db5d99739ff85dbc91a38f"
+    "agents": "d623f29cfce9cb327bcd553d427c44d261c7bd10c216c67632853a43d800ccfe",
+    "claude": "d623f29cfce9cb327bcd553d427c44d261c7bd10c216c67632853a43d800ccfe"
   },
   "skill_source_paths": {
     "agents": ".agents/skills/grade-homework/SKILL.md",
     "claude": ".claude/skills/grade-homework/SKILL.md"
   },
-  "skill_version_id": "skill_candidate_v5",
+  "skill_version_id": "skill_candidate_v5_2",
   "status": "cohort_scoped"
 }

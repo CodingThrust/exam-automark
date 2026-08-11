@@ -49,6 +49,49 @@ class CoreSchemaTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Q2a score"):
             validate_score_records(bad, course)
 
+    def test_supports_leaf_subparts_discrete_scores_and_capped_bonus_total(self):
+        course = CourseSpec(
+            course_id="linearalgebra",
+            assessment_id="quiz",
+            questions=(
+                QuestionSpec(
+                    "Q1a",
+                    5,
+                    score_step=1,
+                    parent_question_id="Q1",
+                    allowed_scores=(0, 5),
+                ),
+                QuestionSpec("Q2", 95, score_step=1),
+                QuestionSpec(
+                    "Q2bonus",
+                    10,
+                    score_step=1,
+                    parent_question_id="Q2",
+                    allowed_scores=(0, 10),
+                    is_bonus=True,
+                ),
+            ),
+            base_total_points=100,
+            final_score_cap=100,
+        )
+        records = [
+            ScoreRecord("S001", "Q1a", 5, "high", "selected true"),
+            ScoreRecord("S001", "Q2", 95, "high", "valid work"),
+            ScoreRecord("S001", "Q2bonus", 10, "high", "two distinct methods"),
+        ]
+
+        self.assertEqual(course.question_map["Q1a"].parent_question_id, "Q1")
+        self.assertEqual(course.raw_max_total, 110)
+        self.assertEqual(course.max_total, 100)
+        self.assertEqual(validate_score_records(records, course), 100)
+        self.assertFalse(course.question_map["Q1a"].allows_score(4))
+
+    def test_rejects_self_parent_and_invalid_discrete_score(self):
+        with self.assertRaisesRegex(ValueError, "differ"):
+            QuestionSpec("Q1", 5, parent_question_id="Q1")
+        with self.assertRaisesRegex(ValueError, "allowed_scores"):
+            QuestionSpec("Q1a", 5, allowed_scores=(1, 6))
+
     def test_rejects_nonanonymous_student_ids(self):
         course = CourseSpec.from_json_path(FIXTURES / "course_dsaa3073_hw1.json")
         records = [

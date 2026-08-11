@@ -20,6 +20,11 @@ from .gold import validate_gold_subset_table, validate_gold_table, write_gold_re
 from .headless_runner import HeadlessPacketRunConfig, run_headless_packet
 from .inventory import write_data_inventory
 from .model_runner import INPUT_MODES, ModelPacketRunConfig, run_model_packet
+from .multiroute_reporting import (
+    build_multi_route_report_from_paths,
+    write_multi_route_report,
+    write_t1_readiness_summary,
+)
 from .comparisons import (
     check_three_condition_ablation,
     write_three_condition_ablation_json,
@@ -48,7 +53,11 @@ from .readiness import (
     write_readiness_json,
     write_readiness_markdown,
 )
-from .route_lineage import check_m1_t1_g1_lineage, write_route_lineage_report
+from .route_lineage import (
+    check_m1_t1_g1_lineage,
+    write_public_route_lineage_binding,
+    write_route_lineage_report,
+)
 from .rubrics import validate_concept_rubric
 from .reporting import write_typst_note
 from .schema import CourseSpec
@@ -180,6 +189,56 @@ def _build_parser() -> argparse.ArgumentParser:
     note.add_argument("--output", type=Path)
     note.add_argument("--title")
 
+    t1_readiness = subparsers.add_parser(
+        "summarize-t1-readiness",
+        help=(
+            "project a local T1 validation file to a privacy-safe aggregate "
+            "readiness record"
+        ),
+    )
+    t1_readiness.add_argument("--validation", type=Path, required=True)
+    t1_readiness.add_argument(
+        "--run-metadata",
+        type=Path,
+        required=True,
+        help="local T1 run metadata used only to project opaque lineage commitments",
+    )
+    t1_readiness.add_argument("--output", type=Path, required=True)
+
+    multi_route_report = subparsers.add_parser(
+        "render-multi-route-report",
+        help=(
+            "combine aggregate-only M1/G1 comparison metrics and T1 readiness "
+            "into a public Typst dashboard"
+        ),
+    )
+    multi_route_report.add_argument("--m1-metrics", type=Path, required=True)
+    multi_route_report.add_argument(
+        "--m1-side", choices=("baseline", "candidate"), default="baseline"
+    )
+    multi_route_report.add_argument(
+        "--g1-codex-metrics", type=Path, required=True
+    )
+    multi_route_report.add_argument(
+        "--g1-codex-side", choices=("baseline", "candidate"), default="candidate"
+    )
+    multi_route_report.add_argument(
+        "--g1-deepseek-metrics", type=Path, required=True
+    )
+    multi_route_report.add_argument(
+        "--g1-deepseek-side", choices=("baseline", "candidate"), default="candidate"
+    )
+    multi_route_report.add_argument("--t1-readiness", type=Path, required=True)
+    multi_route_report.add_argument("--route-contract", type=Path, required=True)
+    multi_route_report.add_argument(
+        "--g1-codex-lineage", type=Path, required=True
+    )
+    multi_route_report.add_argument(
+        "--g1-deepseek-lineage", type=Path, required=True
+    )
+    multi_route_report.add_argument("--output-json", type=Path, required=True)
+    multi_route_report.add_argument("--output-typst", type=Path, required=True)
+
     inventory = subparsers.add_parser(
         "inventory-data",
         help="write a privacy-preserving local data inventory",
@@ -251,6 +310,16 @@ def _build_parser() -> argparse.ArgumentParser:
     lineage.add_argument("--g1-packet", type=Path)
     lineage.add_argument("--t1-run", type=Path)
     lineage.add_argument("--output", type=Path)
+
+    lineage_projection = subparsers.add_parser(
+        "project-route-lineage-binding",
+        help=(
+            "project a ready full-route lineage report to a public opaque "
+            "SHA-256 binding"
+        ),
+    )
+    lineage_projection.add_argument("--lineage", type=Path, required=True)
+    lineage_projection.add_argument("--output", type=Path, required=True)
 
     ablation = subparsers.add_parser(
         "check-ablation-readiness",
@@ -528,6 +597,60 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             print(json.dumps({"note_path": str(output)}, sort_keys=True))
             return 0
+        if args.command == "summarize-t1-readiness":
+            summary = write_t1_readiness_summary(
+                args.validation,
+                args.output,
+                run_metadata_path=args.run_metadata,
+            )
+            print(
+                json.dumps(
+                    {
+                        "record_type": summary["record_type"],
+                        "status": summary["status"],
+                        "students_expected": summary["students_expected"],
+                        "students_passed": summary["students_passed"],
+                        "students_failed": summary["students_failed"],
+                        "ready_for_g1": summary["ready_for_g1"],
+                        "privacy": "aggregate_only",
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0 if summary["ready_for_g1"] else 1
+        if args.command == "render-multi-route-report":
+            report = build_multi_route_report_from_paths(
+                m1_metrics_path=args.m1_metrics,
+                g1_codex_metrics_path=args.g1_codex_metrics,
+                g1_deepseek_metrics_path=args.g1_deepseek_metrics,
+                t1_readiness_path=args.t1_readiness,
+                route_contract_path=args.route_contract,
+                g1_codex_lineage_path=args.g1_codex_lineage,
+                g1_deepseek_lineage_path=args.g1_deepseek_lineage,
+                m1_side=args.m1_side,
+                g1_codex_side=args.g1_codex_side,
+                g1_deepseek_side=args.g1_deepseek_side,
+            )
+            write_multi_route_report(
+                report,
+                output_json=args.output_json,
+                output_typst=args.output_typst,
+            )
+            print(
+                json.dumps(
+                    {
+                        "record_type": report["record_type"],
+                        "course_id": report["course"]["course_id"],
+                        "assessment_id": report["course"]["assessment_id"],
+                        "student_count": report["population"]["student_count"],
+                        "routes": [route["route"] for route in report["routes"]],
+                        "t1_ready_for_g1": report["t1_readiness"]["ready_for_g1"],
+                        "privacy": "aggregate_only",
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
         if args.command == "inventory-data":
             inventory = write_data_inventory(
                 args.data_root,
@@ -667,6 +790,22 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             )
             return 0 if report["status"] == "ready" else 1
+        if args.command == "project-route-lineage-binding":
+            lineage_report = _read_json(args.lineage)
+            binding = write_public_route_lineage_binding(
+                lineage_report, args.output
+            )
+            print(
+                json.dumps(
+                    {
+                        "record_type": binding["record_type"],
+                        "status": binding["status"],
+                        "privacy": "aggregate_only",
+                    },
+                    sort_keys=True,
+                )
+            )
+            return 0
         if args.command == "check-ablation-readiness":
             report = check_three_condition_ablation(
                 args.b0_packet,

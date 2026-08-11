@@ -126,10 +126,10 @@ def compare_course_runs(
         "baseline_run": baseline_summary,
         "candidate_run": candidate_summary,
         "baseline": evaluate_course_scores(
-            gold, baseline_scores, baseline_confidence or None
+            gold, baseline_scores, baseline_confidence or None, course=course
         ),
         "candidate": evaluate_course_scores(
-            gold, candidate_scores, candidate_confidence or None
+            gold, candidate_scores, candidate_confidence or None, course=course
         ),
     }
     result["candidate_minus_baseline"] = {
@@ -163,16 +163,29 @@ def evaluate_course_scores(
     gold: dict[ScoreKey, float],
     predicted: dict[ScoreKey, float],
     confidence: dict[ScoreKey, str] | None = None,
+    *,
+    course: CourseSpec | None = None,
 ) -> dict[str, Any]:
     """Calculate aggregate metrics without returning a row-level result."""
 
     _require_matching_keys(gold, predicted, label="prediction")
     errors = {key: predicted[key] - gold[key] for key in sorted(gold)}
-    total_errors: dict[str, float] = defaultdict(float)
+    total_errors: dict[str, float] = {}
+    gold_totals: dict[str, list[float]] = defaultdict(list)
+    predicted_totals: dict[str, list[float]] = defaultdict(list)
     question_errors: dict[str, list[float]] = defaultdict(list)
     for (student_id, question_id), error in errors.items():
-        total_errors[student_id] += error
+        gold_totals[student_id].append(gold[(student_id, question_id)])
+        predicted_totals[student_id].append(predicted[(student_id, question_id)])
         question_errors[question_id].append(error)
+
+    for student_id in gold_totals:
+        total_errors[student_id] = (
+            course.total_from_score_values(predicted_totals[student_id])
+            - course.total_from_score_values(gold_totals[student_id])
+            if course is not None
+            else sum(predicted_totals[student_id]) - sum(gold_totals[student_id])
+        )
 
     per_question = {
         question_id: {
@@ -570,9 +583,11 @@ def _read_output_jsons(
         if seen_questions != set(course.question_ids):
             raise CourseMetricsError("output questions do not match the course")
         if not _is_finite_number(payload.get("total")) or not _same_score(
-            float(payload["total"]), total
+            float(payload["total"]), course.total_from_score_values(
+                row["score"] for row in rows
+            )
         ):
-            raise CourseMetricsError("output total must equal its question scores")
+            raise CourseMetricsError("output total must equal the course-calculated score total")
     _validate_prediction_pairs(scores, course, student_ids)
     return scores, confidence
 
@@ -721,6 +736,9 @@ def _safe_run_summary(
         "condition",
         "experiment_condition",
         "task",
+        "split",
+        "run_id",
+        "source_run_id",
     ):
         value = metadata.get(field)
         if isinstance(value, str) and value.strip():
@@ -731,6 +749,7 @@ def _safe_run_summary(
         "rubric_hash",
         "data_snapshot_hash",
         "text_source_hash",
+        "source_transcription_packet_hash",
     ):
         value = metadata.get(field)
         if isinstance(value, str) and _HASH.fullmatch(value):

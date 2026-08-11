@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "record_type": "public_multi_route_contract",
+  "privacy": {
+    "aggregate_only": true,
+    "student_ids_included": false,
+    "per_student_scores_included": false,
+    "raw_answers_included": false,
+    "model_evidence_included": false,
+    "private_paths_included": false
+  },
+  "course": {
+    "course_id": "linearalgebra",
+    "assessment_id": "quiz1"
+  },
+  "scope": {
+    "split": "development",
+    "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54"
+  },
+  "routes": {
+    "M1": {
+      "declared_route": "M1",
+      "provider": "codex_cli",
+      "model": "gpt-5.6-sol",
+      "condition": "M1",
+      "task": "grade",
+      "input_mode": "multimodal"
+    },
+    "G1-Codex": {
+      "declared_route": "G1-Codex",
+      "provider": "codex_cli",
+      "model": "gpt-5.6-sol",
+      "condition": "G1",
+      "task": "grade",
+      "input_mode": "text-only"
+    },
+    "G1-DeepSeek": {
+      "declared_route": "G1-DeepSeek",
+      "provider": "deepseek",
+      "model": "deepseek-v4-pro",
+      "condition": "G1",
+      "task": "grade",
+      "input_mode": "text-only"
+    }
+  }
+}

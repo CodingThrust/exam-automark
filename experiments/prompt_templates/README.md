@@ -32,7 +32,7 @@ grading experiments.
   proof, construction, and diagram/representation work. Course-specific point
   values, answer-only credit, and calibration rules must remain in the frozen
   course rubric and packet.
-- `grade_candidate_v5.txt`: current cross-course candidate. It retains v4's
+- `grade_candidate_v5.txt`: historical cross-course candidate. It retains v4's
   evidence-first, question-type, locality, alternative-method, and second-pass
   safeguards while explicitly making the complete anonymous submission the
   scoring unit: all ordered pages for one student are assembled before any
@@ -43,6 +43,16 @@ grading experiments.
   assembly while making each declared `question_id` the smallest independently
   scoreable leaf: separately allocated subparts are scored separately across
   all ordered pages, while undeclared subparts are never invented.
+- `grade_candidate_v5_2.txt`: current cross-course candidate. It retains the
+  v5.1 leaf-subpart contract and explicitly treats page positions, source-page
+  labels, image filenames, and attachment indices as locators only—not question
+  numbers or a question-to-page mapping. It requires complete-submission
+  evidence assembly before a leaf is scored and flags page-order uncertainty
+  instead of guessing from physical scan order.
+- `transcribe_standard_v2.txt`: successor to the v1 transcription template.
+  It applies the same locator-only rule before producing per-leaf transcripts,
+  so transcription preserves content rather than inventing a page-to-question
+  association.
 
 When an experiment is planned, each template file is hashed into `plan.json`.
 When an experiment is run, the exact prompt text is copied into each prompt

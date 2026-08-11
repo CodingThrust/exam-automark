@@ -14,6 +14,7 @@ from benchmark.core.cli import main
 from benchmark.core.model_runner import (
     OpenAICompatibleTextProvider,
     _compose_student_prompt,
+    _submission_page_order,
 )
 from benchmark.core.schema import CourseSpec
 
@@ -40,6 +41,8 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertIn('"scores"', prompt)
         self.assertIn("Do not rename `scores` to `items`", prompt)
         self.assertIn("independently scored or transcribed leaf item", prompt)
+        self.assertIn("input index, source-page number, or image filename", prompt)
+        self.assertIn("Question order may vary by submission", prompt)
         self.assertIn('"student_id":"S001"', prompt)
 
     def test_deepseek_provider_disables_thinking_via_extra_body(self):
@@ -443,6 +446,36 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertIn("answers", response)
         self.assertNotIn("scores", response)
         self.assertEqual(metadata["task"], "transcribe")
+
+    def test_submission_metadata_rejects_page_question_mapping(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            input_dir = root / "S001"
+            pages = input_dir / "pages"
+            pages.mkdir(parents=True)
+            (pages / "p0001.png").write_bytes(b"fixture image")
+            metadata = input_dir / "submission.json"
+            metadata.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "grading_unit": "anonymous_submission",
+                        "student_id": "S001",
+                        "missing_question_ids": [],
+                        "pages": [
+                            {
+                                "source_page": 1,
+                                "file": "pages/p0001.png",
+                                "question_ids": ["Q1"],
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "not assign question IDs"):
+                _submission_page_order(metadata, input_dir, "S001")
 
     def test_submission_metadata_accepts_a_junction_or_symlink_root(self):
         with tempfile.TemporaryDirectory() as tmp:

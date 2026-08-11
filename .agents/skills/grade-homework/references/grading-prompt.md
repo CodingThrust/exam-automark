@@ -120,6 +120,14 @@ page may contain several questions and one question may continue across pages.
 Do not emit, award, or sum page-level marks. Reconcile visible evidence across
 the full page set, then assign one score for each rubric question.
 
+Page position, source-page number, image filename, and attachment/input index
+identify only scan/display order. They never identify Q1, Q2, or any other
+question and do not create a question-to-page mapping. Do not infer question
+order from P01/P02 or from another student's page sequence; locate each answer
+from visible question labels, stems, and content across the complete page set.
+When the relevant page cannot be established from visible evidence, flag
+`page_order_uncertain` rather than awarding credit by page position.
+
 Respect the frozen page order and any explicit missing-page or
 missing-question flags. Do not invent unseen work or silently repair a missing
 or cropped page; apply the frozen course policy and add a score-affecting flag

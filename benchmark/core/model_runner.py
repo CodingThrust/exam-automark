@@ -535,6 +535,11 @@ def _submission_page_order(metadata_path: Path, input_dir: Path, student_id: str
     for page in pages:
         if not isinstance(page, dict):
             raise ValueError("submission.json page must be an object")
+        if "question_id" in page or "question_ids" in page:
+            raise ValueError(
+                "submission.json page must not assign question IDs; "
+                "page order is not a question mapping"
+            )
         source_page = page.get("source_page")
         relative = page.get("file")
         if type(source_page) is not int or source_page <= prior_page:
@@ -645,6 +650,11 @@ def _compose_student_prompt(
     return (
         prompt_text.rstrip()
         + f"\n\nOutput student_id must be {student_id}."
+        + "\nPage-position rule: listed input pages are ordered evidence, not "
+        "question identifiers. Never infer a question_id from an input index, "
+        "source-page number, or image filename. Question order may vary by "
+        "submission; locate each question from visible labels, stems, and answer "
+        "content across all supplied pages."
         + "\nRequired response contract:\n"
         + _structured_output_contract(course, student_id, task)
         + "\nPacket context:\n"

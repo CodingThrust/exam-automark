@@ -176,6 +176,15 @@ page-level marks. Instead, reconcile all visible evidence for each question
 across the student's complete supplied page set, then assign that question's
 single rubric score.
 
+Page position, source-page number, image filename, and input index identify
+only source/display order. They are never question numbers or a question-to-page
+mapping: do not assume that P01 (or the first image) is Q1, that P02 is Q2, or
+that different submissions use the same physical question order. Locate each
+declared leaf from its visible question label, stem, answer content, and any
+course-declared mapping; reconcile evidence across the full submission before
+scoring. If the visible content cannot reliably establish the relevant page or
+pages, flag `page_order_uncertain` rather than assigning credit by page position.
+
 Respect the packet's frozen page order and any explicit missing-page or
 missing-question flags. Do not infer absent work from a neighboring page or
 silently repair a missing/cropped page. Use the course-frozen missing-work rule

@@ -166,6 +166,10 @@ class QuestionGoldReviewTests(unittest.TestCase):
         self.assertIn("Full resolution", _HTML)
         self.assertIn("renderAllowedScoreControls", _HTML)
         self.assertIn("allowed_scores", _HTML)
+        self.assertIn("page-order-notice", _HTML)
+        self.assertIn("not question numbers", _HTML)
+        self.assertIn("Review all pages", _HTML)
+        self.assertIn("page/order only", _HTML)
 
     def test_students_file_rejects_empty_duplicate_invalid_or_outside_snapshot_ids(self):
         with tempfile.TemporaryDirectory() as tmp:

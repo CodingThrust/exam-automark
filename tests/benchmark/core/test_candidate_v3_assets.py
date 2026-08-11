@@ -10,6 +10,7 @@ PROMPT_V33 = Path("experiments/prompt_templates/grade_candidate_v3_3.txt")
 PROMPT_V4 = Path("experiments/prompt_templates/grade_candidate_v4.txt")
 PROMPT_V5 = Path("experiments/prompt_templates/grade_candidate_v5.txt")
 PROMPT_V5_1 = Path("experiments/prompt_templates/grade_candidate_v5_1.txt")
+PROMPT_V5_2 = Path("experiments/prompt_templates/grade_candidate_v5_2.txt")
 STRICT_SNAPSHOT = Path(
     "experiments/records/DSAA3071-week5-candidate-v3-dev-plan/"
     "prompts/grade_candidate_v3_strict_schema.txt"
@@ -109,7 +110,7 @@ class CandidateV3AssetTests(unittest.TestCase):
                 self.assertIn(phrase, combined)
 
     def test_current_assets_define_cross_course_question_type_rules(self):
-        for path in (PROMPT_V5_1, SKILL, REFERENCE):
+        for path in (PROMPT_V5_2, SKILL, REFERENCE):
             text = _normalize_whitespace(path.read_text(encoding="utf-8"))
             for rule in QUESTION_TYPE_RULES:
                 with self.subTest(path=path, rule=rule):
@@ -357,7 +358,7 @@ class CandidateV3AssetTests(unittest.TestCase):
     def test_current_assets_do_not_inherit_dsaa_specific_calibration(self):
         combined = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in (PROMPT_V5_1, SKILL, REFERENCE)
+            for path in (PROMPT_V5_2, SKILL, REFERENCE)
         )
 
         for phrase in (
@@ -374,7 +375,7 @@ class CandidateV3AssetTests(unittest.TestCase):
         combined = _normalize_whitespace(
             "\n".join(
                 path.read_text(encoding="utf-8")
-                for path in (PROMPT_V5_1, SKILL, REFERENCE)
+            for path in (PROMPT_V5_2, SKILL, REFERENCE)
             )
         ).lower()
 
@@ -392,7 +393,7 @@ class CandidateV3AssetTests(unittest.TestCase):
         combined = _normalize_whitespace(
             "\n".join(
                 path.read_text(encoding="utf-8")
-                for path in (PROMPT_V5_1, SKILL, REFERENCE)
+            for path in (PROMPT_V5_2, SKILL, REFERENCE)
             )
         ).lower()
 
@@ -402,6 +403,23 @@ class CandidateV3AssetTests(unittest.TestCase):
             "do not invent subparts",
             "do not merge",
             "declared leaf",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, combined)
+
+    def test_current_assets_treat_page_positions_as_locators_not_question_ids(self):
+        combined = _normalize_whitespace(
+            "\n".join(
+                path.read_text(encoding="utf-8")
+                for path in (PROMPT_V5_2, SKILL, REFERENCE)
+            )
+        ).lower()
+
+        for phrase in (
+            "page position",
+            "never question numbers",
+            "do not assume that p01",
+            "page_order_uncertain",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)

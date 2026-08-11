@@ -617,6 +617,8 @@ def _compose_multimodal_prompt(
         + "\nThe student's scanned paper pages are attached as images in the "
         "order listed under input_images. "
         + task_instruction
+        + "\nRequired response contract:\n"
+        + _structured_output_contract(course, student_id, task)
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
@@ -643,8 +645,48 @@ def _compose_student_prompt(
     return (
         prompt_text.rstrip()
         + f"\n\nOutput student_id must be {student_id}."
+        + "\nRequired response contract:\n"
+        + _structured_output_contract(course, student_id, task)
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
+    )
+
+
+def _structured_output_contract(
+    course: CourseSpec, student_id: str, task: str
+) -> str:
+    """Return an explicit cross-provider JSON field contract for one response."""
+    if task == "transcribe":
+        example: dict[str, Any] = {
+            "student_id": student_id,
+            "answers": [
+                {"question_id": question_id, "text": "visible text", "unclear": False}
+                for question_id in course.question_ids
+            ],
+        }
+    else:
+        example = {
+            "student_id": student_id,
+            "scores": [
+                {
+                    "question_id": question_id,
+                    "extracted_evidence": "visible evidence",
+                    "score": 0,
+                    "evidence": "scoring rationale",
+                    "confidence": "medium",
+                    "flags": [],
+                }
+                for question_id in course.question_ids
+            ],
+            "total": 0,
+        }
+    return (
+        "Return exactly one JSON object and no Markdown. Follow this structural "
+        "example exactly: "
+        + json.dumps(example, ensure_ascii=True, separators=(",", ":"))
+        + ". Replace example values with the actual response. Use every listed "
+        "question_id exactly once. Do not rename `scores` to `items` or add "
+        "alternative top-level fields."
     )
 
 

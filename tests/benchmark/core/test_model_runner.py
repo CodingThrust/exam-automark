@@ -11,13 +11,36 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from benchmark.core.cli import main
-from benchmark.core.model_runner import OpenAICompatibleTextProvider
+from benchmark.core.model_runner import (
+    OpenAICompatibleTextProvider,
+    _compose_student_prompt,
+)
+from benchmark.core.schema import CourseSpec
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
 
 
 class ModelPacketRunnerTests(unittest.TestCase):
+    def test_text_prompt_inlines_cross_provider_scores_contract(self):
+        course = CourseSpec.from_dict(
+            json.loads((FIXTURES / "course_dsaa3073_hw1.json").read_text(encoding="utf-8"))
+        )
+
+        prompt = _compose_student_prompt(
+            "Return JSON.",
+            "S001",
+            course,
+            rubric={},
+            inputs=[],
+            task="grade",
+        )
+
+        self.assertIn("Required response contract", prompt)
+        self.assertIn('"scores"', prompt)
+        self.assertIn("Do not rename `scores` to `items`", prompt)
+        self.assertIn('"student_id":"S001"', prompt)
+
     def test_deepseek_provider_disables_thinking_via_extra_body(self):
         captured: dict[str, object] = {}
 

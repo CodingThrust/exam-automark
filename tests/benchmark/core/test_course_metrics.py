@@ -7,14 +7,33 @@ from pathlib import Path
 from unittest.mock import patch
 
 from benchmark.core.cli import main
-from benchmark.core.course_metrics import CourseMetricsError, compare_course_runs
-from benchmark.core.schema import CourseSpec
+from benchmark.core.course_metrics import CourseMetricsError, compare_course_runs, evaluate_course_scores
+from benchmark.core.schema import CourseSpec, QuestionSpec
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
 
 
 class CourseMetricsTests(unittest.TestCase):
+    def test_total_metric_applies_course_final_cap_after_bonus_leaf_scores(self):
+        course = CourseSpec(
+            course_id="synthetic",
+            assessment_id="quiz",
+            questions=(
+                QuestionSpec("Q1", 100, score_step=1),
+                QuestionSpec("Q1bonus", 10, score_step=1, is_bonus=True),
+            ),
+            base_total_points=100,
+            final_score_cap=100,
+        )
+        gold = {("S001", "Q1"): 95.0, ("S001", "Q1bonus"): 10.0}
+        predicted = {("S001", "Q1"): 100.0, ("S001", "Q1bonus"): 10.0}
+
+        report = evaluate_course_scores(gold, predicted, course=course)
+
+        self.assertEqual(report["subquestion_mae"], 2.5)
+        self.assertEqual(report["total_score_mae"], 0.0)
+
     def test_compares_complete_runs_and_returns_aggregate_only_report(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

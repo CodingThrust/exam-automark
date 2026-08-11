@@ -39,6 +39,7 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertIn("Required response contract", prompt)
         self.assertIn('"scores"', prompt)
         self.assertIn("Do not rename `scores` to `items`", prompt)
+        self.assertIn("independently scored or transcribed leaf item", prompt)
         self.assertIn('"student_id":"S001"', prompt)
 
     def test_deepseek_provider_disables_thinking_via_extra_body(self):

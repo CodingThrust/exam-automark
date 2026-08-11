@@ -164,6 +164,8 @@ class QuestionGoldReviewTests(unittest.TestCase):
         self.assertIn("grid-template-columns:minmax(0,1fr)", _HTML)
         self.assertIn("openNativeImageViewer", _HTML)
         self.assertIn("Full resolution", _HTML)
+        self.assertIn("renderAllowedScoreControls", _HTML)
+        self.assertIn("allowed_scores", _HTML)
 
     def test_students_file_rejects_empty_duplicate_invalid_or_outside_snapshot_ids(self):
         with tempfile.TemporaryDirectory() as tmp:

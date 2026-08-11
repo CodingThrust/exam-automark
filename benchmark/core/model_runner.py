@@ -685,8 +685,11 @@ def _structured_output_contract(
         "example exactly: "
         + json.dumps(example, ensure_ascii=True, separators=(",", ":"))
         + ". Replace example values with the actual response. Use every listed "
-        "question_id exactly once. Do not rename `scores` to `items` or add "
-        "alternative top-level fields."
+        "question_id exactly once. Each listed question_id is one independently "
+        "scored or transcribed leaf item; do not aggregate declared subparts. "
+        "For grading, `total` must equal the sum of score rows after applying "
+        "course.final_score_cap when that field is present. Do not rename `scores` "
+        "to `items` or add alternative top-level fields."
     )
 
 
@@ -815,7 +818,7 @@ def _validate_grade_payload(payload: dict[str, Any], student_id: str, course: Co
         )
     total = validate_score_records(records, course)
     if "total" not in payload or abs(float(payload["total"]) - total) > 1e-9:
-        raise ValueError("total must equal the sum of question scores")
+        raise ValueError("total must equal the course-calculated score total")
     for row in payload["scores"]:
         if row["confidence"] not in CONFIDENCE_LEVELS:
             raise ValueError(f"invalid confidence: {row['confidence']}")

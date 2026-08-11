@@ -39,6 +39,10 @@ grading experiments.
   question is scored; a page is never graded or summed independently. Missing
   page/question flags remain course-frozen evidence, not a license to infer
   unseen work.
+- `grade_candidate_v5_1.txt`: successor to v5. It retains whole-submission
+  assembly while making each declared `question_id` the smallest independently
+  scoreable leaf: separately allocated subparts are scored separately across
+  all ordered pages, while undeclared subparts are never invented.
 
 When an experiment is planned, each template file is hashed into `plan.json`.
 When an experiment is run, the exact prompt text is copied into each prompt

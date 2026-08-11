@@ -71,6 +71,24 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)
 
+    def test_skill_declares_cross_course_leaf_subpart_scoring(self):
+        combined = "\n".join(
+            (
+                (AGENT_SKILL / "SKILL.md").read_text(encoding="utf-8"),
+                (AGENT_SKILL / "references" / "grading-prompt.md").read_text(
+                    encoding="utf-8"
+                ),
+            )
+        ).lower()
+        for phrase in (
+            "smallest independently scoreable leaf",
+            "do not invent subparts",
+            "do not merge",
+            "aggregate parent score",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, combined)
+
     def test_discover_script_reports_solution_submissions_and_late_students(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

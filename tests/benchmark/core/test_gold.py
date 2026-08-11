@@ -4,13 +4,30 @@ import unittest
 from pathlib import Path
 
 from benchmark.core.gold import validate_gold_subset_table, validate_gold_table
-from benchmark.core.schema import CourseSpec
+from benchmark.core.schema import CourseSpec, QuestionSpec
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
 
 
 class GoldTableTests(unittest.TestCase):
+    def test_discrete_leaf_scores_reject_undeclared_intermediate_values(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            course = CourseSpec(
+                course_id="synthetic",
+                assessment_id="quiz",
+                questions=(
+                    QuestionSpec("Q1a", 5, score_step=1, allowed_scores=(0, 5)),
+                ),
+            )
+            gold_path = Path(tmp) / "gold.csv"
+            _write_gold(gold_path, [("S001", "Q1a", "3")])
+
+            report = validate_gold_table(course, gold_path, ["S001"])
+
+        self.assertEqual(report["status"], "not_ready")
+        self.assertIn("scores_within_course_steps", report["failed_checks"])
+
     def test_complete_gold_table_is_ready(self):
         with tempfile.TemporaryDirectory() as tmp:
             course = CourseSpec.from_json_path(FIXTURES / "course_dsaa3073_hw1.json")

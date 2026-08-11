@@ -48,25 +48,25 @@ submission tree and do not put command output in Git.
 ```powershell
 # 1. Human gold must be complete for the frozen development roster.
 python -m benchmark.core.cli validate-gold-subset `
-  --course experiments/course_specs/linearalgebra_quiz1.json `
+  --course experiments/course_specs/linearalgebra_quiz1_v2.json `
   --gold Data/<course>/<private-gold>/question-gold.csv `
   --students-file Data/<course>/<private-split>/development-students.txt `
   --output Data/<course>/<private-gold>/development-gold-readiness.json
 
 # 2. Build byte-matched M1 and T1 image packets. This does not call a model.
 python -m benchmark.core.cli build-matched-image-route-packets `
-  --course experiments/course_specs/linearalgebra_quiz1.json `
+  --course experiments/course_specs/linearalgebra_quiz1_v2.json `
   --snapshot-root Data/<course>/<final-approved-cohort> `
   --output-root Data/<course>/<private-packets>/development `
   --split development `
   --students-file Data/<course>/<private-split>/development-students.txt `
   --m1-packet-id M1-dev-r1 `
   --t1-packet-id T1-dev-r1 `
-  --grade-prompt experiments/prompt_templates/grade_candidate_v5.txt `
+  --grade-prompt experiments/prompt_templates/grade_candidate_v5_1.txt `
   --transcribe-prompt experiments/prompt_templates/transcribe_standard_v1.txt `
-  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v1.json `
-  --metadata skill_version_id=skill_candidate_v5 `
-  --metadata grade_prompt_template_id=grade_candidate_v5 `
+  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v2.json `
+  --metadata skill_version_id=skill_candidate_v5_1 `
+  --metadata grade_prompt_template_id=grade_candidate_v5_1 `
   --metadata transcribe_prompt_template_id=transcribe_standard_v1
 
 # 3. This must be ready before any provider call. It never grants approval.
@@ -84,17 +84,17 @@ T1 run and automatically inherits its run ID, packet hash, and snapshot hash.
 ```powershell
 # Provider/model values are intentionally omitted until the explicit approval.
 python -m benchmark.core.cli build-text-grading-packet `
-  --course experiments/course_specs/linearalgebra_quiz1.json `
+  --course experiments/course_specs/linearalgebra_quiz1_v2.json `
   --packet-id G1-dev-r1 `
   --condition G1 `
-  --prompt experiments/prompt_templates/grade_candidate_v5.txt `
-  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v1.json `
+  --prompt experiments/prompt_templates/grade_candidate_v5_1.txt `
+  --rubric experiments/records/linearalgebra-quiz1-plan/rubric_v2.json `
   --students-file Data/<course>/<private-split>/development-students.txt `
   --transcript-source Data/<course>/<private-runs>/T1-dev-r1/outputs `
   --output-root Data/<course>/<private-packets>/development `
   --text-source-kind automatic_transcript `
   --metadata split=development `
-  --metadata skill_version_id=skill_candidate_v5
+  --metadata skill_version_id=skill_candidate_v5_1
 
 python -m benchmark.core.cli check-route-lineage `
   --m1-packet Data/<course>/<private-packets>/development/M1-dev-r1 `

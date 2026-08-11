@@ -181,6 +181,22 @@ missing-question flags. Do not infer absent work from a neighboring page or
 silently repair a missing/cropped page. Use the course-frozen missing-work rule
 and flag any score-affecting uncertainty for review.
 
+### Scorable subparts and hierarchy
+
+Before scoring, identify the hierarchy of each stem. Each frozen `question_id`
+must represent the smallest independently scoreable leaf item. When the
+assessment and rubric separately allocate points to subparts, score each
+declared leaf separately, even when several leaves share a stem, page, or
+calculation. Use any parent/stem label only for orientation: never emit or add
+an aggregate parent score in addition to leaf scores.
+
+Do not invent subparts when the frozen course contract does not declare
+independent scoring units, and do not merge, average, borrow, or offset credit
+between declared leaves. Assemble the whole submission first, then gather all
+visible evidence for each leaf across its ordered pages. A missing or unclear
+region affects only the material leaf or leaves unless the frozen rubric
+explicitly sets a wider rule.
+
 Freeze the grading protocol before student grading starts:
 
 - page ordering for solutions and each student submission

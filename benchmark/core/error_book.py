@@ -523,7 +523,7 @@ def _load_outputs(
         if not isinstance(total, (int, float)) or isinstance(total, bool):
             raise ValueError(f"total must be numeric: {path.name}")
         if abs(float(total) - calculated_total) > 1e-9:
-            raise ValueError(f"reported total does not match scores: {path.name}")
+            raise ValueError(f"reported total does not match course score total: {path.name}")
         output_sha256 = _file_hash(path)
         for record in records:
             key = (student_id, record.question_id)

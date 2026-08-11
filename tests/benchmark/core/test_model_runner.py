@@ -16,14 +16,113 @@ from benchmark.core.model_runner import (
     _compose_multimodal_prompt,
     _compose_student_prompt,
     _submission_page_order,
+    _validate_grade_payload,
 )
-from benchmark.core.schema import CourseSpec
+from benchmark.core.schema import CourseSpec, QuestionSpec
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
 
 
 class ModelPacketRunnerTests(unittest.TestCase):
+    def test_grade_payload_canonicalizes_total_from_capped_bonus_leaf_scores(self):
+        course = CourseSpec(
+            course_id="synthetic",
+            assessment_id="quiz",
+            questions=(
+                QuestionSpec("Q1", 95, score_step=1),
+                QuestionSpec("Q2", 5, score_step=1),
+                QuestionSpec(
+                    "Q2bonus",
+                    10,
+                    score_step=1,
+                    parent_question_id="Q2",
+                    allowed_scores=(0, 10),
+                    is_bonus=True,
+                ),
+            ),
+            base_total_points=100,
+            final_score_cap=100,
+        )
+        payload = {
+            "student_id": "S001",
+            "scores": [
+                {
+                    "question_id": "Q1",
+                    "extracted_evidence": "complete work",
+                    "score": 95,
+                    "evidence": "full credit",
+                    "confidence": "high",
+                    "flags": [],
+                },
+                {
+                    "question_id": "Q2",
+                    "extracted_evidence": "complete work",
+                    "score": 5,
+                    "evidence": "full credit",
+                    "confidence": "high",
+                    "flags": [],
+                },
+                {
+                    "question_id": "Q2bonus",
+                    "extracted_evidence": "second valid method",
+                    "score": 10,
+                    "evidence": "bonus condition met",
+                    "confidence": "high",
+                    "flags": [],
+                },
+            ],
+            "total": 110,
+        }
+
+        _validate_grade_payload(payload, "S001", course)
+
+        self.assertEqual(payload["total"], 100)
+
+    def test_grade_payload_still_rejects_malformed_leaf_scores(self):
+        course = CourseSpec(
+            course_id="synthetic",
+            assessment_id="quiz",
+            questions=(
+                QuestionSpec("Q1", 5, score_step=1),
+                QuestionSpec(
+                    "Q1bonus",
+                    10,
+                    score_step=1,
+                    parent_question_id="Q1",
+                    allowed_scores=(0, 10),
+                    is_bonus=True,
+                ),
+            ),
+            base_total_points=5,
+            final_score_cap=5,
+        )
+        payload = {
+            "student_id": "S001",
+            "scores": [
+                {
+                    "question_id": "Q1",
+                    "extracted_evidence": "complete work",
+                    "score": 5,
+                    "evidence": "full credit",
+                    "confidence": "high",
+                    "flags": [],
+                },
+                {
+                    "question_id": "Q1bonus",
+                    "extracted_evidence": "extra method",
+                    "score": 9,
+                    "evidence": "bonus condition met",
+                    "confidence": "high",
+                    "flags": [],
+                },
+            ],
+            "total": 5,
+        }
+
+        with self.assertRaisesRegex(ValueError, "Q1bonus score"):
+            _validate_grade_payload(payload, "S001", course)
+
     def test_text_prompt_inlines_cross_provider_scores_contract(self):
         course = CourseSpec.from_dict(
             json.loads((FIXTURES / "course_dsaa3073_hw1.json").read_text(encoding="utf-8"))

@@ -832,8 +832,14 @@ def _validate_grade_payload(payload: dict[str, Any], student_id: str, course: Co
             )
         )
     total = validate_score_records(records, course)
-    if "total" not in payload or abs(float(payload["total"]) - total) > 1e-9:
-        raise ValueError("total must equal the course-calculated score total")
+    if "total" not in payload:
+        raise ValueError("total is required")
+    # Leaf score rows have already passed the course-specific coverage, range,
+    # step, evidence, confidence, and flags checks above.  The model-reported
+    # total is therefore redundant: replace it with the deterministic course
+    # total so final-score caps and bonus rules are applied consistently across
+    # models.
+    payload["total"] = total
     for row in payload["scores"]:
         if row["confidence"] not in CONFIDENCE_LEVELS:
             raise ValueError(f"invalid confidence: {row['confidence']}")

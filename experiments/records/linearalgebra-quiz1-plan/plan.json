@@ -21,7 +21,7 @@
   "data_snapshot_hash": "bc8cc94a7a2e0e4cfb700e14d1322d089a788e09eb78c9580e9fcf4a72a02eba",
   "experiment_id": "linearalgebra-quiz1-plan",
   "git_branch": "codex/la-gold-review-orientation",
-  "git_commit": "62d2d46",
+  "git_commit": "84fc6ad",
   "gates_before_model_run": [
     "course-owner-approved reference solution and rubric",
     "manifest-bound submission-scope decisions for every anomalous included submission group",

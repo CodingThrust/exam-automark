@@ -736,6 +736,9 @@ def _safe_run_summary(
         "condition",
         "experiment_condition",
         "task",
+        "split",
+        "run_id",
+        "source_run_id",
     ):
         value = metadata.get(field)
         if isinstance(value, str) and value.strip():
@@ -746,6 +749,7 @@ def _safe_run_summary(
         "rubric_hash",
         "data_snapshot_hash",
         "text_source_hash",
+        "source_transcription_packet_hash",
     ):
         value = metadata.get(field)
         if isinstance(value, str) and _HASH.fullmatch(value):

@@ -45,7 +45,10 @@ class HeadlessRunnerCliTests(unittest.TestCase):
                 "prompt_hash": "a" * 64,
                 "rubric_hash": "b" * 64,
                 "student_ids": ["S001"],
-                "metadata": {"input_snapshot_manifest_sha256": "c" * 64},
+                "metadata": {
+                    "input_snapshot_manifest_sha256": "c" * 64,
+                    "source_transcription_packet_hash": "e" * 64,
+                },
             }
 
             fallback = _metadata(config, manifest, command="synthetic")
@@ -53,6 +56,9 @@ class HeadlessRunnerCliTests(unittest.TestCase):
             explicit = _metadata(config, manifest, command="synthetic")
 
         self.assertEqual(fallback["data_snapshot_hash"], "c" * 64)
+        self.assertEqual(
+            fallback["source_transcription_packet_hash"], "e" * 64
+        )
         self.assertEqual(explicit["data_snapshot_hash"], "d" * 64)
 
     def test_codex_headless_dry_run_writes_valid_packet_run_outputs(self):

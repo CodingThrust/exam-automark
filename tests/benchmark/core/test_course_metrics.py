@@ -294,6 +294,7 @@ class CourseMetricsTests(unittest.TestCase):
                 report["baseline_run"]["experiment_condition"],
                 "route:multimodal@r1+audit",
             )
+            self.assertEqual(report["baseline_run"]["run_id"], "baseline-run")
 
             metadata_path = candidate / "run-metadata.json"
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
@@ -408,6 +409,7 @@ class CourseMetricsTests(unittest.TestCase):
                     "condition": condition,
                     "experiment_condition": experiment_condition,
                     "task": "grade",
+                    "run_id": f"{name}-run",
                     "dry_run": dry_run,
                     "course_id": "dsaa3073",
                     "assessment_id": "hw1",
@@ -417,6 +419,8 @@ class CourseMetricsTests(unittest.TestCase):
                     "prompt_hash": "d" * 64,
                     "rubric_hash": "e" * 64,
                     "text_source_hash": "f" * 64,
+                    "source_run_id": "t1-run",
+                    "source_transcription_packet_hash": "a" * 64,
                 }
             ),
             encoding="utf-8",

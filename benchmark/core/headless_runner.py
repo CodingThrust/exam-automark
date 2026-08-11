@@ -814,6 +814,9 @@ def _metadata(
         "prompt_template_id": manifest_metadata.get("prompt_template_id"),
         "data_snapshot_hash": data_snapshot_hash,
         "source_run_id": manifest_metadata.get("source_run_id"),
+        "source_transcription_packet_hash": manifest_metadata.get(
+            "source_transcription_packet_hash"
+        ),
         "text_source_kind": manifest_metadata.get("text_source_kind"),
         "image_source_kind": manifest_metadata.get("image_source_kind"),
         "source_prompt_packet": manifest_metadata.get("source_prompt_packet"),

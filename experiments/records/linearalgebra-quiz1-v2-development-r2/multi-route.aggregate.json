@@ -1,0 +1,274 @@
+{
+  "course": {
+    "assessment_id": "quiz1",
+    "course_id": "linearalgebra",
+    "max_total": 100.0,
+    "question_count": 10,
+    "score_unit": "points"
+  },
+  "interpretation_guards": [
+    "M1 and T1 may execute in parallel because both independently consume the same frozen images; G1 begins only after T1 passes validation.",
+    "The route contract, snapshot commitment, and full T1-to-G1 lineage binding must all match before this dashboard can be rendered.",
+    "This report is aggregate-only and contains no student identifiers, individual scores, answers, transcripts, evidence, prompts, responses, or private paths.",
+    "Development or calibration evidence does not by itself authorize held-out or production grading."
+  ],
+  "lineage": {
+    "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+    "g1_codex_packet_hash": "271588f95aeec311892116f8c6aac64cd99451d7e4aa3b466ce4f6f924a3f5d2",
+    "g1_deepseek_packet_hash": "271588f95aeec311892116f8c6aac64cd99451d7e4aa3b466ce4f6f924a3f5d2",
+    "g1_source_run_id": "LA-v2-T1-codex-dev-30-v5_2-r2",
+    "g1_source_transcription_packet_hash": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14",
+    "g1_text_source_hash": "aec0507b6f25a0a978759daa14c2db9967be0731e315bdcbf1e95c74d889e21d",
+    "m1_packet_hash": "d70093ab5bd474d8edcbb71c489d29232b656ed736385014b69c5b02a77b65b2",
+    "roster_hash": "0fe82cddead494fb87efdd2f9b86da6b4759fe05e328a394266f337845b6c4e7",
+    "rubric_hash": "90482f67ac7787a17e65d5360d78573d7d731a2bcd3f69b56f9d06162e1cea8d",
+    "t1_packet_hash": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14",
+    "t1_run_id": "LA-v2-T1-codex-dev-30-v5_2-r2"
+  },
+  "population": {
+    "score_row_count": 300,
+    "student_count": 30
+  },
+  "privacy": {
+    "aggregate_only": true,
+    "model_evidence_included": false,
+    "per_student_scores_included": false,
+    "private_paths_included": false,
+    "raw_answers_included": false,
+    "student_ids_included": false
+  },
+  "record_type": "aggregate_multi_route_grading_report",
+  "route_contract": {
+    "course": {
+      "assessment_id": "quiz1",
+      "course_id": "linearalgebra"
+    },
+    "privacy": {
+      "aggregate_only": true,
+      "model_evidence_included": false,
+      "per_student_scores_included": false,
+      "private_paths_included": false,
+      "raw_answers_included": false,
+      "student_ids_included": false
+    },
+    "record_type": "public_multi_route_contract",
+    "routes": {
+      "G1-Codex": {
+        "condition": "G1",
+        "declared_route": "G1-Codex",
+        "input_mode": "text-only",
+        "model": "gpt-5.6-sol",
+        "provider": "codex_cli",
+        "task": "grade"
+      },
+      "G1-DeepSeek": {
+        "condition": "G1",
+        "declared_route": "G1-DeepSeek",
+        "input_mode": "text-only",
+        "model": "deepseek-v4-pro",
+        "provider": "deepseek",
+        "task": "grade"
+      },
+      "M1": {
+        "condition": "M1",
+        "declared_route": "M1",
+        "input_mode": "multimodal",
+        "model": "gpt-5.6-sol",
+        "provider": "codex_cli",
+        "task": "grade"
+      }
+    },
+    "schema_version": 1,
+    "scope": {
+      "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+      "split": "development"
+    }
+  },
+  "routes": [
+    {
+      "comparison_provenance": {
+        "course_metadata": "matched",
+        "data_snapshot": "matched",
+        "population": "matched_by_exact_question_coverage",
+        "run_validation": "passed"
+      },
+      "course": {
+        "assessment_id": "quiz1",
+        "course_id": "linearalgebra",
+        "max_total": 100.0,
+        "question_count": 10,
+        "score_unit": "points"
+      },
+      "label": "Direct multimodal grading",
+      "metric_side": "baseline",
+      "metrics": {
+        "exact_agreement": 0.89,
+        "macro_accuracy": 0.89,
+        "mean_signed_error": 0.15666666666666668,
+        "severe_error_rate": 0.4666666666666667,
+        "subquestion_mae": 0.51,
+        "total_score_mae": 2.533333333333333,
+        "within_1_point_rate": 0.5
+      },
+      "population": {
+        "score_row_count": 300,
+        "student_count": 30
+      },
+      "route": "M1",
+      "run": {
+        "condition": "M1",
+        "course_metadata": "matched",
+        "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+        "engine": "codex",
+        "experiment_condition": "M1-codex-v5_2_r2-dev-r2",
+        "input_mode": "multimodal",
+        "model": "gpt-5.6-sol",
+        "packet_hash": "d70093ab5bd474d8edcbb71c489d29232b656ed736385014b69c5b02a77b65b2",
+        "prompt_hash": "29123e7cd9ce4ec40d2ee46d2b00999c4c1dfcf449e0700e9bd970e27c3bcb23",
+        "provider": "codex_cli",
+        "rubric_hash": "90482f67ac7787a17e65d5360d78573d7d731a2bcd3f69b56f9d06162e1cea8d",
+        "run_id": "LA-v2-M1-codex-dev-30-v5_2-r2",
+        "source_kind": "run_directory",
+        "source_run_id": null,
+        "source_transcription_packet_hash": null,
+        "split": "development",
+        "task": "grade",
+        "text_source_hash": "c44ea123566264357a0fddc66b449357db2cc89fbbdb19c5536cf91a69c7c782",
+        "validation_status": "passed"
+      }
+    },
+    {
+      "comparison_provenance": {
+        "course_metadata": "matched",
+        "data_snapshot": "matched",
+        "population": "matched_by_exact_question_coverage",
+        "run_validation": "passed"
+      },
+      "course": {
+        "assessment_id": "quiz1",
+        "course_id": "linearalgebra",
+        "max_total": 100.0,
+        "question_count": 10,
+        "score_unit": "points"
+      },
+      "label": "Transcript grading - Codex",
+      "metric_side": "candidate",
+      "metrics": {
+        "exact_agreement": 0.8733333333333333,
+        "macro_accuracy": 0.8733333333333334,
+        "mean_signed_error": 0.0033333333333333335,
+        "severe_error_rate": 0.4,
+        "subquestion_mae": 0.5366666666666666,
+        "total_score_mae": 3.033333333333333,
+        "within_1_point_rate": 0.5
+      },
+      "population": {
+        "score_row_count": 300,
+        "student_count": 30
+      },
+      "route": "G1-Codex",
+      "run": {
+        "condition": "G1",
+        "course_metadata": "matched",
+        "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+        "engine": "codex",
+        "experiment_condition": "G1-codex-v5_2_r2-dev-r2",
+        "input_mode": "text-only",
+        "model": "gpt-5.6-sol",
+        "packet_hash": "271588f95aeec311892116f8c6aac64cd99451d7e4aa3b466ce4f6f924a3f5d2",
+        "prompt_hash": "29123e7cd9ce4ec40d2ee46d2b00999c4c1dfcf449e0700e9bd970e27c3bcb23",
+        "provider": "codex_cli",
+        "rubric_hash": "90482f67ac7787a17e65d5360d78573d7d731a2bcd3f69b56f9d06162e1cea8d",
+        "run_id": "LA-v2-G1-codex-dev-30-v5_2-r2",
+        "source_kind": "run_directory",
+        "source_run_id": "LA-v2-T1-codex-dev-30-v5_2-r2",
+        "source_transcription_packet_hash": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14",
+        "split": "development",
+        "task": "grade",
+        "text_source_hash": "aec0507b6f25a0a978759daa14c2db9967be0731e315bdcbf1e95c74d889e21d",
+        "validation_status": "passed"
+      }
+    },
+    {
+      "comparison_provenance": {
+        "course_metadata": "matched",
+        "data_snapshot": "matched",
+        "population": "matched_by_exact_question_coverage",
+        "run_validation": "passed"
+      },
+      "course": {
+        "assessment_id": "quiz1",
+        "course_id": "linearalgebra",
+        "max_total": 100.0,
+        "question_count": 10,
+        "score_unit": "points"
+      },
+      "label": "Transcript grading - DeepSeek",
+      "metric_side": "candidate",
+      "metrics": {
+        "exact_agreement": 0.8466666666666667,
+        "macro_accuracy": 0.8466666666666667,
+        "mean_signed_error": -0.9466666666666667,
+        "severe_error_rate": 0.6666666666666666,
+        "subquestion_mae": 1.2066666666666668,
+        "total_score_mae": 8.633333333333333,
+        "within_1_point_rate": 0.26666666666666666
+      },
+      "population": {
+        "score_row_count": 300,
+        "student_count": 30
+      },
+      "route": "G1-DeepSeek",
+      "run": {
+        "condition": "G1",
+        "course_metadata": "matched",
+        "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+        "engine": null,
+        "experiment_condition": null,
+        "input_mode": "text-only",
+        "model": "deepseek-v4-pro",
+        "packet_hash": "271588f95aeec311892116f8c6aac64cd99451d7e4aa3b466ce4f6f924a3f5d2",
+        "prompt_hash": "29123e7cd9ce4ec40d2ee46d2b00999c4c1dfcf449e0700e9bd970e27c3bcb23",
+        "provider": "deepseek",
+        "rubric_hash": "90482f67ac7787a17e65d5360d78573d7d731a2bcd3f69b56f9d06162e1cea8d",
+        "run_id": "LA-v2-G1-deepseek-dev-30-v5_2-r2-retry1-canonical-total",
+        "source_kind": "run_directory",
+        "source_run_id": "LA-v2-T1-codex-dev-30-v5_2-r2",
+        "source_transcription_packet_hash": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14",
+        "split": "development",
+        "task": "grade",
+        "text_source_hash": "aec0507b6f25a0a978759daa14c2db9967be0731e315bdcbf1e95c74d889e21d",
+        "validation_status": "passed"
+      }
+    }
+  ],
+  "schema_version": 1,
+  "supplementary_note": "This dashboard is supplementary to the aggregate pairwise metric reports. Those reports retain the score unit, metric thresholds, and paired bootstrap confidence intervals for each comparison.",
+  "t1_readiness": {
+    "privacy": {
+      "aggregate_only": true,
+      "model_evidence_included": false,
+      "per_student_scores_included": false,
+      "private_paths_included": false,
+      "raw_answers_included": false,
+      "student_ids_included": false
+    },
+    "ready_for_g1": true,
+    "record_type": "aggregate_t1_readiness",
+    "route": "T1",
+    "run": {
+      "condition": "T1",
+      "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+      "input_mode": "multimodal",
+      "packet_hash": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14",
+      "run_id": "LA-v2-T1-codex-dev-30-v5_2-r2",
+      "task": "transcribe",
+      "validation_status": "passed"
+    },
+    "schema_version": 1,
+    "status": "passed",
+    "students_expected": 30,
+    "students_failed": 0,
+    "students_passed": 30
+  }
+}

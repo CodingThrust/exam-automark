@@ -1,0 +1,43 @@
+{
+  "course": {
+    "assessment_id": "quiz1",
+    "course_id": "linearalgebra"
+  },
+  "g1": {
+    "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+    "packet_hash": "271588f95aeec311892116f8c6aac64cd99451d7e4aa3b466ce4f6f924a3f5d2",
+    "rubric_hash": "90482f67ac7787a17e65d5360d78573d7d731a2bcd3f69b56f9d06162e1cea8d",
+    "source_run_id": "LA-v2-T1-codex-dev-30-v5_2-r2",
+    "source_transcription_packet_hash": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14",
+    "text_source_hash": "aec0507b6f25a0a978759daa14c2db9967be0731e315bdcbf1e95c74d889e21d"
+  },
+  "m1": {
+    "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+    "packet_hash": "d70093ab5bd474d8edcbb71c489d29232b656ed736385014b69c5b02a77b65b2",
+    "rubric_hash": "90482f67ac7787a17e65d5360d78573d7d731a2bcd3f69b56f9d06162e1cea8d"
+  },
+  "privacy": {
+    "aggregate_only": true,
+    "model_evidence_included": false,
+    "per_student_scores_included": false,
+    "private_paths_included": false,
+    "raw_answers_included": false,
+    "student_ids_included": false
+  },
+  "record_type": "public_full_route_lineage_binding",
+  "schema_version": 1,
+  "scope": {
+    "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+    "roster_hash": "0fe82cddead494fb87efdd2f9b86da6b4759fe05e328a394266f337845b6c4e7"
+  },
+  "status": "ready",
+  "t1": {
+    "condition": "T1",
+    "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+    "input_mode": "multimodal",
+    "packet_hash": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14",
+    "run_id": "LA-v2-T1-codex-dev-30-v5_2-r2",
+    "task": "transcribe",
+    "validation_status": "passed"
+  }
+}

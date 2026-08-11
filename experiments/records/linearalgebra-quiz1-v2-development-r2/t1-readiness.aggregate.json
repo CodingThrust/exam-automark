@@ -1,0 +1,27 @@
+{
+  "privacy": {
+    "aggregate_only": true,
+    "model_evidence_included": false,
+    "per_student_scores_included": false,
+    "private_paths_included": false,
+    "raw_answers_included": false,
+    "student_ids_included": false
+  },
+  "ready_for_g1": true,
+  "record_type": "aggregate_t1_readiness",
+  "route": "T1",
+  "run": {
+    "condition": "T1",
+    "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+    "input_mode": "multimodal",
+    "packet_hash": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14",
+    "run_id": "LA-v2-T1-codex-dev-30-v5_2-r2",
+    "task": "transcribe",
+    "validation_status": "passed"
+  },
+  "schema_version": 1,
+  "status": "passed",
+  "students_expected": 30,
+  "students_failed": 0,
+  "students_passed": 30
+}

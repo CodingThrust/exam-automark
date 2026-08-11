@@ -52,6 +52,7 @@ class MultiRouteReportingTests(unittest.TestCase):
         self.assertTrue(report["t1_readiness"]["ready_for_g1"])
         self.assertIn("Exact-agreement comparison", typst)
         self.assertIn("supplementary", typst)
+        self.assertIn("[1.20]", typst)
         self.assertNotIn("S001", encoded + typst)
         self.assertNotIn("Data/", encoded + typst)
         self.assertEqual(report["lineage"]["g1_codex_packet_hash"], CODEX_PACKET)

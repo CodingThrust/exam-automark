@@ -1125,7 +1125,7 @@ def _render_canonical_typst(report: Mapping[str, Any], *, title: str | None) -> 
         lines.append(
             "  [{route}], [{mae}], [{within}], [{severe}], [{bias}],".format(
                 route=_escape_typst_markup(route["route"]),
-                mae=metrics["total_score_mae"],
+                mae=_decimal(metrics["total_score_mae"]),
                 within=_percent(metrics["within_1_point_rate"]),
                 severe=_percent(metrics["severe_error_rate"]),
                 bias=_signed(metrics["mean_signed_error"]),
@@ -1322,6 +1322,10 @@ def _percent(value: float) -> str:
 
 def _signed(value: float) -> str:
     return f"{value:+.2f}"
+
+
+def _decimal(value: float) -> str:
+    return f"{value:.2f}"
 
 
 def _short_hash(value: str) -> str:

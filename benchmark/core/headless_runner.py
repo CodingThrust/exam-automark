@@ -13,6 +13,7 @@ from .model_runner import (
     ModelProviderResult,
     _append_jsonl,
     _compose_student_prompt,
+    _structured_output_contract,
     _git_commit,
     _list_image_inputs,
     _load_text_inputs,
@@ -22,9 +23,9 @@ from .model_runner import (
     _validate_grade_payload,
     _write_json,
 )
-from .packets import directory_digest
+from .packets import directory_digest, validate_packet_output_contract
 from .run_metadata import validate_run_metadata
-from .schema import CourseSpec
+from .schema import GRADING_OUTPUT_CONTRACT_V1, CourseSpec
 
 
 SUPPORTED_HEADLESS_ENGINES = {"codex", "claude", "kimi"}
@@ -127,6 +128,9 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
     if task == "transcribe" and config.input_mode != "multimodal":
         raise ValueError("transcription packets require --input-mode multimodal")
     course = CourseSpec.from_dict(_read_json(config.packet / "course.json"))
+    output_contract = validate_packet_output_contract(
+        config.packet, manifest, course, str(task)
+    )
     prompt_text = (config.packet / "prompt.txt").read_text(encoding="utf-8")
     rubric = (
         _read_json(config.packet / "rubric.json")
@@ -177,6 +181,7 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
                 course,
                 rubric,
                 image_inputs[student_id],
+                output_contract=output_contract,
             )
         else:
             assert rubric is not None
@@ -186,6 +191,7 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
                 course,
                 rubric,
                 text_inputs[student_id],
+                output_contract=output_contract,
             )
         (config.output / "headless-prompts" / f"{student_id}.prompt.txt").write_text(
             prompt,
@@ -201,6 +207,7 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
             failures=failures,
             usage=usage,
             task=str(task),
+            output_contract=output_contract,
         )
         if result["status"] == "passed":
             successful += 1
@@ -248,11 +255,20 @@ def _compose_headless_prompt(
     course: CourseSpec,
     rubric: dict[str, Any],
     inputs: list[dict[str, str]],
+    *,
+    output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
 ) -> str:
     return (
         HEADLESS_GRADING_WRAPPER.rstrip()
         + "\n\n## Packet grading prompt\n\n"
-        + _compose_student_prompt(prompt_text, student_id, course, rubric, inputs)
+        + _compose_student_prompt(
+            prompt_text,
+            student_id,
+            course,
+            rubric,
+            inputs,
+            output_contract=output_contract,
+        )
     )
 
 
@@ -262,6 +278,8 @@ def _compose_headless_multimodal_prompt(
     course: CourseSpec,
     rubric: dict[str, Any],
     image_paths: list[str],
+    *,
+    output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
 ) -> str:
     context = {
         "student_id": student_id,
@@ -274,6 +292,13 @@ def _compose_headless_multimodal_prompt(
         + "\n\n## Packet grading prompt\n\n"
         + prompt_text.rstrip()
         + f"\n\nOutput student_id must be {student_id}."
+        + "\nRequired response contract:\n"
+        + _structured_output_contract(
+            course,
+            student_id,
+            "grade",
+            output_contract=output_contract,
+        )
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
@@ -310,6 +335,7 @@ def _run_student(
     failures: Path,
     usage: dict[str, int | float],
     task: str = "grade",
+    output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
 ) -> dict[str, Any]:
     last_error: Exception | None = None
     for attempt in range(1, config.max_retries + 2):
@@ -342,7 +368,9 @@ def _run_student(
                         model=config.model,
                     )
                 else:
-                    provider = DryRunTextProvider(config.model)
+                    provider = DryRunTextProvider(
+                        config.model, output_contract=output_contract
+                    )
                     response = provider.complete_text(
                         attempt_prompt,
                         student_id=student_id,
@@ -361,7 +389,12 @@ def _run_student(
             if task == "transcribe":
                 _validate_transcript_payload(payload, student_id, course)
             else:
-                _validate_grade_payload(payload, student_id, course)
+                _validate_grade_payload(
+                    payload,
+                    student_id,
+                    course,
+                    output_contract=output_contract,
+                )
             _write_json(config.output / "outputs" / f"{student_id}.json", payload)
             _append_jsonl(
                 raw_responses,
@@ -822,6 +855,13 @@ def _metadata(
         "source_prompt_packet": manifest_metadata.get("source_prompt_packet"),
         "packet": config.packet.as_posix(),
         "packet_hash": directory_digest(config.packet),
+        "output_contract": manifest.get(
+            "output_contract",
+            "transcript_v1"
+            if manifest.get("task") == "transcribe"
+            else GRADING_OUTPUT_CONTRACT_V1,
+        ),
+        "output_schema_hash": manifest.get("output_schema_hash"),
         "prompt_hash": manifest["prompt_hash"],
         "rubric_hash": manifest.get("rubric_hash"),
         "text_source_hash": directory_digest(config.packet / "inputs"),

@@ -105,8 +105,8 @@ class SkillSnapshotTests(unittest.TestCase):
         )
         self.assertEqual(len(set(snapshot.skill_hashes.values())), 1)
 
-    def test_current_skill_directories_match_candidate_v5_2_snapshot(self):
-        snapshot_path = Path("experiments/skill_versions/skill_candidate_v5_2.json")
+    def test_current_skill_directories_match_candidate_v5_3_snapshot(self):
+        snapshot_path = Path("experiments/skill_versions/skill_candidate_v5_3.json")
         snapshot = SkillSnapshot.from_json_path(snapshot_path)
         rebuilt = build_skill_snapshot(
             skill_version_id=snapshot.skill_version_id,
@@ -237,7 +237,7 @@ class SkillSnapshotTests(unittest.TestCase):
         self.assertTrue(candidate_v4.mirror_synchronized)
         self.assertNotEqual(candidate_v4.canonical_hash, candidate_v33.canonical_hash)
 
-    def test_candidate_v5_2_snapshot_preserves_v5_history_and_differs_from_v4(self):
+    def test_candidate_v5_3_snapshot_preserves_v5_history_and_differs_from_v4(self):
         candidate_v4 = SkillSnapshot.from_json_path(
             Path("experiments/skill_versions/skill_candidate_v4.json")
         )
@@ -250,6 +250,9 @@ class SkillSnapshotTests(unittest.TestCase):
         candidate_v5_2 = SkillSnapshot.from_json_path(
             Path("experiments/skill_versions/skill_candidate_v5_2.json")
         )
+        candidate_v5_3 = SkillSnapshot.from_json_path(
+            Path("experiments/skill_versions/skill_candidate_v5_3.json")
+        )
 
         self.assertEqual(candidate_v5.skill_version_id, "skill_candidate_v5")
         self.assertTrue(candidate_v5.mirror_synchronized)
@@ -260,6 +263,9 @@ class SkillSnapshotTests(unittest.TestCase):
         self.assertEqual(candidate_v5_2.skill_version_id, "skill_candidate_v5_2")
         self.assertTrue(candidate_v5_2.mirror_synchronized)
         self.assertNotEqual(candidate_v5_2.canonical_hash, candidate_v5_1.canonical_hash)
+        self.assertEqual(candidate_v5_3.skill_version_id, "skill_candidate_v5_3")
+        self.assertTrue(candidate_v5_3.mirror_synchronized)
+        self.assertNotEqual(candidate_v5_3.canonical_hash, candidate_v5_2.canonical_hash)
 
 
 if __name__ == "__main__":

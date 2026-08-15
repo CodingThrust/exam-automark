@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "active_skill_version_id": "skill_candidate_v5_2",
+  "active_skill_version_id": "skill_candidate_v5_3",
   "policy": {
     "required_for_every_skill_update": true,
     "required_regressions_for_future_skill_updates": true,
@@ -109,7 +109,7 @@
     {
       "skill_version_id": "skill_candidate_v5_2",
       "predecessor_skill_version_id": "skill_candidate_v5_1",
-      "evaluation_status": "pending",
+      "evaluation_status": "superseded_pending",
       "pending_reason": "Candidate-v5.2 adds a cross-course page-locator safeguard: page positions, source-page labels, attachment indices, and filenames are never question IDs or a question-to-page mapping. It has not yet been evaluated against validated Linear Algebra development gold, so no accuracy or error-reduction claim is made.",
       "pending_gates": [
         "fresh matched M1 direct-multimodal and T1-to-G1 packet manifests using the v5.2/v2 page-locator contract",
@@ -121,6 +121,23 @@
       "skill_canonical_hash": "d623f29cfce9cb327bcd553d427c44d261c7bd10c216c67632853a43d800ccfe",
       "note_en": "Candidate-v5.2 is a pending cross-course revision. It preserves whole-submission, declared-leaf scoring while preventing page order from being treated as question identity; no performance claim is permitted until the stated gold, route, and error-book gates are complete.",
       "note_zh": "Candidate-v5.2 是待评测的跨课程 skill 修订版：它保留整份作答和最小计分叶子的证据组装，同时禁止把页序、页码或文件名当作题号；在完成既定的 gold、路线和错题册门槛前，不得声称准确率或改进效果。"
+    },
+    {
+      "skill_version_id": "skill_candidate_v5_3",
+      "predecessor_skill_version_id": "skill_candidate_v5_2",
+      "evaluation_status": "pending",
+      "pending_reason": "Candidate-v5.3 adds a cross-course deduction-trace output contract. It has not created a v5.3 packet or run, so it has no score, metric, error-reduction, or version-comparison claim.",
+      "pending_gates": [
+        "review of the frozen v5.3 skill, prompt, schema, validator, and packet bindings",
+        "explicit development-only authorization before a newly frozen v5.3 packet or model run",
+        "privacy review confirming deduction traces remain in private run outputs and public artifacts stay aggregate-only",
+        "development error-book, confidence audit, and iteration-delta review after any authorized run"
+      ],
+      "skill_snapshot": "experiments/skill_versions/skill_candidate_v5_3.json",
+      "skill_canonical_hash": "53989eaea05b3652742cbeca112a8dff638db978f252162789c5a29b3fdbd219",
+      "public_contract_plan": "experiments/records/candidate-v5_3-deduction-trace-plan/plan.json",
+      "note_en": "Candidate-v5.3 preserves whole-submission, declared-leaf, and locator-only safeguards while requiring concise deduction traces for non-full leaves. It is registered for reproducibility only and remains unevaluated.",
+      "note_zh": "Candidate-v5.3 在保留整份作答、已声明计分叶子和定位符仅作定位的保障之上，要求非满分叶子提供简洁扣分依据。该版本仅为可复现登记，尚未评测。"
     }
   ]
 }

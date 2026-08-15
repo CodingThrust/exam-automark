@@ -9,6 +9,33 @@ from typing import Any
 CONFIDENCE_LEVELS = {"high", "medium", "low"}
 INPUT_MODES = {"image", "pdf", "transcript", "text"}
 TOKEN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
+TRANSCRIPT_OUTPUT_CONTRACT_V1 = "transcript_v1"
+GRADING_OUTPUT_CONTRACT_V1 = "score_evidence_v1"
+GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1 = "deduction_trace_v1"
+GRADING_OUTPUT_CONTRACTS = {
+    GRADING_OUTPUT_CONTRACT_V1,
+    GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
+}
+DEDUCTION_TYPES = {
+    "answer_only_cap",
+    "blank_or_missing_answer",
+    "contradiction",
+    "incorrect_final_result",
+    "insufficient_required_explanation",
+    "local_arithmetic_or_notation_error",
+    "material_method_error",
+    "missing_required_evidence",
+    "other_rubric_based",
+    "unreadable_or_missing_evidence",
+}
+WINDOWS_ABSOLUTE_PATH = re.compile(r"(?:^|\s)[A-Za-z]:[\\/]")
+PRIVATE_DATA_PATH = re.compile(r"(?:^|[\\/])Data[\\/]", re.IGNORECASE)
+FILE_URI = re.compile(r"\bfile://", re.IGNORECASE)
+EMAIL_ADDRESS = re.compile(r"\b[^\s@]+@[^\s@]+\.[^\s@]+\b")
+IDENTITY_LABEL = re.compile(
+    r"\b(?:student[ _-]?(?:id|number|name)|name)\s*[:=]|(?:姓名|学号)\s*[:：]",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -265,6 +292,24 @@ class SplitPlan:
 
 
 @dataclass(frozen=True)
+class DeductionTrace:
+    rubric_criterion: str
+    observed_evidence_or_missing_or_incorrect_part: str
+    deduction_type: str
+    points_deducted: float
+
+    def __post_init__(self) -> None:
+        _require_private_review_text(self.rubric_criterion, "rubric_criterion")
+        _require_private_review_text(
+            self.observed_evidence_or_missing_or_incorrect_part,
+            "observed_evidence_or_missing_or_incorrect_part",
+        )
+        if self.deduction_type not in DEDUCTION_TYPES:
+            raise ValueError(f"invalid deduction_type: {self.deduction_type}")
+        _require_positive_number(self.points_deducted, "points_deducted")
+
+
+@dataclass(frozen=True)
 class ScoreRecord:
     student_id: str
     question_id: str
@@ -272,6 +317,8 @@ class ScoreRecord:
     confidence: str
     evidence: str
     flags: tuple[str, ...] = field(default_factory=tuple)
+    deduction_trace: tuple[DeductionTrace, ...] = field(default_factory=tuple)
+    attention_note: str | None = None
 
     def __post_init__(self) -> None:
         if self.confidence not in CONFIDENCE_LEVELS:
@@ -279,9 +326,21 @@ class ScoreRecord:
         if not isinstance(self.evidence, str):
             raise ValueError("evidence must be text")
         object.__setattr__(self, "flags", tuple(self.flags))
+        object.__setattr__(self, "deduction_trace", tuple(self.deduction_trace))
+        if self.attention_note is not None:
+            _require_private_review_text(self.attention_note, "attention_note")
 
 
-def validate_score_records(records: list[ScoreRecord], course: CourseSpec) -> float:
+def validate_score_records(
+    records: list[ScoreRecord],
+    course: CourseSpec,
+    *,
+    grading_output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
+) -> float:
+    if grading_output_contract not in GRADING_OUTPUT_CONTRACTS:
+        raise ValueError(
+            f"unsupported grading output contract: {grading_output_contract}"
+        )
     if len(records) != len(course.questions):
         raise ValueError(
             f"expected exactly {len(course.questions)} score records, got {len(records)}"
@@ -303,7 +362,48 @@ def validate_score_records(records: list[ScoreRecord], course: CourseSpec) -> fl
         question = question_map[record.question_id]
         if not question.allows_score(record.score):
             raise ValueError(f"{record.question_id} score is out of range or off step")
+        if grading_output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
+            _validate_deduction_trace(record, question)
     return course.total_from_score_values(record.score for record in records)
+
+
+def _validate_deduction_trace(record: ScoreRecord, question: QuestionSpec) -> None:
+    expected_deduction = round(float(question.max_score) - float(record.score), 10)
+    if expected_deduction == 0:
+        if record.deduction_trace:
+            raise ValueError(
+                f"{record.question_id} full-credit row must not contain deductions"
+            )
+    else:
+        if not record.deduction_trace:
+            raise ValueError(
+                f"{record.question_id} non-full score requires deduction_trace"
+            )
+        for trace in record.deduction_trace:
+            if not _is_multiple(trace.points_deducted, question.score_step):
+                raise ValueError(
+                    f"{record.question_id} points_deducted is off score step"
+                )
+            for value in (
+                trace.rubric_criterion,
+                trace.observed_evidence_or_missing_or_incorrect_part,
+            ):
+                _reject_student_or_private_reference(value, record.student_id)
+        observed_deduction = round(
+            sum(float(trace.points_deducted) for trace in record.deduction_trace),
+            10,
+        )
+        if abs(observed_deduction - expected_deduction) > 1e-9:
+            raise ValueError(
+                f"{record.question_id} deduction total must equal max_score - score"
+            )
+    if record.flags or record.confidence == "low":
+        if record.attention_note is None:
+            raise ValueError(
+                f"{record.question_id} flags or low confidence require attention_note"
+            )
+    if record.attention_note is not None:
+        _reject_student_or_private_reference(record.attention_note, record.student_id)
 
 
 def _require_token(value: str, label: str) -> None:
@@ -314,6 +414,26 @@ def _require_token(value: str, label: str) -> None:
 def _require_positive_number(value: float, label: str) -> None:
     if not isinstance(value, (int, float)) or isinstance(value, bool) or value <= 0:
         raise ValueError(f"{label} must be positive")
+
+
+def _require_private_review_text(value: str, label: str) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{label} must be non-blank text")
+    if len(value) > 500:
+        raise ValueError(f"{label} must be at most 500 characters")
+    if (
+        WINDOWS_ABSOLUTE_PATH.search(value)
+        or PRIVATE_DATA_PATH.search(value)
+        or FILE_URI.search(value)
+    ):
+        raise ValueError(f"{label} must not contain a private or absolute path")
+    if EMAIL_ADDRESS.search(value) or IDENTITY_LABEL.search(value):
+        raise ValueError(f"{label} must not contain identity-bearing text")
+
+
+def _reject_student_or_private_reference(value: str, student_id: str) -> None:
+    if student_id.casefold() in value.casefold():
+        raise ValueError("deduction review text must not repeat a student identifier")
 
 
 def _is_multiple(value: float, step: float) -> bool:

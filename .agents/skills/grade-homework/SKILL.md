@@ -18,6 +18,12 @@ Do NOT use for: single-file grading (just read it inline), plagiarism detection,
 - `<working_dir>/grades/grades.csv` — one row per student, per-question columns, total, flags.
 - `<working_dir>/grades/feedback/<student>.md` — English feedback, per-question breakdown, flags summary.
 
+These are private grading records: choose a directory outside any Git worktree,
+or an already ignored private directory. They contain per-person grades,
+feedback, and answer-derived evidence; never commit, publish, or copy them into
+an experiment's public record. The output helper refuses an unignored directory
+inside a Git worktree.
+
 ## Prerequisites (conditional on submission formats)
 
 Only `.docx` submissions need an external conversion toolchain. PDF and image
@@ -206,6 +212,28 @@ visible evidence for each leaf across its ordered pages. A missing or unclear
 region affects only the material leaf or leaves unless the frozen rubric
 explicitly sets a wider rule.
 
+### Deduction trace contract
+
+For every non-full-credit leaf, record a concise `deduction_trace` with one or
+more entries. Each entry has exactly `rubric_criterion`,
+`observed_evidence_or_missing_or_incorrect_part`, `deduction_type`, and
+`points_deducted`. The entries must be checkable against visible work and the
+frozen rubric; their `points_deducted` values must sum exactly to
+`max_score - score` for that leaf. This is a short audit record, not hidden
+reasoning or a chain of thought.
+
+Deduct from the first material error and do not split its dependent downstream
+consequences into extra deductions. For selected-response questions, assess an
+explanation only when the prompt explicitly requires one. Apply the frozen
+answer-only cap when a correct calculation answer lacks required work. A zero
+score must state the specific missing or incorrect required evidence. Full-credit
+leaves omit `deduction_trace`; a leaf with flags or `low` confidence must add a
+brief `attention_note`. Treat bonus leaves as independent leaves: never use a
+base-leaf deduction to explain, offset, or replace a bonus decision.
+
+Do not put a name, student identifier, email address, private path, or raw
+private-file reference in a deduction trace or attention note.
+
 Freeze the grading protocol before student grading starts:
 
 - page ordering for solutions and each student submission
@@ -337,13 +365,18 @@ For each student (in alphabetical order unless the user specifies otherwise):
    arrays or objects for these fields. If you use `key_term_evidence`,
    `concept_evidence`, or `relation_evidence` internally, summarize those layers
    inside the single `extracted_evidence` string or the single `evidence`
-   string.
+   string. Every non-full leaf also needs the four-field `deduction_trace`
+   contract above; full-credit leaves may omit it.
 
 7. Pipe the record into `write_outputs.py`:
 
    ```bash
-   echo "$RECORD_JSON" | python <skill_root>/scripts/write_outputs.py "$PWD/grades"
+   echo "$RECORD_JSON" | python <skill_root>/scripts/write_outputs.py "$PRIVATE_GRADES_DIR"
    ```
+
+   Set `PRIVATE_GRADES_DIR` to a location outside the repository or to an
+   already ignored private directory. Never use an unignored project folder for
+   this command.
 
 8. After every 3 students, briefly summarize progress to the user so they can course-correct early.
 

@@ -60,7 +60,11 @@ from .route_lineage import (
 )
 from .rubrics import validate_concept_rubric
 from .reporting import write_typst_note
-from .schema import CourseSpec
+from .schema import (
+    GRADING_OUTPUT_CONTRACT_V1,
+    GRADING_OUTPUT_CONTRACTS,
+    CourseSpec,
+)
 from .skill_snapshots import build_skill_snapshot, write_skill_snapshot
 from .submission_snapshot_packets import (
     SubmissionSnapshotPacketSpec,
@@ -91,6 +95,11 @@ def _build_parser() -> argparse.ArgumentParser:
     packet.add_argument("--input-root", type=Path, required=True)
     packet.add_argument("--output-root", type=Path, required=True)
     packet.add_argument(
+        "--grading-output-contract",
+        choices=sorted(GRADING_OUTPUT_CONTRACTS),
+        default=GRADING_OUTPUT_CONTRACT_V1,
+    )
+    packet.add_argument(
         "--metadata",
         action="append",
         default=[],
@@ -118,6 +127,11 @@ def _build_parser() -> argparse.ArgumentParser:
     snapshot_packet.add_argument("--snapshot-root", type=Path, required=True)
     snapshot_packet.add_argument("--output-root", type=Path, required=True)
     snapshot_packet.add_argument(
+        "--grading-output-contract",
+        choices=sorted(GRADING_OUTPUT_CONTRACTS),
+        default=GRADING_OUTPUT_CONTRACT_V1,
+    )
+    snapshot_packet.add_argument(
         "--metadata",
         action="append",
         default=[],
@@ -141,6 +155,11 @@ def _build_parser() -> argparse.ArgumentParser:
     matched_routes.add_argument("--transcribe-prompt", type=Path, required=True)
     matched_routes.add_argument("--rubric", type=Path, required=True)
     matched_routes.add_argument(
+        "--grading-output-contract",
+        choices=sorted(GRADING_OUTPUT_CONTRACTS),
+        default=GRADING_OUTPUT_CONTRACT_V1,
+    )
+    matched_routes.add_argument(
         "--metadata",
         action="append",
         default=[],
@@ -163,6 +182,11 @@ def _build_parser() -> argparse.ArgumentParser:
     text_packet.add_argument("--output-root", type=Path, required=True)
     text_packet.add_argument("--text-source-kind", default="transcript")
     text_packet.add_argument("--source-run-id")
+    text_packet.add_argument(
+        "--grading-output-contract",
+        choices=sorted(GRADING_OUTPUT_CONTRACTS),
+        default=GRADING_OUTPUT_CONTRACT_V1,
+    )
     text_packet.add_argument(
         "--metadata",
         action="append",
@@ -1161,6 +1185,7 @@ def _build_packet(args: argparse.Namespace) -> Any:
             input_root=args.input_root,
             output_root=args.output_root,
             rubric=rubric,
+            grading_output_contract=args.grading_output_contract,
             metadata=_parse_metadata(args.metadata),
         )
     )
@@ -1186,6 +1211,7 @@ def _build_submission_snapshot_packet(args: argparse.Namespace) -> Any:
             snapshot_root=args.snapshot_root,
             output_root=args.output_root,
             rubric=rubric,
+            grading_output_contract=args.grading_output_contract,
             metadata=_parse_metadata(args.metadata),
         )
     )
@@ -1206,6 +1232,7 @@ def _build_matched_image_route_packets(args: argparse.Namespace) -> Any:
             grade_prompt_text=args.grade_prompt.read_text(encoding="utf-8"),
             transcribe_prompt_text=args.transcribe_prompt.read_text(encoding="utf-8"),
             rubric=_read_json(args.rubric),
+            grading_output_contract=args.grading_output_contract,
             metadata=_parse_metadata(args.metadata),
         )
     )
@@ -1226,6 +1253,7 @@ def _build_text_grading_packet(args: argparse.Namespace) -> Any:
             rubric=_read_json(args.rubric),
             text_source_kind=args.text_source_kind,
             source_run_id=args.source_run_id,
+            grading_output_contract=args.grading_output_contract,
             metadata=_parse_metadata(args.metadata),
         )
     )

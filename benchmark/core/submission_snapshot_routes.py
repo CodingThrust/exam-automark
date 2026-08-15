@@ -16,7 +16,11 @@ from typing import Any
 
 from .packets import PromptPacketResult, SAFE_TOKEN, directory_digest
 from .route_lineage import check_m1_t1_g1_lineage
-from .schema import CourseSpec
+from .schema import (
+    GRADING_OUTPUT_CONTRACT_V1,
+    GRADING_OUTPUT_CONTRACTS,
+    CourseSpec,
+)
 from .submission_snapshot_packets import (
     SubmissionSnapshotPacketSpec,
     build_submission_snapshot_packet,
@@ -35,6 +39,7 @@ class MatchedImageRouteSpec:
     grade_prompt_text: str
     transcribe_prompt_text: str
     rubric: dict[str, Any]
+    grading_output_contract: str = GRADING_OUTPUT_CONTRACT_V1
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -50,6 +55,11 @@ class MatchedImageRouteSpec:
             self.course.validate_student_id(student_id)
         if not self.grade_prompt_text.strip() or not self.transcribe_prompt_text.strip():
             raise ValueError("route prompt text must not be blank")
+        if self.grading_output_contract not in GRADING_OUTPUT_CONTRACTS:
+            raise ValueError(
+                "unsupported grading output contract: "
+                f"{self.grading_output_contract}"
+            )
         object.__setattr__(self, "snapshot_root", Path(self.snapshot_root))
         object.__setattr__(self, "output_root", Path(self.output_root))
         object.__setattr__(self, "student_ids", tuple(self.student_ids))
@@ -89,6 +99,7 @@ def build_matched_image_route_packets(
                 snapshot_root=spec.snapshot_root,
                 output_root=temporary_root,
                 rubric=spec.rubric,
+                grading_output_contract=spec.grading_output_contract,
                 metadata=metadata,
             )
         )

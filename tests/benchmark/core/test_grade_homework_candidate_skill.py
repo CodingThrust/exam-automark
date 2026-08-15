@@ -171,6 +171,15 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
                     "feedback": "Good setup; check the final arithmetic.",
                     "confidence": "medium",
                     "flags": ["high_impact_deduction"],
+                    "deduction_trace": [
+                        {
+                            "rubric_criterion": "final arithmetic",
+                            "observed_evidence_or_missing_or_incorrect_part": "The final arithmetic result is incorrect.",
+                            "deduction_type": "local_arithmetic_or_notation_error",
+                            "points_deducted": 0.5,
+                        }
+                    ],
+                    "attention_note": "Review the final arithmetic step.",
                 }
             ],
             "total": 1.5,
@@ -204,6 +213,33 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
         self.assertEqual(rows[0]["Q1"], "1.5")
         self.assertIn("Q1:high_impact_deduction", rows[0]["flags"])
         self.assertIn("Shows correct setup", feedback)
+        self.assertIn("Deduction trace", feedback)
+
+    def test_write_outputs_refuses_an_unignored_git_directory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            subprocess.run(
+                ["git", "init", "--quiet", str(root)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True,
+            )
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(AGENT_SKILL / "scripts" / "write_outputs.py"),
+                    str(root / "grades"),
+                ],
+                input="{}",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False,
+            )
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("private and ignored", result.stderr)
 
 
 if __name__ == "__main__":

@@ -57,6 +57,11 @@ grading experiments.
 - `grade_candidate_v5_2_r2.txt`: current v5.2 execution template. It corrects
   the per-student page-list reference to `inputs/<student_id>/submission.json`
   and is paired with a runtime locator-only safeguard for multimodal routes.
+- `grade_candidate_v5_3.txt`: successor candidate. It preserves v5.2 r2's
+  whole-submission, declared-leaf, and locator-only safeguards while requiring
+  a concise, source-grounded deduction trace for every non-full leaf. It is
+  paired only with the `deduction_trace_v1` output contract; v5.2 packets and
+  results remain frozen historical artifacts.
 - `transcribe_standard_v2_r2.txt`: matching current transcription template.
   It makes the same packet-metadata distinction and preserves the v2
   locator-only rule.

@@ -28,6 +28,8 @@ class RunMetadataTests(unittest.TestCase):
             "max_retries": 2,
             "max_tokens": 4096,
             "model": "deepseek-v4-pro",
+            "output_contract": "score_evidence_v1",
+            "output_schema_hash": "1" * 64,
             "packet": "Data/DSAA3071/week5-benchmark-redaction-v3/packets/G1-dev-r1",
             "packet_hash": "b" * 64,
             "packet_id": "G1-dev-r1",

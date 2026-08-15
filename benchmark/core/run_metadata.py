@@ -18,6 +18,8 @@ RUN_METADATA_REQUIRED_FIELDS = {
     "input_mode",
     "max_retries",
     "max_tokens",
+    "output_contract",
+    "output_schema_hash",
     "model",
     "packet",
     "packet_hash",
@@ -41,6 +43,7 @@ RUN_METADATA_REQUIRED_FIELDS = {
 
 HASH_FIELDS = {
     "data_snapshot_hash",
+    "output_schema_hash",
     "packet_hash",
     "prompt_hash",
     "rubric_hash",
@@ -66,6 +69,12 @@ def validate_run_metadata(payload: dict[str, Any]) -> None:
         raise ValueError("student_ids must contain only strings")
     if not isinstance(payload["cost_estimate"], dict):
         raise ValueError("cost_estimate must be an object")
+    if payload["output_contract"] not in {
+        "transcript_v1",
+        "score_evidence_v1",
+        "deduction_trace_v1",
+    }:
+        raise ValueError("output_contract is invalid")
     for field in HASH_FIELDS:
         value = payload[field]
         if value is not None and HEX_SHA256.fullmatch(str(value)) is None:

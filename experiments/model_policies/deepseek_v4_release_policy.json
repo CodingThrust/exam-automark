@@ -1,0 +1,18 @@
+{
+  "models": {
+    "deepseek-v4-flash": {
+      "default_for_new_runs": true,
+      "release_channel": "stable"
+    },
+    "deepseek-v4-pro": {
+      "default_for_new_runs": false,
+      "release_channel": "provisional",
+      "retest_required_on": "formal_release"
+    }
+  },
+  "policy_id": "deepseek_v4_release_policy_2026_08",
+  "provider": "deepseek",
+  "record_type": "model_release_policy",
+  "schema_version": 1,
+  "source": "course_owner_directive"
+}

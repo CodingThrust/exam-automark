@@ -8,8 +8,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
+from .model_policy import bind_model_release_policy
 from .packets import directory_digest, validate_packet_output_contract
 from .run_metadata import validate_run_metadata
+from .rubrics import execution_criterion_ids, execution_criterion_points
 from .schema import (
     CONFIDENCE_LEVELS,
     GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
@@ -77,6 +79,8 @@ class ModelPacketRunConfig:
     command_argv: tuple[str, ...] = ()
     run_commit: str | None = None
     run_id: str | None = None
+    model_release_policy: Path | None = None
+    allow_provisional_model: bool = False
 
 
 @dataclass(frozen=True)
@@ -125,6 +129,16 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
         )
     if config.max_retries < 0:
         raise ValueError("--max-retries must be non-negative")
+    model_policy_binding = (
+        bind_model_release_policy(
+            policy_path=config.model_release_policy,
+            provider=config.provider,
+            model=config.model,
+            allow_provisional=config.allow_provisional_model,
+        )
+        if config.model_release_policy is not None
+        else None
+    )
 
     manifest = _read_json(packet / "manifest.json")
     task = manifest.get("task")
@@ -159,7 +173,13 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
     usage: dict[str, int | float] = {}
     successful = 0
 
-    metadata = _metadata(config, packet, manifest, command=command)
+    metadata = _metadata(
+        config,
+        packet,
+        manifest,
+        command=command,
+        model_policy_binding=model_policy_binding,
+    )
     validate_run_metadata(metadata)
     metadata["started_at"] = _utc_now()
     _write_json(output / "run-metadata.json", metadata)
@@ -201,6 +221,7 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
             usage=usage,
             max_retries=config.max_retries,
             output_contract=output_contract,
+            rubric=rubric,
         )
         if success["status"] == "passed":
             successful += 1
@@ -673,6 +694,7 @@ def _compose_multimodal_prompt(
         + _structured_output_contract(
             course, student_id, task, output_contract=output_contract
         )
+        + _execution_contract_prompt_note(rubric)
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
@@ -709,6 +731,7 @@ def _compose_student_prompt(
         + _structured_output_contract(
             course, student_id, task, output_contract=output_contract
         )
+        + _execution_contract_prompt_note(rubric)
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
@@ -787,6 +810,17 @@ def _contract_score_row(question: Any, *, traced: bool) -> dict[str, Any]:
     return row
 
 
+def _execution_contract_prompt_note(rubric: dict[str, Any] | None) -> str:
+    if not isinstance(rubric, dict) or rubric.get("rubric_format") != "execution_contract_v1":
+        return ""
+    return (
+        "\nExecution-contract rule: score only the declared criteria. Ignore "
+        "unrelated extra content unless it directly contradicts a declared "
+        "criterion. For every deduction_trace, rubric_criterion must be the "
+        "exact applicable criterion ID from this rubric."
+    )
+
+
 def _run_student(
     *,
     provider: TextModelProvider | MultimodalModelProvider,
@@ -801,6 +835,7 @@ def _run_student(
     usage: dict[str, int | float],
     max_retries: int,
     output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
+    rubric: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     last_error: Exception | None = None
     for attempt in range(1, max_retries + 2):
@@ -834,6 +869,7 @@ def _run_student(
                     student_id,
                     course,
                     output_contract=output_contract,
+                    rubric=rubric,
                 )
             else:
                 _validate_transcript_payload(payload, student_id, course)
@@ -902,6 +938,7 @@ def _validate_grade_payload(
     course: CourseSpec,
     *,
     output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
+    rubric: dict[str, Any] | None = None,
 ) -> None:
     if not isinstance(payload, dict):
         raise ValueError("grade output must be a JSON object")
@@ -995,6 +1032,30 @@ def _validate_grade_payload(
         course,
         grading_output_contract=output_contract,
     )
+    if rubric is not None and output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
+        for record in records:
+            permitted_criteria = execution_criterion_ids(rubric, record.question_id)
+            criterion_points = execution_criterion_points(rubric, record.question_id)
+            if permitted_criteria is None:
+                continue
+            traced_criteria: set[str] = set()
+            for trace in record.deduction_trace:
+                if trace.rubric_criterion not in permitted_criteria:
+                    raise ValueError(
+                        f"{record.question_id} deduction_trace rubric_criterion must be a declared criterion ID"
+                    )
+                if trace.rubric_criterion in traced_criteria:
+                    raise ValueError(
+                        f"{record.question_id} deduction_trace may not repeat a rubric criterion"
+                    )
+                traced_criteria.add(trace.rubric_criterion)
+                if criterion_points is not None and abs(
+                    float(trace.points_deducted)
+                    - criterion_points[trace.rubric_criterion]
+                ) > 1e-9:
+                    raise ValueError(
+                        f"{record.question_id} deduction_trace points_deducted must equal the declared criterion points"
+                    )
     if "total" not in payload:
         raise ValueError("total is required")
     # Leaf score rows have already passed the course-specific coverage, range,
@@ -1040,6 +1101,7 @@ def _metadata(
     manifest: dict[str, Any],
     *,
     command: str,
+    model_policy_binding: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     manifest_metadata = manifest.get("metadata", {})
     if not isinstance(manifest_metadata, dict):
@@ -1048,7 +1110,7 @@ def _metadata(
         manifest_metadata.get("data_snapshot_hash")
         or manifest_metadata.get("input_snapshot_manifest_sha256")
     )
-    return {
+    metadata = {
         "schema_version": 1,
         "record_type": "model_packet_run",
         "provider": config.provider,
@@ -1107,6 +1169,9 @@ def _metadata(
             "total_cost": None,
         },
     }
+    if model_policy_binding is not None:
+        metadata.update(model_policy_binding)
+    return metadata
 
 
 def _write_command_records(output: Path, config: ModelPacketRunConfig) -> str:
@@ -1127,6 +1192,10 @@ def _write_command_records(output: Path, config: ModelPacketRunConfig) -> str:
         ]
         if config.run_id is not None:
             argv.extend(["--run-id", config.run_id])
+        if config.model_release_policy is not None:
+            argv.extend(["--model-release-policy", str(config.model_release_policy)])
+        if config.allow_provisional_model:
+            argv.append("--allow-provisional-model")
     command = "python -m benchmark.core.cli " + shlex.join(argv)
     _write_json(output / "command.argv.json", argv)
     (output / "command.txt").write_text(command + "\n", encoding="utf-8", newline="\n")

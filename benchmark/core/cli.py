@@ -58,7 +58,7 @@ from .route_lineage import (
     write_public_route_lineage_binding,
     write_route_lineage_report,
 )
-from .rubrics import validate_concept_rubric
+from .rubrics import validate_rubric
 from .reporting import write_typst_note
 from .schema import (
     GRADING_OUTPUT_CONTRACT_V1,
@@ -435,6 +435,19 @@ def _build_parser() -> argparse.ArgumentParser:
     run_model.add_argument("--run-commit")
     run_model.add_argument("--run-id")
     run_model.add_argument(
+        "--model-release-policy",
+        type=Path,
+        help=(
+            "public model-release policy that validates the provider/model pair "
+            "and records its hash in run metadata"
+        ),
+    )
+    run_model.add_argument(
+        "--allow-provisional-model",
+        action="store_true",
+        help="explicitly acknowledge a provisional model allowed by the policy",
+    )
+    run_model.add_argument(
         "--dry-run",
         action="store_true",
         help="exercise packet IO and validation without calling the provider API",
@@ -601,7 +614,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "validate-rubric":
             course = CourseSpec.from_json_path(args.course)
             rubric = _read_json(args.rubric)
-            findings = validate_concept_rubric(rubric, course)
+            findings = validate_rubric(rubric, course)
             report = {
                 "course_id": course.course_id,
                 "failed_checks": findings,
@@ -968,6 +981,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                     command_argv=raw_argv,
                     run_commit=args.run_commit,
                     run_id=args.run_id,
+                    model_release_policy=args.model_release_policy,
+                    allow_provisional_model=args.allow_provisional_model,
                 )
             )
             print(json.dumps(result, sort_keys=True))

@@ -13,6 +13,7 @@ from .model_runner import (
     ModelProviderResult,
     _append_jsonl,
     _compose_student_prompt,
+    _execution_contract_prompt_note,
     _structured_output_contract,
     _git_commit,
     _list_image_inputs,
@@ -208,6 +209,7 @@ def run_headless_packet(config: HeadlessPacketRunConfig) -> dict[str, Any]:
             usage=usage,
             task=str(task),
             output_contract=output_contract,
+            rubric=rubric,
         )
         if result["status"] == "passed":
             successful += 1
@@ -299,6 +301,7 @@ def _compose_headless_multimodal_prompt(
             "grade",
             output_contract=output_contract,
         )
+        + _execution_contract_prompt_note(rubric)
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
@@ -336,6 +339,7 @@ def _run_student(
     usage: dict[str, int | float],
     task: str = "grade",
     output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
+    rubric: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     last_error: Exception | None = None
     for attempt in range(1, config.max_retries + 2):
@@ -394,6 +398,7 @@ def _run_student(
                     student_id,
                     course,
                     output_contract=output_contract,
+                    rubric=rubric,
                 )
             _write_json(config.output / "outputs" / f"{student_id}.json", payload)
             _append_jsonl(

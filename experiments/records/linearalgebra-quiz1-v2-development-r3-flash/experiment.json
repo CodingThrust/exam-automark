@@ -1,0 +1,55 @@
+{
+  "experiment_id": "linearalgebra-quiz1-v2-development-r3-flash",
+  "record_type": "frozen_v5_2_flash_route_extension",
+  "course_id": "linearalgebra",
+  "assessment_id": "quiz1",
+  "scope": {
+    "split": "development_only",
+    "student_count": 30,
+    "score_row_count": 300,
+    "heldout_used": false,
+    "production_use": false
+  },
+  "source_experiment": "linearalgebra-quiz1-v2-development-r2",
+  "frozen_contract": {
+    "skill_version_id": "skill_candidate_v5_2",
+    "grading_prompt_id": "grade_candidate_v5_2_r2",
+    "route": "G1",
+    "input_mode": "text-only",
+    "same_validated_transcription_commitment_as_r2": true,
+    "same_g1_packet_and_data_snapshot_as_g1_codex": true
+  },
+  "candidate_route": {
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "release_status": "stable",
+    "release_policy": "experiments/model_policies/deepseek_v4_release_policy.json"
+  },
+  "structural_recovery": {
+    "initial_valid_outputs": 25,
+    "json_only_repair_outputs": 5,
+    "canonical_valid_outputs": 30,
+    "overlap_count": 0,
+    "raw_responses_copied_to_canonical_run": false,
+    "metrics_use_only": "complete_canonical_run"
+  },
+  "public_artifacts": {
+    "metrics": "metrics/g1-codex-vs-g1-deepseek-flash.json",
+    "metrics_markdown": "metrics/g1-codex-vs-g1-deepseek-flash.md",
+    "readme": "README.md"
+  },
+  "privacy": {
+    "aggregate_only": true,
+    "student_ids_included": false,
+    "per_student_scores_included": false,
+    "raw_answers_included": false,
+    "transcripts_included": false,
+    "raw_model_responses_included": false,
+    "private_paths_included": false
+  },
+  "notes": [
+    "This is a V5.2 route extension, not a V5.3 experiment or a basis for cross-version performance comparison.",
+    "No transcription rerun, new packet construction, held-out access, or production grading occurred.",
+    "Aggregate results support development-stage rubric analysis only; they do not establish general accuracy or teacher replacement."
+  ]
+}

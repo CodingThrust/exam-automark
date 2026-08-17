@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "record_type": "linearalgebra_v5_3_r2_rubric_candidate",
+  "experiment_id": "linearalgebra-quiz1-v5-3-r2-development-candidate",
+  "candidate_status": "development_draft_not_frozen_not_run",
+  "scope": {
+    "course_id": "linearalgebra",
+    "assessment_id": "quiz1",
+    "split": "development_only",
+    "student_count": 30,
+    "score_row_count": 300,
+    "heldout_accessed": false,
+    "model_calls": 0
+  },
+  "derivation": {
+    "source_record": "experiments/records/linearalgebra-quiz1-v2-development-r3-flash",
+    "source_status": "frozen_v5_2_development_analysis_only",
+    "priority_leaves": ["Q4", "Q2a", "Q2b"],
+    "rule": "V5.2 results inform rubric design only; they are not compared as V5.3 performance."
+  },
+  "candidate_bindings": {
+    "course_spec": {
+      "path": "experiments/course_specs/linearalgebra_quiz1_v2.json",
+      "sha256": "1918e92772e62bc4087f9215e9cb00e037ddc22570e9f5efbc66a06a0cf196df"
+    },
+    "rubric": {
+      "path": "experiments/records/linearalgebra-quiz1-v5-3-r2-rubric-candidate/rubric_candidate_v3.json",
+      "sha256": "5596f722c25e121109a7c63d0977d068afe5cbea2a1bb881102ad74275a32e00"
+    },
+    "prompt_template": {
+      "path": "experiments/prompt_templates/grade_candidate_v5_3_r2.txt",
+      "sha256": "ee85a6c38c237a83e4fbdee83504686d335baf6787fcc3fb373c729739890244"
+    },
+    "skill": {
+      "version_id": "skill_candidate_v5_3_r2",
+      "snapshot_path": "experiments/skill_versions/skill_candidate_v5_3_r2.json",
+      "canonical_hash": "6d6c0b37a206ffd83bba2bcd5df03d72fc534ed7fbefeb309929f38a44589e3f"
+    },
+    "grading_output_contract": "deduction_trace_v1"
+  },
+  "model_policy": {
+    "flash_model": "deepseek-v4-flash",
+    "flash_release_status": "official_release_api_alias_build_not_pinned",
+    "pro_model": "deepseek-v4-pro",
+    "pro_retest_status": "deferred_until_official_release",
+    "policy_path": "experiments/model_policies/deepseek_v4_release_policy.json"
+  },
+  "calibration_before_freeze": [
+    "Confirm whether Q2a loses only the 1-point sign criterion or the 2-point arithmetic criterion for each representative local error type.",
+    "Confirm that algebraically equivalent Q2b expressions receive full credit when visible derivation requirements are met.",
+    "Confirm that an otherwise correct Q4 solution using a tetrahedron factor other than division by 6 loses the 4-point conversion criterion and retains direct carry-forward credit.",
+    "Create a new private V5.3 development gold only after these candidate score bands are course-owner approved."
+  ],
+  "gates": {
+    "before_packet": [
+      "Freeze the approved V5.3-r2 skill, prompt, rubric, and private development gold as one contract.",
+      "Validate the execution-contract rubric and deduction-trace output schema.",
+      "Reuse the already validated T1 transcript source only after binding it to the new G1 packet."
+    ],
+    "before_model_run": [
+      "Obtain a new explicit development-only run authorization.",
+      "Run G1-Codex and official DeepSeek V4 Flash against the same new G1 packet.",
+      "Do not rerun T1 or access held-out material."
+    ],
+    "before_public_report": [
+      "Validate all deduction traces privately.",
+      "Publish only privacy-audited aggregate metrics and disagreement categories.",
+      "Do not publish traces, student identifiers, answers, transcripts, gold rows, or raw model responses."
+    ]
+  },
+  "privacy": {
+    "aggregate_only_public_reporting": true,
+    "individual_scores_included": false,
+    "private_source_locations_included": false,
+    "deduction_traces_public": false,
+    "raw_answers_included": false,
+    "transcripts_included": false
+  },
+  "limitations": {
+    "en": "This is a V5.3-r2 rubric candidate and static validation record, not a packet, model run, gold revision, or accuracy result. The candidate allocations require course-owner calibration before freezing.",
+    "zh": "这是 V5.3-r2 rubric 候选及静态验证记录，不是 packet、模型运行、新 gold 或准确率结果。候选分档须经课程负责人校准后才能冻结。"
+  },
+  "next_action": {
+    "en": "Review the four calibration statements, then freeze a separate private V5.3 development gold and create one matched G1 packet for Codex and V4 Flash.",
+    "zh": "审核四条校准说明后，单独冻结私有 V5.3 开发集 gold，并为 Codex 与 V4 Flash 创建同一份 G1 packet。"
+  }
+}

@@ -1,0 +1,275 @@
+{
+  "baseline": {
+    "confidence_accuracy": {
+      "by_level": {
+        "high": {
+          "exact_agreement": 0.9260700389105059,
+          "score_row_count": 257
+        },
+        "low": {
+          "exact_agreement": 0.3333333333333333,
+          "score_row_count": 3
+        },
+        "medium": {
+          "exact_agreement": 0.575,
+          "score_row_count": 40
+        }
+      },
+      "status": "available"
+    },
+    "exact_agreement": 0.8733333333333333,
+    "macro_accuracy": 0.8733333333333334,
+    "mean_signed_error": 0.0033333333333333335,
+    "per_question": {
+      "Q1a": {
+        "exact_agreement": 0.9333333333333333,
+        "mae": 0.3333333333333333,
+        "mean_signed_error": -0.3333333333333333,
+        "score_row_count": 30
+      },
+      "Q1b": {
+        "exact_agreement": 1.0,
+        "mae": 0.0,
+        "mean_signed_error": 0.0,
+        "score_row_count": 30
+      },
+      "Q1c": {
+        "exact_agreement": 1.0,
+        "mae": 0.0,
+        "mean_signed_error": 0.0,
+        "score_row_count": 30
+      },
+      "Q1d": {
+        "exact_agreement": 1.0,
+        "mae": 0.0,
+        "mean_signed_error": 0.0,
+        "score_row_count": 30
+      },
+      "Q1e": {
+        "exact_agreement": 1.0,
+        "mae": 0.0,
+        "mean_signed_error": 0.0,
+        "score_row_count": 30
+      },
+      "Q2a": {
+        "exact_agreement": 0.6333333333333333,
+        "mae": 1.4333333333333333,
+        "mean_signed_error": 1.2333333333333334,
+        "score_row_count": 30
+      },
+      "Q2b": {
+        "exact_agreement": 0.7666666666666667,
+        "mae": 0.8333333333333334,
+        "mean_signed_error": 0.43333333333333335,
+        "score_row_count": 30
+      },
+      "Q3": {
+        "exact_agreement": 0.9666666666666667,
+        "mae": 0.06666666666666667,
+        "mean_signed_error": 0.06666666666666667,
+        "score_row_count": 30
+      },
+      "Q3bonus": {
+        "exact_agreement": 0.9333333333333333,
+        "mae": 0.6666666666666666,
+        "mean_signed_error": -0.6666666666666666,
+        "score_row_count": 30
+      },
+      "Q4": {
+        "exact_agreement": 0.5,
+        "mae": 2.033333333333333,
+        "mean_signed_error": -0.7,
+        "score_row_count": 30
+      }
+    },
+    "severe_error_rate": 0.4,
+    "subquestion_mae": 0.5366666666666666,
+    "total_score_mae": 3.033333333333333,
+    "within_1_point_rate": 0.5
+  },
+  "baseline_run": {
+    "condition": "G1",
+    "course_metadata": "matched",
+    "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+    "engine": "codex",
+    "experiment_condition": "G1-codex-v5_2_r2-dev-r2",
+    "input_mode": "text-only",
+    "model": "gpt-5.6-sol",
+    "packet_hash": "271588f95aeec311892116f8c6aac64cd99451d7e4aa3b466ce4f6f924a3f5d2",
+    "prompt_hash": "29123e7cd9ce4ec40d2ee46d2b00999c4c1dfcf449e0700e9bd970e27c3bcb23",
+    "provider": "codex_cli",
+    "record_type": "model_packet_run",
+    "rubric_hash": "90482f67ac7787a17e65d5360d78573d7d731a2bcd3f69b56f9d06162e1cea8d",
+    "run_id": "LA-v2-G1-codex-dev-30-v5_2-r2",
+    "source_kind": "run_directory",
+    "source_run_id": "LA-v2-T1-codex-dev-30-v5_2-r2",
+    "source_transcription_packet_hash": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14",
+    "split": "development",
+    "students_expected": 30,
+    "students_failed": 0,
+    "students_passed": 30,
+    "task": "grade",
+    "text_source_hash": "aec0507b6f25a0a978759daa14c2db9967be0731e315bdcbf1e95c74d889e21d",
+    "validation_status": "passed"
+  },
+  "bootstrap": {
+    "exact_agreement_candidate_minus_baseline": {
+      "lower": -0.04333333333333334,
+      "mean_difference": -0.010000000000000005,
+      "upper": 0.020000000000000004
+    },
+    "samples": 10000,
+    "seed": 20260701
+  },
+  "candidate": {
+    "confidence_accuracy": {
+      "by_level": {
+        "high": {
+          "exact_agreement": 0.9604743083003953,
+          "score_row_count": 253
+        },
+        "low": {
+          "exact_agreement": 0.25,
+          "score_row_count": 4
+        },
+        "medium": {
+          "exact_agreement": 0.3488372093023256,
+          "score_row_count": 43
+        }
+      },
+      "status": "available"
+    },
+    "exact_agreement": 0.8633333333333333,
+    "macro_accuracy": 0.8633333333333333,
+    "mean_signed_error": 0.01,
+    "per_question": {
+      "Q1a": {
+        "exact_agreement": 0.9333333333333333,
+        "mae": 0.3333333333333333,
+        "mean_signed_error": 0.0,
+        "score_row_count": 30
+      },
+      "Q1b": {
+        "exact_agreement": 1.0,
+        "mae": 0.0,
+        "mean_signed_error": 0.0,
+        "score_row_count": 30
+      },
+      "Q1c": {
+        "exact_agreement": 1.0,
+        "mae": 0.0,
+        "mean_signed_error": 0.0,
+        "score_row_count": 30
+      },
+      "Q1d": {
+        "exact_agreement": 1.0,
+        "mae": 0.0,
+        "mean_signed_error": 0.0,
+        "score_row_count": 30
+      },
+      "Q1e": {
+        "exact_agreement": 1.0,
+        "mae": 0.0,
+        "mean_signed_error": 0.0,
+        "score_row_count": 30
+      },
+      "Q2a": {
+        "exact_agreement": 0.6,
+        "mae": 2.3666666666666667,
+        "mean_signed_error": 0.9666666666666667,
+        "score_row_count": 30
+      },
+      "Q2b": {
+        "exact_agreement": 0.8,
+        "mae": 0.6666666666666666,
+        "mean_signed_error": 0.4666666666666667,
+        "score_row_count": 30
+      },
+      "Q3": {
+        "exact_agreement": 0.9,
+        "mae": 0.4666666666666667,
+        "mean_signed_error": 0.3333333333333333,
+        "score_row_count": 30
+      },
+      "Q3bonus": {
+        "exact_agreement": 0.9666666666666667,
+        "mae": 0.3333333333333333,
+        "mean_signed_error": 0.3333333333333333,
+        "score_row_count": 30
+      },
+      "Q4": {
+        "exact_agreement": 0.43333333333333335,
+        "mae": 4.0,
+        "mean_signed_error": -2.0,
+        "score_row_count": 30
+      }
+    },
+    "severe_error_rate": 0.5333333333333333,
+    "subquestion_mae": 0.8166666666666667,
+    "total_score_mae": 4.766666666666667,
+    "within_1_point_rate": 0.4666666666666667
+  },
+  "candidate_minus_baseline": {
+    "exact_agreement": -0.010000000000000009,
+    "macro_accuracy": -0.01000000000000012,
+    "mean_signed_error": 0.006666666666666666,
+    "severe_error_rate": 0.1333333333333333,
+    "subquestion_mae": 0.28,
+    "total_score_mae": 1.7333333333333334,
+    "within_1_point_rate": -0.033333333333333326
+  },
+  "candidate_run": {
+    "condition": "G1",
+    "course_metadata": "matched",
+    "data_snapshot_hash": "6c7bf60f199a80eb27bad6cde854ce2d60eacd1fbe6995305a22226cd2797c54",
+    "input_mode": "text-only",
+    "model": "deepseek-v4-flash",
+    "packet_hash": "271588f95aeec311892116f8c6aac64cd99451d7e4aa3b466ce4f6f924a3f5d2",
+    "prompt_hash": "29123e7cd9ce4ec40d2ee46d2b00999c4c1dfcf449e0700e9bd970e27c3bcb23",
+    "provider": "deepseek",
+    "record_type": "model_packet_run",
+    "rubric_hash": "90482f67ac7787a17e65d5360d78573d7d731a2bcd3f69b56f9d06162e1cea8d",
+    "run_id": "G1-DeepSeek-Flash-v52-dev-r1-canonical",
+    "source_kind": "run_directory",
+    "source_run_id": "LA-v2-T1-codex-dev-30-v5_2-r2",
+    "source_transcription_packet_hash": "3112779297d1385e77fc2a3de8619bdb220b64e9bc180e95d2b73c1dbf283b14",
+    "split": "development",
+    "task": "grade",
+    "text_source_hash": "aec0507b6f25a0a978759daa14c2db9967be0731e315bdcbf1e95c74d889e21d",
+    "validation_status": "passed"
+  },
+  "comparison_provenance": {
+    "course_metadata": "matched",
+    "data_snapshot": "matched",
+    "population": "matched_by_exact_question_coverage",
+    "run_validation": "passed"
+  },
+  "course": {
+    "assessment_id": "quiz1",
+    "course_id": "linearalgebra",
+    "max_total": 100.0,
+    "question_count": 10,
+    "score_unit": "points"
+  },
+  "generated_at": "2026-08-17T10:47:34.093642Z",
+  "metric_policy": {
+    "exact_score_tolerance": 1e-09,
+    "paired_bootstrap_unit": "student",
+    "severe_total_points": 2.0,
+    "within_total_points": 1.0
+  },
+  "population": {
+    "score_row_count": 300,
+    "student_count": 30
+  },
+  "privacy": {
+    "aggregate_only": true,
+    "model_evidence_included": false,
+    "per_student_scores_included": false,
+    "private_paths_included": false,
+    "raw_answers_included": false,
+    "student_ids_included": false
+  },
+  "record_type": "course_generic_run_metrics_comparison",
+  "schema_version": 1
+}

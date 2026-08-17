@@ -49,7 +49,7 @@
       "version_id": "skill_candidate_v5_3"
     }
   },
-  "evaluation_status": "preflight_complete_not_run",
+  "evaluation_status": "superseded_not_run",
   "experiment_id": "linearalgebra-quiz1-v5-3-development-r1",
   "gates": {
     "before_packet_freeze": [
@@ -72,14 +72,16 @@
   },
   "heldout_accessed": false,
   "limitations": {
-    "en": "This is a v5.3 baseline preflight, not a model result. It deliberately preserves the existing v2 course rubric; a more detailed rubric is a post-analysis candidate, not a v5.3 baseline input. Any development result remains a single-course development finding and cannot establish production readiness or teacher replacement.",
-    "zh": "这是 v5.3 基线预检，不是模型结果。它刻意保留既有的 v2 课程 rubric；更细的 rubric 必须在分析之后作为新候选版本提出，不能混入 v5.3 基线。任何开发集结果都只是单课程开发发现，不能证明生产就绪或教师替代。"
+    "en": "This historical preflight is superseded and is not a model result. It preserved the v2 rubric before the completed V5.2 Flash analysis; that sequence is no longer authorized for a V5.3 run. Any development result remains a single-course development finding and cannot establish production readiness or teacher replacement.",
+    "zh": "这是已被取代的历史预检，不是模型结果。它在完成 V5.2 Flash 分析前保留了 v2 rubric；该顺序不再获准用于 V5.3 运行。任何开发集结果都只是单课程开发发现，不能证明生产就绪或教师替代。"
   },
   "model_run_authorization": "not_granted_by_this_preflight",
   "next_action": {
-    "en": "Freeze development-only M1 and T1 packets with the listed v5.3 bindings. Do not call a provider or access held-out material during packet construction.",
-    "zh": "按列出的 v5.3 绑定冻结仅开发集的 M1 与 T1 packet。构建 packet 时不得调用模型或访问留出集。"
+    "en": "Do not create a packet from this historical plan. Use the evidence-derived V5.3-r2 rubric candidate after calibration and a separately frozen development gold.",
+    "zh": "不得根据这份历史计划创建 packet。完成校准并单独冻结开发集 gold 后，改用基于证据的 V5.3-r2 rubric 候选。"
   },
+  "superseded_by": "experiments/records/linearalgebra-quiz1-v5-3-r2-rubric-candidate/plan.json",
+  "supersession_reason": "The V5.2 Flash analysis showed that V5.3 must first use an evidence-derived detailed rubric; a V5.3 run with the old V5.2 rubric would waste model budget and create an invalid version-comparison narrative.",
   "privacy": {
     "aggregate_only_public_reporting": true,
     "individual_scores_included": false,

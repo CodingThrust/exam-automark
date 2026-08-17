@@ -6,7 +6,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from .schema import CONFIDENCE_LEVELS, CourseSpec
+from .schema import (
+    CONFIDENCE_LEVELS,
+    DEDUCTION_TYPES,
+    GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
+    GRADING_OUTPUT_CONTRACT_V1,
+    GRADING_OUTPUT_CONTRACTS,
+    TRANSCRIPT_OUTPUT_CONTRACT_V1,
+    CourseSpec,
+)
 from .rubrics import require_valid_rubric
 
 
@@ -50,6 +58,7 @@ class PromptPacketSpec:
     input_root: Path
     output_root: Path
     rubric: dict[str, Any] | None = None
+    grading_output_contract: str = GRADING_OUTPUT_CONTRACT_V1
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -72,6 +81,7 @@ class PromptPacketSpec:
             raise ValueError("student_ids must be unique")
         if self.task == "grade" and self.rubric is None:
             raise ValueError("grade packets require a rubric")
+        _validate_grading_output_contract(self.task, self.grading_output_contract)
         object.__setattr__(self, "student_ids", tuple(self.student_ids))
         object.__setattr__(self, "input_root", Path(self.input_root))
         object.__setattr__(self, "output_root", Path(self.output_root))
@@ -97,6 +107,7 @@ class TextGradingPacketSpec:
     rubric: dict[str, Any]
     text_source_kind: str = "transcript"
     source_run_id: str | None = None
+    grading_output_contract: str = GRADING_OUTPUT_CONTRACT_V1
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -117,6 +128,7 @@ class TextGradingPacketSpec:
             raise ValueError("student_ids must be unique")
         if self.source_run_id is not None and not self.source_run_id.strip():
             raise ValueError("source_run_id must not be blank")
+        _validate_grading_output_contract("grade", self.grading_output_contract)
         object.__setattr__(self, "student_ids", tuple(self.student_ids))
         object.__setattr__(self, "transcript_source", Path(self.transcript_source))
         object.__setattr__(self, "output_root", Path(self.output_root))
@@ -153,7 +165,7 @@ def build_prompt_packet(spec: PromptPacketSpec) -> PromptPacketResult:
     schema = (
         transcript_output_schema(spec.course)
         if spec.task == "transcribe"
-        else grading_output_schema(spec.course)
+        else grading_output_schema(spec.course, spec.grading_output_contract)
     )
     _write_json(packet_path / "output.schema.json", schema)
 
@@ -169,6 +181,9 @@ def build_prompt_packet(spec: PromptPacketSpec) -> PromptPacketResult:
         "assessment_id": spec.course.assessment_id,
         "condition": spec.condition,
         "task": spec.task,
+        "output_contract": _output_contract_for_task(
+            spec.task, spec.grading_output_contract
+        ),
         "student_ids": list(spec.student_ids),
         "prompt_hash": _file_hash(packet_path / "prompt.txt"),
         "course_hash": _file_hash(packet_path / "course.json"),
@@ -223,7 +238,10 @@ def build_text_grading_packet(spec: TextGradingPacketSpec) -> PromptPacketResult
         encoding="utf-8",
         newline="\n",
     )
-    _write_json(packet_path / "output.schema.json", grading_output_schema(spec.course))
+    _write_json(
+        packet_path / "output.schema.json",
+        grading_output_schema(spec.course, spec.grading_output_contract),
+    )
     _write_json(packet_path / "rubric.json", spec.rubric)
 
     metadata = dict(spec.metadata)
@@ -265,6 +283,7 @@ def build_text_grading_packet(spec: TextGradingPacketSpec) -> PromptPacketResult
         "assessment_id": spec.course.assessment_id,
         "condition": spec.condition,
         "task": "grade",
+        "output_contract": spec.grading_output_contract,
         "student_ids": list(spec.student_ids),
         "prompt_hash": _file_hash(packet_path / "prompt.txt"),
         "course_hash": _file_hash(packet_path / "course.json"),
@@ -320,8 +339,78 @@ def transcript_output_schema(course: CourseSpec) -> dict[str, Any]:
     }
 
 
-def grading_output_schema(course: CourseSpec) -> dict[str, Any]:
+def grading_output_schema(
+    course: CourseSpec,
+    grading_output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
+) -> dict[str, Any]:
+    _validate_grading_output_contract("grade", grading_output_contract)
     max_question_score = max(question.max_score for question in course.questions)
+    score_properties: dict[str, Any] = {
+        "question_id": {
+            "type": "string",
+            "enum": list(course.question_ids),
+        },
+        "extracted_evidence": {"type": "string"},
+        "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": max_question_score,
+        },
+        "evidence": {"type": "string"},
+        "confidence": {
+            "type": "string",
+            "enum": sorted(CONFIDENCE_LEVELS),
+        },
+        "flags": {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+    }
+    if grading_output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
+        score_properties.update(
+            {
+                "deduction_trace": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "rubric_criterion": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 500,
+                            },
+                            "observed_evidence_or_missing_or_incorrect_part": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 500,
+                            },
+                            "deduction_type": {
+                                "type": "string",
+                                "enum": sorted(DEDUCTION_TYPES),
+                            },
+                            "points_deducted": {
+                                "type": "number",
+                                "exclusiveMinimum": 0,
+                                "maximum": max_question_score,
+                            },
+                        },
+                        "required": [
+                            "rubric_criterion",
+                            "observed_evidence_or_missing_or_incorrect_part",
+                            "deduction_type",
+                            "points_deducted",
+                        ],
+                        "additionalProperties": False,
+                    },
+                },
+                "attention_note": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500,
+                },
+            }
+        )
     return {
         "type": "object",
         "properties": {
@@ -335,27 +424,7 @@ def grading_output_schema(course: CourseSpec) -> dict[str, Any]:
                 "maxItems": len(course.questions),
                 "items": {
                     "type": "object",
-                    "properties": {
-                        "question_id": {
-                            "type": "string",
-                            "enum": list(course.question_ids),
-                        },
-                        "extracted_evidence": {"type": "string"},
-                        "score": {
-                            "type": "number",
-                            "minimum": 0,
-                            "maximum": max_question_score,
-                        },
-                        "evidence": {"type": "string"},
-                        "confidence": {
-                            "type": "string",
-                            "enum": sorted(CONFIDENCE_LEVELS),
-                        },
-                        "flags": {
-                            "type": "array",
-                            "items": {"type": "string"},
-                        },
-                    },
+                    "properties": score_properties,
                     "required": [
                         "question_id",
                         "extracted_evidence",
@@ -376,6 +445,68 @@ def grading_output_schema(course: CourseSpec) -> dict[str, Any]:
         "required": ["student_id", "scores", "total"],
         "additionalProperties": False,
     }
+
+
+def validate_packet_output_contract(
+    packet: Path,
+    manifest: dict[str, Any],
+    course: CourseSpec,
+    task: str,
+) -> str:
+    """Resolve a packet output contract and verify every explicit binding.
+
+    Historical packets did not name their contract, so they retain the legacy
+    behavior. New packets bind a fixed contract to both the manifest hash and
+    the exact generated schema before a runner may consume them.
+    """
+
+    raw_contract = manifest.get("output_contract")
+    contract = (
+        TRANSCRIPT_OUTPUT_CONTRACT_V1
+        if task == "transcribe"
+        else GRADING_OUTPUT_CONTRACT_V1
+    )
+    if raw_contract is not None:
+        if not isinstance(raw_contract, str):
+            raise ValueError("packet output_contract must be text")
+        contract = raw_contract
+    if task == "transcribe":
+        if contract != TRANSCRIPT_OUTPUT_CONTRACT_V1:
+            raise ValueError("transcription packet has an invalid output_contract")
+        expected_schema = transcript_output_schema(course)
+    elif task == "grade":
+        _validate_grading_output_contract(task, contract)
+        expected_schema = grading_output_schema(course, contract)
+    else:
+        raise ValueError(f"unsupported packet task: {task}")
+
+    if raw_contract is not None:
+        schema_path = packet / "output.schema.json"
+        if _file_hash(schema_path) != manifest.get("output_schema_hash"):
+            raise ValueError("packet output schema hash does not match manifest")
+        actual_schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        if actual_schema != expected_schema:
+            raise ValueError("packet output schema does not match output_contract")
+    return contract
+
+
+def _validate_grading_output_contract(task: str, contract: str) -> None:
+    if task == "transcribe":
+        if contract != GRADING_OUTPUT_CONTRACT_V1:
+            raise ValueError(
+                "transcription packets cannot select a grading output contract"
+            )
+        return
+    if contract not in GRADING_OUTPUT_CONTRACTS:
+        raise ValueError(f"unsupported grading output contract: {contract}")
+
+
+def _output_contract_for_task(task: str, grading_output_contract: str) -> str:
+    return (
+        TRANSCRIPT_OUTPUT_CONTRACT_V1
+        if task == "transcribe"
+        else grading_output_contract
+    )
 
 
 def audit_prompt_packet(packet: Path) -> list[str]:

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import csv
 import json
+import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -9,6 +11,26 @@ from typing import Any
 
 BASE_COLUMNS = ["student_id"]
 TAIL_COLUMNS = ["total", "flags"]
+DEDUCTION_TYPES = {
+    "answer_only_cap",
+    "blank_or_missing_answer",
+    "contradiction",
+    "incorrect_final_result",
+    "insufficient_required_explanation",
+    "local_arithmetic_or_notation_error",
+    "material_method_error",
+    "missing_required_evidence",
+    "other_rubric_based",
+    "unreadable_or_missing_evidence",
+}
+WINDOWS_ABSOLUTE_PATH = re.compile(r"(?:^|\s)[A-Za-z]:[\\/]")
+PRIVATE_DATA_PATH = re.compile(r"(?:^|[\\/])Data[\\/]", re.IGNORECASE)
+FILE_URI = re.compile(r"\bfile://", re.IGNORECASE)
+EMAIL_ADDRESS = re.compile(r"\b[^\s@]+@[^\s@]+\.[^\s@]+\b")
+IDENTITY_LABEL = re.compile(
+    r"\b(?:student[ _-]?(?:id|number|name)|name)\s*[:=]|(?:姓名|学号)\s*[:：]",
+    re.IGNORECASE,
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -18,11 +40,12 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     grades_dir = Path(args[0])
-    grades_dir.mkdir(parents=True, exist_ok=True)
-    feedback_dir = grades_dir / "feedback"
-    feedback_dir.mkdir(exist_ok=True)
 
     try:
+        _require_private_output_directory(grades_dir)
+        grades_dir.mkdir(parents=True, exist_ok=True)
+        feedback_dir = grades_dir / "feedback"
+        feedback_dir.mkdir(exist_ok=True)
         record = json.loads(sys.stdin.read())
         normalized = _normalize_record(record)
     except Exception as error:
@@ -91,20 +114,40 @@ def _normalize_record(record: dict[str, Any]) -> dict[str, Any]:
         if not question_id:
             raise ValueError("question_id is required")
         score = float(item.get("score"))
+        max_score = _positive_score(item.get("max_score"), "max_score", question_id)
+        if score < 0 or score > max_score:
+            raise ValueError(f"score is outside range for {question_id}")
         confidence = str(item.get("confidence", "")).strip().lower()
         if confidence not in {"high", "medium", "low"}:
             raise ValueError(f"invalid confidence for {question_id}: {confidence}")
         item_flags = list(_as_list(item.get("flags", [])))
+        deduction_trace = _normalize_deduction_trace(
+            item.get("deduction_trace"),
+            question_id=question_id,
+            score=score,
+            max_score=max_score,
+            student_id=student_id,
+        )
+        attention_note = item.get("attention_note")
+        if attention_note is not None:
+            attention_note = _safe_trace_text(attention_note, "attention_note", student_id)
+        if item_flags or confidence == "low":
+            if attention_note is None:
+                raise ValueError(
+                    f"flags or low confidence require attention_note for {question_id}"
+                )
         flags.extend(f"{question_id}:{flag}" for flag in item_flags)
         normalized_scores.append(
             {
                 "question_id": question_id,
                 "score": score,
-                "max_score": item.get("max_score"),
+                "max_score": max_score,
                 "evidence": str(item.get("evidence", "")).strip(),
                 "feedback": str(item.get("feedback", "")).strip(),
                 "confidence": confidence,
                 "flags": item_flags,
+                "deduction_trace": deduction_trace,
+                "attention_note": attention_note,
             }
         )
     total = float(record.get("total", sum(item["score"] for item in normalized_scores)))
@@ -122,6 +165,44 @@ def _read_existing_rows(path: Path) -> tuple[list[str], list[dict[str, str]]] | 
     with path.open("r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
         return list(reader.fieldnames or []), list(reader)
+
+
+def _require_private_output_directory(grades_dir: Path) -> None:
+    """Reject a new per-person grading record in an unignored Git location."""
+
+    resolved = grades_dir.resolve()
+    repository_root = next(
+        (parent for parent in (resolved, *resolved.parents) if (parent / ".git").exists()),
+        None,
+    )
+    if repository_root is None:
+        return
+    try:
+        relative = resolved.relative_to(repository_root).as_posix()
+    except ValueError:
+        return
+    check = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repository_root),
+            "check-ignore",
+            "--quiet",
+            "--no-index",
+            "--",
+            relative,
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if check.returncode == 0:
+        return
+    if check.returncode == 1:
+        raise ValueError(
+            "grades directory inside a Git worktree must be private and ignored"
+        )
+    raise ValueError("could not verify whether the grades directory is ignored")
 
 
 def _feedback_markdown(record: dict[str, Any]) -> str:
@@ -149,6 +230,21 @@ def _feedback_markdown(record: dict[str, Any]) -> str:
         )
         if item["flags"]:
             lines.extend(["Flags: " + ", ".join(item["flags"]), ""])
+        if item["deduction_trace"]:
+            lines.extend(["Deduction trace:", ""])
+            for trace in item["deduction_trace"]:
+                lines.extend(
+                    [
+                        "- "
+                        + f"{trace['rubric_criterion']}: "
+                        + f"{trace['observed_evidence_or_missing_or_incorrect_part']} "
+                        + f"(-{_format_score(trace['points_deducted'])}; "
+                        + f"{trace['deduction_type']})",
+                        "",
+                    ]
+                )
+        if item["attention_note"]:
+            lines.extend([f"Attention: {item['attention_note']}", ""])
     return "\n".join(lines)
 
 
@@ -158,6 +254,89 @@ def _as_list(value: Any) -> list[str]:
     if isinstance(value, list):
         return [str(item) for item in value]
     return [str(value)]
+
+
+def _positive_score(value: Any, label: str, question_id: str) -> float:
+    try:
+        score = float(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{label} is required for {question_id}") from error
+    if score <= 0:
+        raise ValueError(f"{label} must be positive for {question_id}")
+    return score
+
+
+def _normalize_deduction_trace(
+    value: Any,
+    *,
+    question_id: str,
+    score: float,
+    max_score: float,
+    student_id: str,
+) -> list[dict[str, Any]]:
+    expected = round(max_score - score, 10)
+    if expected == 0:
+        if value not in (None, []):
+            raise ValueError(f"full-credit {question_id} must not contain deduction_trace")
+        return []
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"non-full {question_id} requires deduction_trace")
+
+    normalized = []
+    required = {
+        "rubric_criterion",
+        "observed_evidence_or_missing_or_incorrect_part",
+        "deduction_type",
+        "points_deducted",
+    }
+    for entry in value:
+        if not isinstance(entry, dict) or set(entry) != required:
+            raise ValueError(
+                f"deduction_trace entries for {question_id} require exactly four fields"
+            )
+        deduction_type = entry["deduction_type"]
+        if deduction_type not in DEDUCTION_TYPES:
+            raise ValueError(f"invalid deduction_type for {question_id}")
+        points_deducted = _positive_score(
+            entry["points_deducted"], "points_deducted", question_id
+        )
+        normalized.append(
+            {
+                "rubric_criterion": _safe_trace_text(
+                    entry["rubric_criterion"], "rubric_criterion", student_id
+                ),
+                "observed_evidence_or_missing_or_incorrect_part": _safe_trace_text(
+                    entry["observed_evidence_or_missing_or_incorrect_part"],
+                    "observed_evidence_or_missing_or_incorrect_part",
+                    student_id,
+                ),
+                "deduction_type": deduction_type,
+                "points_deducted": points_deducted,
+            }
+        )
+    if abs(sum(entry["points_deducted"] for entry in normalized) - expected) > 1e-9:
+        raise ValueError(
+            f"deduction total must equal max_score - score for {question_id}"
+        )
+    return normalized
+
+
+def _safe_trace_text(value: Any, label: str, student_id: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{label} must be non-blank text")
+    if len(value) > 500:
+        raise ValueError(f"{label} must be at most 500 characters")
+    if (
+        WINDOWS_ABSOLUTE_PATH.search(value)
+        or PRIVATE_DATA_PATH.search(value)
+        or FILE_URI.search(value)
+    ):
+        raise ValueError(f"{label} must not contain a private or absolute path")
+    if EMAIL_ADDRESS.search(value) or IDENTITY_LABEL.search(value):
+        raise ValueError(f"{label} must not contain identity-bearing text")
+    if student_id.casefold() in value.casefold():
+        raise ValueError(f"{label} must not repeat student_id")
+    return value.strip()
 
 
 def _format_score(value: float) -> str:

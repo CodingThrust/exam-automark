@@ -40,3 +40,9 @@ source-page labels, image filenames, and attachment indices are locators only,
 not question IDs or a question-to-page mapping. It preserves whole-submission,
 leaf-level evidence assembly for submissions whose scanned page order differs
 from assessment question order.
+
+`skill_candidate_v5_3.json` records the successor cross-course deduction-trace
+contract. Every non-full declared leaf must carry a concise, rubric-grounded
+deduction trace whose point total equals that leaf's withheld credit. The
+contract is versioned so it does not rewrite or retrospectively validate frozen
+v5.2 packets and results.

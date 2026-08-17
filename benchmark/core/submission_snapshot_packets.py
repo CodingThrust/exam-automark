@@ -33,7 +33,12 @@ from .packets import (
     transcript_output_schema,
 )
 from .rubrics import require_valid_rubric
-from .schema import CourseSpec
+from .schema import (
+    GRADING_OUTPUT_CONTRACT_V1,
+    GRADING_OUTPUT_CONTRACTS,
+    TRANSCRIPT_OUTPUT_CONTRACT_V1,
+    CourseSpec,
+)
 from .submission_scope_workflow import (
     SUBMISSION_SNAPSHOT_MANIFEST_RELATIVE_PATH,
     SUBMISSION_SNAPSHOT_RECORD_TYPE,
@@ -75,6 +80,7 @@ class SubmissionSnapshotPacketSpec:
     snapshot_root: Path
     output_root: Path
     rubric: dict[str, Any] | None = None
+    grading_output_contract: str = GRADING_OUTPUT_CONTRACT_V1
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -97,6 +103,16 @@ class SubmissionSnapshotPacketSpec:
             raise ValueError("student_ids must be unique")
         if self.task == "grade" and self.rubric is None:
             raise ValueError("grade packets require a rubric")
+        if self.task == "transcribe":
+            if self.grading_output_contract != GRADING_OUTPUT_CONTRACT_V1:
+                raise ValueError(
+                    "transcription packets cannot select a grading output contract"
+                )
+        elif self.grading_output_contract not in GRADING_OUTPUT_CONTRACTS:
+            raise ValueError(
+                "unsupported grading output contract: "
+                f"{self.grading_output_contract}"
+            )
         object.__setattr__(self, "student_ids", tuple(self.student_ids))
         object.__setattr__(self, "snapshot_root", Path(self.snapshot_root))
         object.__setattr__(self, "output_root", Path(self.output_root))
@@ -374,7 +390,7 @@ def _write_packet(
     schema = (
         transcript_output_schema(spec.course)
         if spec.task == "transcribe"
-        else grading_output_schema(spec.course)
+        else grading_output_schema(spec.course, spec.grading_output_contract)
     )
     _write_json(packet_path / "output.schema.json", schema)
 
@@ -405,6 +421,11 @@ def _write_packet(
         "assessment_id": spec.course.assessment_id,
         "condition": spec.condition,
         "task": spec.task,
+        "output_contract": (
+            TRANSCRIPT_OUTPUT_CONTRACT_V1
+            if spec.task == "transcribe"
+            else spec.grading_output_contract
+        ),
         "student_ids": list(spec.student_ids),
         "prompt_hash": _file_hash(packet_path / "prompt.txt"),
         "course_hash": _file_hash(packet_path / "course.json"),

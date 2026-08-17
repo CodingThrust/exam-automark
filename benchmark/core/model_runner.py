@@ -8,9 +8,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
-from .packets import directory_digest
+from .packets import directory_digest, validate_packet_output_contract
 from .run_metadata import validate_run_metadata
-from .schema import CONFIDENCE_LEVELS, CourseSpec, ScoreRecord, validate_score_records
+from .schema import (
+    CONFIDENCE_LEVELS,
+    GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
+    GRADING_OUTPUT_CONTRACT_V1,
+    CourseSpec,
+    DeductionTrace,
+    ScoreRecord,
+    validate_score_records,
+)
 
 
 IMAGE_OR_DOCUMENT_SUFFIXES = {
@@ -125,6 +133,7 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
     if task == "transcribe" and config.input_mode != "multimodal":
         raise ValueError("transcription packets require --input-mode multimodal")
     course = CourseSpec.from_dict(_read_json(packet / "course.json"))
+    output_contract = validate_packet_output_contract(packet, manifest, course, task)
     prompt_text = (packet / "prompt.txt").read_text(encoding="utf-8")
     rubric = _read_json(packet / "rubric.json") if task == "grade" else None
     student_ids = tuple(manifest.get("student_ids", ()))
@@ -137,7 +146,7 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
         image_inputs = _load_image_inputs(packet, student_ids)
     else:
         text_inputs = _load_text_inputs(packet, student_ids)
-    provider = _provider_from_config(config)
+    provider = _provider_from_config(config, output_contract=output_contract)
     output.mkdir(parents=True)
     (output / "outputs").mkdir()
     command = _write_command_records(output, config)
@@ -167,6 +176,7 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
                 images,
                 task=task,
                 submission_scope=_read_submission_scope(packet, student_id),
+                output_contract=output_contract,
             )
         else:
             prompt = _compose_student_prompt(
@@ -176,6 +186,7 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
                 rubric,
                 text_inputs[student_id],
                 task=task,
+                output_contract=output_contract,
             )
         success = _run_student(
             provider=provider,
@@ -189,6 +200,7 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
             failures=failures,
             usage=usage,
             max_retries=config.max_retries,
+            output_contract=output_contract,
         )
         if success["status"] == "passed":
             successful += 1
@@ -220,9 +232,11 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
 
 def _provider_from_config(
     config: ModelPacketRunConfig,
+    *,
+    output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
 ) -> TextModelProvider | MultimodalModelProvider:
     if config.dry_run:
-        return DryRunTextProvider(config.model)
+        return DryRunTextProvider(config.model, output_contract=output_contract)
     settings = _provider_settings(config.provider)
     return OpenAICompatibleTextProvider(
         model=config.model,
@@ -238,8 +252,14 @@ def _provider_from_config(
 
 
 class DryRunTextProvider:
-    def __init__(self, model: str):
+    def __init__(
+        self,
+        model: str,
+        *,
+        output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
+    ):
         self.model = model
+        self.output_contract = output_contract
 
     def complete_text(
         self,
@@ -262,17 +282,14 @@ class DryRunTextProvider:
                 ],
             }
         else:
+            traced = (
+                self.output_contract
+                == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1
+            )
             payload = {
                 "student_id": student_id,
                 "scores": [
-                    {
-                        "question_id": question.id,
-                        "extracted_evidence": "dry-run placeholder",
-                        "score": 0,
-                        "evidence": "Dry-run response; no model call was made.",
-                        "confidence": "low",
-                        "flags": ["dry_run"],
-                    }
+                    _dry_run_score_row(question, traced=traced)
                     for question in course.questions
                 ],
                 "total": 0,
@@ -298,6 +315,30 @@ class DryRunTextProvider:
         result.usage["dry_run_image_count"] = len(images)
         result.usage["dry_run_image_bytes"] = sum(len(image["data"]) for image in images)
         return result
+
+
+def _dry_run_score_row(question: Any, *, traced: bool) -> dict[str, Any]:
+    row: dict[str, Any] = {
+        "question_id": question.id,
+        "extracted_evidence": "dry-run placeholder",
+        "score": 0,
+        "evidence": "Dry-run response; no model call was made.",
+        "confidence": "low",
+        "flags": ["dry_run"],
+    }
+    if traced:
+        row["deduction_trace"] = [
+            {
+                "rubric_criterion": "synthetic dry-run contract check",
+                "observed_evidence_or_missing_or_incorrect_part": (
+                    "No student work is evaluated during a dry run."
+                ),
+                "deduction_type": "missing_required_evidence",
+                "points_deducted": question.max_score,
+            }
+        ]
+        row["attention_note"] = "Synthetic dry-run row; no model call was made."
+    return row
 
 
 class OpenAICompatibleTextProvider:
@@ -601,6 +642,7 @@ def _compose_multimodal_prompt(
     *,
     task: str,
     submission_scope: dict[str, Any] | None,
+    output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
 ) -> str:
     context = {
         "student_id": student_id,
@@ -628,7 +670,9 @@ def _compose_multimodal_prompt(
         "across all supplied pages. "
         + task_instruction
         + "\nRequired response contract:\n"
-        + _structured_output_contract(course, student_id, task)
+        + _structured_output_contract(
+            course, student_id, task, output_contract=output_contract
+        )
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
@@ -642,6 +686,7 @@ def _compose_student_prompt(
     inputs: list[dict[str, str]],
     *,
     task: str = "grade",
+    output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
 ) -> str:
     context = {
         "student_id": student_id,
@@ -661,14 +706,20 @@ def _compose_student_prompt(
         "submission; locate each question from visible labels, stems, and answer "
         "content across all supplied pages."
         + "\nRequired response contract:\n"
-        + _structured_output_contract(course, student_id, task)
+        + _structured_output_contract(
+            course, student_id, task, output_contract=output_contract
+        )
         + "\nPacket context:\n"
         + json.dumps(context, ensure_ascii=True, sort_keys=True)
     )
 
 
 def _structured_output_contract(
-    course: CourseSpec, student_id: str, task: str
+    course: CourseSpec,
+    student_id: str,
+    task: str,
+    *,
+    output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
 ) -> str:
     """Return an explicit cross-provider JSON field contract for one response."""
     if task == "transcribe":
@@ -680,21 +731,25 @@ def _structured_output_contract(
             ],
         }
     else:
+        traced = output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1
         example = {
             "student_id": student_id,
             "scores": [
-                {
-                    "question_id": question_id,
-                    "extracted_evidence": "visible evidence",
-                    "score": 0,
-                    "evidence": "scoring rationale",
-                    "confidence": "medium",
-                    "flags": [],
-                }
-                for question_id in course.question_ids
+                _contract_score_row(question, traced=traced)
+                for question in course.questions
             ],
             "total": 0,
         }
+    trace_instruction = ""
+    if task == "grade" and output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
+        trace_instruction = (
+            " Every non-full-credit leaf must include deduction_trace with one or "
+            "more four-field entries; their points_deducted must sum exactly to "
+            "that leaf's max_score minus score. Omit deduction_trace for full "
+            "credit. Any row with flags or low confidence must include a concise "
+            "attention_note. Deduction traces are audit statements, not hidden "
+            "reasoning or chain-of-thought."
+        )
     return (
         "Return exactly one JSON object and no Markdown. Follow this structural "
         "example exactly: "
@@ -705,7 +760,31 @@ def _structured_output_contract(
         "For grading, `total` must equal the sum of score rows after applying "
         "course.final_score_cap when that field is present. Do not rename `scores` "
         "to `items` or add alternative top-level fields."
+        + trace_instruction
     )
+
+
+def _contract_score_row(question: Any, *, traced: bool) -> dict[str, Any]:
+    row: dict[str, Any] = {
+        "question_id": question.id,
+        "extracted_evidence": "visible evidence",
+        "score": 0,
+        "evidence": "scoring rationale",
+        "confidence": "medium",
+        "flags": [],
+    }
+    if traced:
+        row["deduction_trace"] = [
+            {
+                "rubric_criterion": "criterion label from the frozen rubric",
+                "observed_evidence_or_missing_or_incorrect_part": (
+                    "concise visible evidence or missing/incorrect part"
+                ),
+                "deduction_type": "missing_required_evidence",
+                "points_deducted": question.max_score,
+            }
+        ]
+    return row
 
 
 def _run_student(
@@ -721,6 +800,7 @@ def _run_student(
     failures: Path,
     usage: dict[str, int | float],
     max_retries: int,
+    output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
 ) -> dict[str, Any]:
     last_error: Exception | None = None
     for attempt in range(1, max_retries + 2):
@@ -749,7 +829,12 @@ def _run_student(
                 )
             payload = _parse_json_result(result.raw_text)
             if task == "grade":
-                _validate_grade_payload(payload, student_id, course)
+                _validate_grade_payload(
+                    payload,
+                    student_id,
+                    course,
+                    output_contract=output_contract,
+                )
             else:
                 _validate_transcript_payload(payload, student_id, course)
             _write_json(output / "outputs" / f"{student_id}.json", payload)
@@ -811,16 +896,88 @@ def _run_student(
     }
 
 
-def _validate_grade_payload(payload: dict[str, Any], student_id: str, course: CourseSpec) -> None:
+def _validate_grade_payload(
+    payload: dict[str, Any],
+    student_id: str,
+    course: CourseSpec,
+    *,
+    output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
+) -> None:
+    if not isinstance(payload, dict):
+        raise ValueError("grade output must be a JSON object")
+    if output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
+        if set(payload) != {"student_id", "scores", "total"}:
+            raise ValueError(
+                "deduction-trace grade output requires only student_id, scores, and total"
+            )
     if payload.get("student_id") != student_id:
         raise ValueError(f"student_id mismatch: expected {student_id}")
+    scores = payload.get("scores")
+    if not isinstance(scores, list):
+        raise ValueError("scores must be a list")
     records = []
-    for row in payload.get("scores", []):
+    required_row_fields = {
+        "question_id",
+        "extracted_evidence",
+        "score",
+        "evidence",
+        "confidence",
+        "flags",
+    }
+    trace_optional_fields = {"deduction_trace", "attention_note"}
+    for row in scores:
+        if not isinstance(row, dict):
+            raise ValueError("each score row must be an object")
+        if output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
+            if not required_row_fields <= set(row):
+                missing = sorted(required_row_fields - set(row))
+                raise ValueError(
+                    "deduction-trace score row missing field(s): " + ", ".join(missing)
+                )
+            unexpected = set(row) - required_row_fields - trace_optional_fields
+            if unexpected:
+                raise ValueError(
+                    "deduction-trace score row has unexpected field(s): "
+                    + ", ".join(sorted(unexpected))
+                )
         if not isinstance(row.get("extracted_evidence"), str):
             raise ValueError("extracted_evidence must be text")
+        if output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
+            if not row["extracted_evidence"].strip():
+                raise ValueError("extracted_evidence must not be blank")
+            if not isinstance(row.get("evidence"), str) or not row["evidence"].strip():
+                raise ValueError("evidence must be non-blank text")
         flags = row.get("flags")
         if not isinstance(flags, list) or not all(isinstance(flag, str) for flag in flags):
             raise ValueError("flags must be a list of strings")
+        deduction_trace: list[DeductionTrace] = []
+        raw_trace = row.get("deduction_trace")
+        if raw_trace is not None:
+            if not isinstance(raw_trace, list) or not raw_trace:
+                raise ValueError("deduction_trace must be a non-empty list when present")
+            for entry in raw_trace:
+                if not isinstance(entry, dict) or set(entry) != {
+                    "rubric_criterion",
+                    "observed_evidence_or_missing_or_incorrect_part",
+                    "deduction_type",
+                    "points_deducted",
+                }:
+                    raise ValueError(
+                        "each deduction_trace entry requires exactly the four contract fields"
+                    )
+                deduction_trace.append(
+                    DeductionTrace(
+                        rubric_criterion=entry["rubric_criterion"],
+                        observed_evidence_or_missing_or_incorrect_part=entry[
+                            "observed_evidence_or_missing_or_incorrect_part"
+                        ],
+                        deduction_type=entry["deduction_type"],
+                        points_deducted=entry["points_deducted"],
+                    )
+                )
+        attention_note = row.get("attention_note")
+        if attention_note is not None and not isinstance(attention_note, str):
+            raise ValueError("attention_note must be text")
         records.append(
             ScoreRecord(
                 student_id=student_id,
@@ -829,9 +986,15 @@ def _validate_grade_payload(payload: dict[str, Any], student_id: str, course: Co
                 confidence=row["confidence"],
                 evidence=row["evidence"],
                 flags=tuple(flags),
+                deduction_trace=tuple(deduction_trace),
+                attention_note=attention_note,
             )
         )
-    total = validate_score_records(records, course)
+    total = validate_score_records(
+        records,
+        course,
+        grading_output_contract=output_contract,
+    )
     if "total" not in payload:
         raise ValueError("total is required")
     # Leaf score rows have already passed the course-specific coverage, range,
@@ -920,6 +1083,13 @@ def _metadata(
         ),
         "packet": packet.as_posix(),
         "packet_hash": directory_digest(packet),
+        "output_contract": manifest.get(
+            "output_contract",
+            "transcript_v1"
+            if manifest.get("task") == "transcribe"
+            else GRADING_OUTPUT_CONTRACT_V1,
+        ),
+        "output_schema_hash": manifest.get("output_schema_hash"),
         "prompt_hash": manifest["prompt_hash"],
         "rubric_hash": manifest.get("rubric_hash"),
         "text_source_hash": directory_digest(packet / "inputs"),

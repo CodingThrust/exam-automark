@@ -148,6 +148,30 @@ declared leaves. Read the complete submission first and collect evidence for
 each leaf across all ordered pages. A missing or unclear region affects only
 the material leaf or leaves unless the frozen rubric explicitly says otherwise.
 
+## Required deduction trace for non-full leaves
+
+For every leaf below `max_score`, add a concise `deduction_trace` array. Every
+entry must contain exactly these fields:
+
+- `rubric_criterion`
+- `observed_evidence_or_missing_or_incorrect_part`
+- `deduction_type`
+- `points_deducted`
+
+The trace must be grounded in visible work and the frozen rubric, and its
+`points_deducted` values must sum exactly to `max_score - score` for that one
+leaf. It is a compact audit statement, not a chain of thought. Deduct from the
+first material error; do not deduct again for consequences of that same error.
+For selected-response work, do not penalize a missing explanation unless the
+question explicitly requires it. When a correct calculation answer lacks
+required work, use the frozen answer-only cap. A zero score needs an explicit
+missing or incorrect reason. Full-credit leaves omit `deduction_trace`; any
+leaf with flags or `low` confidence needs a short `attention_note`. Evaluate a
+bonus leaf independently from every base leaf.
+
+Never place a name, identifier, email address, private path, or raw private
+file reference in a trace or attention note.
+
 ## Required JSON record
 
 Write one JSON object per student before passing it to `write_outputs.py`:
@@ -163,7 +187,15 @@ Write one JSON object per student before passing it to `write_outputs.py`:
       "evidence": "Visible work used to justify the score.",
       "feedback": "Short English feedback for the student.",
       "confidence": "high",
-      "flags": []
+      "flags": [],
+      "deduction_trace": [
+        {
+          "rubric_criterion": "frozen rubric criterion label",
+          "observed_evidence_or_missing_or_incorrect_part": "Concise visible missing or incorrect part.",
+          "deduction_type": "material_method_error",
+          "points_deducted": 1.0
+        }
+      ]
     }
   ],
   "total": 2.0,

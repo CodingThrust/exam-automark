@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "record_type": "cross_course_candidate_contract_plan",
+  "candidate_skill_version_id": "skill_candidate_v5_3",
+  "predecessor_skill_version_id": "skill_candidate_v5_2",
+  "skill_snapshot": "experiments/skill_versions/skill_candidate_v5_3.json",
+  "skill_canonical_hash": "53989eaea05b3652742cbeca112a8dff638db978f252162789c5a29b3fdbd219",
+  "prompt_template": "experiments/prompt_templates/grade_candidate_v5_3.txt",
+  "prompt_template_sha256": "da0505beae5213b2e020aa7d54eca07fbab6530652724cbad9954a4bc2c5a1fa",
+  "grading_output_contract": "deduction_trace_v1",
+  "scope": {
+    "en": "Cross-course candidate contract only. Course-specific scoring policies remain in the frozen course rubric.",
+    "zh": "仅为跨课程候选合同；各课程的具体评分政策仍以冻结的课程 rubric 为准。"
+  },
+  "acceptance_requirements": {
+    "en": [
+      "Each non-full declared leaf has one or more concise, source-grounded deduction entries.",
+      "The deducted-point sum exactly equals max_score minus awarded score for that leaf.",
+      "A calculation deduction starts at the first material error and does not repeat consequential loss.",
+      "Full-credit leaves omit deduction_trace; flagged or low-confidence leaves carry a concise attention_note.",
+      "Bonus leaves remain independent and follow their course contract."
+    ],
+    "zh": [
+      "每个非满分的已声明计分叶子都必须有一条或多条简洁、基于作答来源的扣分记录。",
+      "每个叶子的扣分合计必须严格等于 max_score 减去实得分。",
+      "计算题从首个实质错误扣分，不能重复扣除其连带后果。",
+      "满分叶子不写 deduction_trace；有 flags 或低置信度的叶子必须写简洁 attention_note。",
+      "bonus 叶子独立处理，并遵循所属课程合同。"
+    ]
+  },
+  "privacy_policy": {
+    "en": "Deduction traces are private run-output fields. Public records may contain only aggregate, privacy-audited summaries and immutable public hashes.",
+    "zh": "扣分依据属于私有运行输出字段。公开记录只能包含经隐私审计的汇总信息和不可变的公开哈希。"
+  },
+  "evaluation_status": "not_run",
+  "model_run_authorization": "not_granted_by_this_plan",
+  "heldout_accessed": false,
+  "limitations": {
+    "en": "This plan creates no packet, model output, score, metric, comparison, or teacher-replacement claim. Any future evaluation requires a newly frozen development-only packet and explicit authorization.",
+    "zh": "本计划不创建 packet、模型输出、分数、指标、比较或教师替代声明。任何后续评测都必须新建冻结的仅开发集 packet，并获得明确授权。"
+  },
+  "next_step": {
+    "en": "After review, decide whether to create a v5.3 development packet; do not run models or access held-out material without a separate authorization.",
+    "zh": "审核后再决定是否创建 v5.3 开发集 packet；未获单独授权前不得运行模型或访问留出材料。"
+  }
+}

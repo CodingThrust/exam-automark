@@ -1,0 +1,44 @@
+{
+  "global_scoring_rules": {
+    "alternative_valid_methods": "accept_when_declared_criteria_are_met",
+    "criterion_evidence": "explicit_per_criterion",
+    "deduction_locality": "first_material_error_no_double_count",
+    "irrelevant_extra_content": "ignore_unless_directly_contradicts_declared_criterion",
+    "score_declared_criteria_only": true
+  },
+  "questions": [
+    {
+      "answer_form_requirements": {
+        "explanation": "not_required",
+        "simplification": "required",
+        "working": "answer_only_cap"
+      },
+      "answer_only_cap": 3,
+      "criteria": [
+        {
+          "award_condition": "A valid setup uses the quantities specified in the question.",
+          "id": "Q1.valid_setup",
+          "points": 3,
+          "withhold_condition": "No valid setup using the specified quantities is shown."
+        },
+        {
+          "award_condition": "The expression is simplified to the form required by the question.",
+          "id": "Q1.required_simplification",
+          "points": 4,
+          "withhold_condition": "The required simplification is absent or incorrect."
+        },
+        {
+          "award_condition": "The final result is correct.",
+          "id": "Q1.final_result",
+          "points": 3,
+          "withhold_condition": "The final result is missing or incorrect."
+        }
+      ],
+      "id": "Q1",
+      "max_score": 10,
+      "question_type": "calculation"
+    }
+  ],
+  "rubric_format": "execution_contract_v1",
+  "rubric_version": "replace_with_course_version"
+}

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from decimal import Decimal
+import re
 from typing import Any
 
 from .schema import CourseSpec, QuestionSpec
@@ -29,6 +30,41 @@ FORBIDDEN_RUBRIC_KEYS = {
     "example_student_answer",
 }
 _CONCEPT_QUESTION_TYPES = {"short_answer", "proof", "essay"}
+EXECUTION_CONTRACT_FORMAT = "execution_contract_v1"
+EXECUTION_QUESTION_TYPES = {
+    "algorithm",
+    "calculation",
+    "calculation_short_answer",
+    "conceptual",
+    "diagram",
+    "essay",
+    "objective_selection",
+    "open_response",
+    "proof",
+    "representation",
+    "short_answer",
+    "true_false",
+}
+EXECUTION_GLOBAL_RULES = {
+    "score_declared_criteria_only": True,
+    "irrelevant_extra_content": "ignore_unless_directly_contradicts_declared_criterion",
+    "alternative_valid_methods": "accept_when_declared_criteria_are_met",
+    "deduction_locality": "first_material_error_no_double_count",
+    "criterion_evidence": "explicit_per_criterion",
+}
+ANSWER_FORM_RULES = {
+    "simplification": {
+        "required",
+        "not_required",
+        "equivalent_form_accepted",
+    },
+    "explanation": {"required", "not_required"},
+    "working": {"required", "not_required", "answer_only_cap"},
+}
+AMBIGUOUS_RUBRIC_LANGUAGE = re.compile(
+    r"\b(?:as appropriate|generally|may|normally|reasonable|should|typically|usually)\b",
+    re.IGNORECASE,
+)
 
 
 def validate_concept_rubric(rubric: dict[str, Any], course: CourseSpec) -> list[str]:
@@ -95,9 +131,199 @@ def validate_concept_rubric(rubric: dict[str, Any], course: CourseSpec) -> list[
 
 def require_valid_rubric(rubric: dict[str, Any], course: CourseSpec) -> None:
     """Raise one error containing every validation finding."""
-    findings = validate_concept_rubric(rubric, course)
+    findings = validate_rubric(rubric, course)
     if findings:
-        raise ValueError("invalid concept-keyterm rubric: " + "; ".join(findings))
+        rubric_label = (
+            "execution-contract"
+            if rubric.get("rubric_format") == EXECUTION_CONTRACT_FORMAT
+            else "concept-keyterm"
+        )
+        raise ValueError(f"invalid {rubric_label} rubric: " + "; ".join(findings))
+
+
+def validate_rubric(rubric: dict[str, Any], course: CourseSpec) -> list[str]:
+    """Validate an opted-in rubric format while keeping legacy rubrics valid."""
+
+    if rubric.get("rubric_format") == EXECUTION_CONTRACT_FORMAT:
+        return validate_execution_contract_rubric(rubric, course)
+    return validate_concept_rubric(rubric, course)
+
+
+def validate_execution_contract_rubric(
+    rubric: dict[str, Any], course: CourseSpec
+) -> list[str]:
+    """Validate a detailed leaf-level rubric for repeatable cross-agent scoring."""
+
+    findings = _forbidden_key_findings(rubric)
+    global_rules = rubric.get("global_scoring_rules")
+    if global_rules != EXECUTION_GLOBAL_RULES:
+        findings.append(
+            "execution rubric global_scoring_rules must exactly declare the shared scoring rules"
+        )
+    questions = rubric.get("questions")
+    if not isinstance(questions, list):
+        return sorted(set(findings + ["execution rubric questions must be a list"]))
+
+    question_ids: list[str] = []
+    criterion_ids: list[str] = []
+    question_map = course.question_map
+    for index, question in enumerate(questions):
+        if not isinstance(question, dict):
+            findings.append(f"execution rubric question at index {index} must be an object")
+            continue
+        question_id = _question_id(question)
+        if question_id is None:
+            findings.append(f"execution rubric question at index {index} must define id")
+            continue
+        question_ids.append(question_id)
+        course_question = question_map.get(question_id)
+        if course_question is None:
+            continue
+        if not _same_number(question.get("max_score"), course_question.max_score):
+            findings.append(
+                f"{question_id} max_score must match course maximum {_score_label(course_question.max_score)}"
+            )
+        if question.get("question_type") not in EXECUTION_QUESTION_TYPES:
+            findings.append(f"{question_id} question_type must be an execution contract type")
+        findings.extend(
+            _validate_answer_form_requirements(question, question_id, course_question)
+        )
+        findings.extend(
+            _validate_execution_criteria(
+                question, question_id, course_question, criterion_ids
+            )
+        )
+
+    for question_id in _duplicates(question_ids):
+        findings.append(f"duplicate rubric question ID: {question_id}")
+    for criterion_id in _duplicates(criterion_ids):
+        findings.append(f"duplicate execution criterion ID: {criterion_id}")
+    missing = sorted(set(course.question_ids) - set(question_ids))
+    extra = sorted(set(question_ids) - set(course.question_ids))
+    if missing:
+        findings.append("missing rubric question IDs: " + ", ".join(missing))
+    if extra:
+        findings.append("extra rubric question IDs: " + ", ".join(extra))
+    return sorted(set(findings))
+
+
+def execution_criterion_ids(
+    rubric: dict[str, Any], question_id: str
+) -> set[str] | None:
+    """Return an opted-in leaf's permitted trace criterion IDs, if available."""
+
+    if rubric.get("rubric_format") != EXECUTION_CONTRACT_FORMAT:
+        return None
+    questions = rubric.get("questions")
+    if not isinstance(questions, list):
+        return None
+    for question in questions:
+        if not isinstance(question, dict) or _question_id(question) != question_id:
+            continue
+        criteria = question.get("criteria")
+        if not isinstance(criteria, list):
+            return None
+        return {
+            criterion["id"]
+            for criterion in criteria
+            if isinstance(criterion, dict) and isinstance(criterion.get("id"), str)
+        }
+    return None
+
+
+def execution_criterion_points(
+    rubric: dict[str, Any], question_id: str
+) -> dict[str, float] | None:
+    """Return an opted-in leaf's criterion-to-points map, if available."""
+
+    if rubric.get("rubric_format") != EXECUTION_CONTRACT_FORMAT:
+        return None
+    questions = rubric.get("questions")
+    if not isinstance(questions, list):
+        return None
+    for question in questions:
+        if not isinstance(question, dict) or _question_id(question) != question_id:
+            continue
+        criteria = question.get("criteria")
+        if not isinstance(criteria, list):
+            return None
+        return {
+            criterion["id"]: float(criterion["points"])
+            for criterion in criteria
+            if isinstance(criterion, dict)
+            and isinstance(criterion.get("id"), str)
+            and _is_number(criterion.get("points"))
+        }
+    return None
+
+
+def _validate_answer_form_requirements(
+    question: dict[str, Any], question_id: str, course_question: QuestionSpec
+) -> list[str]:
+    requirements = question.get("answer_form_requirements")
+    expected_keys = set(ANSWER_FORM_RULES)
+    if not isinstance(requirements, dict) or set(requirements) != expected_keys:
+        return [
+            f"{question_id} answer_form_requirements must define exactly: "
+            "simplification, explanation, working"
+        ]
+    findings: list[str] = []
+    for field, allowed_values in ANSWER_FORM_RULES.items():
+        if requirements[field] not in allowed_values:
+            findings.append(f"{question_id} {field} requirement is invalid")
+    answer_only_cap = question.get("answer_only_cap")
+    if requirements["working"] == "answer_only_cap":
+        if not _allows_score(course_question, answer_only_cap) or _same_number(
+            answer_only_cap, course_question.max_score
+        ):
+            findings.append(
+                f"{question_id} answer_only_cap must be below the maximum and use the score step"
+            )
+    elif answer_only_cap is not None:
+        findings.append(
+            f"{question_id} answer_only_cap is allowed only when working uses answer_only_cap"
+        )
+    return findings
+
+
+def _validate_execution_criteria(
+    question: dict[str, Any],
+    question_id: str,
+    course_question: QuestionSpec,
+    criterion_ids: list[str],
+) -> list[str]:
+    criteria = question.get("criteria")
+    if not isinstance(criteria, list) or not criteria:
+        return [f"{question_id} criteria must be a non-empty list"]
+    findings: list[str] = []
+    points_total = 0.0
+    required = {"id", "points", "award_condition", "withhold_condition"}
+    for index, criterion in enumerate(criteria):
+        label = f"{question_id} criteria[{index}]"
+        if not isinstance(criterion, dict) or set(criterion) != required:
+            findings.append(f"{label} must contain exactly id, points, award_condition, withhold_condition")
+            continue
+        criterion_id = criterion["id"]
+        if not isinstance(criterion_id, str) or not criterion_id.strip():
+            findings.append(f"{label} id must be non-blank text")
+        else:
+            criterion_ids.append(criterion_id)
+        points = criterion["points"]
+        if not _allows_score(course_question, points) or not _is_number(points) or points <= 0:
+            findings.append(f"{label} points must be positive and use the score step")
+        else:
+            points_total += float(points)
+        for field in ("award_condition", "withhold_condition"):
+            value = criterion[field]
+            if not isinstance(value, str) or not value.strip():
+                findings.append(f"{label} {field} must be non-blank text")
+            elif AMBIGUOUS_RUBRIC_LANGUAGE.search(value):
+                findings.append(f"{label} {field} must avoid unresolved discretionary language")
+    if abs(points_total - course_question.max_score) > 1e-9:
+        findings.append(
+            f"{question_id} criterion points must total {_score_label(course_question.max_score)}"
+        )
+    return findings
 
 
 def _validate_concept_question(

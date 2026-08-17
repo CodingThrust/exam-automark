@@ -1,0 +1,36 @@
+{
+  "evaluation_status": "not_run",
+  "heldout_accessed": false,
+  "implementation_scope": {
+    "en": "Public cross-course validation and template only. Existing frozen rubrics and historic results are unchanged.",
+    "zh": "仅包含公开的跨课程验证器和模板；既有冻结 rubric 与历史结果均不改变。"
+  },
+  "model_release_policy": {
+    "current_default_for_new_deepseek_runs": "deepseek-v4-flash",
+    "policy_path": "experiments/model_policies/deepseek_v4_release_policy.json",
+    "provisional_deepseek_model": "deepseek-v4-pro",
+    "provisional_retest_trigger": "formal_release"
+  },
+  "model_run_authorization": "not_granted_by_this_plan",
+  "record_type": "cross_course_rubric_execution_contract_plan",
+  "required_rubric_properties": {
+    "en": [
+      "Each declared leaf has exact point-bearing criteria whose points total its maximum.",
+      "Each criterion has an explicit award condition and withhold condition.",
+      "A withheld criterion is deducted once for exactly its declared points; finer deductions require finer criteria.",
+      "Each leaf declares whether simplification, explanation, and visible working are required.",
+      "Unrelated extra content is ignored unless it directly contradicts a declared criterion.",
+      "A deduction trace references the exact applicable criterion ID."
+    ],
+    "zh": [
+      "每个已声明叶子都有精确的计分标准，且各标准分值合计等于该叶子的满分。",
+      "每条标准都必须明确写出给分条件与不给分条件。",
+      "未满足的标准只能按其声明分值扣一次；如需更细扣分，必须拆分为更细标准。",
+      "每个叶子都必须声明是否要求化简、解释和可见过程。",
+      "无关额外内容不影响评分，除非它直接矛盾于已声明标准。",
+      "扣分依据必须引用适用的精确 criterion ID。"
+    ]
+  },
+  "schema_version": 1,
+  "template_path": "experiments/rubric_templates/execution_contract_v1.template.json"
+}

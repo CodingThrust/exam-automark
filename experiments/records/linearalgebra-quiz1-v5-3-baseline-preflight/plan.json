@@ -1,0 +1,129 @@
+{
+  "analysis_protocol": {
+    "cross_route_agreement": [
+      "leaf-level exact agreement",
+      "total-score MAE",
+      "within-one-point rate",
+      "severe total-error rate",
+      "mean signed difference"
+    ],
+    "disagreement_taxonomy": [
+      "clear_model_error",
+      "representation_or_transcription_loss",
+      "rubric_or_gold_conflict",
+      "reasonable_strictness_difference",
+      "insufficient_evidence"
+    ],
+    "human_alignment": [
+      "leaf-level exact agreement",
+      "total-score MAE",
+      "within-one-point rate",
+      "severe total-error rate",
+      "mean signed error"
+    ],
+    "trace_quality": [
+      "every non-full leaf has deduction_trace",
+      "deduction points close exactly to max_score minus score",
+      "full-credit leaves omit deduction_trace",
+      "flags or low confidence include attention_note",
+      "no trace repeats a downstream consequence of the first material error"
+    ]
+  },
+  "baseline": {
+    "course_spec": {
+      "path": "experiments/course_specs/linearalgebra_quiz1_v2.json",
+      "sha256": "1918e92772e62bc4087f9215e9cb00e037ddc22570e9f5efbc66a06a0cf196df"
+    },
+    "grading_output_contract": "deduction_trace_v1",
+    "prompt_template": {
+      "path": "experiments/prompt_templates/grade_candidate_v5_3.txt",
+      "sha256": "da0505beae5213b2e020aa7d54eca07fbab6530652724cbad9954a4bc2c5a1fa"
+    },
+    "rubric": {
+      "path": "experiments/records/linearalgebra-quiz1-plan/rubric_v2.json",
+      "sha256": "16391adb3ba169fb7ffdbf44c83100278e4153fa20761bf6191f12ce17ab85dd"
+    },
+    "skill": {
+      "canonical_hash": "53989eaea05b3652742cbeca112a8dff638db978f252162789c5a29b3fdbd219",
+      "snapshot_path": "experiments/skill_versions/skill_candidate_v5_3.json",
+      "version_id": "skill_candidate_v5_3"
+    }
+  },
+  "evaluation_status": "preflight_complete_not_run",
+  "experiment_id": "linearalgebra-quiz1-v5-3-development-r1",
+  "gates": {
+    "before_packet_freeze": [
+      "Validate the existing development-only human gold privately.",
+      "Build new matched image packets from the frozen anonymous snapshot.",
+      "Bind the v5.3 prompt, v2 rubric, course specification, output schema, and skill snapshot in packet metadata.",
+      "Check M1-to-T1 lineage before any provider call."
+    ],
+    "before_provider_call": [
+      "Validate all packet contracts and lineage reports.",
+      "Pin the Codex provider/model in private run metadata.",
+      "Bind the public DeepSeek release policy and require the stable Flash model.",
+      "Record a development-only model-run authorization."
+    ],
+    "before_public_reporting": [
+      "Validate every private output against deduction_trace_v1.",
+      "Compute aggregate-only metrics and audit the public record for privacy.",
+      "Classify high-impact disagreements before attributing fault."
+    ]
+  },
+  "heldout_accessed": false,
+  "limitations": {
+    "en": "This is a v5.3 baseline preflight, not a model result. It deliberately preserves the existing v2 course rubric; a more detailed rubric is a post-analysis candidate, not a v5.3 baseline input. Any development result remains a single-course development finding and cannot establish production readiness or teacher replacement.",
+    "zh": "这是 v5.3 基线预检，不是模型结果。它刻意保留既有的 v2 课程 rubric；更细的 rubric 必须在分析之后作为新候选版本提出，不能混入 v5.3 基线。任何开发集结果都只是单课程开发发现，不能证明生产就绪或教师替代。"
+  },
+  "model_run_authorization": "not_granted_by_this_preflight",
+  "next_action": {
+    "en": "Freeze development-only M1 and T1 packets with the listed v5.3 bindings. Do not call a provider or access held-out material during packet construction.",
+    "zh": "按列出的 v5.3 绑定冻结仅开发集的 M1 与 T1 packet。构建 packet 时不得调用模型或访问留出集。"
+  },
+  "privacy": {
+    "aggregate_only_public_reporting": true,
+    "individual_scores_included": false,
+    "private_run_outputs_included": false,
+    "private_source_locations_included": false
+  },
+  "record_type": "linearalgebra_v5_3_baseline_preflight",
+  "routes": {
+    "G1-Codex": {
+      "condition": "G1",
+      "input_mode": "text-only",
+      "model_pin": "required_before_provider_call",
+      "provider": "codex_cli",
+      "task": "grade",
+      "transcript_source": "completed_frozen_T1_only"
+    },
+    "G1-DeepSeek-Flash": {
+      "condition": "G1",
+      "input_mode": "text-only",
+      "model": "deepseek-v4-flash",
+      "model_release_policy": "experiments/model_policies/deepseek_v4_release_policy.json",
+      "provider": "deepseek",
+      "task": "grade",
+      "transcript_source": "completed_frozen_T1_only"
+    },
+    "M1-Codex": {
+      "condition": "M1",
+      "input_mode": "multimodal",
+      "model_pin": "required_before_provider_call",
+      "provider": "codex_cli",
+      "task": "grade"
+    },
+    "T1-Codex": {
+      "condition": "T1",
+      "input_mode": "multimodal",
+      "model_pin": "required_before_provider_call",
+      "provider": "codex_cli",
+      "task": "transcribe"
+    }
+  },
+  "schema_version": 1,
+  "scope": {
+    "assessment_id": "quiz1",
+    "course_id": "linearalgebra",
+    "split": "development"
+  }
+}

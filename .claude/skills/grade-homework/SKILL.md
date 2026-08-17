@@ -234,6 +234,28 @@ base-leaf deduction to explain, offset, or replace a bonus decision.
 Do not put a name, student identifier, email address, private path, or raw
 private-file reference in a deduction trace or attention note.
 
+### Calculation calibration guardrails
+
+For each calculation leaf, classify the first score-affecting issue before
+withholding points: absent required work, local notation or arithmetic error,
+incorrect formula or method, failed required simplification, or incorrect final
+result independent of earlier work. Apply only the frozen rubric criterion or
+criteria for that first issue; do not convert its downstream result into a
+second deduction.
+
+Check algebraic equivalence before withholding a symbolic-result or
+simplification criterion. Reordered, factored, expanded, or otherwise
+unambiguous equivalent expressions satisfy an `equivalent_form_accepted`
+requirement. A required canonical simplification can be withheld only when the
+course rubric explicitly declares it required.
+
+When a rubric declares a local-error or carry-forward rule, preserve the
+downstream final-result criterion for the direct consequence of that one local
+error. Treat a wrong formula, wrong governing relation, or invalid method as a
+method criterion, not as a local arithmetic error. Ignore extra work that is
+irrelevant to every declared criterion; evaluate extra work only when it
+directly contradicts a declared criterion.
+
 Freeze the grading protocol before student grading starts:
 
 - page ordering for solutions and each student submission

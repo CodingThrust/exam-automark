@@ -89,6 +89,26 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)
 
+    def test_skill_declares_calculation_locality_and_equivalence_guards(self):
+        combined = "\n".join(
+            (
+                (AGENT_SKILL / "SKILL.md").read_text(encoding="utf-8"),
+                (AGENT_SKILL / "references" / "grading-prompt.md").read_text(
+                    encoding="utf-8"
+                ),
+            )
+        ).lower()
+        for phrase in (
+            "first score-affecting issue",
+            "check algebraic equivalence",
+            "equivalent_form_accepted",
+            "do not convert its downstream result",
+            "wrong formula",
+            "irrelevant to every declared criterion",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, combined)
+
     def test_skill_treats_page_positions_as_locators_not_question_ids(self):
         combined = "\n".join(
             (

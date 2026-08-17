@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "active_skill_version_id": "skill_candidate_v5_3",
+  "active_skill_version_id": "skill_candidate_v5_3_r2",
   "policy": {
     "required_for_every_skill_update": true,
     "required_regressions_for_future_skill_updates": true,
@@ -125,8 +125,8 @@
     {
       "skill_version_id": "skill_candidate_v5_3",
       "predecessor_skill_version_id": "skill_candidate_v5_2",
-      "evaluation_status": "pending",
-      "pending_reason": "Candidate-v5.3 adds a cross-course deduction-trace output contract. It has not created a v5.3 packet or run, so it has no score, metric, error-reduction, or version-comparison claim.",
+      "evaluation_status": "superseded_pending",
+      "pending_reason": "Candidate-v5.3 adds a cross-course deduction-trace output contract, but it was superseded before any packet or run by V5.3-r2, which adds V5.2-analysis-derived calculation-locality and algebraic-equivalence guidance. It has no score, metric, error-reduction, or version-comparison claim.",
       "pending_gates": [
         "review of the frozen v5.3 skill, prompt, schema, validator, and packet bindings",
         "explicit development-only authorization before a newly frozen v5.3 packet or model run",
@@ -138,6 +138,24 @@
       "public_contract_plan": "experiments/records/candidate-v5_3-deduction-trace-plan/plan.json",
       "note_en": "Candidate-v5.3 preserves whole-submission, declared-leaf, and locator-only safeguards while requiring concise deduction traces for non-full leaves. It is registered for reproducibility only and remains unevaluated.",
       "note_zh": "Candidate-v5.3 在保留整份作答、已声明计分叶子和定位符仅作定位的保障之上，要求非满分叶子提供简洁扣分依据。该版本仅为可复现登记，尚未评测。"
+    },
+    {
+      "skill_version_id": "skill_candidate_v5_3_r2",
+      "predecessor_skill_version_id": "skill_candidate_v5_3",
+      "evaluation_status": "pending",
+      "pending_reason": "Candidate-v5.3-r2 makes calculation-error locality, algebraic-equivalence, formula-versus-arithmetic distinctions, and irrelevant-extra-content handling explicit. It has no V5.3 gold, packet, model run, score, metric, or version-comparison claim.",
+      "pending_gates": [
+        "course-owner calibration of the V5.3-r2 calculation criterion allocations before a new private development gold is frozen",
+        "review of the frozen V5.3-r2 skill, prompt, execution-contract rubric, schema, validator, and packet bindings",
+        "explicit development-only authorization before a newly frozen V5.3-r2 packet or model run",
+        "privacy review confirming deduction traces remain in private run outputs and public artifacts stay aggregate-only",
+        "development error-book, confidence audit, and iteration-delta review after any authorized run"
+      ],
+      "skill_snapshot": "experiments/skill_versions/skill_candidate_v5_3_r2.json",
+      "skill_canonical_hash": "6d6c0b37a206ffd83bba2bcd5df03d72fc534ed7fbefeb309929f38a44589e3f",
+      "public_contract_plan": "experiments/records/linearalgebra-quiz1-v5-3-r2-rubric-candidate/plan.json",
+      "note_en": "Candidate-v5.3-r2 preserves V5.3 deduction traces and adds explicit cross-course calculation-locality and algebraic-equivalence safeguards. Its Linear Algebra allocation draft remains a candidate until the stated calibration and development gates are complete.",
+      "note_zh": "Candidate-v5.3-r2 保留 V5.3 的扣分依据合同，并新增跨课程的计算题首错定位与代数等价保障。Linear Algebra 分档草案在完成既定校准与开发集门禁前仍只是候选。"
     }
   ]
 }

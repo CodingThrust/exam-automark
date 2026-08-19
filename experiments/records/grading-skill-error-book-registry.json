@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "active_skill_version_id": "skill_candidate_v5_3_r2",
+  "active_skill_version_id": "skill_candidate_v5_3_r3",
   "policy": {
     "required_for_every_skill_update": true,
     "required_regressions_for_future_skill_updates": true,
@@ -142,8 +142,8 @@
     {
       "skill_version_id": "skill_candidate_v5_3_r2",
       "predecessor_skill_version_id": "skill_candidate_v5_3",
-      "evaluation_status": "pending",
-      "pending_reason": "Candidate-v5.3-r2 makes calculation-error locality, algebraic-equivalence, formula-versus-arithmetic distinctions, and irrelevant-extra-content handling explicit. It has no V5.3 gold, packet, model run, score, metric, or version-comparison claim.",
+      "evaluation_status": "superseded_pending",
+      "pending_reason": "Candidate-v5.3-r2 was a public calibration draft. It was superseded by the separately versioned human-calibrated V5.3-r3 candidate before any V5.3 gold, packet, model run, score, metric, or version-comparison claim.",
       "pending_gates": [
         "course-owner calibration of the V5.3-r2 calculation criterion allocations before a new private development gold is frozen",
         "review of the frozen V5.3-r2 skill, prompt, execution-contract rubric, schema, validator, and packet bindings",
@@ -155,7 +155,25 @@
       "skill_canonical_hash": "6d6c0b37a206ffd83bba2bcd5df03d72fc534ed7fbefeb309929f38a44589e3f",
       "public_contract_plan": "experiments/records/linearalgebra-quiz1-v5-3-r2-rubric-candidate/plan.json",
       "note_en": "Candidate-v5.3-r2 preserves V5.3 deduction traces and adds explicit cross-course calculation-locality and algebraic-equivalence safeguards. Its Linear Algebra allocation draft remains a candidate until the stated calibration and development gates are complete.",
-      "note_zh": "Candidate-v5.3-r2 保留 V5.3 的扣分依据合同，并新增跨课程的计算题首错定位与代数等价保障。Linear Algebra 分档草案在完成既定校准与开发集门禁前仍只是候选。"
+      "note_zh": "Candidate-v5.3-r2 保留 V5.3 的扣分依据合同，并新增跨课程的计算题首错定位与代数等价保障。其 Linear Algebra 分档草案已由单独版本化的、经课程负责人校准的 r3 候选取代。"
+    },
+    {
+      "skill_version_id": "skill_candidate_v5_3_r3",
+      "predecessor_skill_version_id": "skill_candidate_v5_3_r2",
+      "evaluation_status": "pending",
+      "pending_reason": "Candidate-v5.3-r3 records course-owner calibration of the Linear Algebra execution rubric, makes wrong independently allocated final answers lose their final-result points, and adds validated scoring gates for explicitly declared fundamental-method reversals. It has no new private gold, packet, model run, score, metric, or version-comparison claim.",
+      "pending_gates": [
+        "public review of the r3 rubric, prompt, scoring-gate validator, skill snapshot, and tests",
+        "separate explicit authorization before a new private development-only gold revision",
+        "separate explicit authorization before a newly frozen r3 packet or model run",
+        "privacy review confirming deduction traces remain in private run outputs and public artifacts stay aggregate-only",
+        "development error-book, confidence audit, and iteration-delta review after any authorized run"
+      ],
+      "skill_snapshot": "experiments/skill_versions/skill_candidate_v5_3_r3.json",
+      "skill_canonical_hash": "3a279867b28eb3f0480db9d350d7863371dbe8233d6db6f8eab5bbbda6635e0f",
+      "public_contract_plan": "experiments/records/linearalgebra-quiz1-v5-3-r3-human-calibrated/plan.json",
+      "note_en": "Candidate-v5.3-r3 preserves V5.3 deduction traces and records a separately versioned human-calibrated Linear Algebra execution rubric. It remains a development candidate with no run or accuracy claim.",
+      "note_zh": "Candidate-v5.3-r3 保留 V5.3 的扣分依据合同，并记录单独版本化、经课程负责人校准的 Linear Algebra 执行 rubric。它仍是未运行的开发候选，不含准确率或改进声明。"
     }
   ]
 }

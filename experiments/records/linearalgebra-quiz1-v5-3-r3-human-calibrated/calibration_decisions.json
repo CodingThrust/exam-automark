@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "record_type": "linearalgebra_quiz1_course_owner_calibration",
+  "status": "recorded_for_r3_candidate",
+  "scope": {
+    "course_id": "linearalgebra",
+    "assessment_id": "quiz1",
+    "development_only": true,
+    "heldout_accessed": false,
+    "model_calls": 0
+  },
+  "purpose": "Record course-owner partial-credit decisions before a new development rubric is frozen. This record contains rules and synthetic score anchors only; it contains no student work, identity, gold row, transcript, or model output.",
+  "decisions": [
+    {
+      "id": "Q1_selection_only",
+      "rule": "Each true/false leaf is independent: exactly correct selection earns 5; blank, wrong, multiple, ambiguous, or contradictory selection earns 0. Explanations are ignored unless the stem explicitly requires one."
+    },
+    {
+      "id": "Q2a_error_depth",
+      "rule": "A late final numerical-sign or combination error after valid determinant method, structure, signed expansion, and intermediate terms scores 11/15. An early incorrect signed core expansion whose later work follows that expansion scores 6/15. A wrong final determinant receives none of the independently allocated final-result points."
+    },
+    {
+      "id": "Q2b_equivalence_and_locality",
+      "rule": "A visible derivation plus a final algebraic expression equivalent to the official expression earns 15/15, including factored, expanded, or reordered forms. A single local symbol, sign, or coefficient error that leaves subsequent symbolic combination and simplification correct relative to the student's own expression scores 11/15: lose the one local-term point and the three final-expression points."
+    },
+    {
+      "id": "Q3_independent_routes_and_gates",
+      "rule": "Any valid complete route that establishes exceptional values 0 and -8 and the unique-solution condition s not equal to 0 and -8 earns 25/25. A late error only in the reported exceptional values or final condition scores 22/25. Correct uniqueness principle and valid setup followed by an early determinant computation error score 8/25. Reversing the governing uniqueness condition so that zero determinant or rank failure is treated as unique scores 0/25. A literal matrix named A is not required when an equivalent valid setup is visible."
+    },
+    {
+      "id": "Q3bonus_distinctness",
+      "rule": "The bonus is independent and all-or-nothing: 10 only for two correct genuinely independent methods. A cosmetic rewrite or a different expansion of the same method is not a second method."
+    },
+    {
+      "id": "Q4_error_depth",
+      "rule": "Correct vectors, valid triple-product work, and an incorrect tetrahedron conversion factor of one half instead of one sixth score 15/20. An early wrong common-vertex vector followed by dependent calculations scores 7/20: preserve only visible method, nonnegative-magnitude, and correct one-sixth conversion evidence."
+    },
+    {
+      "id": "answer_only_and_independent_final_result",
+      "rule": "For Q2a, Q2b, Q3, and Q4, a correct answer without required visible work is capped at 3. When the final answer is an independently declared criterion and is wrong, those final-answer points are not retained merely because an earlier error led to it; no-double-counting protects dependent process criteria only."
+    },
+    {
+      "id": "alternatives_and_irrelevant_work",
+      "rule": "Accept any valid alternative route that demonstrates the declared requirement. Do not require a standard presentation, and ignore extra content unless it directly contradicts a declared criterion."
+    }
+  ],
+  "next_gate": "A new private development gold and a matched G1 packet require separate explicit authorization. This decision record does not authorize either action or any model call."
+}

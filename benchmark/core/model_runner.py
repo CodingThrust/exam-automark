@@ -11,7 +11,11 @@ from typing import Any, Protocol
 from .model_policy import bind_model_release_policy
 from .packets import directory_digest, validate_packet_output_contract
 from .run_metadata import validate_run_metadata
-from .rubrics import execution_criterion_ids, execution_criterion_points
+from .rubrics import (
+    execution_criterion_ids,
+    execution_criterion_points,
+    execution_scoring_gates,
+)
 from .schema import (
     CONFIDENCE_LEVELS,
     GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
@@ -1036,6 +1040,7 @@ def _validate_grade_payload(
         for record in records:
             permitted_criteria = execution_criterion_ids(rubric, record.question_id)
             criterion_points = execution_criterion_points(rubric, record.question_id)
+            scoring_gates = execution_scoring_gates(rubric, record.question_id)
             if permitted_criteria is None:
                 continue
             traced_criteria: set[str] = set()
@@ -1055,6 +1060,28 @@ def _validate_grade_payload(
                 ) > 1e-9:
                     raise ValueError(
                         f"{record.question_id} deduction_trace points_deducted must equal the declared criterion points"
+                    )
+            declared_gate_ids = set(scoring_gates or {})
+            used_gate_ids = declared_gate_ids & traced_criteria
+            if used_gate_ids:
+                if len(used_gate_ids) != 1 or len(traced_criteria) != 1:
+                    raise ValueError(
+                        f"{record.question_id} scoring-gate deduction must be the only deduction_trace entry"
+                    )
+                gate_id = next(iter(used_gate_ids))
+                gate = scoring_gates[gate_id]
+                if abs(float(record.score) - float(gate["score_cap"])) > 1e-9:
+                    raise ValueError(
+                        f"{record.question_id} scoring-gate deduction requires score_cap"
+                    )
+                gate_trace = next(
+                    trace
+                    for trace in record.deduction_trace
+                    if trace.rubric_criterion == gate_id
+                )
+                if gate_trace.deduction_type != gate["deduction_type"]:
+                    raise ValueError(
+                        f"{record.question_id} scoring-gate deduction_type must match the declared gate"
                     )
     if "total" not in payload:
         raise ValueError("total is required")

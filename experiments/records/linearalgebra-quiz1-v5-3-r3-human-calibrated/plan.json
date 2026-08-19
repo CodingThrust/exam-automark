@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "record_type": "linearalgebra_v5_3_r3_human_calibrated_candidate",
+  "experiment_id": "linearalgebra-quiz1-v5-3-r3-development-candidate",
+  "candidate_status": "human_calibrated_development_candidate_not_frozen_not_run",
+  "scope": {
+    "course_id": "linearalgebra",
+    "assessment_id": "quiz1",
+    "split": "development_only",
+    "student_count": 30,
+    "score_row_count": 300,
+    "heldout_accessed": false,
+    "model_calls": 0
+  },
+  "derivation": {
+    "predecessor": "experiments/records/linearalgebra-quiz1-v5-3-r2-rubric-candidate/plan.json",
+    "source_analysis": "experiments/records/linearalgebra-quiz1-v2-development-r3-flash",
+    "method": "The r2 public draft was not rewritten. Course-owner decisions were recorded in a new r3 artifact and then encoded as a new rubric, prompt, and skill snapshot. V5.2 results informed calibration topics only; they are not V5.3 performance results."
+  },
+  "candidate_bindings": {
+    "course_spec": {
+      "path": "experiments/course_specs/linearalgebra_quiz1_v2.json",
+      "sha256": "1918e92772e62bc4087f9215e9cb00e037ddc22570e9f5efbc66a06a0cf196df"
+    },
+    "rubric": {
+      "path": "experiments/records/linearalgebra-quiz1-v5-3-r3-human-calibrated/rubric_human_calibrated_v3.json",
+      "sha256": "a7b8ae138f7304420d9047f063db20d8efd476309a49d917dbf5c6c3f1ff0682"
+    },
+    "course_owner_calibration": {
+      "path": "experiments/records/linearalgebra-quiz1-v5-3-r3-human-calibrated/calibration_decisions.json",
+      "sha256": "972e61dcc730c28dc4ea95b8523a72074ff6a76e996d439f2b77830c806dde3b"
+    },
+    "prompt_template": {
+      "path": "experiments/prompt_templates/grade_candidate_v5_3_r3.txt",
+      "sha256": "05461a121ae3b5662aff5bd86c77577cc2179795f550941720141afc943eed30"
+    },
+    "skill": {
+      "version_id": "skill_candidate_v5_3_r3",
+      "snapshot_path": "experiments/skill_versions/skill_candidate_v5_3_r3.json",
+      "canonical_hash": "3a279867b28eb3f0480db9d350d7863371dbe8233d6db6f8eab5bbbda6635e0f"
+    },
+    "grading_output_contract": "deduction_trace_v1"
+  },
+  "model_policy": {
+    "flash_model": "deepseek-v4-flash",
+    "flash_release_status": "official_release_api_alias_build_not_pinned",
+    "pro_model": "deepseek-v4-pro",
+    "pro_retest_status": "deferred_until_official_release",
+    "policy_path": "experiments/model_policies/deepseek_v4_release_policy.json"
+  },
+  "gates": {
+    "before_private_gold": [
+      "Review and merge the public r3 rubric, prompt, scoring-gate validator, and tests.",
+      "Obtain separate explicit authorization for a new private development-only gold revision."
+    ],
+    "before_packet": [
+      "Freeze the merged r3 skill, prompt, rubric, and authorized private development gold as one contract.",
+      "Validate the execution-contract rubric, scoring-gate behavior, and deduction-trace output schema.",
+      "Reuse the previously validated T1 transcript source only after binding it to a new G1 packet."
+    ],
+    "before_model_run": [
+      "Obtain a new explicit development-only run authorization.",
+      "Run G1-Codex and official DeepSeek V4 Flash against the same newly frozen G1 packet.",
+      "Do not rerun T1, access heldout material, or infer V5.3 results from V5.2 outputs."
+    ],
+    "before_public_report": [
+      "Validate all deduction traces privately.",
+      "Publish only privacy-audited aggregate metrics and disagreement categories.",
+      "Do not publish traces, student identifiers, answers, transcripts, gold rows, raw model responses, or private locations."
+    ]
+  },
+  "privacy": {
+    "aggregate_only_public_reporting": true,
+    "individual_scores_included": false,
+    "private_source_locations_included": false,
+    "deduction_traces_public": false,
+    "raw_answers_included": false,
+    "transcripts_included": false
+  },
+  "limitations": {
+    "en": "This is a human-calibrated V5.3-r3 development candidate and static-validation record, not a private gold revision, prompt packet, model run, metric, or production claim.",
+    "zh": "这是经课程负责人校准的 V5.3-r3 开发候选及静态验证记录，不是私有 gold 修订、prompt packet、模型运行、指标或生产能力声明。"
+  },
+  "next_action": {
+    "en": "After public review and a separate authorization, create a new private development-only gold revision and one matched G1 packet for Codex and DeepSeek V4 Flash. Do not access heldout material.",
+    "zh": "公开审查通过并获得单独授权后，才可创建新的私有开发集 gold 修订，以及供 Codex 与 DeepSeek V4 Flash 共用的一份 G1 packet；不得访问留出集。"
+  }
+}

@@ -264,7 +264,7 @@ class DeductionTraceContractTests(unittest.TestCase):
         self.assertEqual(audit_public_error_summary(plan), [])
         self.assertEqual(plan["evaluation_status"], "not_run")
         self.assertFalse(plan["heldout_accessed"])
-        self.assertEqual(registry["active_skill_version_id"], "skill_candidate_v5_3_r2")
+        self.assertEqual(registry["active_skill_version_id"], "skill_candidate_v5_3_r3")
         self.assertEqual(registry["entries"][-1]["evaluation_status"], "pending")
         self.assertEqual(
             validate_error_book_registry(

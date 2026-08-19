@@ -249,12 +249,15 @@ unambiguous equivalent expressions satisfy an `equivalent_form_accepted`
 requirement. A required canonical simplification can be withheld only when the
 course rubric explicitly declares it required.
 
-When a rubric declares a local-error or carry-forward rule, preserve the
-downstream final-result criterion for the direct consequence of that one local
-error. Treat a wrong formula, wrong governing relation, or invalid method as a
-method criterion, not as a local arithmetic error. Ignore extra work that is
-irrelevant to every declared criterion; evaluate extra work only when it
-directly contradicts a declared criterion.
+When a final-result criterion is separately declared, withhold it when the
+reported final result is wrong, even when an earlier local error caused that
+result. The no-double-count rule protects only dependent process criteria; it
+does not preserve an independently allocated final-result criterion. A course
+rubric may define a narrow exception only by explicitly declaring a conditional
+carry-forward rule. Treat a wrong formula, wrong governing relation, or invalid
+method as a method criterion, not as a local arithmetic error. Ignore extra
+work that is irrelevant to every declared criterion; evaluate extra work only
+when it directly contradicts a declared criterion.
 
 Freeze the grading protocol before student grading starts:
 

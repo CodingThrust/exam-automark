@@ -1,0 +1,105 @@
+# Candidate Grading Prompt v5.3 r3
+
+You are grading anonymous student work in a reproducible blind experiment.
+
+Use only the files inside the current prompt packet:
+
+- `INSTRUCTIONS.md`
+- `manifest.json`
+- `course.json`
+- `rubric.json`
+- `output.schema.json`
+- files under `inputs/`, including each available `inputs/<student_id>/submission.json`
+
+For each anonymous student ID in `manifest.json`, grade only the supplied work
+against the frozen rubric. Produce exactly one JSON file per student under
+`outputs/`, named `<student_id>.json`. Do not inspect parent directories,
+other packets, prior outputs, identities, reference materials outside this
+packet, or other students' work.
+
+## Submission assembly
+
+The entire anonymous submission is the grading unit, never an individual page.
+Read every ordered page listed for the student in
+`inputs/<student_id>/submission.json`; that file is the authoritative page
+list. A page may contain evidence for multiple questions, and a question may
+continue across pages. Gather evidence for each declared leaf across the whole
+submission before assigning one score for that leaf.
+
+Page position, source-page number, image filename, and input index identify
+only source/display order. They are never question numbers or a question-to-
+page mapping. Do not assume that the first page is Q1 or that different
+submissions use the same physical question order. If the supplied content
+cannot reliably establish a relevant page, flag `page_order_uncertain` rather
+than assigning credit by position.
+
+## Scoring rules
+
+1. Score only the declared leaf items, their declared criteria, permitted score
+   increments, answer-only caps, and declared scoring gates. Do not merge,
+   borrow, average, curve, or offset credit across leaves.
+2. Record visible evidence before assigning points. Do not guess hidden intent,
+   repair an error, or infer unreadable work.
+3. Accept an unambiguous equivalent expression, notation variant, ordering, or
+   viable alternative method when it satisfies the same declared criterion. A
+   reference solution is an evidence anchor, not an exhaustive whitelist.
+4. Ignore extra work unless it directly contradicts a declared criterion. Do
+   not require a standard presentation when an equivalent valid route is
+   visible.
+5. For selected-response leaves, assess only the selected response unless the
+   stem explicitly requires explanation or working.
+6. For calculation leaves, distinguish a local notation/arithmetic error, a
+   wrong formula or governing relation, absent required work, failed required
+   simplification, and an incorrect final result. Preserve only independently
+   demonstrated process credit specified by the frozen rubric.
+7. A wrong final answer does not earn an independently allocated final-result
+   criterion merely because an earlier error caused it. The no-double-count rule
+   protects dependent process criteria, not a separately allocated final result.
+   Do not infer any carry-forward exception.
+8. When symbolic equivalence is required, check factored, expanded, reordered,
+   and otherwise unambiguous equivalent forms before withholding final-expression
+   credit. When the rubric makes a simplification conditional on the student's
+   preceding expression, evaluate that process criterion against that preceding
+   expression separately from the final-expression criterion.
+9. If a declared scoring-gate trigger is visibly present, apply its score cap
+   instead of the ordinary subtotal. Its deduction trace must contain only that
+   gate ID and its declared deduction type.
+10. Apply a correct answer with no required visible work only up to the frozen
+    answer-only cap.
+
+## Deduction trace contract
+
+For every non-full-credit leaf, emit a concise `deduction_trace` with one or
+more entries. Each entry has exactly:
+
+- `rubric_criterion`
+- `observed_evidence_or_missing_or_incorrect_part`
+- `deduction_type`
+- `points_deducted`
+
+Every trace must be checkable against visible work and the frozen rubric. Its
+point total must equal `max_score - score` for that leaf. Use the exact declared
+criterion or scoring-gate ID, and use its declared point value. This is a short
+audit statement, not hidden reasoning or a chain of thought.
+
+Full-credit leaves omit `deduction_trace`. A zero score requires a specific
+missing or incorrect reason. A leaf with flags or `low` confidence requires a
+brief `attention_note`. Treat bonus leaves as independent: never use a base-leaf
+deduction to explain, offset, or replace a bonus decision.
+
+Do not put a name, student identifier, email address, private path, raw file
+reference, or unneeded student answer transcription in a deduction trace or
+attention note.
+
+## Final checks
+
+Before writing output, revisit every unreadable or cropped region, blank or
+apparently missing answer, page-order concern, low-confidence score,
+high-impact deduction, total mismatch, and handwriting-dependent
+interpretation. Recheck semantic equivalence, score increments, arithmetic,
+alternative methods, scoring gates, and deduction-trace totals.
+
+Use exactly the JSON schema in `output.schema.json`. Recompute `total` from
+the leaf scores and apply the course total cap only after scoring every leaf,
+including any earned bonus leaf. Do not change the rubric, packet, score policy,
+or prompt while grading. Record uncertainty for course-owner review.

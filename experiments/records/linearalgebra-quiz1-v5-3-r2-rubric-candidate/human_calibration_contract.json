@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "record_type": "linearalgebra_v5_3_r2_human_calibration_contract",
+  "status": "prepared_pending_course_owner_decisions",
+  "scope": {
+    "course_id": "linearalgebra",
+    "assessment_id": "quiz1",
+    "development_only": true,
+    "model_calls": 0,
+    "heldout_accessed": false
+  },
+  "candidate_binding": {
+    "rubric_path": "experiments/records/linearalgebra-quiz1-v5-3-r2-rubric-candidate/rubric_candidate_v3.json",
+    "rubric_sha256": "5596f722c25e121109a7c63d0977d068afe5cbea2a1bb881102ad74275a32e00",
+    "rubric_version": "linearalgebra_quiz1_v3_candidate_r2"
+  },
+  "review_protocol": {
+    "course_owner_role": "Decide the intended instructional and partial-credit policy; do not delegate those decisions to the grading model.",
+    "reviewer_input": "For each leaf, confirm the proposal or state a replacement rule and point allocation. For every high-impact decision, choose confirm or provide a replacement.",
+    "evidence_boundary": "This public contract contains no student work, student identity, per-student gold, transcript, or model output. Any representative-paper review remains private and is recorded separately.",
+    "freeze_rule": "Do not freeze a V5.3 rubric, create V5.3 gold, create a packet, or run a model until every leaf is confirmed or explicitly modified and every high-impact decision is resolved."
+  },
+  "annotation_policy": {
+    "purpose": "Use the same declared criterion for score, deduction trace, CSV review reason, and future visual annotation.",
+    "deduction_anchor": "Mark the first visible missing, incorrect, or contradicted evidence for the withheld criterion; never mark only a downstream consequence when an earlier local error is visible.",
+    "praise_anchor": "Add at most one concise positive mark for a meaningful correct method, valid equivalent form, or complete reasoning step. Do not mechanically mark every correct line.",
+    "uncertainty_anchor": "If evidence is unreadable, page order is uncertain, or a location cannot be established, emit a review flag rather than an unsupported score or a misplaced visual mark.",
+    "label_style": "Labels are short, criterion-linked, and non-speculative. They state the scoring issue or strength, not hidden reasoning.",
+    "privacy_boundary": "Future annotation records use anonymous submission and page keys only. Names, student IDs, private paths, raw answers, and raw model output are excluded from public artifacts."
+  },
+  "leaf_reviews": [
+    {
+      "leaf_id": "Q1a",
+      "max_score": 5,
+      "question_type": "true_false",
+      "full_credit_visible_evidence": "An unambiguous visible selection of T.",
+      "no_deduction_for": "Missing explanation, working, simplification, or irrelevant extra writing.",
+      "course_owner_decision": "Confirm that selection alone is sufficient and that an ambiguous or contradictory mark earns zero.",
+      "criteria": [
+        {"id": "Q1a.selection", "points": 5, "review_question": "Is T the intended required selection?"}
+      ],
+      "annotation": {"deduction_anchor": "First ambiguous, contradictory, or non-T selection.", "praise_anchor": "Optional check beside an unambiguous T.", "uncertainty_rule": "Flag only if the selected mark cannot be read."}
+    },
+    {
+      "leaf_id": "Q1b",
+      "max_score": 5,
+      "question_type": "true_false",
+      "full_credit_visible_evidence": "An unambiguous visible selection of F.",
+      "no_deduction_for": "Missing explanation, working, simplification, or irrelevant extra writing.",
+      "course_owner_decision": "Confirm that selection alone is sufficient and that an ambiguous or contradictory mark earns zero.",
+      "criteria": [
+        {"id": "Q1b.selection", "points": 5, "review_question": "Is F the intended required selection?"}
+      ],
+      "annotation": {"deduction_anchor": "First ambiguous, contradictory, or non-F selection.", "praise_anchor": "Optional check beside an unambiguous F.", "uncertainty_rule": "Flag only if the selected mark cannot be read."}
+    },
+    {
+      "leaf_id": "Q1c",
+      "max_score": 5,
+      "question_type": "true_false",
+      "full_credit_visible_evidence": "An unambiguous visible selection of T.",
+      "no_deduction_for": "Missing explanation, working, simplification, or irrelevant extra writing.",
+      "course_owner_decision": "Confirm that selection alone is sufficient and that an ambiguous or contradictory mark earns zero.",
+      "criteria": [
+        {"id": "Q1c.selection", "points": 5, "review_question": "Is T the intended required selection?"}
+      ],
+      "annotation": {"deduction_anchor": "First ambiguous, contradictory, or non-T selection.", "praise_anchor": "Optional check beside an unambiguous T.", "uncertainty_rule": "Flag only if the selected mark cannot be read."}
+    },
+    {
+      "leaf_id": "Q1d",
+      "max_score": 5,
+      "question_type": "true_false",
+      "full_credit_visible_evidence": "An unambiguous visible selection of F.",
+      "no_deduction_for": "Missing explanation, working, simplification, or irrelevant extra writing.",
+      "course_owner_decision": "Confirm that selection alone is sufficient and that an ambiguous or contradictory mark earns zero.",
+      "criteria": [
+        {"id": "Q1d.selection", "points": 5, "review_question": "Is F the intended required selection?"}
+      ],
+      "annotation": {"deduction_anchor": "First ambiguous, contradictory, or non-F selection.", "praise_anchor": "Optional check beside an unambiguous F.", "uncertainty_rule": "Flag only if the selected mark cannot be read."}
+    },
+    {
+      "leaf_id": "Q1e",
+      "max_score": 5,
+      "question_type": "true_false",
+      "full_credit_visible_evidence": "An unambiguous visible selection of F.",
+      "no_deduction_for": "Missing explanation, working, simplification, or irrelevant extra writing.",
+      "course_owner_decision": "Confirm that selection alone is sufficient and that an ambiguous or contradictory mark earns zero.",
+      "criteria": [
+        {"id": "Q1e.selection", "points": 5, "review_question": "Is F the intended required selection?"}
+      ],
+      "annotation": {"deduction_anchor": "First ambiguous, contradictory, or non-F selection.", "praise_anchor": "Optional check beside an unambiguous F.", "uncertainty_rule": "Flag only if the selected mark cannot be read."}
+    },
+    {
+      "leaf_id": "Q2a",
+      "max_score": 15,
+      "question_type": "calculation",
+      "full_credit_visible_evidence": "A valid determinant-preserving method, valid expansion or equivalent structure, correct local signs and arithmetic, correct simplification, and final result -56.",
+      "no_deduction_for": "A valid nonstandard determinant method, different valid ordering, or irrelevant extra writing.",
+      "course_owner_decision": "Confirm the 3+3+1+2+3+3 allocation, the answer-only cap of 3, and the one-local-error carry-forward rule.",
+      "criteria": [
+        {"id": "Q2a.determinant_method", "points": 3, "review_question": "What determinant-preserving alternatives should receive method credit?"},
+        {"id": "Q2a.expansion_structure", "points": 3, "review_question": "What valid row, column, cofactor, or triangular structures are acceptable?"},
+        {"id": "Q2a.local_sign_accuracy", "points": 1, "review_question": "Should one local cofactor sign error lose exactly this one point?"},
+        {"id": "Q2a.local_arithmetic_accuracy", "points": 2, "review_question": "Which numerical errors are local arithmetic rather than method errors?"},
+        {"id": "Q2a.simplification", "points": 3, "review_question": "Is the declared numerical simplification required for these three points?"},
+        {"id": "Q2a.final_result_or_local_carry_forward", "points": 3, "review_question": "Should a direct consequence of one local sign or arithmetic error retain these final-result points?"}
+      ],
+      "annotation": {"deduction_anchor": "Circle the first incorrect sign, arithmetic operation, invalid determinant step, missing simplification, or independent final-result error.", "praise_anchor": "Optional check at a valid determinant setup or valid alternative method.", "uncertainty_rule": "Flag if the first score-affecting symbol cannot be read."}
+    },
+    {
+      "leaf_id": "Q2b",
+      "max_score": 15,
+      "question_type": "calculation",
+      "full_credit_visible_evidence": "A valid symbolic determinant method and structure, correct local terms and symbolic combination, an algebraically equivalent completed expression, and an equivalent final result.",
+      "no_deduction_for": "Factored, expanded, reordered, or otherwise unambiguous algebraically equivalent forms.",
+      "course_owner_decision": "Confirm the 3+3+1+2+3+3 allocation, answer-only cap of 3, and full acceptance of algebraically equivalent final expressions.",
+      "criteria": [
+        {"id": "Q2b.determinant_method", "points": 3, "review_question": "What determinant-preserving symbolic alternatives receive method credit?"},
+        {"id": "Q2b.expansion_structure", "points": 3, "review_question": "What symbolic expansion or row/column structure is valid?"},
+        {"id": "Q2b.local_term_or_sign_accuracy", "points": 1, "review_question": "Should one local symbolic sign or coefficient error lose exactly this one point?"},
+        {"id": "Q2b.local_symbolic_combination", "points": 2, "review_question": "Which factoring, product, sum, or collection errors are local?"},
+        {"id": "Q2b.equivalent_simplification", "points": 3, "review_question": "Is any algebraically equivalent completed expression sufficient?"},
+        {"id": "Q2b.final_result_or_local_carry_forward", "points": 3, "review_question": "Should a direct consequence of one local symbolic error retain these final-result points?"}
+      ],
+      "annotation": {"deduction_anchor": "Circle the first non-equivalent symbolic transformation or first incorrect local term.", "praise_anchor": "Optional check at a correct nonstandard but equivalent form.", "uncertainty_rule": "Flag if equivalence cannot be established from the visible expression."}
+    },
+    {
+      "leaf_id": "Q3",
+      "max_score": 25,
+      "question_type": "calculation_short_answer",
+      "full_credit_visible_evidence": "A valid uniqueness principle, parameterized setup, derivation, correct parameter algebra, exceptional values 0 and -8, and final condition s is not equal to 0 or -8.",
+      "no_deduction_for": "A valid alternative determinant, row-reduction, elimination, or full-rank derivation that establishes the same condition.",
+      "course_owner_decision": "Confirm the 4+4+6+2+6+3 allocation, answer-only cap of 3, and preservation of exceptional-value/final-condition credit for one direct local algebra carry-forward.",
+      "criteria": [
+        {"id": "Q3.unique_solution_principle", "points": 4, "review_question": "Which equivalent uniqueness or full-rank statements are accepted?"},
+        {"id": "Q3.parameterized_setup", "points": 4, "review_question": "Which parameterized determinant, elimination, or row-reduction setups are accepted?"},
+        {"id": "Q3.derivation", "points": 6, "review_question": "What visible derivation is enough to connect the setup to failure of uniqueness?"},
+        {"id": "Q3.parameter_algebra_accuracy", "points": 2, "review_question": "Which errors are local parameter algebra rather than derivation errors?"},
+        {"id": "Q3.exceptional_values", "points": 6, "review_question": "Should a direct carry-forward from one local algebra error retain these points?"},
+        {"id": "Q3.final_condition_or_local_carry_forward", "points": 3, "review_question": "Should a direct carry-forward preserve the final-condition points?"}
+      ],
+      "annotation": {"deduction_anchor": "Circle the first missing principle, invalid setup, failed derivation link, local algebra error, or independent exceptional-value error.", "praise_anchor": "Optional check at a complete valid derivation or valid alternative route.", "uncertainty_rule": "Flag if a parameter or inequality sign is unreadable."}
+    },
+    {
+      "leaf_id": "Q3bonus",
+      "max_score": 10,
+      "question_type": "calculation",
+      "full_credit_visible_evidence": "The correct conclusion is supported by two mathematically correct, genuinely distinct methods.",
+      "no_deduction_for": "Different notation or a cosmetic rewrite of the same method; these are not a second method and do not earn bonus credit.",
+      "course_owner_decision": "Confirm that the bonus remains independent and all-or-nothing, and define whether any borderline pair counts as genuinely distinct.",
+      "criteria": [
+        {"id": "Q3bonus.two_distinct_correct_methods", "points": 10, "review_question": "What distinguishes two methods from a continuation or cosmetic rewrite?"}
+      ],
+      "annotation": {"deduction_anchor": "Mark the second purported method only if it is missing, incorrect, or not genuinely distinct.", "praise_anchor": "Optional check when two distinct valid methods are visible.", "uncertainty_rule": "Flag borderline method distinctness for course-owner review."}
+    },
+    {
+      "leaf_id": "Q4",
+      "max_score": 20,
+      "question_type": "calculation",
+      "full_credit_visible_evidence": "Correct common-vertex vectors or equivalent geometry, a valid volume setup, correct conditional determinant or triple-product evaluation, nonnegative magnitude, division by 6, correct local arithmetic, and final volume 7/2.",
+      "no_deduction_for": "A valid equivalent geometric volume method, determinant order with a sign later handled by magnitude, or irrelevant extra writing.",
+      "course_owner_decision": "Confirm the 4+4+3+1+4+1+3 allocation, answer-only cap of 3, and retention of final-result credit when division by 6 or one local arithmetic error directly carries through.",
+      "criteria": [
+        {"id": "Q4.common_vertex_vectors", "points": 4, "review_question": "Which equivalent vector or geometric constructions receive full credit?"},
+        {"id": "Q4.scalar_triple_product_setup", "points": 4, "review_question": "Which determinant, triple-product, or base-times-height setups are valid?"},
+        {"id": "Q4.determinant_or_triple_product_evaluation", "points": 3, "review_question": "Which conditional evaluation errors are separate from setup errors?"},
+        {"id": "Q4.absolute_value", "points": 1, "review_question": "Is an equivalent nonnegative magnitude acceptable without explicit absolute-value notation?"},
+        {"id": "Q4.tetrahedron_conversion_factor", "points": 4, "review_question": "Should a factor other than division by 6 lose exactly these four points?"},
+        {"id": "Q4.local_arithmetic_accuracy", "points": 1, "review_question": "Which post-formula arithmetic errors are local?"},
+        {"id": "Q4.final_result_or_local_carry_forward", "points": 3, "review_question": "Should one direct conversion-factor or arithmetic carry-forward retain these points?"}
+      ],
+      "annotation": {"deduction_anchor": "Circle the first invalid vector, setup, determinant evaluation, missing magnitude, wrong conversion factor, or local arithmetic error.", "praise_anchor": "Optional check at a correct common-vertex construction or valid volume setup.", "uncertainty_rule": "Flag if a vector component, factor, or sign cannot be read."}
+    }
+  ],
+  "high_impact_decisions": [
+    {
+      "decision_id": "D01_Q2a_local_sign",
+      "leaves": ["Q2a"],
+      "proposal": "Withhold only Q2a.local_sign_accuracy (1 point) for one local cofactor sign error. Preserve Q2a.final_result_or_local_carry_forward when the final result is its direct consequence and every other criterion is satisfied.",
+      "owner_action": "Confirm, or state the replacement deduction and carry-forward policy."
+    },
+    {
+      "decision_id": "D02_Q2b_equivalence",
+      "leaves": ["Q2b"],
+      "proposal": "Award the equivalent-simplification and final-result criteria when the completed symbolic expression is algebraically equivalent, even if factored, expanded, or ordered differently from the reference form.",
+      "owner_action": "Confirm, or specify any required canonical form and its point consequence."
+    },
+    {
+      "decision_id": "D03_Q3_complete_derivation",
+      "leaves": ["Q3"],
+      "proposal": "Award all 25 points when a valid derivation establishes the correct exceptional values and final unique-solution condition, regardless of an alternative valid route.",
+      "owner_action": "Confirm, or revise the required evidence and criterion allocations."
+    },
+    {
+      "decision_id": "D04_Q4_conversion_factor",
+      "leaves": ["Q4"],
+      "proposal": "For an otherwise correct solution that converts a tetrahedron using a factor other than division by 6, withhold only Q4.tetrahedron_conversion_factor (4 points) and preserve the direct carry-forward final-result criterion.",
+      "owner_action": "Confirm, or state the replacement deduction and whether final-result carry-forward remains available."
+    },
+    {
+      "decision_id": "D05_answer_only_caps",
+      "leaves": ["Q2a", "Q2b", "Q3", "Q4"],
+      "proposal": "A correct final answer without required visible work receives at most 3 points for each listed calculation leaf.",
+      "owner_action": "Confirm, or give an independent answer-only cap for each affected leaf."
+    },
+    {
+      "decision_id": "D06_Q3bonus_distinctness",
+      "leaves": ["Q3bonus"],
+      "proposal": "The 10-point bonus is independent and all-or-nothing: two correct methods must be genuinely distinct, not a continuation or cosmetic rewrite.",
+      "owner_action": "Confirm, or define a different bonus threshold or partial-credit policy."
+    }
+  ],
+  "freeze_requirements": [
+    "Record a course-owner response for all ten leaf reviews and all six high-impact decisions.",
+    "If any point allocation or rule changes, create a new V5.3 revision rather than editing this candidate in place.",
+    "Create private V5.3 development gold only after the approved revision is bound to the course spec, prompt, skill snapshot, and output schema.",
+    "Do not access heldout material or call a model as part of human calibration."
+  ]
+}

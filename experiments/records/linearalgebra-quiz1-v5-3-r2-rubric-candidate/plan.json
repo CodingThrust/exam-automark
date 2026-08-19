@@ -51,6 +51,26 @@
     "Confirm that an otherwise correct Q4 solution using a tetrahedron factor other than division by 6 loses the 4-point conversion criterion and retains direct carry-forward credit.",
     "Create a new private V5.3 development gold only after these candidate score bands are course-owner approved."
   ],
+  "human_calibration_package": {
+    "status": "prepared_pending_course_owner_decisions",
+    "contract": {
+      "path": "experiments/records/linearalgebra-quiz1-v5-3-r2-rubric-candidate/human_calibration_contract.json",
+      "sha256": "e979dfa0081c9f0cfb1fcf8c6a077e6eff95eb5b9f506d318a85e14995034f24"
+    },
+    "worksheet": {
+      "path": "experiments/records/linearalgebra-quiz1-v5-3-r2-rubric-candidate/HUMAN-CALIBRATION.md",
+      "sha256": "4403de2def4d3cb5cbaad39926b330814bbfbff7f5d0bc6ebb0a19424868b5aa"
+    },
+    "required_decisions": [
+      "D01_Q2a_local_sign",
+      "D02_Q2b_equivalence",
+      "D03_Q3_complete_derivation",
+      "D04_Q4_conversion_factor",
+      "D05_answer_only_caps",
+      "D06_Q3bonus_distinctness"
+    ],
+    "freeze_rule": "A course-owner response is required for every leaf review and every required decision. A changed rule creates a new V5.3 revision; it never rewrites this candidate."
+  },
   "gates": {
     "before_packet": [
       "Freeze the approved V5.3-r2 skill, prompt, rubric, and private development gold as one contract.",
@@ -81,7 +101,7 @@
     "zh": "这是 V5.3-r2 rubric 候选及静态验证记录，不是 packet、模型运行、新 gold 或准确率结果。候选分档须经课程负责人校准后才能冻结。"
   },
   "next_action": {
-    "en": "Review the four calibration statements, then freeze a separate private V5.3 development gold and create one matched G1 packet for Codex and V4 Flash.",
-    "zh": "审核四条校准说明后，单独冻结私有 V5.3 开发集 gold，并为 Codex 与 V4 Flash 创建同一份 G1 packet。"
+    "en": "The course owner reviews all ten leaf rows and decisions D01-D06, then a separately versioned approved V5.3 rubric may be used to freeze private development gold and create one matched G1 packet for Codex and V4 Flash.",
+    "zh": "课程负责人审核全部 10 个叶子项及 D01-D06 后，才可建立单独版本化的已批准 V5.3 rubric，并据此冻结私有开发集 gold、为 Codex 与 V4 Flash 创建同一份 G1 packet。"
   }
 }

@@ -46,3 +46,10 @@ contract. Every non-full declared leaf must carry a concise, rubric-grounded
 deduction trace whose point total equals that leaf's withheld credit. The
 contract is versioned so it does not rewrite or retrospectively validate frozen
 v5.2 packets and results.
+
+`skill_candidate_v5_3_r2.json` records the first calculation-locality and
+algebraic-equivalence refinement. `skill_candidate_v5_3_r3.json` is its
+separately versioned human-calibrated successor: a wrong independently allocated
+final result loses its final-result points, while no-double-counting protects
+only dependent process criteria. It also records an optional, explicitly
+validated scoring gate for a course-declared fundamental-method reversal.

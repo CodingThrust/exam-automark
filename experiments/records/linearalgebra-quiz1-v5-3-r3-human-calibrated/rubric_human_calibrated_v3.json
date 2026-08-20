@@ -1,0 +1,121 @@
+{
+  "candidate_status": "human_calibrated_development_candidate_not_frozen",
+  "course_id": "linearalgebra",
+  "assessment_id": "quiz1",
+  "rubric_format": "execution_contract_v1",
+  "rubric_version": "linearalgebra_quiz1_v3_candidate_r3_human_calibrated",
+  "global_scoring_rules": {
+    "score_declared_criteria_only": true,
+    "irrelevant_extra_content": "ignore_unless_directly_contradicts_declared_criterion",
+    "alternative_valid_methods": "accept_when_declared_criteria_are_met",
+    "deduction_locality": "first_material_error_no_double_count",
+    "criterion_evidence": "explicit_per_criterion"
+  },
+  "questions": [
+    {
+      "id": "Q1a",
+      "max_score": 5,
+      "question_type": "true_false",
+      "answer_form_requirements": {"simplification": "not_required", "explanation": "not_required", "working": "not_required"},
+      "criteria": [{"id": "Q1a.selection", "points": 5, "award_condition": "The visible selected response is T.", "withhold_condition": "The visible selected response is blank, ambiguous, contradictory, or not T."}]
+    },
+    {
+      "id": "Q1b",
+      "max_score": 5,
+      "question_type": "true_false",
+      "answer_form_requirements": {"simplification": "not_required", "explanation": "not_required", "working": "not_required"},
+      "criteria": [{"id": "Q1b.selection", "points": 5, "award_condition": "The visible selected response is F.", "withhold_condition": "The visible selected response is blank, ambiguous, contradictory, or not F."}]
+    },
+    {
+      "id": "Q1c",
+      "max_score": 5,
+      "question_type": "true_false",
+      "answer_form_requirements": {"simplification": "not_required", "explanation": "not_required", "working": "not_required"},
+      "criteria": [{"id": "Q1c.selection", "points": 5, "award_condition": "The visible selected response is T.", "withhold_condition": "The visible selected response is blank, ambiguous, contradictory, or not T."}]
+    },
+    {
+      "id": "Q1d",
+      "max_score": 5,
+      "question_type": "true_false",
+      "answer_form_requirements": {"simplification": "not_required", "explanation": "not_required", "working": "not_required"},
+      "criteria": [{"id": "Q1d.selection", "points": 5, "award_condition": "The visible selected response is F.", "withhold_condition": "The visible selected response is blank, ambiguous, contradictory, or not F."}]
+    },
+    {
+      "id": "Q1e",
+      "max_score": 5,
+      "question_type": "true_false",
+      "answer_form_requirements": {"simplification": "not_required", "explanation": "not_required", "working": "not_required"},
+      "criteria": [{"id": "Q1e.selection", "points": 5, "award_condition": "The visible selected response is F.", "withhold_condition": "The visible selected response is blank, ambiguous, contradictory, or not F."}]
+    },
+    {
+      "id": "Q2a",
+      "max_score": 15,
+      "question_type": "calculation",
+      "answer_form_requirements": {"simplification": "required", "explanation": "not_required", "working": "answer_only_cap"},
+      "answer_only_cap": 3,
+      "criteria": [
+        {"id": "Q2a.determinant_method", "points": 3, "award_condition": "Visible work applies a determinant method whose displayed transformations preserve the stated determinant.", "withhold_condition": "No visible determinant-preserving method is applied to the stated determinant."},
+        {"id": "Q2a.expansion_structure", "points": 3, "award_condition": "The displayed cofactor positions, minors, row operations, column operations, or triangular structure are mathematically valid.", "withhold_condition": "A displayed determinant structure is mathematically invalid."},
+        {"id": "Q2a.signed_core_expansion", "points": 3, "award_condition": "The signed core expansion is correct for the stated determinant.", "withhold_condition": "The signed core expansion is incorrect for the stated determinant."},
+        {"id": "Q2a.intermediate_term_calculation", "points": 2, "award_condition": "The displayed intermediate determinant terms are correct from a valid signed core expansion of the stated determinant.", "withhold_condition": "The displayed intermediate determinant terms are not correct from a valid signed core expansion of the stated determinant."},
+        {"id": "Q2a.final_numerical_combination", "points": 1, "award_condition": "The final numerical terms are combined with the correct arithmetic and sign.", "withhold_condition": "The final numerical terms are combined with an incorrect arithmetic operation or sign."},
+        {"id": "Q2a.final_result", "points": 3, "award_condition": "The reported determinant is -56.", "withhold_condition": "The reported determinant is not -56."}
+      ]
+    },
+    {
+      "id": "Q2b",
+      "max_score": 15,
+      "question_type": "calculation",
+      "answer_form_requirements": {"simplification": "equivalent_form_accepted", "explanation": "not_required", "working": "answer_only_cap"},
+      "answer_only_cap": 3,
+      "criteria": [
+        {"id": "Q2b.determinant_method", "points": 3, "award_condition": "Visible work applies a determinant method whose displayed transformations preserve the stated symbolic determinant.", "withhold_condition": "No visible determinant-preserving method is applied to the stated symbolic determinant."},
+        {"id": "Q2b.expansion_structure", "points": 3, "award_condition": "The displayed symbolic cofactor positions, minors, row operations, column operations, or triangular structure are mathematically valid.", "withhold_condition": "A displayed symbolic determinant structure is mathematically invalid."},
+        {"id": "Q2b.local_term_or_sign_accuracy", "points": 1, "award_condition": "Every displayed local symbolic term has the correct sign and coefficient.", "withhold_condition": "A displayed local symbolic term has an incorrect sign or coefficient."},
+        {"id": "Q2b.local_symbolic_combination", "points": 2, "award_condition": "The displayed symbolic products, sums, factoring, or collection of like terms are correct conditional on the student's preceding displayed terms.", "withhold_condition": "A displayed symbolic product, sum, factoring step, or collection of like terms is incorrect conditional on the student's preceding displayed terms."},
+        {"id": "Q2b.conditional_simplification", "points": 3, "award_condition": "A visible completed expression is simplified correctly conditional on the student's preceding displayed expression; an unsorted, factored, or expanded equivalent of that preceding expression is accepted.", "withhold_condition": "The visible completed expression is not simplified correctly conditional on the student's preceding displayed expression."},
+        {"id": "Q2b.final_expression", "points": 3, "award_condition": "The reported final expression is algebraically equivalent to abcd + ab + ad + cd + 1, including an unsorted or factored equivalent form.", "withhold_condition": "The reported final expression is not algebraically equivalent to abcd + ab + ad + cd + 1."}
+      ]
+    },
+    {
+      "id": "Q3",
+      "max_score": 25,
+      "question_type": "calculation_short_answer",
+      "answer_form_requirements": {"simplification": "not_required", "explanation": "not_required", "working": "answer_only_cap"},
+      "answer_only_cap": 3,
+      "criteria": [
+        {"id": "Q3.unique_solution_principle", "points": 4, "award_condition": "The work states that uniqueness requires a nonzero determinant or an equivalent full-rank condition.", "withhold_condition": "The work does not state a valid uniqueness condition."},
+        {"id": "Q3.equivalent_system_setup", "points": 4, "award_condition": "A matrix representation, determinant, row-reduction, elimination, or equivalent parameterized system setup is visibly and correctly applied to the stated system.", "withhold_condition": "No valid parameterized system setup is visibly applied to the stated system."},
+        {"id": "Q3.actual_determinant_or_rank_derivation", "points": 7, "award_condition": "The displayed derivation correctly obtains the determinant or equivalent rank condition for the stated system from a valid setup.", "withhold_condition": "The displayed derivation does not correctly obtain the determinant or equivalent rank condition for the stated system from a valid setup."},
+        {"id": "Q3.actual_condition_simplification", "points": 7, "award_condition": "The actual determinant or rank condition is simplified or factored correctly to identify when uniqueness fails.", "withhold_condition": "The actual determinant or rank condition is not simplified or factored correctly to identify when uniqueness fails."},
+        {"id": "Q3.final_exceptional_values_and_unique_condition", "points": 3, "award_condition": "The work identifies exceptional values 0 and -8 and concludes that the system has a unique solution exactly when s is not equal to 0 or -8.", "withhold_condition": "The work does not identify both exceptional values and the correct unique-solution condition."}
+      ],
+      "scoring_gates": [
+        {"id": "Q3.fundamental_unique_condition_reversal", "score_cap": 0, "trigger": "The work explicitly treats a zero determinant or rank failure as the condition for a unique solution and bases its conclusion on that reversal.", "deduction_type": "material_method_error"}
+      ]
+    },
+    {
+      "id": "Q3bonus",
+      "max_score": 10,
+      "question_type": "calculation",
+      "answer_form_requirements": {"simplification": "not_required", "explanation": "not_required", "working": "required"},
+      "criteria": [{"id": "Q3bonus.two_distinct_correct_methods", "points": 10, "award_condition": "The work reaches the correct conclusion through two mathematically correct and genuinely independent methods, such as a determinant method and a row-reduction or rank method; a cosmetic rewrite or a different expansion of the same method is not a second method.", "withhold_condition": "The conclusion is incorrect, a method is mathematically incorrect, or the two methods are not genuinely independent."}]
+    },
+    {
+      "id": "Q4",
+      "max_score": 20,
+      "question_type": "calculation",
+      "answer_form_requirements": {"simplification": "equivalent_form_accepted", "explanation": "not_required", "working": "answer_only_cap"},
+      "answer_only_cap": 3,
+      "criteria": [
+        {"id": "Q4.scalar_triple_product_setup", "points": 4, "award_condition": "A scalar triple product, determinant, base-times-height relation, or equivalent tetrahedron-volume method is visibly established.", "withhold_condition": "No valid tetrahedron-volume method is visibly established."},
+        {"id": "Q4.common_vertex_vectors", "points": 5, "award_condition": "Three correct edge vectors from one common tetrahedron vertex are constructed, or equivalent geometric quantities are correctly constructed.", "withhold_condition": "The constructed edge vectors or equivalent geometric quantities are not correct from one common tetrahedron vertex."},
+        {"id": "Q4.original_triple_product_evaluation", "points": 4, "award_condition": "The determinant or scalar triple product for the original problem is evaluated correctly from correct vectors or equivalent quantities.", "withhold_condition": "The determinant or scalar triple product for the original problem is not evaluated correctly from correct vectors or equivalent quantities."},
+        {"id": "Q4.absolute_value", "points": 1, "award_condition": "The volume computation uses a nonnegative magnitude through an absolute value or an equivalent nonnegative geometric quantity.", "withhold_condition": "The volume computation does not use a nonnegative magnitude through an absolute value or an equivalent nonnegative geometric quantity."},
+        {"id": "Q4.tetrahedron_conversion_factor", "points": 2, "award_condition": "The scalar triple product or equivalent parallelepiped volume is converted to tetrahedron volume by division by 6.", "withhold_condition": "The scalar triple product or equivalent parallelepiped volume is converted using a factor other than division by 6."},
+        {"id": "Q4.conditional_arithmetic", "points": 1, "award_condition": "The displayed arithmetic after the student's stated volume relation is correct conditional on that relation and preceding displayed values.", "withhold_condition": "The displayed arithmetic after the student's stated volume relation is incorrect conditional on that relation or preceding displayed values."},
+        {"id": "Q4.final_volume", "points": 3, "award_condition": "The reported volume is 7/2.", "withhold_condition": "The reported volume is not 7/2."}
+      ]
+    }
+  ]
+}

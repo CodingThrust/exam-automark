@@ -5,7 +5,7 @@ from decimal import Decimal
 import re
 from typing import Any
 
-from .schema import CourseSpec, QuestionSpec
+from .schema import CourseSpec, DEDUCTION_TYPES, QuestionSpec
 
 
 REQUIRED_LEVELS = (
@@ -193,6 +193,11 @@ def validate_execution_contract_rubric(
                 question, question_id, course_question, criterion_ids
             )
         )
+        findings.extend(
+            _validate_execution_scoring_gates(
+                question, question_id, course_question, criterion_ids
+            )
+        )
 
     for question_id in _duplicates(question_ids):
         findings.append(f"duplicate rubric question ID: {question_id}")
@@ -223,11 +228,20 @@ def execution_criterion_ids(
         criteria = question.get("criteria")
         if not isinstance(criteria, list):
             return None
-        return {
+        criterion_ids = {
             criterion["id"]
             for criterion in criteria
             if isinstance(criterion, dict) and isinstance(criterion.get("id"), str)
         }
+        scoring_gates = question.get("scoring_gates", [])
+        if not isinstance(scoring_gates, list):
+            return None
+        criterion_ids.update(
+            gate["id"]
+            for gate in scoring_gates
+            if isinstance(gate, dict) and isinstance(gate.get("id"), str)
+        )
+        return criterion_ids
     return None
 
 
@@ -247,12 +261,56 @@ def execution_criterion_points(
         criteria = question.get("criteria")
         if not isinstance(criteria, list):
             return None
-        return {
+        criterion_points = {
             criterion["id"]: float(criterion["points"])
             for criterion in criteria
             if isinstance(criterion, dict)
             and isinstance(criterion.get("id"), str)
             and _is_number(criterion.get("points"))
+        }
+        scoring_gates = question.get("scoring_gates", [])
+        if not isinstance(scoring_gates, list):
+            return None
+        for gate in scoring_gates:
+            if (
+                isinstance(gate, dict)
+                and isinstance(gate.get("id"), str)
+                and _is_number(gate.get("score_cap"))
+                and _is_number(question.get("max_score"))
+            ):
+                criterion_points[gate["id"]] = float(question["max_score"]) - float(
+                    gate["score_cap"]
+                )
+        return criterion_points
+    return None
+
+
+def execution_scoring_gates(
+    rubric: dict[str, Any], question_id: str
+) -> dict[str, dict[str, Any]] | None:
+    """Return declared execution-contract score caps keyed by gate ID."""
+
+    if rubric.get("rubric_format") != EXECUTION_CONTRACT_FORMAT:
+        return None
+    questions = rubric.get("questions")
+    if not isinstance(questions, list):
+        return None
+    for question in questions:
+        if not isinstance(question, dict) or _question_id(question) != question_id:
+            continue
+        scoring_gates = question.get("scoring_gates", [])
+        if not isinstance(scoring_gates, list):
+            return None
+        return {
+            gate["id"]: {
+                "score_cap": float(gate["score_cap"]),
+                "deduction_type": gate["deduction_type"],
+            }
+            for gate in scoring_gates
+            if isinstance(gate, dict)
+            and isinstance(gate.get("id"), str)
+            and _is_number(gate.get("score_cap"))
+            and isinstance(gate.get("deduction_type"), str)
         }
     return None
 
@@ -323,6 +381,49 @@ def _validate_execution_criteria(
         findings.append(
             f"{question_id} criterion points must total {_score_label(course_question.max_score)}"
         )
+    return findings
+
+
+def _validate_execution_scoring_gates(
+    question: dict[str, Any],
+    question_id: str,
+    course_question: QuestionSpec,
+    criterion_ids: list[str],
+) -> list[str]:
+    if "scoring_gates" not in question:
+        return []
+    scoring_gates = question["scoring_gates"]
+    if not isinstance(scoring_gates, list) or not scoring_gates:
+        return [f"{question_id} scoring_gates must be a non-empty list when present"]
+
+    findings: list[str] = []
+    required = {"id", "score_cap", "trigger", "deduction_type"}
+    for index, gate in enumerate(scoring_gates):
+        label = f"{question_id} scoring_gates[{index}]"
+        if not isinstance(gate, dict) or set(gate) != required:
+            findings.append(
+                f"{label} must contain exactly id, score_cap, trigger, deduction_type"
+            )
+            continue
+        gate_id = gate["id"]
+        if not isinstance(gate_id, str) or not gate_id.strip():
+            findings.append(f"{label} id must be non-blank text")
+        else:
+            criterion_ids.append(gate_id)
+        score_cap = gate["score_cap"]
+        if not _allows_score(course_question, score_cap) or _same_number(
+            score_cap, course_question.max_score
+        ):
+            findings.append(
+                f"{label} score_cap must be below the maximum and use the score step"
+            )
+        trigger = gate["trigger"]
+        if not isinstance(trigger, str) or not trigger.strip():
+            findings.append(f"{label} trigger must be non-blank text")
+        elif AMBIGUOUS_RUBRIC_LANGUAGE.search(trigger):
+            findings.append(f"{label} trigger must avoid unresolved discretionary language")
+        if gate["deduction_type"] not in DEDUCTION_TYPES:
+            findings.append(f"{label} deduction_type is invalid")
     return findings
 
 

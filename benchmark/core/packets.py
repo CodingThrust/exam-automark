@@ -33,6 +33,9 @@ FORBIDDEN_PACKET_TERMS = (
 FORBIDDEN_TEXT_TERMS = tuple(
     term for term in FORBIDDEN_PACKET_TERMS if term != "reports"
 )
+ABSOLUTE_PATH_PATTERN = re.compile(
+    r"[A-Za-z]:[\\/](?!/)|\\\\|(?:^|[\s\"'])/(?!/)[A-Za-z_.~-][^\s\"']*"
+)
 
 
 PACKET_INSTRUCTIONS = """# Blind Grading Experiment Packet
@@ -272,7 +275,6 @@ def build_text_grading_packet(spec: TextGradingPacketSpec) -> PromptPacketResult
             "text_source_hash": directory_digest(packet_path / "inputs"),
             "text_source_input_hashes": source_hashes,
             "text_source_kind": spec.text_source_kind,
-            "text_source_path": spec.transcript_source.as_posix(),
         }
     )
 
@@ -522,6 +524,8 @@ def audit_prompt_packet(packet: Path) -> list[str]:
             for term in FORBIDDEN_TEXT_TERMS:
                 if term.lower() in text:
                     findings.append(f"forbidden text term {term}: {relative}")
+            if ABSOLUTE_PATH_PATTERN.search(text):
+                findings.append(f"absolute path syntax: {relative}")
     return sorted(set(findings))
 
 

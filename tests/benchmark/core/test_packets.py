@@ -6,8 +6,10 @@ from pathlib import Path
 from benchmark.core.packets import (
     FORBIDDEN_TEXT_TERMS,
     PromptPacketSpec,
+    TextGradingPacketSpec,
     audit_prompt_packet,
     build_prompt_packet,
+    build_text_grading_packet,
     directory_digest,
     grading_output_schema,
     transcript_output_schema,
@@ -129,6 +131,52 @@ class CorePacketTests(unittest.TestCase):
             findings = audit_prompt_packet(packet)
 
         self.assertTrue(any("student_map" in finding for finding in findings))
+
+    def test_text_grading_packet_omits_private_source_path_and_audit_rejects_one(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            course = self._course()
+            transcript_source = root / "private-transcript-source"
+            transcript_source.mkdir()
+            payload = {
+                "student_id": "S001",
+                "answers": [
+                    {"question_id": question_id, "text": "synthetic", "unclear": False}
+                    for question_id in course.question_ids
+                ],
+            }
+            (transcript_source / "S001.json").write_text(
+                json.dumps(payload), encoding="utf-8"
+            )
+
+            result = build_text_grading_packet(
+                TextGradingPacketSpec(
+                    course=course,
+                    packet_id="G1-dev-r1",
+                    condition="G1",
+                    prompt_text="Grade only the supplied work.",
+                    student_ids=("S001",),
+                    transcript_source=transcript_source,
+                    output_root=root / "packets",
+                    rubric={"rubric_version": "synthetic_v1", "questions": []},
+                )
+            )
+            manifest = json.loads(
+                (result.packet_path / "manifest.json").read_text(encoding="utf-8")
+            )
+            (result.packet_path / "unsafe-path.txt").write_text(
+                "See D:\\private\\source.json", encoding="utf-8"
+            )
+            (result.packet_path / "safe-url.txt").write_text(
+                "See https://example.test/reference", encoding="utf-8"
+            )
+
+            findings = audit_prompt_packet(result.packet_path)
+
+        self.assertNotIn("text_source_path", manifest["metadata"])
+        self.assertNotIn(str(transcript_source), json.dumps(manifest))
+        self.assertTrue(any("absolute path syntax" in finding for finding in findings))
+        self.assertFalse(any("safe-url.txt" in finding for finding in findings))
 
     def test_schemas_track_course_questions_and_score_bounds(self):
         course = self._course()

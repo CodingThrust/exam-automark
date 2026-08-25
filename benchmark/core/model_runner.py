@@ -796,6 +796,23 @@ def _structured_output_contract(
     )
 
 
+def _retry_validation_prompt_suffix(output_contract: str) -> str:
+    """Return safe, contract-only feedback for a structural validation retry."""
+
+    suffix = (
+        "\nThe previous response failed validation. Return one corrected JSON "
+        "object only, following the required schema exactly."
+    )
+    if output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
+        suffix += (
+            " Before returning, check every leaf: full credit requires "
+            "deduction_trace=null; every non-full score requires a non-empty "
+            "deduction_trace whose points_deducted values sum exactly to "
+            "max_score minus score."
+        )
+    return suffix
+
+
 def _contract_score_row(question: Any, *, traced: bool) -> dict[str, Any]:
     row: dict[str, Any] = {
         "question_id": question.id,
@@ -852,10 +869,7 @@ def _run_student(
         try:
             attempt_prompt = prompt
             if attempt > 1:
-                attempt_prompt += (
-                    "\nThe previous response failed validation. Return one corrected "
-                    "JSON object only, following the required schema exactly."
-                )
+                attempt_prompt += _retry_validation_prompt_suffix(output_contract)
             if images is None:
                 result = provider.complete_text(
                     attempt_prompt,

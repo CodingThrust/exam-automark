@@ -15,6 +15,7 @@ from benchmark.core.model_runner import (
     OpenAICompatibleTextProvider,
     _compose_multimodal_prompt,
     _compose_student_prompt,
+    _retry_validation_prompt_suffix,
     _submission_page_order,
     _validate_grade_payload,
 )
@@ -167,6 +168,15 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertIn("Use deduction_type exactly as one of:", prompt)
         self.assertIn("incorrect_final_result", prompt)
         self.assertIn("Do not invent aliases.", prompt)
+
+    def test_deduction_trace_retry_feedback_repeats_exact_deduction_invariant(self):
+        suffix = _retry_validation_prompt_suffix(
+            GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1
+        )
+
+        self.assertIn("deduction_trace=null", suffix)
+        self.assertIn("sum exactly to max_score minus score", suffix)
+        self.assertNotIn("student_id", suffix)
 
     def test_multimodal_prompt_repeats_page_locator_rule(self):
         course = CourseSpec.from_dict(

@@ -122,12 +122,24 @@ class DeductionTraceContractTests(unittest.TestCase):
 
         self._validate(payload)
 
-    def test_full_credit_empty_trace_is_normalized_but_nonfull_trace_is_not(self):
+    def test_nonsemantic_empty_or_zero_point_traces_are_normalized_safely(self):
         payload = self._payload()
         payload["scores"][0]["deduction_trace"] = []
 
         self._validate(payload)
         self.assertIsNone(payload["scores"][0]["deduction_trace"])
+
+        payload = self._payload()
+        payload["scores"][1]["deduction_trace"].append(
+            {
+                "rubric_criterion": "zero-point transport artifact",
+                "observed_evidence_or_missing_or_incorrect_part": "No additional deduction.",
+                "deduction_type": "other_rubric_based",
+                "points_deducted": 0,
+            }
+        )
+        self._validate(payload)
+        self.assertEqual(len(payload["scores"][1]["deduction_trace"]), 1)
 
         payload = self._payload()
         payload["scores"][1]["deduction_trace"] = []

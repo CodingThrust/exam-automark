@@ -18,7 +18,11 @@ from benchmark.core.model_runner import (
     _submission_page_order,
     _validate_grade_payload,
 )
-from benchmark.core.schema import CourseSpec, QuestionSpec
+from benchmark.core.schema import (
+    GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
+    CourseSpec,
+    QuestionSpec,
+)
 
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "synthetic"
@@ -144,6 +148,25 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertIn("input index, source-page number, or image filename", prompt)
         self.assertIn("Question order may vary by submission", prompt)
         self.assertIn('"student_id":"S001"', prompt)
+
+    def test_deduction_trace_prompt_lists_the_only_allowed_deduction_types(self):
+        course = CourseSpec.from_dict(
+            json.loads((FIXTURES / "course_dsaa3073_hw1.json").read_text(encoding="utf-8"))
+        )
+
+        prompt = _compose_student_prompt(
+            "Return JSON.",
+            "S001",
+            course,
+            rubric={},
+            inputs=[],
+            task="grade",
+            output_contract=GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
+        )
+
+        self.assertIn("Use deduction_type exactly as one of:", prompt)
+        self.assertIn("incorrect_final_result", prompt)
+        self.assertIn("Do not invent aliases.", prompt)
 
     def test_multimodal_prompt_repeats_page_locator_rule(self):
         course = CourseSpec.from_dict(

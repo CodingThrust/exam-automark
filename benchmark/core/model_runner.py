@@ -18,6 +18,7 @@ from .rubrics import (
 )
 from .schema import (
     CONFIDENCE_LEVELS,
+    DEDUCTION_TYPES,
     GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
     GRADING_OUTPUT_CONTRACT_V1,
     CourseSpec,
@@ -776,7 +777,10 @@ def _structured_output_contract(
             "four-field entries; their points_deducted must sum exactly to that "
             "leaf's max_score minus score. Any row with flags or low confidence "
             "must instead provide a concise non-null attention_note. Deduction "
-            "traces are audit statements, not hidden reasoning or chain-of-thought."
+            "traces are audit statements, not hidden reasoning or chain-of-thought. "
+            "Use deduction_type exactly as one of: "
+            + ", ".join(sorted(DEDUCTION_TYPES))
+            + ". Do not invent aliases."
         )
     return (
         "Return exactly one JSON object and no Markdown. Follow this structural "

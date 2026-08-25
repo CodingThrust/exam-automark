@@ -770,12 +770,13 @@ def _structured_output_contract(
     trace_instruction = ""
     if task == "grade" and output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
         trace_instruction = (
-            " Every non-full-credit leaf must include deduction_trace with one or "
-            "more four-field entries; their points_deducted must sum exactly to "
-            "that leaf's max_score minus score. Omit deduction_trace for full "
-            "credit. Any row with flags or low confidence must include a concise "
-            "attention_note. Deduction traces are audit statements, not hidden "
-            "reasoning or chain-of-thought."
+            " Every leaf row must include deduction_trace and attention_note. "
+            "Use null for either field when it is not applicable. Every non-full-"
+            "credit leaf must instead provide deduction_trace with one or more "
+            "four-field entries; their points_deducted must sum exactly to that "
+            "leaf's max_score minus score. Any row with flags or low confidence "
+            "must instead provide a concise non-null attention_note. Deduction "
+            "traces are audit statements, not hidden reasoning or chain-of-thought."
         )
     return (
         "Return exactly one JSON object and no Markdown. Follow this structural "
@@ -956,6 +957,9 @@ def _validate_grade_payload(
     scores = payload.get("scores")
     if not isinstance(scores, list):
         raise ValueError("scores must be a list")
+    _normalize_full_credit_empty_deduction_traces(
+        scores, course, output_contract=output_contract
+    )
     records = []
     required_row_fields = {
         "question_id",
@@ -1094,6 +1098,37 @@ def _validate_grade_payload(
     for row in payload["scores"]:
         if row["confidence"] not in CONFIDENCE_LEVELS:
             raise ValueError(f"invalid confidence: {row['confidence']}")
+
+
+def _normalize_full_credit_empty_deduction_traces(
+    scores: list[Any],
+    course: CourseSpec,
+    *,
+    output_contract: str,
+) -> None:
+    """Normalize a provider's empty-list spelling of a nullable full-credit trace.
+
+    The strict v5.3 schema represents an inapplicable trace as ``null``. Some
+    JSON-object providers still emit ``[]`` for a full-credit leaf. Converting
+    that one syntactic variant before validation preserves the score and cannot
+    hide a missing deduction: non-full leaves keep ``[]`` and are rejected.
+    """
+
+    if output_contract != GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
+        return
+    question_map = course.question_map
+    for row in scores:
+        if not isinstance(row, dict) or row.get("deduction_trace") != []:
+            continue
+        question = question_map.get(row.get("question_id"))
+        score = row.get("score")
+        if (
+            question is not None
+            and isinstance(score, (int, float))
+            and not isinstance(score, bool)
+            and abs(float(score) - float(question.max_score)) <= 1e-9
+        ):
+            row["deduction_trace"] = None
 
 
 def _validate_transcript_payload(

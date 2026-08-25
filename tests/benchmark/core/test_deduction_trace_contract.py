@@ -114,6 +114,26 @@ class DeductionTraceContractTests(unittest.TestCase):
         self.assertNotIn("deduction_trace", payload["scores"][0])
         self.assertEqual(payload["total"], 19)
 
+    def test_full_credit_leaf_accepts_nullable_strict_schema_fields(self):
+        payload = self._payload()
+        payload["scores"][0].update(
+            {"deduction_trace": None, "attention_note": None}
+        )
+
+        self._validate(payload)
+
+    def test_full_credit_empty_trace_is_normalized_but_nonfull_trace_is_not(self):
+        payload = self._payload()
+        payload["scores"][0]["deduction_trace"] = []
+
+        self._validate(payload)
+        self.assertIsNone(payload["scores"][0]["deduction_trace"])
+
+        payload = self._payload()
+        payload["scores"][1]["deduction_trace"] = []
+        with self.assertRaisesRegex(ValueError, "deduction_trace"):
+            self._validate(payload)
+
     def test_rejects_nonfull_leaf_without_trace(self):
         payload = self._payload()
         del payload["scores"][1]["deduction_trace"]
@@ -170,6 +190,21 @@ class DeductionTraceContractTests(unittest.TestCase):
                 "points_deducted",
             ],
         )
+        self.assertEqual(
+            schema["properties"]["scores"]["items"]["required"],
+            [
+                "question_id",
+                "extracted_evidence",
+                "score",
+                "evidence",
+                "confidence",
+                "flags",
+                "deduction_trace",
+                "attention_note",
+            ],
+        )
+        self.assertEqual(score_properties["deduction_trace"]["type"], ["array", "null"])
+        self.assertEqual(score_properties["attention_note"]["type"], ["string", "null"])
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -170,6 +170,12 @@ class CorePacketTests(unittest.TestCase):
             (result.packet_path / "safe-url.txt").write_text(
                 "See https://example.test/reference", encoding="utf-8"
             )
+            (result.packet_path / "unsafe-unix-path.txt").write_text(
+                "See /private/source.json", encoding="utf-8"
+            )
+            (result.packet_path / "math-notation.txt").write_text(
+                "Use /det(A) as compact mathematical notation.", encoding="utf-8"
+            )
 
             findings = audit_prompt_packet(result.packet_path)
 
@@ -177,6 +183,8 @@ class CorePacketTests(unittest.TestCase):
         self.assertNotIn(str(transcript_source), json.dumps(manifest))
         self.assertTrue(any("absolute path syntax" in finding for finding in findings))
         self.assertFalse(any("safe-url.txt" in finding for finding in findings))
+        self.assertTrue(any("unsafe-unix-path.txt" in finding for finding in findings))
+        self.assertFalse(any("math-notation.txt" in finding for finding in findings))
 
     def test_schemas_track_course_questions_and_score_bounds(self):
         course = self._course()

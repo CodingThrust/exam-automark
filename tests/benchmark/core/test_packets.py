@@ -141,7 +141,11 @@ class CorePacketTests(unittest.TestCase):
             payload = {
                 "student_id": "S001",
                 "answers": [
-                    {"question_id": question_id, "text": "synthetic", "unclear": False}
+                    {
+                        "question_id": question_id,
+                        "text": "synthetic a:/b and \\\\matrix",
+                        "unclear": False,
+                    }
                     for question_id in course.question_ids
                 ],
             }
@@ -164,6 +168,7 @@ class CorePacketTests(unittest.TestCase):
             manifest = json.loads(
                 (result.packet_path / "manifest.json").read_text(encoding="utf-8")
             )
+            self.assertEqual(audit_prompt_packet(result.packet_path), [])
             (result.packet_path / "unsafe-path.txt").write_text(
                 "See D:\\private\\source.json", encoding="utf-8"
             )

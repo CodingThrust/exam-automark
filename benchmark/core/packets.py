@@ -368,11 +368,19 @@ def grading_output_schema(
             "items": {"type": "string"},
         },
     }
+    score_required = [
+        "question_id",
+        "extracted_evidence",
+        "score",
+        "evidence",
+        "confidence",
+        "flags",
+    ]
     if grading_output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
         score_properties.update(
             {
                 "deduction_trace": {
-                    "type": "array",
+                    "type": ["array", "null"],
                     "minItems": 1,
                     "items": {
                         "type": "object",
@@ -407,12 +415,17 @@ def grading_output_schema(
                     },
                 },
                 "attention_note": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "minLength": 1,
                     "maxLength": 500,
                 },
             }
         )
+        # Codex strict structured output requires every declared property to
+        # appear in `required`.  Nullable values retain this contract's
+        # semantic optionality: a validator still requires a non-empty trace
+        # for non-full credit and a non-empty note for flags/low confidence.
+        score_required.extend(["deduction_trace", "attention_note"])
     return {
         "type": "object",
         "properties": {
@@ -427,14 +440,7 @@ def grading_output_schema(
                 "items": {
                     "type": "object",
                     "properties": score_properties,
-                    "required": [
-                        "question_id",
-                        "extracted_evidence",
-                        "score",
-                        "evidence",
-                        "confidence",
-                        "flags",
-                    ],
+                    "required": score_required,
                     "additionalProperties": False,
                 },
             },

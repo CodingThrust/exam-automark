@@ -975,7 +975,7 @@ def _validate_grade_payload(
     scores = payload.get("scores")
     if not isinstance(scores, list):
         raise ValueError("scores must be a list")
-    _normalize_full_credit_empty_deduction_traces(
+    _normalize_deduction_trace_transport_variants(
         scores, course, output_contract=output_contract
     )
     records = []
@@ -1118,25 +1118,40 @@ def _validate_grade_payload(
             raise ValueError(f"invalid confidence: {row['confidence']}")
 
 
-def _normalize_full_credit_empty_deduction_traces(
+def _normalize_deduction_trace_transport_variants(
     scores: list[Any],
     course: CourseSpec,
     *,
     output_contract: str,
 ) -> None:
-    """Normalize a provider's empty-list spelling of a nullable full-credit trace.
+    """Normalize non-semantic provider spellings for a deduction trace.
 
     The strict v5.3 schema represents an inapplicable trace as ``null``. Some
-    JSON-object providers still emit ``[]`` for a full-credit leaf. Converting
-    that one syntactic variant before validation preserves the score and cannot
-    hide a missing deduction: non-full leaves keep ``[]`` and are rejected.
+    JSON-object providers emit ``[]`` for full credit or add a zero-point trace
+    entry. Both are non-semantic spellings: no points are added or removed. A
+    non-full leaf still fails unless its remaining positive entries explain the
+    full ``max_score - score`` deduction.
     """
 
     if output_contract != GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
         return
     question_map = course.question_map
     for row in scores:
-        if not isinstance(row, dict) or row.get("deduction_trace") != []:
+        if not isinstance(row, dict):
+            continue
+        raw_trace = row.get("deduction_trace")
+        if isinstance(raw_trace, list):
+            row["deduction_trace"] = [
+                entry
+                for entry in raw_trace
+                if not (
+                    isinstance(entry, dict)
+                    and isinstance(entry.get("points_deducted"), (int, float))
+                    and not isinstance(entry.get("points_deducted"), bool)
+                    and float(entry["points_deducted"]) == 0
+                )
+            ]
+        if row.get("deduction_trace") != []:
             continue
         question = question_map.get(row.get("question_id"))
         score = row.get("score")

@@ -34,7 +34,7 @@ FORBIDDEN_TEXT_TERMS = tuple(
     term for term in FORBIDDEN_PACKET_TERMS if term != "reports"
 )
 ABSOLUTE_PATH_PATTERN = re.compile(
-    r"[A-Za-z]:[\\/](?!/)|\\\\|(?:^|[\s\"'])/(?!/)[A-Za-z_.~-][^\s\"']*"
+    r"[A-Za-z]:[\\/](?!/)|\\\\|(?:^|[\s\"'])/(?!/)[A-Za-z_.~-][^\s\"']*/[^\s\"']+"
 )
 
 

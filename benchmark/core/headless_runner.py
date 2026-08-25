@@ -20,6 +20,7 @@ from .model_runner import (
     _load_text_inputs,
     _merge_usage,
     _parse_json_result,
+    _retry_validation_prompt_suffix,
     _utc_now,
     _validate_grade_payload,
     _write_json,
@@ -348,10 +349,7 @@ def _run_student(
         try:
             attempt_prompt = prompt
             if attempt > 1:
-                attempt_prompt += (
-                    "\nThe previous response failed validation. Return one corrected "
-                    "JSON object only, following the required schema exactly."
-                )
+                attempt_prompt += _retry_validation_prompt_suffix(output_contract)
             if config.dry_run:
                 if task == "transcribe":
                     response = ModelProviderResult(

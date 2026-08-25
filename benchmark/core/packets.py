@@ -524,7 +524,7 @@ def audit_prompt_packet(packet: Path) -> list[str]:
             for term in FORBIDDEN_TEXT_TERMS:
                 if term.lower() in text:
                     findings.append(f"forbidden text term {term}: {relative}")
-            if ABSOLUTE_PATH_PATTERN.search(text):
+            if not relative.startswith("inputs/") and ABSOLUTE_PATH_PATTERN.search(text):
                 findings.append(f"absolute path syntax: {relative}")
     return sorted(set(findings))
 

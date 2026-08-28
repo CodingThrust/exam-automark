@@ -12,9 +12,12 @@ from unittest.mock import patch
 
 from benchmark.core.cli import main
 from benchmark.core.model_runner import (
+    DeepSeekResponsesJsonSchemaProvider,
+    ModelPacketRunConfig,
     OpenAICompatibleTextProvider,
     _compose_multimodal_prompt,
     _compose_student_prompt,
+    _provider_from_config,
     _retry_validation_prompt_suffix,
     _submission_page_order,
     _validate_grade_payload,
@@ -238,6 +241,78 @@ class ModelPacketRunnerTests(unittest.TestCase):
         self.assertEqual(captured["extra_body"], {"thinking": {"type": "disabled"}})
         self.assertEqual(captured["max_tokens"], 4096)
 
+    def test_deepseek_responses_provider_binds_packet_schema_and_disables_thinking(self):
+        captured: dict[str, object] = {}
+        output_schema = {
+            "type": "object",
+            "properties": {"total": {"type": "number"}},
+            "required": ["total"],
+            "additionalProperties": False,
+        }
+
+        class FakeResponses:
+            def create(self, **kwargs):
+                captured.update(kwargs)
+                return SimpleNamespace(
+                    status="completed",
+                    output_text='{"total": 5}',
+                    model="deepseek-v4-flash",
+                    usage=None,
+                )
+
+        class FakeOpenAI:
+            def __init__(self, **kwargs):
+                captured["client"] = kwargs
+                self.responses = FakeResponses()
+
+        provider = DeepSeekResponsesJsonSchemaProvider(
+            model="deepseek-v4-flash",
+            endpoint="https://api.deepseek.com",
+            api_key_env="DEEPSEEK_API_KEY",
+            display_name="DeepSeek",
+            temperature=0,
+            top_p=None,
+            max_tokens=4096,
+            output_schema=output_schema,
+        )
+        with patch.dict(os.environ, {"DEEPSEEK_API_KEY": "test-key"}), patch.dict(
+            sys.modules, {"openai": SimpleNamespace(OpenAI=FakeOpenAI)}
+        ):
+            result = provider.complete_text(
+                "Return JSON.",
+                student_id="S001",
+                course=None,
+                task="grade",
+            )
+
+        self.assertEqual(result.raw_text, '{"total": 5}')
+        self.assertEqual(captured["input"], "Return JSON.")
+        self.assertEqual(captured["reasoning"], {"effort": "none"})
+        self.assertEqual(captured["max_output_tokens"], 4096)
+        self.assertEqual(
+            captured["text"],
+            {
+                "format": {
+                    "type": "json_schema",
+                    "name": "grading_packet_output",
+                    "schema": output_schema,
+                }
+            },
+        )
+
+    def test_deepseek_responses_schema_transport_rejects_other_providers(self):
+        config = ModelPacketRunConfig(
+            provider="kimi",
+            model="kimi-k2.6",
+            input_mode="text-only",
+            packet=Path("packet"),
+            output=Path("output"),
+            transport="deepseek_responses_json_schema",
+        )
+
+        with self.assertRaisesRegex(ValueError, "requires provider deepseek"):
+            _provider_from_config(config, output_schema={"type": "object"})
+
     def test_build_text_grading_packet_can_feed_dry_run_runner(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -453,6 +528,42 @@ class ModelPacketRunnerTests(unittest.TestCase):
         )
         self.assertNotIn("MOONSHOT_API_KEY=", command)
         self.assertNotIn("sk-", command)
+
+    def test_run_model_packet_records_deepseek_responses_schema_transport(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            packet = self._build_grade_packet(root, "transcript.json", b'{"answer":"ok"}')
+            output = root / "runs" / "deepseek-responses-schema-G1-dev-r1"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                code = main(
+                    [
+                        "run-model-packet",
+                        "--provider",
+                        "deepseek",
+                        "--model",
+                        "deepseek-v4-flash",
+                        "--input-mode",
+                        "text-only",
+                        "--packet",
+                        str(packet),
+                        "--output",
+                        str(output),
+                        "--transport",
+                        "deepseek_responses_json_schema",
+                        "--dry-run",
+                    ]
+                )
+
+            metadata = json.loads((output / "run-metadata.json").read_text(encoding="utf-8"))
+            command_argv = json.loads((output / "command.argv.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(code, 0)
+        self.assertEqual(metadata["transport"], "deepseek_responses_json_schema")
+        self.assertEqual(metadata["response_format"], "json_schema")
+        self.assertIn("--transport", command_argv)
+        self.assertIn("deepseek_responses_json_schema", command_argv)
 
     def test_run_model_packet_rejects_image_inputs_for_text_only_deepseek(self):
         with tempfile.TemporaryDirectory() as tmp:

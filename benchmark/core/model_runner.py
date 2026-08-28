@@ -51,6 +51,10 @@ IMAGE_MIME_TYPES = {
     ".webp": "image/webp",
 }
 INPUT_MODES = ("text-only", "multimodal")
+MODEL_TRANSPORTS = (
+    "chat_completions_json_object",
+    "deepseek_responses_json_schema",
+)
 TEXT_SUFFIXES = {".csv", ".json", ".md", ".text", ".txt"}
 OPENAI_COMPATIBLE_PROVIDERS = {
     "deepseek": {
@@ -78,6 +82,7 @@ class ModelPacketRunConfig:
     top_p: float | None = None
     max_tokens: int | None = None
     response_format: str = "json_object"
+    transport: str = "chat_completions_json_object"
     endpoint: str | None = None
     max_retries: int = 0
     dry_run: bool = False
@@ -132,6 +137,10 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
         raise ValueError(
             f"--input-mode must be one of {', '.join(INPUT_MODES)}"
         )
+    if config.transport not in MODEL_TRANSPORTS:
+        raise ValueError(
+            f"--transport must be one of {', '.join(MODEL_TRANSPORTS)}"
+        )
     if config.max_retries < 0:
         raise ValueError("--max-retries must be non-negative")
     model_policy_binding = (
@@ -153,6 +162,11 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
         raise ValueError("transcription packets require --input-mode multimodal")
     course = CourseSpec.from_dict(_read_json(packet / "course.json"))
     output_contract = validate_packet_output_contract(packet, manifest, course, task)
+    output_schema = (
+        _read_json(packet / "output.schema.json")
+        if config.transport == "deepseek_responses_json_schema"
+        else None
+    )
     prompt_text = (packet / "prompt.txt").read_text(encoding="utf-8")
     rubric = _read_json(packet / "rubric.json") if task == "grade" else None
     student_ids = tuple(manifest.get("student_ids", ()))
@@ -165,7 +179,11 @@ def run_model_packet(config: ModelPacketRunConfig) -> dict[str, Any]:
         image_inputs = _load_image_inputs(packet, student_ids)
     else:
         text_inputs = _load_text_inputs(packet, student_ids)
-    provider = _provider_from_config(config, output_contract=output_contract)
+    provider = _provider_from_config(
+        config,
+        output_contract=output_contract,
+        output_schema=output_schema,
+    )
     output.mkdir(parents=True)
     (output / "outputs").mkdir()
     command = _write_command_records(output, config)
@@ -260,10 +278,39 @@ def _provider_from_config(
     config: ModelPacketRunConfig,
     *,
     output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
+    output_schema: dict[str, Any] | None = None,
 ) -> TextModelProvider | MultimodalModelProvider:
+    if config.transport not in MODEL_TRANSPORTS:
+        raise ValueError(
+            f"--transport must be one of {', '.join(MODEL_TRANSPORTS)}"
+        )
+    if config.transport == "deepseek_responses_json_schema":
+        if config.provider != "deepseek":
+            raise ValueError(
+                "deepseek_responses_json_schema transport requires provider deepseek"
+            )
+        if config.input_mode != "text-only":
+            raise ValueError(
+                "deepseek_responses_json_schema transport requires input_mode text-only"
+            )
+        if output_schema is None:
+            raise ValueError(
+                "deepseek_responses_json_schema transport requires packet output schema"
+            )
     if config.dry_run:
         return DryRunTextProvider(config.model, output_contract=output_contract)
     settings = _provider_settings(config.provider)
+    if config.transport == "deepseek_responses_json_schema":
+        return DeepSeekResponsesJsonSchemaProvider(
+            model=config.model,
+            endpoint=_provider_endpoint(config),
+            api_key_env=settings["api_key_env"],
+            display_name=settings["display_name"],
+            temperature=config.temperature,
+            top_p=config.top_p,
+            max_tokens=config.max_tokens,
+            output_schema=output_schema,
+        )
     return OpenAICompatibleTextProvider(
         model=config.model,
         endpoint=_provider_endpoint(config),
@@ -365,6 +412,82 @@ def _dry_run_score_row(question: Any, *, traced: bool) -> dict[str, Any]:
         ]
         row["attention_note"] = "Synthetic dry-run row; no model call was made."
     return row
+
+
+class DeepSeekResponsesJsonSchemaProvider:
+    """DeepSeek Responses API provider with a packet-bound JSON Schema."""
+
+    def __init__(
+        self,
+        *,
+        model: str,
+        endpoint: str,
+        api_key_env: str,
+        display_name: str,
+        temperature: float | None,
+        top_p: float | None,
+        max_tokens: int | None,
+        output_schema: dict[str, Any],
+    ):
+        self.model = model
+        self.endpoint = endpoint
+        self.api_key_env = api_key_env
+        self.display_name = display_name
+        self.temperature = temperature
+        self.top_p = top_p
+        self.max_tokens = max_tokens
+        self.output_schema = output_schema
+
+    def complete_text(
+        self,
+        prompt: str,
+        *,
+        student_id: str,
+        course: CourseSpec,
+        task: str,
+    ) -> ModelProviderResult:
+        api_key = os.environ.get(self.api_key_env)
+        if not api_key:
+            raise ValueError(
+                f"{self.api_key_env} is required for non-dry {self.display_name} runs"
+            )
+        from openai import OpenAI
+
+        client = OpenAI(api_key=api_key, base_url=self.endpoint)
+        request: dict[str, Any] = {
+            "model": self.model,
+            "input": prompt,
+            "reasoning": {"effort": "none"},
+            "text": {
+                "format": {
+                    "type": "json_schema",
+                    "name": "grading_packet_output",
+                    "schema": self.output_schema,
+                }
+            },
+        }
+        if self.temperature is not None:
+            request["temperature"] = self.temperature
+        if self.top_p is not None:
+            request["top_p"] = self.top_p
+        if self.max_tokens is not None:
+            request["max_output_tokens"] = self.max_tokens
+        response = client.responses.create(**request)
+        status = getattr(response, "status", None)
+        if status not in {None, "completed"}:
+            raise ValueError(
+                "DeepSeek Responses API returned non-completed status: "
+                f"{status}"
+            )
+        raw_text = getattr(response, "output_text", None)
+        if not isinstance(raw_text, str) or not raw_text:
+            raise ValueError("DeepSeek Responses API returned no output_text")
+        return ModelProviderResult(
+            raw_text=raw_text,
+            model=getattr(response, "model", self.model),
+            usage=_usage_to_dict(getattr(response, "usage", None)),
+            system_fingerprint=getattr(response, "system_fingerprint", None),
+        )
 
 
 class OpenAICompatibleTextProvider:
@@ -1216,7 +1339,12 @@ def _metadata(
         "temperature": config.temperature,
         "top_p": config.top_p,
         "max_tokens": config.max_tokens,
-        "response_format": config.response_format,
+        "response_format": (
+            "json_schema"
+            if config.transport == "deepseek_responses_json_schema"
+            else config.response_format
+        ),
+        "transport": config.transport,
         "max_retries": config.max_retries,
         "retry_policy": (
             "append JSON repair instruction after validation or provider failure"
@@ -1280,6 +1408,8 @@ def _write_command_records(output: Path, config: ModelPacketRunConfig) -> str:
             config.model,
             "--input-mode",
             config.input_mode,
+            "--transport",
+            config.transport,
             "--packet",
             str(config.packet),
             "--output",

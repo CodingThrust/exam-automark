@@ -932,8 +932,9 @@ def _retry_validation_prompt_suffix(output_contract: str) -> str:
             "deduction_trace=null; every non-full score requires a non-empty "
             "deduction_trace whose points_deducted values sum exactly to "
             "max_score minus score. For an execution-contract rubric, use only "
-            "declared criterion IDs and copy their atomic point values exactly; "
-            "do not split or rescale points to force a total."
+            "declared criterion IDs, never exceed their declared point caps, "
+            "and use a partial amount only when the evidence supports partial "
+            "credit; do not alter a trace merely to force a total."
         )
     return suffix
 
@@ -969,10 +970,11 @@ def _execution_contract_prompt_note(rubric: dict[str, Any] | None) -> str:
         "unrelated extra content unless it directly contradicts a declared "
         "criterion. For every deduction_trace, rubric_criterion must be the "
         "exact applicable criterion ID from this rubric. Criterion points are "
-        "atomic: copy each selected criterion's declared points exactly; never "
-        "split, rescale, or invent a deduction amount just to make a trace add "
-        "up. Select a score only when max_score minus score equals the exact "
-        "sum of the withheld declared criteria."
+        "maximum deductible amounts: a partial, score-step-aligned deduction is "
+        "allowed only when the evidence supports partial credit. Never exceed a "
+        "criterion cap, invent a criterion, or alter a trace merely to make it "
+        "add up. The selected trace amounts must still sum exactly to max_score "
+        "minus score."
     )
 
 
@@ -995,6 +997,7 @@ def _run_student(
     last_error: Exception | None = None
     for attempt in range(1, max_retries + 2):
         result: ModelProviderResult | None = None
+        trace_normalizations: list[dict[str, Any]] = []
         try:
             attempt_prompt = prompt
             if attempt > 1:
@@ -1016,7 +1019,7 @@ def _run_student(
                 )
             payload = _parse_json_result(result.raw_text)
             if task == "grade":
-                _validate_grade_payload(
+                trace_normalizations = _validate_grade_payload(
                     payload,
                     student_id,
                     course,
@@ -1026,19 +1029,19 @@ def _run_student(
             else:
                 _validate_transcript_payload(payload, student_id, course)
             _write_json(output / "outputs" / f"{student_id}.json", payload)
-            _append_jsonl(
-                raw_responses,
-                {
-                    "student_id": student_id,
-                    "attempt": attempt,
-                    "status": "ok",
-                    "timestamp": _utc_now(),
-                    "model": result.model,
-                    "raw_text": result.raw_text,
-                    "usage": result.usage,
-                    "system_fingerprint": result.system_fingerprint,
-                },
-            )
+            raw_row: dict[str, Any] = {
+                "student_id": student_id,
+                "attempt": attempt,
+                "status": "ok",
+                "timestamp": _utc_now(),
+                "model": result.model,
+                "raw_text": result.raw_text,
+                "usage": result.usage,
+                "system_fingerprint": result.system_fingerprint,
+            }
+            if trace_normalizations:
+                raw_row["trace_normalizations"] = trace_normalizations
+            _append_jsonl(raw_responses, raw_row)
             _merge_usage(usage, result.usage)
             return {"student_id": student_id, "status": "passed", "attempts": attempt}
         except Exception as error:
@@ -1091,7 +1094,7 @@ def _validate_grade_payload(
     *,
     output_contract: str = GRADING_OUTPUT_CONTRACT_V1,
     rubric: dict[str, Any] | None = None,
-) -> None:
+) -> list[dict[str, Any]]:
     if not isinstance(payload, dict):
         raise ValueError("grade output must be a JSON object")
     if output_contract == GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
@@ -1104,8 +1107,11 @@ def _validate_grade_payload(
     scores = payload.get("scores")
     if not isinstance(scores, list):
         raise ValueError("scores must be a list")
-    _normalize_deduction_trace_transport_variants(
-        scores, course, output_contract=output_contract
+    trace_normalizations = _normalize_deduction_trace_transport_variants(
+        scores,
+        course,
+        output_contract=output_contract,
+        rubric=rubric,
     )
     records = []
     required_row_fields = {
@@ -1205,12 +1211,12 @@ def _validate_grade_payload(
                         f"{record.question_id} deduction_trace may not repeat a rubric criterion"
                     )
                 traced_criteria.add(trace.rubric_criterion)
-                if criterion_points is not None and abs(
+                if criterion_points is not None and (
                     float(trace.points_deducted)
                     - criterion_points[trace.rubric_criterion]
                 ) > 1e-9:
                     raise ValueError(
-                        f"{record.question_id} deduction_trace points_deducted must equal the declared criterion points"
+                        f"{record.question_id} deduction_trace points_deducted must not exceed the declared criterion points"
                     )
             declared_gate_ids = set(scoring_gates or {})
             used_gate_ids = declared_gate_ids & traced_criteria
@@ -1245,6 +1251,7 @@ def _validate_grade_payload(
     for row in payload["scores"]:
         if row["confidence"] not in CONFIDENCE_LEVELS:
             raise ValueError(f"invalid confidence: {row['confidence']}")
+    return trace_normalizations
 
 
 def _normalize_deduction_trace_transport_variants(
@@ -1252,18 +1259,27 @@ def _normalize_deduction_trace_transport_variants(
     course: CourseSpec,
     *,
     output_contract: str,
-) -> None:
-    """Normalize non-semantic provider spellings for a deduction trace.
+    rubric: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Normalize safe deduction-trace representation and arithmetic variants.
 
     The strict v5.3 schema represents an inapplicable trace as ``null``. Some
     JSON-object providers emit ``[]`` for full credit or add a zero-point trace
     entry. Both are non-semantic spellings: no points are added or removed. A
     non-full leaf still fails unless its remaining positive entries explain the
     full ``max_score - score`` deduction.
+
+    Execution rubrics may award partial credit inside a declared criterion. If
+    a trace names only unique, non-gate declared criteria; every amount is on
+    the course score step and within its criterion's cap; and exactly one
+    amount can be adjusted within that cap to reconcile a score-preserving
+    arithmetic mismatch, normalize that one amount. Ambiguous or semantic
+    repairs remain validation failures and trigger the existing retry flow.
     """
 
     if output_contract != GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1:
-        return
+        return []
+    normalizations: list[dict[str, Any]] = []
     question_map = course.question_map
     for row in scores:
         if not isinstance(row, dict):
@@ -1291,6 +1307,88 @@ def _normalize_deduction_trace_transport_variants(
             and abs(float(score) - float(question.max_score)) <= 1e-9
         ):
             row["deduction_trace"] = None
+    if not isinstance(rubric, dict):
+        return normalizations
+
+    for row in scores:
+        if not isinstance(row, dict):
+            continue
+        question_id = row.get("question_id")
+        question = question_map.get(question_id)
+        score = row.get("score")
+        raw_trace = row.get("deduction_trace")
+        if (
+            question is None
+            or not isinstance(score, (int, float))
+            or isinstance(score, bool)
+            or not isinstance(raw_trace, list)
+            or not raw_trace
+        ):
+            continue
+        criterion_points = execution_criterion_points(rubric, question_id)
+        scoring_gates = execution_scoring_gates(rubric, question_id)
+        if criterion_points is None:
+            continue
+        gate_ids = set(scoring_gates or {})
+        observed = 0.0
+        seen_criteria: set[str] = set()
+        valid_entries = True
+        candidates: list[tuple[int, float]] = []
+        for index, entry in enumerate(raw_trace):
+            if not isinstance(entry, dict):
+                valid_entries = False
+                break
+            criterion = entry.get("rubric_criterion")
+            points = entry.get("points_deducted")
+            if (
+                not isinstance(criterion, str)
+                or criterion in seen_criteria
+                or criterion not in criterion_points
+                or criterion in gate_ids
+                or not isinstance(points, (int, float))
+                or isinstance(points, bool)
+                or float(points) <= 0
+                or not _is_score_step_value(float(points), question.score_step)
+                or float(points) > criterion_points[criterion]
+            ):
+                valid_entries = False
+                break
+            seen_criteria.add(criterion)
+            observed += float(points)
+        expected = float(question.max_score) - float(score)
+        if not valid_entries or abs(observed - expected) <= 1e-9:
+            continue
+        delta = expected - observed
+        for index, entry in enumerate(raw_trace):
+            criterion = entry["rubric_criterion"]
+            adjusted = float(entry["points_deducted"]) + delta
+            if (
+                adjusted > 0
+                and adjusted <= criterion_points[criterion]
+                and _is_score_step_value(adjusted, question.score_step)
+            ):
+                candidates.append((index, adjusted))
+        if len(candidates) != 1:
+            continue
+        index, adjusted = candidates[0]
+        raw_trace[index]["points_deducted"] = _canonical_score_value(adjusted)
+        normalizations.append(
+            {
+                "question_id": question_id,
+                "kind": "bounded_trace_arithmetic",
+                "entry_index": index,
+            }
+        )
+    return normalizations
+
+
+def _is_score_step_value(value: float, step: float) -> bool:
+    return abs((value / step) - round(value / step)) <= 1e-9
+
+
+def _canonical_score_value(value: float) -> int | float:
+    rounded = round(value)
+    return rounded if abs(value - rounded) <= 1e-9 else value
 
 
 def _validate_transcript_payload(

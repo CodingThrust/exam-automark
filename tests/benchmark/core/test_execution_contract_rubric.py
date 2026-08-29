@@ -206,7 +206,7 @@ class ExecutionContractRubricTests(unittest.TestCase):
                 )
             self.assertFalse((root / "packets" / "G1-dev-r1").exists())
 
-    def test_trace_deducts_each_declared_criterion_once_and_in_full(self):
+    def test_trace_allows_bounded_partial_deduction_for_a_declared_criterion(self):
         payload = {
             "student_id": "S001",
             "scores": [
@@ -238,7 +238,147 @@ class ExecutionContractRubricTests(unittest.TestCase):
             "total": 13,
         }
 
-        with self.assertRaisesRegex(ValueError, "declared criterion points"):
+        _validate_grade_payload(
+            payload,
+            "S001",
+            self.course,
+            output_contract=GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
+            rubric=self.rubric,
+        )
+
+    def test_trace_rejects_partial_deduction_above_declared_criterion_cap(self):
+        payload = {
+            "student_id": "S001",
+            "scores": [
+                {
+                    "question_id": "Q1",
+                    "extracted_evidence": "Selected T.",
+                    "score": 5,
+                    "evidence": "The required selection is visible.",
+                    "confidence": "high",
+                    "flags": [],
+                },
+                {
+                    "question_id": "Q2",
+                    "extracted_evidence": "A valid setup is visible; final result is wrong.",
+                    "score": 6,
+                    "evidence": "Setup and simplification are correct.",
+                    "confidence": "high",
+                    "flags": [],
+                    "deduction_trace": [
+                        {
+                            "rubric_criterion": "Q2.final_result",
+                            "observed_evidence_or_missing_or_incorrect_part": "The final result is incorrect.",
+                            "deduction_type": "incorrect_final_result",
+                            "points_deducted": 4,
+                        }
+                    ],
+                },
+            ],
+            "total": 11,
+        }
+
+        with self.assertRaisesRegex(ValueError, "must not exceed the declared criterion points"):
+            _validate_grade_payload(
+                payload,
+                "S001",
+                self.course,
+                output_contract=GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
+                rubric=self.rubric,
+            )
+
+    def test_unambiguous_bounded_trace_arithmetic_is_normalized_without_score_change(self):
+        payload = {
+            "student_id": "S001",
+            "scores": [
+                {
+                    "question_id": "Q1",
+                    "extracted_evidence": "Selected T.",
+                    "score": 5,
+                    "evidence": "The required selection is visible.",
+                    "confidence": "high",
+                    "flags": [],
+                },
+                {
+                    "question_id": "Q2",
+                    "extracted_evidence": "A valid setup is visible; final result is partly incorrect.",
+                    "score": 7,
+                    "evidence": "Setup and simplification are correct.",
+                    "confidence": "high",
+                    "flags": [],
+                    "deduction_trace": [
+                        {
+                            "rubric_criterion": "Q2.final_result",
+                            "observed_evidence_or_missing_or_incorrect_part": "The final result is partly incorrect.",
+                            "deduction_type": "incorrect_final_result",
+                            "points_deducted": 2,
+                        }
+                    ],
+                },
+            ],
+            "total": 12,
+        }
+
+        normalizations = _validate_grade_payload(
+            payload,
+            "S001",
+            self.course,
+            output_contract=GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
+            rubric=self.rubric,
+        )
+
+        self.assertEqual(payload["scores"][1]["score"], 7)
+        self.assertEqual(payload["scores"][1]["deduction_trace"][0]["points_deducted"], 3)
+        self.assertEqual(
+            normalizations,
+            [
+                {
+                    "question_id": "Q2",
+                    "kind": "bounded_trace_arithmetic",
+                    "entry_index": 0,
+                }
+            ],
+        )
+
+    def test_ambiguous_bounded_trace_arithmetic_still_requires_a_model_retry(self):
+        payload = {
+            "student_id": "S001",
+            "scores": [
+                {
+                    "question_id": "Q1",
+                    "extracted_evidence": "Selected T.",
+                    "score": 5,
+                    "evidence": "The required selection is visible.",
+                    "confidence": "high",
+                    "flags": [],
+                },
+                {
+                    "question_id": "Q2",
+                    "extracted_evidence": "Two criteria are partly incorrect.",
+                    "score": 5,
+                    "evidence": "Two deductions are recorded.",
+                    "confidence": "high",
+                    "flags": [],
+                    "deduction_trace": [
+                        {
+                            "rubric_criterion": "Q2.setup",
+                            "observed_evidence_or_missing_or_incorrect_part": "The setup is partly incomplete.",
+                            "deduction_type": "missing_required_evidence",
+                            "points_deducted": 1,
+                        },
+                        {
+                            "rubric_criterion": "Q2.simplification",
+                            "observed_evidence_or_missing_or_incorrect_part": "The simplification is partly incomplete.",
+                            "deduction_type": "missing_required_evidence",
+                            "points_deducted": 3,
+                        },
+                    ],
+                },
+            ],
+            "total": 10,
+        }
+
+        with self.assertRaisesRegex(ValueError, "Q2 deduction total"):
             _validate_grade_payload(
                 payload,
                 "S001",

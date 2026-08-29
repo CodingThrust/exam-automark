@@ -179,10 +179,10 @@ class ModelPacketRunnerTests(unittest.TestCase):
 
         self.assertIn("deduction_trace=null", suffix)
         self.assertIn("sum exactly to max_score minus score", suffix)
-        self.assertIn("copy their atomic point values exactly", suffix)
+        self.assertIn("never exceed their declared point caps", suffix)
         self.assertNotIn("student_id", suffix)
 
-    def test_execution_contract_prompt_requires_atomic_trace_bookkeeping(self):
+    def test_execution_contract_prompt_requires_bounded_trace_bookkeeping(self):
         course = CourseSpec.from_dict(
             json.loads((FIXTURES / "course_dsaa3073_hw1.json").read_text(encoding="utf-8"))
         )
@@ -197,9 +197,9 @@ class ModelPacketRunnerTests(unittest.TestCase):
             output_contract=GRADING_OUTPUT_CONTRACT_DEDUCTION_TRACE_V1,
         )
 
-        self.assertIn("Criterion points are atomic", prompt)
-        self.assertIn("never split, rescale, or invent a deduction amount", prompt)
-        self.assertIn("exact sum of the withheld declared criteria", prompt)
+        self.assertIn("maximum deductible amounts", prompt)
+        self.assertIn("partial, score-step-aligned deduction", prompt)
+        self.assertIn("must still sum exactly to max_score minus score", prompt)
 
     def test_multimodal_prompt_repeats_page_locator_rule(self):
         course = CourseSpec.from_dict(

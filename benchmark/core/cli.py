@@ -19,7 +19,12 @@ from .error_regressions import (
 from .gold import validate_gold_subset_table, validate_gold_table, write_gold_report
 from .headless_runner import HeadlessPacketRunConfig, run_headless_packet
 from .inventory import write_data_inventory
-from .model_runner import INPUT_MODES, ModelPacketRunConfig, run_model_packet
+from .model_runner import (
+    INPUT_MODES,
+    MODEL_TRANSPORTS,
+    ModelPacketRunConfig,
+    run_model_packet,
+)
 from .multiroute_reporting import (
     build_multi_route_report_from_paths,
     write_multi_route_report,
@@ -431,6 +436,15 @@ def _build_parser() -> argparse.ArgumentParser:
     run_model.add_argument("--max-tokens", type=int)
     run_model.add_argument("--max-retries", type=int, default=0)
     run_model.add_argument("--response-format", default="json_object")
+    run_model.add_argument(
+        "--transport",
+        choices=MODEL_TRANSPORTS,
+        default="chat_completions_json_object",
+        help=(
+            "model API transport; deepseek_responses_json_schema binds the "
+            "packet output.schema.json to DeepSeek's Responses API"
+        ),
+    )
     run_model.add_argument("--endpoint")
     run_model.add_argument("--run-commit")
     run_model.add_argument("--run-id")
@@ -976,6 +990,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     max_tokens=args.max_tokens,
                     max_retries=args.max_retries,
                     response_format=args.response_format,
+                    transport=args.transport,
                     endpoint=args.endpoint,
                     dry_run=args.dry_run,
                     command_argv=raw_argv,

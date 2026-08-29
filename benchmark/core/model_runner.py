@@ -931,7 +931,9 @@ def _retry_validation_prompt_suffix(output_contract: str) -> str:
             " Before returning, check every leaf: full credit requires "
             "deduction_trace=null; every non-full score requires a non-empty "
             "deduction_trace whose points_deducted values sum exactly to "
-            "max_score minus score."
+            "max_score minus score. For an execution-contract rubric, use only "
+            "declared criterion IDs and copy their atomic point values exactly; "
+            "do not split or rescale points to force a total."
         )
     return suffix
 
@@ -966,7 +968,11 @@ def _execution_contract_prompt_note(rubric: dict[str, Any] | None) -> str:
         "\nExecution-contract rule: score only the declared criteria. Ignore "
         "unrelated extra content unless it directly contradicts a declared "
         "criterion. For every deduction_trace, rubric_criterion must be the "
-        "exact applicable criterion ID from this rubric."
+        "exact applicable criterion ID from this rubric. Criterion points are "
+        "atomic: copy each selected criterion's declared points exactly; never "
+        "split, rescale, or invent a deduction amount just to make a trace add "
+        "up. Select a score only when max_score minus score equals the exact "
+        "sum of the withheld declared criteria."
     )
 
 

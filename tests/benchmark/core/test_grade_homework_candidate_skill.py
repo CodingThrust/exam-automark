@@ -18,9 +18,13 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
         relative_files = [
             Path("SKILL.md"),
             Path("references/grading-prompt.md"),
+            Path("references/course-package-template.json"),
+            Path("scripts/roster.py"),
             Path("scripts/discover.py"),
             Path("scripts/to_images.py"),
+            Path("scripts/render_submission.py"),
             Path("scripts/write_outputs.py"),
+            Path("scripts/annotate_submission.py"),
         ]
 
         for relative in relative_files:
@@ -30,46 +34,20 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
                     (CLAUDE_SKILL / relative).read_text(encoding="utf-8"),
                 )
 
-    def test_skill_uses_teacher_partial_credit_policy(self):
+    def test_skill_keeps_course_specific_policy_outside_the_generic_core(self):
         text = (AGENT_SKILL / "SKILL.md").read_text(encoding="utf-8").lower()
         prompt = (AGENT_SKILL / "references" / "grading-prompt.md").read_text(
             encoding="utf-8"
         ).lower()
-        combined = text + "\n" + prompt
+        combined = " ".join((text + "\n" + prompt).split())
 
-        self.assertIn("do not use 0.25-point", combined)
-        self.assertIn("final answer is correct and the process", combined)
-        self.assertIn("roughly correct", combined)
-        self.assertIn("award full credit", combined)
-        self.assertIn("when the final answer is wrong", combined)
-        self.assertIn("process credit", combined)
-        self.assertNotIn("if the rubric allows quarter points", combined)
-        self.assertNotIn("quarter-point increment", combined)
-
-    def test_skill_uses_candidate_v3_evidence_states_and_caps(self):
-        combined = "\n".join(
-            (
-                (AGENT_SKILL / "SKILL.md").read_text(encoding="utf-8"),
-                (AGENT_SKILL / "references" / "grading-prompt.md").read_text(
-                    encoding="utf-8"
-                ),
-            )
-        )
-        for phrase in (
-            "key_term_evidence",
-            "concept_evidence",
-            "relation_evidence",
-            "mentioned_only",
-            "partial_understanding",
-            "demonstrated",
-            "misused_or_contradicted",
-            "Do not award duplicate credit",
-            "semantic equivalent",
-            "question type",
-            "cannot raise the subtotal",
-        ):
-            with self.subTest(phrase=phrase):
-                self.assertIn(phrase, combined)
+        self.assertIn("course package", combined)
+        self.assertIn("does not supply subject knowledge", combined)
+        self.assertIn("do not invent a universal point rule", combined)
+        self.assertIn("frozen for the batch", combined)
+        for historical_overlay in ("physics week", "dsaa", "q7", "q8", "q9"):
+            with self.subTest(historical_overlay=historical_overlay):
+                self.assertNotIn(historical_overlay, combined)
 
     def test_skill_declares_cross_course_leaf_subpart_scoring(self):
         combined = "\n".join(
@@ -89,7 +67,7 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)
 
-    def test_skill_declares_calculation_locality_and_equivalence_guards(self):
+    def test_skill_declares_generic_evidence_trace_and_annotation_contract(self):
         combined = "\n".join(
             (
                 (AGENT_SKILL / "SKILL.md").read_text(encoding="utf-8"),
@@ -99,12 +77,14 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
             )
         ).lower()
         for phrase in (
-            "first score-affecting issue",
-            "check algebraic equivalence",
-            "equivalent_form_accepted",
-            "do not convert its downstream result",
-            "wrong formula",
-            "irrelevant to every declared criterion",
+            "complete anonymous submission",
+            "deduction_trace",
+            "points_deducted",
+            "attention_note",
+            "marked-page annotations",
+            "student_name,student_number",
+            "private roster",
+            "a teacher owns",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)
@@ -149,9 +129,12 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0)
         self.assertIsNone(payload["solutions_error"])
+        self.assertEqual(payload["root"], ".")
         self.assertEqual(payload["solutions_candidates"], ["solutions.pdf"])
         self.assertEqual(len(payload["submissions"]), 2)
         self.assertEqual(payload["late_students"], ["S002"])
+        self.assertNotIn("S001_page1.jpg", result.stdout)
+        self.assertNotIn(str(root), result.stdout)
 
     def test_to_images_script_converts_image_to_page_png(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -177,6 +160,8 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0)
         self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["pages"], ["page-001.png"])
+        self.assertNotIn(str(source), result.stdout)
         self.assertTrue(page_exists)
 
     def test_write_outputs_script_writes_csv_and_feedback(self):
@@ -234,6 +219,164 @@ class GradeHomeworkCandidateSkillTests(unittest.TestCase):
         self.assertIn("Q1:high_impact_deduction", rows[0]["flags"])
         self.assertIn("Shows correct setup", feedback)
         self.assertIn("Deduction trace", feedback)
+
+    def test_grouped_batch_writes_roster_columns_and_renders_marked_pages(self):
+        record = {
+            "student_id": "S001",
+            "scores": [
+                {
+                    "question_id": "leaf-a",
+                    "score": 1,
+                    "max_score": 2,
+                    "evidence": "A visible required component is absent.",
+                    "feedback": "Please include the required component.",
+                    "confidence": "medium",
+                    "flags": ["needs_manual_review"],
+                    "deduction_trace": [
+                        {
+                            "rubric_criterion": "visible requirement",
+                            "observed_evidence_or_missing_or_incorrect_part": "The required component is absent.",
+                            "deduction_type": "missing_required_evidence",
+                            "points_deducted": 1,
+                        }
+                    ],
+                    "attention_note": "Please verify the marked region.",
+                }
+            ],
+            "annotations": [
+                {
+                    "question_id": "leaf-a",
+                    "page_id": "source-001-page-001",
+                    "box": [0.1, 0.65, 0.4, 0.15],
+                    "kind": "praise",
+                    "label": "A valid component is clearly shown.",
+                },
+                {
+                    "question_id": "leaf-a",
+                    "page_id": "source-001-page-001",
+                    "box": [0.1, 0.1, 0.4, 0.2],
+                    "kind": "deduction",
+                    "label": "Required component is missing.",
+                },
+                {
+                    "question_id": "leaf-a",
+                    "page_id": "source-001-page-001",
+                    "box": [0.1, 0.4, 0.4, 0.2],
+                    "kind": "review",
+                    "label": "Please verify this region.",
+                },
+            ],
+            "total": 1,
+            "flags": [],
+        }
+        course_package = {
+            "schema_version": 1,
+            "course_id": "synthetic-course",
+            "assessment_id": "synthetic-assessment",
+            "score_leaves": [
+                {"question_id": "leaf-a", "max_score": 2, "allowed_increment": 1}
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            roster = root / "roster.csv"
+            roster.write_text(
+                "submission_id,student_name,student_number\nS001,Test Person,900001\n",
+                encoding="utf-8",
+            )
+            package_path = root / "course-package.json"
+            package_path.write_text(json.dumps(course_package), encoding="utf-8")
+            submission = root / "submissions" / "S001"
+            submission.mkdir(parents=True)
+            Image.new("RGB", (80, 60), color=(255, 255, 255)).save(
+                submission / "scan.png"
+            )
+            rendered = root / "rendered" / "S001"
+            render = subprocess.run(
+                [
+                    sys.executable,
+                    str(AGENT_SKILL / "scripts" / "render_submission.py"),
+                    str(submission),
+                    str(rendered),
+                    "--submission-id",
+                    "S001",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False,
+            )
+            grades = root / "grades"
+            missing_praise_record = dict(record)
+            missing_praise_record["annotations"] = [
+                annotation
+                for annotation in record["annotations"]
+                if annotation["kind"] != "praise"
+            ]
+            missing_praise = subprocess.run(
+                [
+                    sys.executable,
+                    str(AGENT_SKILL / "scripts" / "write_outputs.py"),
+                    str(root / "missing-praise"),
+                    "--roster",
+                    str(roster),
+                    "--course-package",
+                    str(package_path),
+                    "--require-annotations",
+                ],
+                input=json.dumps(missing_praise_record),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False,
+            )
+            write = subprocess.run(
+                [
+                    sys.executable,
+                    str(AGENT_SKILL / "scripts" / "write_outputs.py"),
+                    str(grades),
+                    "--roster",
+                    str(roster),
+                    "--course-package",
+                    str(package_path),
+                    "--require-annotations",
+                ],
+                input=json.dumps(record),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False,
+            )
+            annotate = subprocess.run(
+                [
+                    sys.executable,
+                    str(AGENT_SKILL / "scripts" / "annotate_submission.py"),
+                    str(rendered / "pages.json"),
+                    str(grades / "annotations" / "S001.json"),
+                    str(grades / "marked" / "S001"),
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=False,
+            )
+            with (grades / "grades.csv").open(encoding="utf-8", newline="") as handle:
+                rows = list(csv.DictReader(handle))
+            review = (grades / "review.csv").read_text(encoding="utf-8")
+            manifest = (rendered / "pages.json").read_text(encoding="utf-8")
+
+            self.assertEqual(render.returncode, 0, render.stderr)
+            self.assertEqual(missing_praise.returncode, 2)
+            self.assertIn("requires a praise annotation", missing_praise.stderr)
+            self.assertEqual(write.returncode, 0, write.stderr)
+            self.assertEqual(annotate.returncode, 0, annotate.stderr)
+            self.assertEqual(rows[0]["student_name"], "Test Person")
+            self.assertEqual(rows[0]["student_number"], "900001")
+            self.assertIn("needs_manual_review", review)
+            self.assertTrue((grades / "marked" / "S001" / "marked.pdf").is_file())
+            self.assertNotIn("scan.png", manifest)
+            self.assertNotIn(str(root), write.stdout)
+            self.assertNotIn("Test Person", write.stdout)
 
     def test_write_outputs_refuses_an_unignored_git_directory(self):
         with tempfile.TemporaryDirectory() as tmp:

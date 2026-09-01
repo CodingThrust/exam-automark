@@ -4,7 +4,7 @@ from pathlib import Path
 
 AGENT_SKILL = Path(".agents/skills/grade-homework")
 CLAUDE_SKILL = Path(".claude/skills/grade-homework")
-CURRENT_PROMPT = Path("experiments/prompt_templates/grade_candidate_v5_3.txt")
+HISTORICAL_PROMPT = Path("experiments/prompt_templates/grade_candidate_v5_3.txt")
 
 
 class GradeHomeworkSkillContractTests(unittest.TestCase):
@@ -12,62 +12,54 @@ class GradeHomeworkSkillContractTests(unittest.TestCase):
         agent_files = {
             path.relative_to(AGENT_SKILL).as_posix(): path.read_bytes()
             for path in AGENT_SKILL.rglob("*")
-            if path.is_file()
+            if path.is_file() and "__pycache__" not in path.relative_to(AGENT_SKILL).parts
         }
         claude_files = {
             path.relative_to(CLAUDE_SKILL).as_posix(): path.read_bytes()
             for path in CLAUDE_SKILL.rglob("*")
-            if path.is_file()
+            if path.is_file() and "__pycache__" not in path.relative_to(CLAUDE_SKILL).parts
         }
 
         self.assertEqual(agent_files, claude_files)
 
-    def test_current_candidate_is_cross_course_and_type_first(self):
-        text = CURRENT_PROMPT.read_text(encoding="utf-8").lower()
-        expected_types = (
-            "objective_selection",
-            "calculation",
-            "calculation_short_answer",
-            "proof",
-            "diagram",
-            "essay",
-        )
-        for question_type in expected_types:
-            with self.subTest(question_type=question_type):
-                self.assertIn(question_type, text)
-
-        for inherited_rule in (
-            "q7 proof-locality",
-            "q8 enumerator",
-            "q9 conceptual essay",
-            "church-turing",
-            "power-of-two",
-        ):
-            with self.subTest(inherited_rule=inherited_rule):
-                self.assertNotIn(inherited_rule, text)
-
-    def test_current_candidate_preserves_key_calibration_safeguards(self):
-        text = CURRENT_PROMPT.read_text(encoding="utf-8").lower()
+    def test_live_skill_is_generic_and_requires_a_current_course_package(self):
+        combined = "\n".join(
+            (
+                (AGENT_SKILL / "SKILL.md").read_text(encoding="utf-8"),
+                (AGENT_SKILL / "references" / "grading-prompt.md").read_text(
+                    encoding="utf-8"
+                ),
+                (AGENT_SKILL / "references" / "course-package-template.json").read_text(
+                    encoding="utf-8"
+                ),
+            )
+        ).lower()
+        combined = " ".join(combined.split())
         for safeguard in (
-            "evidence before assigning points",
-            "semantic equivalent",
-            "official-style adequacy",
-            "material-error cap",
-            "local misconception",
-            "second pass",
-            "true/false",
-            "answer-only allocation",
-            "entire anonymous submission",
-            "page-level marks",
-            "page position",
-            "never question numbers",
+            "frozen course package",
+            "complete anonymous submission",
             "deduction_trace",
-            "first material error",
-            "answer-only cap",
-            "bonus leaves",
+            "attention_note",
+            "review.csv",
+            "marked-page annotations",
+            "do not invent a universal point rule",
+            "a teacher owns",
         ):
             with self.subTest(safeguard=safeguard):
-                self.assertIn(safeguard, text)
+                self.assertIn(safeguard, combined)
+        for historical_overlay in ("physics week", "dsaa", "church-turing", "q7", "q8", "q9"):
+            with self.subTest(historical_overlay=historical_overlay):
+                self.assertNotIn(historical_overlay, combined)
+
+    def test_historical_candidate_prompt_remains_an_explicitly_separate_artifact(self):
+        text = HISTORICAL_PROMPT.read_text(encoding="utf-8")
+        self.assertIn("deduction_trace", text)
+        self.assertNotEqual(
+            text,
+            (AGENT_SKILL / "references" / "grading-prompt.md").read_text(
+                encoding="utf-8"
+            ),
+        )
 
 
 if __name__ == "__main__":

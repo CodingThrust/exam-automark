@@ -22,7 +22,7 @@ class SkillSnapshot:
     hash_policy: str = (
         "sha256(normalized LF utf-8 text for files; recursive relative path plus "
         "normalized content in case-folded POSIX relative-path order with an "
-        "original-path tie-breaker for directories)"
+        "original-path tie-breaker for directories; excluding __pycache__ runtime caches)"
     )
     schema_version: int = 1
 
@@ -125,7 +125,12 @@ def _source_hash(path: Path) -> str:
 
 def _directory_hash(path: Path) -> str:
     digest = hashlib.sha256()
-    files = (item for item in path.rglob("*") if item.is_file())
+    files = (
+        item
+        for item in path.rglob("*")
+        if item.is_file()
+        and "__pycache__" not in item.relative_to(path).parts
+    )
     for file_path in sorted(
         files,
         key=lambda item: (

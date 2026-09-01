@@ -13,38 +13,39 @@ class SkillSyncTests(unittest.TestCase):
         agent = agent_path.read_text(encoding="utf-8")
         self.assertEqual(claude, agent)
 
-    def test_skill_requires_frozen_evidence_first_workflow(self):
+    def test_skill_requires_frozen_course_package_and_evidence_first_workflow(self):
         text = Path(".claude/skills/grade-homework/SKILL.md").read_text(
             encoding="utf-8"
         ).lower()
         for phrase in (
-            "page ordering",
+            "course package",
             "rubric",
             "evidence",
             "confidence",
-            "second-pass",
-            "do not guess",
+            "review.csv",
+            "do not infer",
         ):
             self.assertIn(phrase, text)
 
-    def test_skill_includes_benchmark_informed_safeguards(self):
+    def test_skill_includes_generic_delivery_safeguards_without_course_overlays(self):
         text = Path(".claude/skills/grade-homework/SKILL.md").read_text(
             encoding="utf-8"
         ).lower()
         normalized = " ".join(text.split())
         for phrase in (
-            "benchmark-informed safeguards",
-            "does not prove that transcript workflows are generally better",
-            "direct-image baseline",
-            "blank or apparently missing answers",
-            "high-impact deductions",
-            "flagged items",
+            "private roster",
+            "grades/grades.csv",
+            "marked pdf",
+            "deduction trace",
+            "flagged, medium-confidence, or low-confidence",
             "spot-check",
+            "not a teacher replacement",
         ):
             self.assertIn(phrase, normalized)
         for forbidden in (
-            "therefore transcript-based grading is generally better",
-            "transcript grading is generally better than direct image grading",
+            "benchmark-informed safeguards",
+            "physics week",
+            "dsaa3071",
         ):
             self.assertNotIn(forbidden, normalized)
 

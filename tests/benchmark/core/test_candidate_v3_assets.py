@@ -76,8 +76,6 @@ class CandidateV3AssetTests(unittest.TestCase):
         expected = (
             PROMPT,
             STRICT_SNAPSHOT,
-            SKILL,
-            REFERENCE,
         )
 
         for path in expected:
@@ -89,7 +87,7 @@ class CandidateV3AssetTests(unittest.TestCase):
     def test_candidate_v3_preserves_required_safeguards(self):
         combined = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in (PROMPT, STRICT_SNAPSHOT, SKILL, REFERENCE)
+            for path in (PROMPT, STRICT_SNAPSHOT)
         ).lower()
 
         for phrase in (
@@ -109,18 +107,17 @@ class CandidateV3AssetTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, combined)
 
-    def test_current_assets_define_cross_course_question_type_rules(self):
-        for path in (PROMPT_V5_2, SKILL, REFERENCE):
-            text = _normalize_whitespace(path.read_text(encoding="utf-8"))
-            for rule in QUESTION_TYPE_RULES:
-                with self.subTest(path=path, rule=rule):
-                    self.assertIn(_normalize_whitespace(rule), text)
+    def test_historical_v5_2_prompt_retains_its_question_type_rules(self):
+        text = _normalize_whitespace(PROMPT_V5_2.read_text(encoding="utf-8"))
+        for rule in QUESTION_TYPE_RULES:
+            with self.subTest(rule=rule):
+                self.assertIn(_normalize_whitespace(rule), text)
 
     def test_calculation_rule_preserves_physics_process_credit(self):
         combined = _normalize_whitespace(
             "\n".join(
                 path.read_text(encoding="utf-8")
-                for path in (PROMPT, STRICT_SNAPSHOT, SKILL, REFERENCE)
+                for path in (PROMPT, STRICT_SNAPSHOT)
             )
         )
 
@@ -140,7 +137,7 @@ class CandidateV3AssetTests(unittest.TestCase):
         combined = _normalize_whitespace(
             "\n".join(
                 path.read_text(encoding="utf-8")
-                for path in (PROMPT, STRICT_SNAPSHOT, SKILL, REFERENCE)
+                for path in (PROMPT, STRICT_SNAPSHOT)
             )
         )
 
@@ -166,7 +163,7 @@ class CandidateV3AssetTests(unittest.TestCase):
     def test_candidate_v3_assets_are_generic_and_private(self):
         combined = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in (PROMPT, SKILL, REFERENCE)
+            for path in (PROMPT, STRICT_SNAPSHOT)
         )
 
         self.assertNotRegex(combined, r"\bS\d{3}\b")
@@ -196,8 +193,6 @@ class CandidateV3AssetTests(unittest.TestCase):
         expected = (
             PROMPT_V31,
             STRICT_SNAPSHOT_V31,
-            SKILL,
-            REFERENCE,
         )
 
         for path in expected:
@@ -217,8 +212,6 @@ class CandidateV3AssetTests(unittest.TestCase):
         expected = (
             PROMPT_V31,
             STRICT_SNAPSHOT_V31,
-            SKILL,
-            REFERENCE,
         )
 
         for path in expected:
@@ -251,8 +244,6 @@ class CandidateV3AssetTests(unittest.TestCase):
         expected = (
             PROMPT_V32,
             STRICT_SNAPSHOT_V32,
-            SKILL,
-            REFERENCE,
         )
 
         for path in expected:
@@ -358,7 +349,7 @@ class CandidateV3AssetTests(unittest.TestCase):
     def test_current_assets_do_not_inherit_dsaa_specific_calibration(self):
         combined = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in (PROMPT_V5_2, SKILL, REFERENCE)
+            for path in (SKILL, REFERENCE)
         )
 
         for phrase in (
@@ -375,7 +366,7 @@ class CandidateV3AssetTests(unittest.TestCase):
         combined = _normalize_whitespace(
             "\n".join(
                 path.read_text(encoding="utf-8")
-            for path in (PROMPT_V5_2, SKILL, REFERENCE)
+            for path in (SKILL, REFERENCE)
             )
         ).lower()
 
@@ -393,7 +384,7 @@ class CandidateV3AssetTests(unittest.TestCase):
         combined = _normalize_whitespace(
             "\n".join(
                 path.read_text(encoding="utf-8")
-            for path in (PROMPT_V5_2, SKILL, REFERENCE)
+            for path in (SKILL, REFERENCE)
             )
         ).lower()
 
@@ -411,7 +402,7 @@ class CandidateV3AssetTests(unittest.TestCase):
         combined = _normalize_whitespace(
             "\n".join(
                 path.read_text(encoding="utf-8")
-                for path in (PROMPT_V5_2, SKILL, REFERENCE)
+                for path in (SKILL, REFERENCE)
             )
         ).lower()
 

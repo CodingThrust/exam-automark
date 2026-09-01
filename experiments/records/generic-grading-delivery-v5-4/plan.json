@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "record_type": "generic_grading_delivery_plan",
+  "skill_version_id": "skill_candidate_v5_4_generic_delivery",
+  "evaluation_status": "not_run",
+  "heldout_accessed": false,
+  "scope": {
+    "course_specific_scoring_rules_included": false,
+    "contains_student_level_records": false,
+    "contains_answers_or_transcripts": false,
+    "heldout_accessed": false,
+    "model_run_authorized": false
+  },
+  "delivery_contract": [
+    "A private ignored roster maps opaque submission IDs to local names and student numbers.",
+    "A submission directory groups all scans for one opaque submission ID before scoring.",
+    "The frozen course package supplies all course-specific score leaves, criteria, increments, alternatives, and partial-credit rules.",
+    "Private outputs include grades.csv, review.csv, concise feedback, validated annotations, and marked page images/PDF.",
+    "Production annotation mode requires praise for score-bearing work, deductions for non-full work, and review marks for uncertainty."
+  ],
+  "limits": [
+    "This is an implementation and synthetic-test plan, not a model accuracy result.",
+    "It makes no production, heldout, cross-course accuracy, or teacher-replacement claim.",
+    "A course owner must review and freeze a course package before any real batch is graded.",
+    "Real scans, roster records, per-person grades, transcripts, and raw model outputs remain private and ignored."
+  ],
+  "next_gates": [
+    "Run an owner-approved dry run with synthetic or authorized private scans.",
+    "Review marked pages and review.csv with the course owner.",
+    "Obtain separate authorization before any model grading run or course-specific evaluation."
+  ]
+}

@@ -66,6 +66,26 @@ class SkillSnapshotTests(unittest.TestCase):
         self.assertTrue(snapshot.mirror_synchronized)
         self.assertIn("directories", snapshot.hash_policy)
 
+    def test_directory_snapshot_ignores_runtime_cache_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            first = root / "agent"
+            second = root / "claude"
+            for folder in (first, second):
+                folder.mkdir(parents=True)
+                (folder / "SKILL.md").write_text("skill\n", encoding="utf-8")
+            cache = first / "__pycache__"
+            cache.mkdir()
+            (cache / "SKILL.cpython-312.pyc").write_bytes(b"runtime cache")
+
+            snapshot = build_skill_snapshot(
+                skill_version_id="skill_runtime_cache_ignored",
+                source_paths={"agents": first, "claude": second},
+            )
+
+        self.assertTrue(snapshot.mirror_synchronized)
+        self.assertIn("excluding __pycache__", snapshot.hash_policy)
+
     def test_directory_snapshot_uses_portable_posix_path_order(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "skill"
@@ -105,9 +125,9 @@ class SkillSnapshotTests(unittest.TestCase):
         )
         self.assertEqual(len(set(snapshot.skill_hashes.values())), 1)
 
-    def test_current_skill_directories_match_candidate_v5_3_r3_snapshot(self):
+    def test_current_skill_directories_match_generic_delivery_snapshot(self):
         snapshot_path = Path(
-            "experiments/skill_versions/skill_candidate_v5_3_r3.json"
+            "experiments/skill_versions/skill_candidate_v5_4_generic_delivery.json"
         )
         snapshot = SkillSnapshot.from_json_path(snapshot_path)
         rebuilt = build_skill_snapshot(
@@ -120,6 +140,7 @@ class SkillSnapshotTests(unittest.TestCase):
 
         self.assertEqual(rebuilt.skill_hashes, snapshot.skill_hashes)
         self.assertTrue(snapshot.mirror_synchronized)
+        self.assertEqual(snapshot.skill_version_id, "skill_candidate_v5_4_generic_delivery")
 
     def test_historical_candidate_v3_snapshot_remains_loadable_and_distinct(self):
         baseline = SkillSnapshot.from_json_path(

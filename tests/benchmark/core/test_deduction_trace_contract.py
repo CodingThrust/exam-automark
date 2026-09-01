@@ -290,13 +290,13 @@ class DeductionTraceContractTests(unittest.TestCase):
                 metadata["output_schema_hash"], manifest["output_schema_hash"]
             )
 
-    def test_public_v5_3_plan_is_privacy_safe_and_registry_tracks_pending_contract(self):
+    def test_public_generic_delivery_plan_is_privacy_safe_and_registry_tracks_pending_contract(self):
         repo_root = Path(__file__).parents[3]
         plan_path = (
             repo_root
             / "experiments"
             / "records"
-            / "candidate-v5_3-deduction-trace-plan"
+            / "generic-grading-delivery-v5-4"
             / "plan.json"
         )
         registry_path = (
@@ -311,7 +311,10 @@ class DeductionTraceContractTests(unittest.TestCase):
         self.assertEqual(audit_public_error_summary(plan), [])
         self.assertEqual(plan["evaluation_status"], "not_run")
         self.assertFalse(plan["heldout_accessed"])
-        self.assertEqual(registry["active_skill_version_id"], "skill_candidate_v5_3_r3")
+        self.assertEqual(
+            registry["active_skill_version_id"],
+            "skill_candidate_v5_4_generic_delivery",
+        )
         self.assertEqual(registry["entries"][-1]["evaluation_status"], "pending")
         self.assertEqual(
             validate_error_book_registry(

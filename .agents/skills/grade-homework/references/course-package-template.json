@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "course_id": "replace-with-course-id",
+  "assessment_id": "replace-with-assessment-id",
+  "score_leaves": [
+    {
+      "question_id": "replace-with-leaf-id",
+      "max_score": 1,
+      "allowed_increment": 1,
+      "question_type": "replace-with-local-type-or-omit",
+      "criteria": [
+        {
+          "criterion": "Replace with a visible, checkable requirement.",
+          "points": 1,
+          "evidence_required": "Describe observable work or answer evidence."
+        }
+      ],
+      "full_credit_rule": "State the local full-credit condition.",
+      "accepted_alternatives": [
+        "List valid alternate methods or forms, if any."
+      ],
+      "partial_credit_rules": [
+        "State local score bands and deduction order, including dependent consequences."
+      ],
+      "missing_or_unreadable_policy": "State the local review or score policy.",
+      "annotation_guidance": "State what a deduction, praise, or review box should locate.",
+      "bonus": false
+    }
+  ]
+}

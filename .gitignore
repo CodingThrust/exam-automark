@@ -12,6 +12,12 @@ __pycache__
 /Data/
 .private-data/
 
+# Per-person grading runs and rendered scans (private; never commit)
+/grades/
+/rendered/
+/marked/
+/annotations/
+
 # Compiled outputs (PDFs are built artifacts, not sources)
 *.learning-sheet.pdf
 *.advanced-learning-sheet.pdf
